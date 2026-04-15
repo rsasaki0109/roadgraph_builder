@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>roadgraph_builder — viewer</title>
+    <link rel="stylesheet" href="css/viewer.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <h1>roadgraph_builder</h1>
+        <span class="sub">Interactive preview · drag to pan · wheel to zoom</span>
+        <div class="controls">
+          <label for="dataset">Dataset</label>
+          <select id="dataset"></select>
+          <button type="button" id="btn-fit">Fit</button>
+          <button type="button" id="btn-reset">Reset view</button>
+        </div>
+      </header>
+
+      <div class="stage-wrap">
+        <svg
+          id="svg-root"
+          viewBox="0 0 960 640"
+          preserveAspectRatio="xMidYMid meet"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%">
+              <feGaussianBlur stdDeviation="1.2" result="b" />
+              <feMerge>
+                <feMergeNode in="b" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+          <rect width="100%" height="100%" fill="#0f172a" />
+          <g id="layer-grid"></g>
+          <g id="panzoom">
+            <g id="layer-trajectory"></g>
+            <g id="layer-edges"></g>
+            <g id="layer-nodes"></g>
+          </g>
+        </svg>
+
+        <div class="legend" aria-hidden="true">
+          <div class="legend-row">
+            <span class="swatch" style="background: #60a5fa"></span>
+            Centerline
+          </div>
+          <div class="legend-row">
+            <span class="swatch dot" style="background: #94a3b8"></span>
+            Trajectory
+          </div>
+          <div class="legend-row">
+            <span class="swatch dot" style="background: #f87171; border: 1px solid #fff"></span>
+            Node
+          </div>
+        </div>
+
+        <div class="hud" id="hud">Loading…</div>
+      </div>
+
+      <footer class="footer">
+        Open source · graph JSON + trajectory CSV ·
+        <a href="https://github.com/rsasaki0109/roadgraph_builder">Repository</a>
+      </footer>
+    </div>
+    <script src="js/viewer.js"></script>
+  </body>
+</html>

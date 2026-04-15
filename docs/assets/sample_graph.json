@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "nodes": [
+    {
+      "id": "n0",
+      "position": {
+        "x": 0.0,
+        "y": 0.0
+      }
+    },
+    {
+      "id": "n1",
+      "position": {
+        "x": 15.0,
+        "y": 0.7
+      }
+    },
+    {
+      "id": "n2",
+      "position": {
+        "x": 50.0,
+        "y": 1.0
+      }
+    },
+    {
+      "id": "n3",
+      "position": {
+        "x": 65.0,
+        "y": 1.0
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0",
+      "start_node_id": "n0",
+      "end_node_id": "n1",
+      "polyline": [
+        {
+          "x": 0.0,
+          "y": 0.0
+        },
+        {
+          "x": 5.0,
+          "y": 0.2
+        },
+        {
+          "x": 10.0,
+          "y": 0.5
+        },
+        {
+          "x": 15.0,
+          "y": 0.7
+        }
+      ],
+      "attributes": {
+        "kind": "lane_centerline",
+        "source": "trajectory_mvp"
+      }
+    },
+    {
+      "id": "e1",
+      "start_node_id": "n2",
+      "end_node_id": "n3",
+      "polyline": [
+        {
+          "x": 50.0,
+          "y": 1.0
+        },
+        {
+          "x": 55.0,
+          "y": 1.1
+        },
+        {
+          "x": 60.0,
+          "y": 1.2
+        },
+        {
+          "x": 65.0,
+          "y": 1.0
+        }
+      ],
+      "attributes": {
+        "kind": "lane_centerline",
+        "source": "trajectory_mvp"
+      }
+    }
+  ]
+}

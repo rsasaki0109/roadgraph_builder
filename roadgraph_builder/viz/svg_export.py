@@ -69,8 +69,18 @@ def write_trajectory_graph_svg(
         '<?xml version="1.0" encoding="UTF-8"?>',
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" '
         f'viewBox="0 0 {width} {height}">',
-        '<defs><style type="text/css"><![CDATA[.muted{fill:#64748b;font-size:11px;font-family:ui-sans-serif,system-ui,sans-serif}]]></style></defs>',
-        '<rect width="100%" height="100%" fill="#f1f5f9"/>',
+        '<defs>',
+        '<linearGradient id="bgGrad" x1="0" y1="0" x2="0" y2="1">',
+        '<stop offset="0%" stop-color="#f8fafc"/>',
+        '<stop offset="100%" stop-color="#e2e8f0"/>',
+        "</linearGradient>",
+        '<filter id="edgeGlow" x="-20%" y="-20%" width="140%" height="140%">',
+        '<feGaussianBlur stdDeviation="0.8" result="b"/>',
+        "<feMerge><feMergeNode in=\"b\"/><feMergeNode in=\"SourceGraphic\"/></feMerge>",
+        "</filter>",
+        '<style type="text/css"><![CDATA[.muted{fill:#64748b;font-size:11px;font-family:ui-sans-serif,system-ui,sans-serif}]]></style>',
+        "</defs>",
+        '<rect width="100%" height="100%" fill="url(#bgGrad)"/>',
         f'<text x="12" y="22" class="muted" font-size="13" font-weight="600" fill="#0f172a">{title}</text>',
         f'<text x="12" y="{height - 8:.0f}" class="muted">Local XY · span ≈ {w:.0f} × {h:.0f} m (same units as input)</text>',
         '<g stroke="#cbd5e1" stroke-width="0.5">',
@@ -109,7 +119,8 @@ def write_trajectory_graph_svg(
         if len(e.polyline) >= 2:
             d = path_d(e.polyline)
             lines.append(
-                f'<path d="{d}" fill="none" stroke="#2563eb" stroke-width="2.5" opacity="0.95"/>'
+                f'<path d="{d}" fill="none" stroke="#1d4ed8" stroke-width="3" opacity="0.98" '
+                f'stroke-linecap="round" filter="url(#edgeGlow)"/>'
             )
 
     # Nodes

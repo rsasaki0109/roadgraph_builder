@@ -1,0 +1,16 @@
+{
+  "datasets": [
+    {
+      "id": "toy",
+      "label": "Toy trajectory",
+      "graph": "assets/sample_graph.json",
+      "csv": "assets/sample_trajectory.csv"
+    },
+    {
+      "id": "osm",
+      "label": "OSM public GPS (Berlin area sample)",
+      "graph": "assets/osm_graph.json",
+      "csv": "assets/osm_trajectory.csv"
+    }
+  ]
+}
