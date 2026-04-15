@@ -1,6 +1,44 @@
 # roadgraph_builder
 
-Construct road graphs from trajectory, LiDAR, and camera data.
+**Construct road graphs from trajectory, LiDAR, and camera data** (MVP: **trajectory CSV only**).
+
+This project builds a **graph-first** intermediate representation: **nodes** (junctions/endpoints) and **edges** (lane/road segments) with **centerline polylines** and optional **attributes**. Output is **JSON** (`schema_version`) with optional **SVG** previews and an **interactive viewer** on **GitHub Pages** (`docs/`).
+
+### GitHub “About” text (copy-paste)
+
+Use the short description and topics listed in [`.github/ABOUT.md`](.github/ABOUT.md), or run `gh repo edit` (see below).
+
+### Features
+
+| Area | What works today |
+| --- | --- |
+| **Input** | Trajectory CSV (`timestamp`, `x`, `y`) |
+| **Pipeline** | Gap-based segmentation → PCA centerline → endpoint merge → graph |
+| **Output** | JSON graph + `visualize` SVG + schema validation |
+| **Demo** | [Interactive viewer](https://rsasaki0109.github.io/roadgraph_builder/) (enable Pages on `/docs`), static previews in [docs/images](docs/images/) |
+| **Samples** | [Toy CSV](examples/sample_trajectory.csv), [OSM GPS](examples/osm_public_trackpoints.csv) (ODbL) |
+| **Next** | LiDAR / camera / Lanelet2 **stubs** for modular extension |
+
+### Quick start
+
+```bash
+python3 -m venv .venv && .venv/bin/pip install -e .
+.venv/bin/roadgraph_builder build examples/sample_trajectory.csv out.json
+.venv/bin/roadgraph_builder validate out.json
+```
+
+### Links
+
+| Resource | URL |
+| --- | --- |
+| **Live viewer** (after Pages) | `https://rsasaki0109.github.io/roadgraph_builder/` |
+| **Changelog** | [CHANGELOG.md](CHANGELOG.md) |
+| **PyPI** | Not published by default; see [PyPI (optional)](#pypi-optional) |
+
+### Forks: URLs and OSM User-Agent
+
+- **`scripts/refresh_docs_assets.py`** — set `ROADGRAPH_REPO_URL` and `ROADGRAPH_PAGES_URL` before running to rewrite `docs/assets/site.json` (footer links in the viewer).
+- **`scripts/fetch_osm_trackpoints.py`** — set `ROADGRAPH_USER_AGENT` or pass `--user-agent` (OpenStreetMap [policy](https://operations.osmfoundation.org/policies/api/)).
 
 ## Concept
 
@@ -61,9 +99,10 @@ python3 -m venv .venv
 The file `examples/osm_public_trackpoints.csv` is **real, publicly contributed GPS data** fetched from the OpenStreetMap API (`/api/0.6/trackpoints`). It is intended for tuning `build` / `visualize` on noisy trajectories.
 
 - **License / attribution:** OpenStreetMap data is © OpenStreetMap contributors and available under the **Open Database License (ODbL)**. See [openstreetmap.org/copyright](https://www.openstreetmap.org/copyright).
-- **Regenerate** (optional; requires network): from the repo root, after editing `USER_AGENT` in the script if you publish a fork:
+- **Regenerate** (optional; requires network): set a fork-specific agent if needed, then run:
 
 ```bash
+export ROADGRAPH_USER_AGENT='myfork/1.0 (+https://github.com/you/roadgraph_builder)'
 python3 scripts/fetch_osm_trackpoints.py -o examples/osm_public_trackpoints.csv
 ```
 
@@ -153,6 +192,7 @@ Python package: `roadgraph_builder/`
 | `roadgraph_builder/cli/` | CLI |
 | `docs/` | GitHub Pages viewer + bundled sample assets |
 | `scripts/refresh_docs_assets.py` | Regenerate `docs/assets` and `docs/images` |
+| `.github/ABOUT.md` | Short text + topics for GitHub **About** |
 
 ## Future extensions
 

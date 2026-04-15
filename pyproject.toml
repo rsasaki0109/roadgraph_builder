@@ -18,6 +18,12 @@ dev = [
     "pytest>=7.0",
 ]
 
+[project.urls]
+Homepage = "https://github.com/rsasaki0109/roadgraph_builder"
+Documentation = "https://rsasaki0109.github.io/roadgraph_builder/"
+Repository = "https://github.com/rsasaki0109/roadgraph_builder"
+Changelog = "https://github.com/rsasaki0109/roadgraph_builder/blob/main/CHANGELOG.md"
+
 [project.scripts]
 roadgraph_builder = "roadgraph_builder.cli.main:main"
 

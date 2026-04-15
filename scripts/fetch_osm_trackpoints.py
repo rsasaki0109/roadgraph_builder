@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import math
+import os
 import sys
 import urllib.error
 import urllib.request
@@ -22,8 +23,11 @@ from pathlib import Path
 OSM_TRACKPOINTS = "https://api.openstreetmap.org/api/0.6/trackpoints"
 # Default: small area in Berlin (often has public traces); override with --bbox
 DEFAULT_BBOX = "13.40,52.51,13.42,52.52"
-# Set contact URL when you fork this project (OSMF API policy).
-USER_AGENT = "roadgraph_builder/0.1 (public trajectory sample; https://github.com/roadgraph_builder/roadgraph_builder)"
+# OSMF requires a descriptive User-Agent. Override for forks:
+#   export ROADGRAPH_USER_AGENT='myapp/1.0 (+https://github.com/you/repo)'
+DEFAULT_USER_AGENT = (
+    "roadgraph_builder/0.2 (+https://github.com/rsasaki0109/roadgraph_builder)"
+)
 
 
 def _local_xy_m(lat_deg: float, lon_deg: float, lat0: float, lon0: float) -> tuple[float, float]:
@@ -50,9 +54,9 @@ def _parse_time(text: str | None) -> float:
         return 0.0
 
 
-def fetch_gpx(bbox: str, page: int = 0) -> bytes:
+def fetch_gpx(bbox: str, page: int = 0, *, user_agent: str = DEFAULT_USER_AGENT) -> bytes:
     url = f"{OSM_TRACKPOINTS}?bbox={bbox}&page={page}"
-    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+    req = urllib.request.Request(url, headers={"User-Agent": user_agent})
     with urllib.request.urlopen(req, timeout=60) as resp:
         return resp.read()
 
@@ -123,10 +127,15 @@ def main() -> int:
     )
     p.add_argument("--max-points", type=int, default=1200, help="Cap points written")
     p.add_argument("--page", type=int, default=0, help="API page index")
+    p.add_argument(
+        "--user-agent",
+        default=os.environ.get("ROADGRAPH_USER_AGENT", DEFAULT_USER_AGENT),
+        help="HTTP User-Agent (OSMF policy). Env: ROADGRAPH_USER_AGENT.",
+    )
     args = p.parse_args()
 
     try:
-        gpx = fetch_gpx(args.bbox, page=args.page)
+        gpx = fetch_gpx(args.bbox, page=args.page, user_agent=args.user_agent)
     except urllib.error.HTTPError as e:
         print(f"HTTP error: {e}", file=sys.stderr)
         return 1

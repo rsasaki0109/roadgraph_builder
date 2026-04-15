@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import os
 import shutil
 from pathlib import Path
 
@@ -11,6 +12,9 @@ ROOT = Path(__file__).resolve().parent.parent
 DOCS = ROOT / "docs"
 ASSETS = DOCS / "assets"
 IMAGES = DOCS / "images"
+
+DEFAULT_REPO_URL = "https://github.com/rsasaki0109/roadgraph_builder"
+DEFAULT_PAGES_URL = "https://rsasaki0109.github.io/roadgraph_builder/"
 
 
 def main() -> None:
@@ -47,6 +51,11 @@ def main() -> None:
         ]
     }
     (ASSETS / "viewer_config.json").write_text(json.dumps(meta, indent=2) + "\n", encoding="utf-8")
+
+    repo_url = os.environ.get("ROADGRAPH_REPO_URL", DEFAULT_REPO_URL).rstrip("/")
+    pages_url = os.environ.get("ROADGRAPH_PAGES_URL", DEFAULT_PAGES_URL).rstrip("/") + "/"
+    site = {"repository_url": repo_url + "/", "pages_url": pages_url}
+    (ASSETS / "site.json").write_text(json.dumps(site, indent=2) + "\n", encoding="utf-8")
     print("Wrote docs/assets and docs/images")
 
 

@@ -246,6 +246,23 @@
   }
 
   async function init() {
+    try {
+      const siteRes = await fetch("assets/site.json");
+      if (siteRes.ok) {
+        const site = await siteRes.json();
+        const r = document.getElementById("footer-repo");
+        const p = document.getElementById("footer-pages");
+        if (r && site.repository_url) {
+          r.href = site.repository_url;
+        }
+        if (p && site.pages_url) {
+          p.href = site.pages_url;
+        }
+      }
+    } catch (_) {
+      /* keep # hrefs */
+    }
+
     const cfgRes = await fetch("assets/viewer_config.json");
     const cfg = await cfgRes.json();
     selDataset.innerHTML = "";
