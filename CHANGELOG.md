@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **`visualize` SVG** — map-inspired styling (grid, trajectory polyline, road-width stroke under centerline, scale bar, refreshed `docs/images` for README).
 
+### Documentation
+
+- **README:** SD map vs HD map table (how this repo relates to each).
+
 ## [0.2.0] — 2026-04-15
 
 ### Added
