@@ -1,4 +1,7 @@
-"""Export trajectory + road graph as a simple SVG (no matplotlib)."""
+"""Export trajectory + road graph as SVG (no matplotlib).
+
+Styling aims for a readable “map-like” diagram: not aerial imagery, but clearer road structure.
+"""
 
 from __future__ import annotations
 
@@ -21,6 +24,17 @@ def _collect_xy(traj: Trajectory, graph: Graph) -> np.ndarray:
     return np.vstack(parts)
 
 
+def _nice_scale_meters(span: float) -> float:
+    """Pick a round scale-bar length (meters) for ~10–15% of span."""
+    if span <= 0:
+        return 1.0
+    target = span * 0.12
+    for step in (1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000):
+        if step >= target * 0.35:
+            return float(step)
+    return float(span * 0.2)
+
+
 def write_trajectory_graph_svg(
     traj: Trajectory,
     graph: Graph,
@@ -30,7 +44,7 @@ def write_trajectory_graph_svg(
     height: float = 700,
     margin_ratio: float = 0.08,
 ) -> None:
-    """Write an SVG with raw trajectory, edge polylines, and nodes."""
+    """Write an SVG: trajectory (line + dots), road-shaped edges, nodes, scale bar."""
     path = Path(path)
     pts = _collect_xy(traj, graph)
     if pts.shape[0] == 0:
@@ -64,75 +78,124 @@ def write_trajectory_graph_svg(
             parts.append(f"L {tx(x):.2f} {ty(y):.2f}")
         return " ".join(parts)
 
-    title = "Road graph preview (trajectory samples + centerlines + nodes)"
+    scale_m = _nice_scale_meters(max(w, h))
+    bar_px = scale_m / max(w, 1e-9) * width
+
+    title = "Road structure preview"
+    subtitle = "Trajectory + inferred centerlines + nodes (diagram, not satellite imagery)"
+
     lines: list[str] = [
         '<?xml version="1.0" encoding="UTF-8"?>',
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" '
         f'viewBox="0 0 {width} {height}">',
-        '<defs>',
-        '<linearGradient id="bgGrad" x1="0" y1="0" x2="0" y2="1">',
-        '<stop offset="0%" stop-color="#f8fafc"/>',
-        '<stop offset="100%" stop-color="#e2e8f0"/>',
+        "<defs>",
+        '<linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">',
+        '<stop offset="0%" stop-color="#f0fdf4"/>',
+        '<stop offset="50%" stop-color="#f8fafc"/>',
+        '<stop offset="100%" stop-color="#e0f2fe"/>',
         "</linearGradient>",
-        '<filter id="edgeGlow" x="-20%" y="-20%" width="140%" height="140%">',
-        '<feGaussianBlur stdDeviation="0.8" result="b"/>',
-        "<feMerge><feMergeNode in=\"b\"/><feMergeNode in=\"SourceGraphic\"/></feMerge>",
+        '<filter id="edgeGlow" x="-30%" y="-30%" width="160%" height="160%">',
+        '<feGaussianBlur stdDeviation="1.0" result="b"/>',
+        '<feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>',
         "</filter>",
-        '<style type="text/css"><![CDATA[.muted{fill:#64748b;font-size:11px;font-family:ui-sans-serif,system-ui,sans-serif}]]></style>',
+        '<style type="text/css"><![CDATA[',
+        ".lbl{font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,sans-serif}",
+        ".sub{fill:#475569;font-size:11px}",
+        "]]></style>",
         "</defs>",
         '<rect width="100%" height="100%" fill="url(#bgGrad)"/>',
-        f'<text x="12" y="22" class="muted" font-size="13" font-weight="600" fill="#0f172a">{title}</text>',
-        f'<text x="12" y="{height - 8:.0f}" class="muted">Local XY · span ≈ {w:.0f} × {h:.0f} m (same units as input)</text>',
-        '<g stroke="#cbd5e1" stroke-width="0.5">',
+        f'<text x="14" y="26" class="lbl" font-size="15" font-weight="700" fill="#0f172a">{title}</text>',
+        f'<text x="14" y="44" class="sub">{subtitle}</text>',
+        f'<text x="14" y="{height - 10:.0f}" class="sub">Span ≈ {w:.0f} × {h:.0f} (input units) · same projection as CSV</text>',
     ]
-    # Light grid for map-like readability
-    for i in range(11):
-        gx = width * i / 10
-        gy = height * i / 10
-        lines.append(f'<line x1="{gx:.1f}" y1="0" x2="{gx:.1f}" y2="{height}" />')
-        lines.append(f'<line x1="0" y1="{gy:.1f}" x2="{width}" y2="{gy:.1f}" />')
-    lines.extend(
-        [
-            "</g>",
-            '<g stroke-linecap="round" stroke-linejoin="round">',
-            '<g transform="translate(' + str(width - 188) + ',28)">',
-            '<rect x="0" y="-14" width="176" height="72" rx="4" fill="white" stroke="#e2e8f0"/>',
-            '<line x1="8" y1="8" x2="32" y2="8" stroke="#2563eb" stroke-width="3"/>',
-            '<text x="40" y="12" class="muted">Centerline</text>',
-            '<circle cx="20" cy="28" r="3" fill="#94a3b8"/>',
-            '<text x="40" y="32" class="muted">Trajectory</text>',
-            '<circle cx="20" cy="48" r="5" fill="#dc2626" stroke="#fff" stroke-width="1.2"/>',
-            '<text x="40" y="52" class="muted">Node</text>',
-            "</g>",
-        ]
-    )
 
-    # Trajectory samples
+    # Grid (major / minor)
+    lines.append('<g opacity="0.45" stroke="#94a3b8" stroke-width="0.35">')
+    for i in range(21):
+        gx = width * i / 20
+        sw = 0.9 if i % 5 == 0 else 0.35
+        lines.append(
+            f'<line x1="{gx:.1f}" y1="0" x2="{gx:.1f}" y2="{height}" stroke-width="{sw}"/>'
+        )
+    for i in range(21):
+        gy = height * i / 20
+        sw = 0.9 if i % 5 == 0 else 0.35
+        lines.append(
+            f'<line x1="0" y1="{gy:.1f}" x2="{width}" y2="{gy:.1f}" stroke-width="{sw}"/>'
+        )
+    lines.append("</g>")
+
+    lines.append('<g stroke-linecap="round" stroke-linejoin="round">')
+
+    # Trajectory as a faint polyline + dots (reads as “driven path”)
+    if traj.xy.shape[0] >= 2:
+        tpts = [(float(traj.xy[i, 0]), float(traj.xy[i, 1])) for i in range(traj.xy.shape[0])]
+        td = path_d(tpts)
+        lines.append(
+            f'<path d="{td}" fill="none" stroke="#64748b" stroke-width="1.8" '
+            f'stroke-opacity="0.35" stroke-linejoin="round"/>'
+        )
     for x, y in traj.xy:
         cx, cy = tx(float(x)), ty(float(y))
         lines.append(
-            f'<circle cx="{cx:.2f}" cy="{cy:.2f}" r="2" fill="#94a3b8" opacity="0.85"/>'
+            f'<circle cx="{cx:.2f}" cy="{cy:.2f}" r="1.6" fill="#475569" opacity="0.55"/>'
         )
 
-    # Edge centerlines
+    # Edges: “road” fill under centerline
     for e in graph.edges:
         if len(e.polyline) >= 2:
             d = path_d(e.polyline)
             lines.append(
-                f'<path d="{d}" fill="none" stroke="#1d4ed8" stroke-width="3" opacity="0.98" '
-                f'stroke-linecap="round" filter="url(#edgeGlow)"/>'
+                f'<path d="{d}" fill="none" stroke="#cbd5e1" stroke-width="11" '
+                f'stroke-linecap="round" stroke-linejoin="round" opacity="0.95"/>'
+            )
+            lines.append(
+                f'<path d="{d}" fill="none" stroke="#1e40af" stroke-width="3.2" '
+                f'stroke-linecap="round" stroke-linejoin="round" opacity="0.95" filter="url(#edgeGlow)"/>'
             )
 
-    # Nodes
+    # Nodes + labels
     for n in graph.nodes:
         x, y = n.position
         cx, cy = tx(x), ty(y)
         lines.append(
-            f'<circle cx="{cx:.2f}" cy="{cy:.2f}" r="5" fill="#dc2626" stroke="#fff" stroke-width="1.5"/>'
+            f'<circle cx="{cx:.2f}" cy="{cy:.2f}" r="6.5" fill="#b91c1c" stroke="#fff" stroke-width="2"/>'
         )
         lines.append(
-            f'<text x="{cx + 8:.2f}" y="{cy - 8:.2f}" font-size="11" font-family="sans-serif" fill="#334155">{n.id}</text>'
+            f'<text x="{cx + 10:.2f}" y="{cy - 10:.2f}" font-size="12" class="lbl" '
+            f'fill="#0f172a" font-weight="600" stroke="#ffffff" stroke-width="0.6" '
+            f'paint-order="stroke fill">{n.id}</text>'
         )
+
+    # Scale bar (bottom-right)
+    bx = width - bar_px - 24
+    by = height - 28
+    lines.append(
+        f'<rect x="{bx:.1f}" y="{by:.1f}" width="{bar_px:.1f}" height="5" rx="1" '
+        f'fill="#1e293b" opacity="0.85"/>'
+    )
+    lines.append(
+        f'<text x="{bx:.1f}" y="{by - 6:.1f}" class="sub" font-size="10" font-weight="600" fill="#334155">'
+        f"≈ {scale_m:.0f} m</text>"
+    )
+
+    # Legend box
+    lx = width - 200
+    lines.extend(
+        [
+            f'<g transform="translate({lx},58)">',
+            '<rect x="0" y="-18" width="188" height="92" rx="6" fill="#ffffff" stroke="#cbd5e1" '
+            'stroke-width="1" opacity="0.96"/>',
+            '<line x1="10" y1="8" x2="38" y2="8" stroke="#cbd5e1" stroke-width="9" stroke-linecap="round"/>',
+            '<line x1="10" y1="8" x2="38" y2="8" stroke="#1e40af" stroke-width="3" stroke-linecap="round"/>',
+            '<text x="48" y="12" class="sub" font-size="11" fill="#334155">Road (width + centerline)</text>',
+            '<line x1="10" y1="32" x2="38" y2="32" stroke="#64748b" stroke-width="1.5" opacity="0.4"/>',
+            '<text x="48" y="36" class="sub" font-size="11" fill="#334155">Raw trajectory</text>',
+            '<circle cx="24" cy="56" r="5" fill="#b91c1c" stroke="#fff" stroke-width="1.5"/>',
+            '<text x="48" y="60" class="sub" font-size="11" fill="#334155">Node</text>',
+            "</g>",
+        ]
+    )
 
     lines.extend(["</g>", "</svg>"])
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")

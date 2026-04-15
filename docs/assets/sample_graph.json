@@ -6,6 +6,10 @@
       "position": {
         "x": 0.0,
         "y": 0.0
+      },
+      "attributes": {
+        "degree": 1,
+        "junction_hint": "dead_end"
       }
     },
     {
@@ -13,6 +17,10 @@
       "position": {
         "x": 15.0,
         "y": 0.7
+      },
+      "attributes": {
+        "degree": 1,
+        "junction_hint": "dead_end"
       }
     },
     {
@@ -20,6 +28,10 @@
       "position": {
         "x": 50.0,
         "y": 1.0
+      },
+      "attributes": {
+        "degree": 1,
+        "junction_hint": "dead_end"
       }
     },
     {
@@ -27,6 +39,10 @@
       "position": {
         "x": 65.0,
         "y": 1.0
+      },
+      "attributes": {
+        "degree": 1,
+        "junction_hint": "dead_end"
       }
     }
   ],

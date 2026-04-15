@@ -6,6 +6,10 @@
       "position": {
         "x": 5.866325500000001,
         "y": 0.5615343333333334
+      },
+      "attributes": {
+        "degree": 1,
+        "junction_hint": "dead_end"
       }
     },
     {
@@ -13,6 +17,10 @@
       "position": {
         "x": 331.57134045454546,
         "y": 136.81524845454547
+      },
+      "attributes": {
+        "degree": 1,
+        "junction_hint": "dead_end"
       }
     },
     {
@@ -20,6 +28,10 @@
       "position": {
         "x": 396.4765503333333,
         "y": 138.46733566666668
+      },
+      "attributes": {
+        "degree": 1,
+        "junction_hint": "dead_end"
       }
     },
     {
@@ -27,6 +39,10 @@
       "position": {
         "x": 522.8134315,
         "y": 138.782388
+      },
+      "attributes": {
+        "degree": 1,
+        "junction_hint": "dead_end"
       }
     },
     {
@@ -34,6 +50,10 @@
       "position": {
         "x": 1068.1340662,
         "y": -966.7598267999999
+      },
+      "attributes": {
+        "degree": 1,
+        "junction_hint": "dead_end"
       }
     },
     {
@@ -41,6 +61,10 @@
       "position": {
         "x": 1132.5459150000002,
         "y": -773.3180901666666
+      },
+      "attributes": {
+        "degree": 2,
+        "junction_hint": "through_or_corner"
       }
     },
     {
@@ -48,6 +72,10 @@
       "position": {
         "x": 1106.428249,
         "y": -836.408238
+      },
+      "attributes": {
+        "degree": 1,
+        "junction_hint": "dead_end"
       }
     }
   ],
