@@ -26,7 +26,7 @@ DEFAULT_BBOX = "13.40,52.51,13.42,52.52"
 # OSMF requires a descriptive User-Agent. Override for forks:
 #   export ROADGRAPH_USER_AGENT='myapp/1.0 (+https://github.com/you/repo)'
 DEFAULT_USER_AGENT = (
-    "roadgraph_builder/0.3 (+https://github.com/rsasaki0109/roadgraph_builder)"
+    "roadgraph_builder/0.2 (+https://github.com/rsasaki0109/roadgraph_builder)"
 )
 
 
