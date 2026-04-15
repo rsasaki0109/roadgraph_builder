@@ -64,13 +64,38 @@ def write_trajectory_graph_svg(
             parts.append(f"L {tx(x):.2f} {ty(y):.2f}")
         return " ".join(parts)
 
+    title = "Road graph preview (trajectory samples + centerlines + nodes)"
     lines: list[str] = [
         '<?xml version="1.0" encoding="UTF-8"?>',
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" '
         f'viewBox="0 0 {width} {height}">',
-        '<rect width="100%" height="100%" fill="#fafafa"/>',
-        '<g stroke-linecap="round" stroke-linejoin="round">',
+        '<defs><style type="text/css"><![CDATA[.muted{fill:#64748b;font-size:11px;font-family:ui-sans-serif,system-ui,sans-serif}]]></style></defs>',
+        '<rect width="100%" height="100%" fill="#f1f5f9"/>',
+        f'<text x="12" y="22" class="muted" font-size="13" font-weight="600" fill="#0f172a">{title}</text>',
+        f'<text x="12" y="{height - 8:.0f}" class="muted">Local XY · span ≈ {w:.0f} × {h:.0f} m (same units as input)</text>',
+        '<g stroke="#cbd5e1" stroke-width="0.5">',
     ]
+    # Light grid for map-like readability
+    for i in range(11):
+        gx = width * i / 10
+        gy = height * i / 10
+        lines.append(f'<line x1="{gx:.1f}" y1="0" x2="{gx:.1f}" y2="{height}" />')
+        lines.append(f'<line x1="0" y1="{gy:.1f}" x2="{width}" y2="{gy:.1f}" />')
+    lines.extend(
+        [
+            "</g>",
+            '<g stroke-linecap="round" stroke-linejoin="round">',
+            '<g transform="translate(' + str(width - 188) + ',28)">',
+            '<rect x="0" y="-14" width="176" height="72" rx="4" fill="white" stroke="#e2e8f0"/>',
+            '<line x1="8" y1="8" x2="32" y2="8" stroke="#2563eb" stroke-width="3"/>',
+            '<text x="40" y="12" class="muted">Centerline</text>',
+            '<circle cx="20" cy="28" r="3" fill="#94a3b8"/>',
+            '<text x="40" y="32" class="muted">Trajectory</text>',
+            '<circle cx="20" cy="48" r="5" fill="#dc2626" stroke="#fff" stroke-width="1.2"/>',
+            '<text x="40" y="52" class="muted">Node</text>',
+            "</g>",
+        ]
+    )
 
     # Trajectory samples
     for x, y in traj.xy:

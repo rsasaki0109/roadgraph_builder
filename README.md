@@ -8,6 +8,12 @@ Construct road graphs from trajectory, LiDAR, and camera data.
 - **Multi-modal** — Trajectory, LiDAR, and camera inputs are separate, swappable modules; fusion is an explicit later stage (not baked into the core graph model).
 - **Toward SD/HD maps** — The JSON graph is an intermediate representation you can enrich (semantics, topology) before exporting to map formats.
 
+### What you get (and what you do not)
+
+- **You get** a **road graph** (nodes and edges) with **centerline polylines** in the **same units as your CSV** (often meters after projection). That is **intermediate data** for fusion, mapping tools, or simulation—not a finished HD product by itself.
+- **Do not expect** satellite-style photo maps, automatic alignment to aerial imagery, or perfect lane shapes without **tuning** (`max-step-m`, `merge-endpoint-m`, bin count, and data quality). GPS noise and dropouts directly affect the result.
+- **`visualize` SVG** is a **diagram overlay** (points + polylines + node labels) to inspect structure; it is not a basemap tile.
+
 ## Requirements
 
 - Python 3.10+
@@ -126,6 +132,30 @@ Python package: `roadgraph_builder/`
 - **Lanelet2 export** — Serialize enriched graphs to Lanelet2/OSM-style outputs.
 
 Codebase TODOs also mention: graph fusion across tiles/modalities, intersection topology inference, and routing graph generation.
+
+## Releases
+
+Changes are listed in [CHANGELOG.md](CHANGELOG.md).
+
+Tag and push a version (example `v0.1.0`):
+
+```bash
+git tag -a v0.1.0 -m "Release 0.1.0"
+git push origin main
+git push origin v0.1.0
+```
+
+On GitHub, open **Releases → Create a new release**, select that tag, and paste the notes from `CHANGELOG.md`.
+
+## PyPI (optional)
+
+The distribution name in `pyproject.toml` is `roadgraph-builder`. Publishing is manual unless you add your own automation:
+
+1. Create a [PyPI](https://pypi.org/) account and an **API token** with upload permission for this project.
+2. Install build tools: `python -m pip install build twine`.
+3. From a clean checkout: `python -m build` then `twine upload dist/*` (use API token when prompted).
+
+For hands-off uploads from GitHub, configure [Trusted Publishers](https://docs.pypi.org/trusted-publishers/) or a `PYPI_API_TOKEN` secret and a workflow in your fork—this repository does not ship token-based publish secrets.
 
 ## License
 
