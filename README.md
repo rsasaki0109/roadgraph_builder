@@ -132,6 +132,9 @@ roadgraph_builder build input.csv out.json --max-step-m 25 --merge-endpoint-m 8 
 - `--max-step-m` — Split the time-ordered path when consecutive samples are farther apart (meters); mimics trip/gap segmentation (MVP “clustering”).
 - `--merge-endpoint-m` — Snap nearby polyline endpoints into one graph node (meters).
 - `--centerline-bins` — PCA bin count for smoothing each segment’s centerline.
+- `--simplify-tolerance` — Douglas–Peucker tolerance (meters) to thin edge polylines after centerline fit; omit to keep all centerline points.
+
+**Node metadata (topology):** each exported node may include `attributes.degree` (undirected edge count) and `attributes.junction_hint` (`dead_end`, `through_or_corner`, `multi_branch`).
 
 ### Visualize (SVG)
 

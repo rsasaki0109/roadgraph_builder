@@ -5,6 +5,7 @@ import numpy as np
 from roadgraph_builder.utils.geometry import (
     centerline_from_points,
     merge_endpoints_union_find,
+    simplify_polyline_rdp,
     split_indices_by_step,
 )
 
@@ -21,6 +22,13 @@ def test_merge_endpoints():
     assert idx[0] == idx[1]
     assert idx[2] == idx[3]
     assert len(pos) == 2
+
+
+def test_simplify_polyline_rdp():
+    pts = [(0.0, 0.0), (1.0, 5.0), (2.0, 0.0), (10.0, 0.0)]
+    s = simplify_polyline_rdp(pts, epsilon=0.5)
+    assert len(s) >= 2
+    assert s[0] == pts[0] and s[-1] == pts[-1]
 
 
 def test_centerline_nonempty():

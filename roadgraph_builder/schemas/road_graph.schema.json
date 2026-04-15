@@ -36,7 +36,12 @@
       "required": ["id", "position"],
       "properties": {
         "id": { "type": "string" },
-        "position": { "$ref": "#/$defs/point2" }
+        "position": { "$ref": "#/$defs/point2" },
+        "attributes": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "e.g. degree, junction_hint"
+        }
       }
     },
     "edge": {

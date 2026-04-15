@@ -22,6 +22,7 @@ from roadgraph_builder.io.trajectory.loader import Trajectory, load_trajectory_c
 from roadgraph_builder.utils.geometry import (
     centerline_from_points,
     merge_endpoints_union_find,
+    simplify_polyline_rdp,
     split_indices_by_step,
 )
 
@@ -33,6 +34,8 @@ class BuildParams:
     max_step_m: float = 25.0
     merge_endpoint_m: float = 8.0
     centerline_bins: int = 32
+    #: Douglas–Peucker tolerance (meters); None disables simplification.
+    simplify_tolerance_m: float | None = None
 
 
 def _orient_polyline_to_trajectory(
@@ -70,10 +73,42 @@ def trajectory_to_polylines(traj: Trajectory, params: BuildParams) -> list[list[
     return polylines
 
 
+def annotate_node_degrees(graph: Graph) -> None:
+    """Set node `attributes`: `degree` (undirected) and `junction_hint` for dead-ends / branches."""
+    deg: dict[str, int] = {n.id: 0 for n in graph.nodes}
+    for e in graph.edges:
+        a, b = e.start_node_id, e.end_node_id
+        if a == b:
+            deg[a] = deg.get(a, 0) + 2
+        else:
+            deg[a] = deg.get(a, 0) + 1
+            deg[b] = deg.get(b, 0) + 1
+    for n in graph.nodes:
+        d = deg.get(n.id, 0)
+        n.attributes["degree"] = d
+        if d >= 3:
+            n.attributes["junction_hint"] = "multi_branch"
+        elif d == 1:
+            n.attributes["junction_hint"] = "dead_end"
+        else:
+            n.attributes["junction_hint"] = "through_or_corner"
+
+
 def polylines_to_graph(polylines: list[list[tuple[float, float]]], params: BuildParams) -> Graph:
     """Create nodes (merged endpoints) and edges (centerline polylines)."""
+    work: list[list[tuple[float, float]]] = list(polylines)
+    tol = params.simplify_tolerance_m
+    if tol is not None and tol > 0:
+        work = []
+        for poly in polylines:
+            if len(poly) < 2:
+                continue
+            sp = simplify_polyline_rdp(poly, tol)
+            if len(sp) >= 2:
+                work.append(sp)
+
     endpoints: list[tuple[float, float]] = []
-    for poly in polylines:
+    for poly in work:
         endpoints.append(poly[0])
         endpoints.append(poly[-1])
 
@@ -81,7 +116,7 @@ def polylines_to_graph(polylines: list[list[tuple[float, float]]], params: Build
     nodes = [Node(id=nid, position=node_positions[nid]) for nid in sorted(node_positions.keys())]
 
     edges: list[Edge] = []
-    for eid, poly in enumerate(polylines):
+    for eid, poly in enumerate(work):
         i0 = 2 * eid
         i1 = 2 * eid + 1
         sn = idx_to_node[i0]
@@ -98,7 +133,9 @@ def polylines_to_graph(polylines: list[list[tuple[float, float]]], params: Build
                 },
             )
         )
-    return Graph(nodes=nodes, edges=edges)
+    graph = Graph(nodes=nodes, edges=edges)
+    annotate_node_degrees(graph)
+    return graph
 
 
 def build_graph_from_trajectory(traj: Trajectory, params: BuildParams | None = None) -> Graph:

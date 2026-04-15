@@ -40,6 +40,12 @@ def _add_build_params(p: argparse.ArgumentParser) -> None:
         default=32,
         help="PCA bin count along each segment for centerline smoothing.",
     )
+    p.add_argument(
+        "--simplify-tolerance",
+        type=float,
+        default=None,
+        help="Douglas–Peucker tolerance (meters) for edge polylines; omit to skip.",
+    )
 
 
 def _build_params_from_args(args: argparse.Namespace) -> BuildParams:
@@ -47,6 +53,7 @@ def _build_params_from_args(args: argparse.Namespace) -> BuildParams:
         max_step_m=args.max_step_m,
         merge_endpoint_m=args.merge_endpoint_m,
         centerline_bins=args.centerline_bins,
+        simplify_tolerance_m=args.simplify_tolerance,
     )
 
 

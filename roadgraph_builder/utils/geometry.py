@@ -10,8 +10,47 @@ import numpy as np
 
 # Future extension notes (repository-wide):
 # - graph fusion: align multiple graphs before merging nodes/edges.
-# - intersection topology: detect degree-3+ junctions from edge connectivity.
 # - routing graph: derive a simplified graph for path search.
+
+
+def _point_segment_distance(px: float, py: float, ax: float, ay: float, bx: float, by: float) -> float:
+    """Minimum distance from P to segment AB."""
+    abx = bx - ax
+    aby = by - ay
+    ab2 = abx * abx + aby * aby
+    if ab2 < 1e-18:
+        return float(np.hypot(px - ax, py - ay))
+    t = max(0.0, min(1.0, ((px - ax) * abx + (py - ay) * aby) / ab2))
+    qx = ax + t * abx
+    qy = ay + t * aby
+    return float(np.hypot(px - qx, py - qy))
+
+
+def simplify_polyline_rdp(points: list[tuple[float, float]], epsilon: float) -> list[tuple[float, float]]:
+    """Douglas–Peucker simplification (2D). Keeps endpoints; epsilon in same units as coordinates."""
+    if epsilon <= 0 or len(points) < 3:
+        return list(points)
+
+    def rdp(pts: list[tuple[float, float]]) -> list[tuple[float, float]]:
+        if len(pts) < 3:
+            return pts
+        ax, ay = pts[0]
+        bx, by = pts[-1]
+        dmax = 0.0
+        idx = 0
+        for i in range(1, len(pts) - 1):
+            px, py = pts[i]
+            d = _point_segment_distance(px, py, ax, ay, bx, by)
+            if d > dmax:
+                dmax = d
+                idx = i
+        if dmax > epsilon:
+            left = rdp(pts[: idx + 1])
+            right = rdp(pts[idx:])
+            return left[:-1] + right
+        return [pts[0], pts[-1]]
+
+    return rdp(list(points))
 
 
 def split_indices_by_step(xy: np.ndarray, max_step: float) -> list[tuple[int, int]]:
