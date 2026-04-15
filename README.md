@@ -15,7 +15,7 @@ Use the short description and topics listed in [`.github/ABOUT.md`](.github/ABOU
 | **Input** | Trajectory CSV (`timestamp`, `x`, `y`) |
 | **Pipeline** | Gap-based segmentation → PCA centerline → endpoint merge → graph |
 | **Output** | JSON graph + `visualize` SVG + schema validation |
-| **Demo** | [Interactive viewer](https://rsasaki0109.github.io/roadgraph_builder/) (enable Pages on `/docs`), static previews in [docs/images](docs/images/) |
+| **Demo** | [Diagram viewer](https://rsasaki0109.github.io/roadgraph_builder/) · **[Map (OSM tiles)](https://rsasaki0109.github.io/roadgraph_builder/map.html)** (enable Pages on `/docs`), static previews in [docs/images](docs/images/) |
 | **Samples** | [Toy CSV](examples/sample_trajectory.csv), [OSM GPS](examples/osm_public_trackpoints.csv) (ODbL) |
 | **Next** | LiDAR / camera / Lanelet2 **stubs** for modular extension |
 
@@ -68,16 +68,19 @@ These are **static exports** from `roadgraph_builder visualize` (regenerate with
 
 ### Interactive viewer (GitHub Pages)
 
-The **`docs/`** folder is a small static site: pan/zoom, dataset switch (toy vs OSM), dark UI.
+The **`docs/`** folder is a small static site.
 
 1. In the GitHub repo: **Settings → Pages → Build and deployment → Source**: **Deploy from a branch**, branch **`main`**, folder **`/docs`**, Save.
-2. After a minute, open: **`https://<your-username>.github.io/roadgraph_builder/`** (replace with your fork if renamed).
+2. After a minute, open:
+   - **`https://<user>.github.io/roadgraph_builder/`** — diagram viewer (SVG-style pan/zoom)
+   - **`https://<user>.github.io/roadgraph_builder/map.html`** — **real basemap** (OpenStreetMap raster tiles + GeoJSON overlay: trajectory, centerlines, nodes)
 
 Local preview (no GitHub required):
 
 ```bash
 cd docs && python3 -m http.server 8765
-# open http://127.0.0.1:8765/
+# http://127.0.0.1:8765/          — diagram viewer
+# http://127.0.0.1:8765/map.html  — OSM map + GeoJSON
 ```
 
 Regenerate bundled JSON/CSV/SVG for `docs/` after changing examples or pipeline logic:
@@ -111,6 +114,8 @@ The file `examples/osm_public_trackpoints.csv` is **real, publicly contributed G
 export ROADGRAPH_USER_AGENT='myfork/1.0 (+https://github.com/you/roadgraph_builder)'
 python3 scripts/fetch_osm_trackpoints.py -o examples/osm_public_trackpoints.csv
 ```
+
+Also writes **`examples/osm_public_trackpoints_origin.json`** (WGS84 origin for the meters CSV) and **`examples/osm_public_trackpoints_wgs84.csv`** (`timestamp,lon,lat`) for map tooling.
 
 Try another area if the bbox has no uploads: `--bbox min_lon,min_lat,max_lon,max_lat` (each side ≤ 0.25°).
 
@@ -201,6 +206,8 @@ Python package: `roadgraph_builder/`
 | `roadgraph_builder/cli/` | CLI |
 | `docs/` | GitHub Pages viewer + bundled sample assets |
 | `scripts/refresh_docs_assets.py` | Regenerate `docs/assets` and `docs/images` |
+| `roadgraph_builder/io/export/geojson.py` | `export_map_geojson()` for Leaflet / OSM |
+| `roadgraph_builder/utils/geo.py` | meters ↔ WGS84 (local tangent plane) |
 | `.github/ABOUT.md` | Short text + topics for GitHub **About** |
 
 ## Future extensions

@@ -1,0 +1,5 @@
+{
+  "lat0": 52.52,
+  "lon0": 13.405,
+  "note": "WGS84 reference for map overlay; toy CSV uses local meters from this origin (synthetic path)"
+}

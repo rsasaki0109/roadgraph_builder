@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Douglas–Peucker** polyline simplification (`BuildParams.simplify_tolerance_m`, CLI `--simplify-tolerance`).
 - **Node topology attributes:** `degree` and `junction_hint` (dead-end / through / multi-branch) via `annotate_node_degrees()`.
 - **`Node.attributes`** on export (optional in JSON schema).
+- **GeoJSON + Leaflet** — `docs/map.html` overlays trajectory / centerlines / nodes on **OpenStreetMap** tiles; `export_map_geojson()` and `utils/geo.py` (meters ↔ WGS84).
+- **OSM fetch** — writes `*_origin.json` and `*_wgs84.csv` next to the meters CSV.
 
 ### Changed
 

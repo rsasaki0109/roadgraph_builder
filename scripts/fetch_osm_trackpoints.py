@@ -10,6 +10,7 @@ Use a descriptive User-Agent (OSMF policy). Bounding box max size: 0.25° per si
 from __future__ import annotations
 
 import argparse
+import json
 import math
 import os
 import sys
@@ -61,8 +62,15 @@ def fetch_gpx(bbox: str, page: int = 0, *, user_agent: str = DEFAULT_USER_AGENT)
         return resp.read()
 
 
-def gpx_to_points(gpx_bytes: bytes, max_points: int) -> list[tuple[float, float, float]]:
-    """Return list of (timestamp, x_m, y_m) in local coordinates (first point = origin)."""
+def gpx_to_points(
+    gpx_bytes: bytes,
+    max_points: int,
+) -> tuple[
+    list[tuple[float, float, float]],
+    tuple[float, float],
+    list[tuple[float, float, float]],
+]:
+    """Return (timestamp,x,y) meters, (lat0,lon0) origin, (timestamp,lon,lat) WGS84 rows."""
     root = ET.fromstring(gpx_bytes)
     ns = {"gpx": "http://www.topografix.com/GPX/1/0"}
     # GPX 1.0 from OSM; try with/without namespace
@@ -87,12 +95,13 @@ def gpx_to_points(gpx_bytes: bytes, max_points: int) -> list[tuple[float, float,
         raw.append((ts, la, lo, ts))
 
     if not raw:
-        return []
+        return [], (0.0, 0.0), []
 
     raw.sort(key=lambda t: (t[0], t[3]))
     lat0 = raw[0][1]
     lon0 = raw[0][2]
     out: list[tuple[float, float, float]] = []
+    wgs84: list[tuple[float, float, float]] = []
     seen = 0
     for ts, la, lo, _ in raw:
         if seen >= max_points:
@@ -100,8 +109,9 @@ def gpx_to_points(gpx_bytes: bytes, max_points: int) -> list[tuple[float, float,
         x, y = _local_xy_m(la, lo, lat0, lon0)
         t_use = ts if ts > 0 else float(seen)
         out.append((t_use, x, y))
+        wgs84.append((t_use, lo, la))
         seen += 1
-    return out
+    return out, (lat0, lon0), wgs84
 
 
 def write_csv(path: Path, points: list[tuple[float, float, float]]) -> None:
@@ -109,6 +119,21 @@ def write_csv(path: Path, points: list[tuple[float, float, float]]) -> None:
     for ts, x, y in points:
         lines.append(f"{ts:.3f},{x:.6f},{y:.6f}\n")
     path.write_text("".join(lines), encoding="utf-8")
+
+
+def write_wgs84_csv(path: Path, rows: list[tuple[float, float, float]]) -> None:
+    lines = ["timestamp,lon,lat\n"]
+    for ts, lon, lat in rows:
+        lines.append(f"{ts:.3f},{lon:.8f},{lat:.8f}\n")
+    path.write_text("".join(lines), encoding="utf-8")
+
+
+def write_origin_json(path: Path, lat0: float, lon0: float) -> None:
+    path.write_text(
+        json.dumps({"lat0": lat0, "lon0": lon0, "note": "WGS84 origin of local meters CSV (first point)"}, indent=2)
+        + "\n",
+        encoding="utf-8",
+    )
 
 
 def main() -> int:
@@ -143,7 +168,7 @@ def main() -> int:
         print(f"Network error: {e}", file=sys.stderr)
         return 1
 
-    pts = gpx_to_points(gpx, args.max_points)
+    pts, origin, wgs84 = gpx_to_points(gpx, args.max_points)
     if len(pts) < 2:
         print(
             "No trackpoints in response. Try another --bbox (area with public GPS uploads) or --page 1.",
@@ -153,7 +178,13 @@ def main() -> int:
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     write_csv(args.output, pts)
+    lat0, lon0 = origin
+    origin_path = args.output.parent / f"{args.output.stem}_origin.json"
+    wgs84_path = args.output.parent / f"{args.output.stem}_wgs84.csv"
+    write_origin_json(origin_path, lat0, lon0)
+    write_wgs84_csv(wgs84_path, wgs84)
     print(f"Wrote {len(pts)} points to {args.output}")
+    print(f"Wrote origin {origin_path} and WGS84 {wgs84_path}")
     return 0
 
 

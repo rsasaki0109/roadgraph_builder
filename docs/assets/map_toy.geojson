@@ -1,0 +1,183 @@
+{
+  "type": "FeatureCollection",
+  "name": "toy",
+  "properties": {
+    "origin_lat": 52.52,
+    "origin_lon": 13.405,
+    "crs_note": "Local meters projected from this WGS84 origin; see utils/geo.py"
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "trajectory",
+        "dataset": "toy"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            13.405,
+            52.52
+          ],
+          [
+            13.40507389848599,
+            52.520001798643214
+          ],
+          [
+            13.40514779697198,
+            52.52000449660803
+          ],
+          [
+            13.40522169545797,
+            52.52000629525124
+          ],
+          [
+            13.405738984859903,
+            52.52000899321606
+          ],
+          [
+            13.405812883345893,
+            52.520009892537665
+          ],
+          [
+            13.405886781831883,
+            52.52001079185927
+          ],
+          [
+            13.405960680317873,
+            52.52000899321606
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "lane_centerline",
+        "dataset": "toy",
+        "edge_id": "e0",
+        "source": "trajectory_mvp"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            13.405,
+            52.52
+          ],
+          [
+            13.40507389848599,
+            52.520001798643214
+          ],
+          [
+            13.40514779697198,
+            52.52000449660803
+          ],
+          [
+            13.40522169545797,
+            52.52000629525124
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "lane_centerline",
+        "dataset": "toy",
+        "edge_id": "e1",
+        "source": "trajectory_mvp"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            13.405738984859903,
+            52.52000899321606
+          ],
+          [
+            13.405812883345893,
+            52.520009892537665
+          ],
+          [
+            13.405886781831883,
+            52.52001079185927
+          ],
+          [
+            13.405960680317873,
+            52.52000899321606
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "node",
+        "dataset": "toy",
+        "node_id": "n0",
+        "degree": 1,
+        "junction_hint": "dead_end"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.405,
+          52.52
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "node",
+        "dataset": "toy",
+        "node_id": "n1",
+        "degree": 1,
+        "junction_hint": "dead_end"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.40522169545797,
+          52.52000629525124
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "node",
+        "dataset": "toy",
+        "node_id": "n2",
+        "degree": 1,
+        "junction_hint": "dead_end"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.405738984859903,
+          52.52000899321606
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "node",
+        "dataset": "toy",
+        "node_id": "n3",
+        "degree": 1,
+        "junction_hint": "dead_end"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.405960680317873,
+          52.52000899321606
+        ]
+      }
+    }
+  ]
+}
