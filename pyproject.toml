@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "roadgraph-builder"
+version = "0.1.0"
+description = "Construct road graphs from trajectory, LiDAR, and camera data."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.24",
+    "jsonschema>=4.19",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+]
+
+[project.scripts]
+roadgraph_builder = "roadgraph_builder.cli.main:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["roadgraph_builder*"]
+
+[tool.setuptools.package-data]
+roadgraph_builder = ["py.typed", "schemas/*.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+# If global pytest plugins (e.g. ROS launch_testing) break the venv, run:
+#   PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest
