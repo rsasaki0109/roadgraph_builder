@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/rsasaki0109/roadgraph_builder/sd_nav.schema.json",
+  "title": "Navigation SD seed (topology + edge lengths)",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["role", "schema_version", "nodes", "edges"],
+  "properties": {
+    "role": {
+      "type": "string",
+      "const": "navigation_sd_seed"
+    },
+    "schema_version": {
+      "type": "integer",
+      "const": 1
+    },
+    "description": {
+      "type": "string"
+    },
+    "turn_restrictions": {
+      "type": "array",
+      "description": "Optional legal/regulatory transition restrictions. These are separate from geometry-derived allowed_maneuvers hints.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "junction_node_id",
+          "from_edge_id",
+          "from_direction",
+          "to_edge_id",
+          "to_direction",
+          "restriction",
+          "source"
+        ],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "junction_node_id": { "type": "string", "minLength": 1 },
+          "from_edge_id": { "type": "string", "minLength": 1 },
+          "from_direction": { "type": "string", "enum": ["forward", "reverse"] },
+          "to_edge_id": { "type": "string", "minLength": 1 },
+          "to_direction": { "type": "string", "enum": ["forward", "reverse"] },
+          "restriction": {
+            "type": "string",
+            "enum": [
+              "no_left_turn",
+              "no_right_turn",
+              "no_straight",
+              "no_u_turn",
+              "only_left",
+              "only_right",
+              "only_straight"
+            ]
+          },
+          "source": { "type": "string", "minLength": 1 },
+          "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+        }
+      }
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "x_m", "y_m"],
+        "properties": {
+          "id": { "type": "string" },
+          "x_m": { "type": "number" },
+          "y_m": { "type": "number" }
+        }
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "start_node_id", "end_node_id", "length_m", "polyline_vertex_count"],
+        "properties": {
+          "id": { "type": "string" },
+          "start_node_id": { "type": "string" },
+          "end_node_id": { "type": "string" },
+          "length_m": { "type": "number", "minimum": 0 },
+          "polyline_vertex_count": { "type": "integer", "minimum": 0 },
+          "allowed_maneuvers": {
+            "type": "array",
+            "description": "Coarse hints at the digitized end node: straight plus left/right/u_turn from 2D junction geometry when applicable (heuristic, not surveyed).",
+            "items": { "type": "string", "enum": ["straight", "left", "right", "u_turn"] }
+          },
+          "allowed_maneuvers_reverse": {
+            "type": "array",
+            "description": "Same as allowed_maneuvers but when traversing the link opposite to digitization (arriving at the original start node).",
+            "items": { "type": "string", "enum": ["straight", "left", "right", "u_turn"] }
+          }
+        }
+      }
+    }
+  }
+}

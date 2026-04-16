@@ -23,6 +23,8 @@ def _load_origin(path: Path) -> tuple[float, float]:
 
 
 def main() -> None:
+    from roadgraph_builder.hd.pipeline import SDToHDConfig, enrich_sd_to_hd
+    from roadgraph_builder.io.camera.detections import apply_camera_detections_to_graph, load_camera_detections_json
     from roadgraph_builder.io.export.geojson import export_map_geojson
     from roadgraph_builder.io.export.json_exporter import export_graph_json
     from roadgraph_builder.io.trajectory.loader import load_trajectory_csv
@@ -39,6 +41,10 @@ def main() -> None:
     shutil.copyfile(toy_origin, ASSETS / "toy_map_origin.json")
     toy_traj = load_trajectory_csv(toy_csv)
     toy_graph = build_graph_from_trajectory(toy_traj, BuildParams())
+    enrich_sd_to_hd(toy_graph, SDToHDConfig(lane_width_m=3.5))
+    det_json = ROOT / "examples" / "camera_detections_sample.json"
+    if det_json.is_file():
+        apply_camera_detections_to_graph(toy_graph, load_camera_detections_json(det_json))
     export_graph_json(toy_graph, ASSETS / "sample_graph.json")
     write_trajectory_graph_svg(toy_traj, toy_graph, IMAGES / "sample_trajectory.svg", width=960, height=640)
     tlat, tlon = _load_origin(toy_origin)
@@ -61,6 +67,9 @@ def main() -> None:
     osm_traj = load_trajectory_csv(osm_csv)
     p = BuildParams(max_step_m=40.0, merge_endpoint_m=12.0, centerline_bins=32)
     osm_graph = build_graph_from_trajectory(osm_traj, p)
+    enrich_sd_to_hd(osm_graph, SDToHDConfig(lane_width_m=3.5))
+    if det_json.is_file():
+        apply_camera_detections_to_graph(osm_graph, load_camera_detections_json(det_json))
     export_graph_json(osm_graph, ASSETS / "osm_graph.json")
     write_trajectory_graph_svg(osm_traj, osm_graph, IMAGES / "osm_public.svg", width=960, height=640)
     olat, olon = _load_origin(osm_origin_file)

@@ -1,15 +1,17 @@
-"""LiDAR loaders (MVP: stubs for modular extension)."""
+"""LiDAR loaders (MVP: XY CSV; LAS/LAZ later)."""
 
 from __future__ import annotations
 
 from pathlib import Path
 
+from roadgraph_builder.io.lidar.points import load_points_xy_csv
+
 
 def load_lidar_placeholder(path: str | Path) -> None:
-    """Reserved entry point for future LiDAR ingestion (e.g. LAS/LAZ, numpy dumps).
-
-    Will feed fusion / edge geometry updates; not used in trajectory-only MVP.
-    """
+    """Reserved for LAS/LAZ / proprietary dumps — not implemented."""
     raise NotImplementedError(
-        "LiDAR loading is not implemented yet. Use trajectory CSV via build_graph_from_csv()."
+        "LAS/LAZ loading is not implemented yet. Use load_points_xy_csv() for x,y text exports."
     )
+
+
+__all__ = ["load_lidar_placeholder", "load_points_xy_csv"]

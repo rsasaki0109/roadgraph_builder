@@ -1,0 +1,15 @@
+{
+  "format_version": 1,
+  "observations": [
+    {
+      "edge_id": "e0",
+      "kind": "speed_limit",
+      "value_kmh": 50
+    },
+    {
+      "edge_id": "e0",
+      "kind": "traffic_light",
+      "confidence": 0.82
+    }
+  ]
+}

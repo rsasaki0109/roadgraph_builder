@@ -18,6 +18,11 @@
     "edges": {
       "type": "array",
       "items": { "$ref": "#/$defs/edge" }
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Optional document metadata (e.g. sd_to_hd pipeline status)."
     }
   },
   "$defs": {
@@ -30,6 +35,49 @@
         "y": { "type": "number" }
       }
     },
+    "semantic_rule": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["kind"],
+      "properties": {
+        "kind": { "type": "string", "minLength": 1 },
+        "edge_id": { "type": "string" },
+        "value_kmh": { "type": "number" },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "description": "Camera / perception observations merged into an edge (see camera_detections.schema.json)."
+    },
+    "hd_block": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "SD→HD enrichment: boundaries, semantics, quality.",
+      "properties": {
+        "tier": { "type": "string" },
+        "target_tier": { "type": "string" },
+        "quality": { "type": "string" },
+        "note": { "type": "string" },
+        "lane_boundaries": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "left": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/point2" }
+            },
+            "right": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/point2" }
+            }
+          }
+        },
+        "semantic_rules": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/semantic_rule" }
+        },
+        "vertical_model": { "type": "string" },
+        "elevation_m": { "type": ["number", "null"] }
+      }
+    },
     "node": {
       "type": "object",
       "additionalProperties": true,
@@ -40,7 +88,10 @@
         "attributes": {
           "type": "object",
           "additionalProperties": true,
-          "description": "e.g. degree, junction_hint"
+          "description": "e.g. degree, junction_hint, hd",
+          "properties": {
+            "hd": { "$ref": "#/$defs/hd_block" }
+          }
         }
       }
     },
@@ -58,7 +109,10 @@
         },
         "attributes": {
           "type": "object",
-          "additionalProperties": true
+          "additionalProperties": true,
+          "properties": {
+            "hd": { "$ref": "#/$defs/hd_block" }
+          }
         }
       }
     }

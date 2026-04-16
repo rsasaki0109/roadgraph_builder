@@ -1,0 +1,26 @@
+{
+  "format_version": 1,
+  "turn_restrictions": [
+    {
+      "id": "tr_toy_001",
+      "junction_node_id": "n1",
+      "from_edge_id": "e0",
+      "from_direction": "forward",
+      "to_edge_id": "e1",
+      "to_direction": "forward",
+      "restriction": "no_left_turn",
+      "source": "manual"
+    },
+    {
+      "id": "tr_toy_002",
+      "junction_node_id": "n2",
+      "from_edge_id": "e1",
+      "from_direction": "reverse",
+      "to_edge_id": "e0",
+      "to_direction": "reverse",
+      "restriction": "no_u_turn",
+      "source": "manual",
+      "confidence": 0.9
+    }
+  ]
+}

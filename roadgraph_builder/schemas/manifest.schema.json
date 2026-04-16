@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/rsasaki0109/roadgraph_builder/manifest.schema.json",
+  "title": "export-bundle manifest.json",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "manifest_version",
+    "generator",
+    "roadgraph_builder_version",
+    "generated_at_utc",
+    "dataset_name",
+    "origin_wgs84_deg",
+    "origin_source",
+    "input_trajectory_csv",
+    "lane_width_m",
+    "outputs"
+  ],
+  "properties": {
+    "manifest_version": { "type": "integer", "const": 1 },
+    "generator": { "type": "string", "const": "roadgraph_builder" },
+    "roadgraph_builder_version": { "type": "string", "minLength": 1 },
+    "generated_at_utc": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"
+    },
+    "dataset_name": { "type": "string", "minLength": 1 },
+    "origin_wgs84_deg": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["lat", "lon"],
+      "properties": {
+        "lat": { "type": "number" },
+        "lon": { "type": "number" }
+      }
+    },
+    "origin_source": { "type": "string", "enum": ["cli", "origin_json"] },
+    "origin_json": { "type": ["string", "null"] },
+    "input_trajectory_csv": { "type": "string", "minLength": 1 },
+    "lane_width_m": { "type": ["number", "null"] },
+    "detections_json": { "type": ["string", "null"] },
+    "turn_restrictions_json": { "type": ["string", "null"] },
+    "turn_restrictions_count": { "type": "integer", "minimum": 0 },
+    "outputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "nav_sd_nav",
+        "sim_road_graph",
+        "sim_map_geojson",
+        "sim_trajectory_csv",
+        "lanelet_osm"
+      ],
+      "properties": {
+        "nav_sd_nav": { "type": "string" },
+        "sim_road_graph": { "type": "string" },
+        "sim_map_geojson": { "type": "string" },
+        "sim_trajectory_csv": { "type": "string" },
+        "lanelet_osm": { "type": "string" }
+      }
+    }
+  }
+}

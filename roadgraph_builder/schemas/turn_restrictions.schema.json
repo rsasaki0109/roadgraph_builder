@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/rsasaki0109/roadgraph_builder/turn_restrictions.schema.json",
+  "title": "Turn restrictions (manual / camera-derived)",
+  "description": "Optional legal/regulatory transition restrictions layer consumed by export-bundle. Separate from geometry-derived allowed_maneuvers hints.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["turn_restrictions"],
+  "properties": {
+    "format_version": {
+      "type": "integer",
+      "const": 1
+    },
+    "turn_restrictions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "junction_node_id",
+          "from_edge_id",
+          "from_direction",
+          "to_edge_id",
+          "to_direction",
+          "restriction",
+          "source"
+        ],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "junction_node_id": { "type": "string", "minLength": 1 },
+          "from_edge_id": { "type": "string", "minLength": 1 },
+          "from_direction": { "type": "string", "enum": ["forward", "reverse"] },
+          "to_edge_id": { "type": "string", "minLength": 1 },
+          "to_direction": { "type": "string", "enum": ["forward", "reverse"] },
+          "restriction": {
+            "type": "string",
+            "enum": [
+              "no_left_turn",
+              "no_right_turn",
+              "no_straight",
+              "no_u_turn",
+              "only_left",
+              "only_right",
+              "only_straight"
+            ]
+          },
+          "source": { "type": "string", "minLength": 1 },
+          "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+        }
+      }
+    }
+  }
+}

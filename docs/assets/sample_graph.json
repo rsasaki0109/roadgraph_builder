@@ -9,7 +9,11 @@
       },
       "attributes": {
         "degree": 1,
-        "junction_hint": "dead_end"
+        "junction_hint": "dead_end",
+        "hd": {
+          "vertical_model": "unknown",
+          "elevation_m": null
+        }
       }
     },
     {
@@ -20,7 +24,11 @@
       },
       "attributes": {
         "degree": 1,
-        "junction_hint": "dead_end"
+        "junction_hint": "dead_end",
+        "hd": {
+          "vertical_model": "unknown",
+          "elevation_m": null
+        }
       }
     },
     {
@@ -31,7 +39,11 @@
       },
       "attributes": {
         "degree": 1,
-        "junction_hint": "dead_end"
+        "junction_hint": "dead_end",
+        "hd": {
+          "vertical_model": "unknown",
+          "elevation_m": null
+        }
       }
     },
     {
@@ -42,7 +54,11 @@
       },
       "attributes": {
         "degree": 1,
-        "junction_hint": "dead_end"
+        "junction_hint": "dead_end",
+        "hd": {
+          "vertical_model": "unknown",
+          "elevation_m": null
+        }
       }
     }
   ],
@@ -71,7 +87,63 @@
       ],
       "attributes": {
         "kind": "lane_centerline",
-        "source": "trajectory_mvp"
+        "source": "trajectory_mvp",
+        "hd": {
+          "tier": "sd_seed",
+          "target_tier": "hd",
+          "lane_boundaries": {
+            "left": [
+              {
+                "x": -0.06994406711052527,
+                "y": 1.7486016777631315
+              },
+              {
+                "x": 4.912609170348189,
+                "y": 1.947816593036228
+              },
+              {
+                "x": 9.912609170348189,
+                "y": 2.247816593036228
+              },
+              {
+                "x": 14.930055932889475,
+                "y": 2.4486016777631314
+              }
+            ],
+            "right": [
+              {
+                "x": 0.06994406711052527,
+                "y": -1.7486016777631315
+              },
+              {
+                "x": 5.087390829651811,
+                "y": -1.547816593036228
+              },
+              {
+                "x": 10.087390829651811,
+                "y": -1.247816593036228
+              },
+              {
+                "x": 15.069944067110525,
+                "y": -1.0486016777631315
+              }
+            ]
+          },
+          "semantic_rules": [
+            {
+              "edge_id": "e0",
+              "kind": "speed_limit",
+              "value_kmh": 50
+            },
+            {
+              "edge_id": "e0",
+              "kind": "traffic_light",
+              "confidence": 0.82
+            }
+          ],
+          "quality": "centerline_offset_hd_lite",
+          "note": "Offsets from centerline by half lane width; not survey-grade."
+        }
       }
     },
     {
@@ -98,8 +170,75 @@
       ],
       "attributes": {
         "kind": "lane_centerline",
-        "source": "trajectory_mvp"
+        "source": "trajectory_mvp",
+        "hd": {
+          "tier": "sd_seed",
+          "target_tier": "hd",
+          "lane_boundaries": {
+            "left": [
+              {
+                "x": 49.9650069979007,
+                "y": 2.7496501049650126
+              },
+              {
+                "x": 54.9650069979007,
+                "y": 2.8496501049650123
+              },
+              {
+                "x": 60.01749912506562,
+                "y": 2.949912506561953
+              },
+              {
+                "x": 65.06994406711053,
+                "y": 2.7486016777631317
+              }
+            ],
+            "right": [
+              {
+                "x": 50.0349930020993,
+                "y": -0.7496501049650124
+              },
+              {
+                "x": 55.0349930020993,
+                "y": -0.6496501049650123
+              },
+              {
+                "x": 59.98250087493438,
+                "y": -0.5499125065619532
+              },
+              {
+                "x": 64.93005593288947,
+                "y": -0.7486016777631315
+              }
+            ]
+          },
+          "semantic_rules": [],
+          "quality": "centerline_offset_hd_lite",
+          "note": "Offsets from centerline by half lane width; not survey-grade."
+        }
       }
     }
-  ]
+  ],
+  "metadata": {
+    "sd_to_hd": {
+      "pipeline_version": "0.2",
+      "status": "centerline_boundaries_hd_lite",
+      "stages_completed": [
+        "attach_hd_attribute_slots",
+        "centerline_offset_boundaries"
+      ],
+      "stages_pending": [
+        "lidar_boundary_refinement",
+        "camera_semantics",
+        "fusion_refine",
+        "lanelet2_export"
+      ],
+      "notes": "Centerline offsets by half lane width; not survey-grade.",
+      "lane_width_m": 3.5
+    },
+    "camera_detections": {
+      "observation_count": 2,
+      "edges_touched": 1
+    }
+  }
 }

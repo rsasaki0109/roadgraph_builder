@@ -1,0 +1,6 @@
+# Example XY point cloud snippet (meters, same local frame as trajectory CSV)
+# x,y
+0.05,0.12
+0.52,0.08
+1.01,-0.02
+1.48,0.05

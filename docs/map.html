@@ -33,12 +33,47 @@
         padding: 4px 8px;
         border-radius: 6px;
       }
+      .map-legend {
+        background: rgba(255, 255, 255, 0.94);
+        padding: 10px 12px;
+        border-radius: 8px;
+        box-shadow: 0 1px 5px rgba(0, 0, 0, 0.28);
+        font-size: 12px;
+        line-height: 1.45;
+        color: #0f172a;
+        max-width: 220px;
+      }
+      .map-legend strong {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: #64748b;
+      }
+      .map-legend .lg {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 5px;
+      }
+      .map-legend .sw {
+        flex-shrink: 0;
+        width: 22px;
+        height: 5px;
+        border-radius: 1px;
+      }
+      .map-legend .sw.dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+      }
     </style>
   </head>
   <body>
     <div class="bar">
       <strong>roadgraph_builder</strong>
-      <span style="opacity: 0.85">Trajectory + graph on OpenStreetMap tiles (WGS84)</span>
+      <span style="opacity: 0.85">Trajectory + centerlines + HD-lite lane boundaries on OSM (WGS84)</span>
       <label>
         Layer
         <select id="dataset">
@@ -60,6 +95,21 @@
 
       let layerGroup = L.layerGroup().addTo(map);
 
+      const legend = L.control({ position: "bottomright" });
+      legend.onAdd = function () {
+        const div = L.DomUtil.create("div", "map-legend");
+        div.innerHTML =
+          "<strong>Legend</strong>" +
+          '<div class="lg"><span class="sw" style="background:#2563eb"></span> GPS trajectory</div>' +
+          '<div class="lg"><span class="sw" style="background:#ea580c"></span> Centerline</div>' +
+          '<div class="lg"><span class="sw" style="background:#16a34a"></span> Lane boundary (L)</div>' +
+          '<div class="lg"><span class="sw" style="background:#9333ea"></span> Lane boundary (R)</div>' +
+          '<div class="lg"><span class="sw dot" style="background:#b91c1c;border:2px solid #fff;box-sizing:border-box"></span> Graph node</div>';
+        L.DomEvent.disableClickPropagation(div);
+        return div;
+      };
+      legend.addTo(map);
+
       function styleLine(f) {
         const k = f.properties && f.properties.kind;
         if (k === "trajectory") {
@@ -67,6 +117,12 @@
         }
         if (k === "centerline") {
           return { color: "#ea580c", weight: 5, opacity: 0.9 };
+        }
+        if (k === "lane_boundary_left") {
+          return { color: "#16a34a", weight: 3, opacity: 0.88, dashArray: "8 6" };
+        }
+        if (k === "lane_boundary_right") {
+          return { color: "#9333ea", weight: 3, opacity: 0.88, dashArray: "4 6" };
         }
         return { color: "#64748b", weight: 2 };
       }
@@ -102,6 +158,12 @@
             const p = f.properties || {};
             if (p.kind === "node" && p.node_id) {
               layer.bindPopup(String(p.node_id) + (p.degree != null ? "<br>degree: " + p.degree : ""));
+            } else if (p.kind === "centerline" && p.edge_id) {
+              let txt = String(p.edge_id);
+              if (p.semantic_summary) {
+                txt += "<br/>" + String(p.semantic_summary);
+              }
+              layer.bindPopup(txt);
             }
           },
         });

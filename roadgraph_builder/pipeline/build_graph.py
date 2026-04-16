@@ -142,7 +142,15 @@ def build_graph_from_trajectory(traj: Trajectory, params: BuildParams | None = N
     """Build a road graph from an in-memory trajectory."""
     p = params or BuildParams()
     polylines = trajectory_to_polylines(traj, p)
-    return polylines_to_graph(polylines, p)
+    graph = polylines_to_graph(polylines, p)
+    if not graph.edges:
+        raise ValueError(
+            "Built graph has no edges: the trajectory produced no usable centerline segments "
+            "(each segment needs enough samples to form a polyline with at least two vertices). "
+            "Try adding more points, lowering --max-step-m if gaps split the path too much, "
+            "or check for collapsed/duplicate coordinates."
+        )
+    return graph
 
 
 def build_graph_from_csv(path: str, params: BuildParams | None = None) -> Graph:

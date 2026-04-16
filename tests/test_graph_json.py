@@ -20,9 +20,11 @@ def test_graph_roundtrip():
     )
     d = g.to_dict()
     assert d["schema_version"] == 1
+    assert "metadata" not in d
     g2 = Graph.from_dict(d)
     assert len(g2.nodes) == 2
     assert g2.edges[0].polyline[1] == (1.0, 2.0)
+    assert g2.metadata == {}
 
 
 def test_from_dict_allows_omitted_schema_version():
@@ -33,3 +35,13 @@ def test_from_dict_allows_omitted_schema_version():
         }
     )
     assert len(g.nodes) == 1
+
+
+def test_graph_roundtrip_metadata():
+    g = Graph(
+        nodes=[Node(id="n0", position=(0.0, 0.0))],
+        edges=[],
+        metadata={"tier": "test"},
+    )
+    g2 = Graph.from_dict(g.to_dict())
+    assert g2.metadata == {"tier": "test"}

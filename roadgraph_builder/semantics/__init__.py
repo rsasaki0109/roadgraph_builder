@@ -3,7 +3,7 @@
 Graph geometry lives in `core.graph`; this package will hold typed semantics and
 validators for `Edge.attributes` / `Node` extensions.
 
-TODO: bind traffic signals / stop lines from camera pipelines.
+Perception JSON is merged via ``io.camera.detections``; this module remains for typed enums helpers.
 TODO: lane connectivity and maneuver rules for HD maps.
 """
 

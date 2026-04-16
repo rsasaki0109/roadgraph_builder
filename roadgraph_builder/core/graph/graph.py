@@ -18,13 +18,17 @@ class Graph:
 
     nodes: list[Node] = field(default_factory=list)
     edges: list[Edge] = field(default_factory=list)
+    metadata: dict[str, object] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, object]:
-        return {
+        out: dict[str, object] = {
             "schema_version": SCHEMA_VERSION,
             "nodes": [n.to_dict() for n in self.nodes],
             "edges": [e.to_dict() for e in self.edges],
         }
+        if self.metadata:
+            out["metadata"] = dict(self.metadata)
+        return out
 
     @staticmethod
     def from_dict(data: dict[str, object]) -> "Graph":
@@ -39,7 +43,15 @@ class Graph:
             raise ValueError(f"Unsupported schema_version: {sv} (expected {SCHEMA_VERSION})")
         nodes_in = cast(list[Any], raw_nodes)
         edges_in = cast(list[Any], raw_edges)
+        raw_meta = data.get("metadata", {})
+        if raw_meta is None:
+            meta: dict[str, object] = {}
+        elif isinstance(raw_meta, dict):
+            meta = dict(cast(dict[str, object], raw_meta))
+        else:
+            raise TypeError(f"metadata must be object or null, got {type(raw_meta).__name__}")
         return Graph(
             nodes=[Node.from_dict(cast(dict[str, object], n)) for n in nodes_in],
             edges=[Edge.from_dict(cast(dict[str, object], e)) for e in edges_in],
+            metadata=dict(meta),
         )

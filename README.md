@@ -14,18 +14,58 @@ Use the short description and topics listed in [`.github/ABOUT.md`](.github/ABOU
 | --- | --- |
 | **Input** | Trajectory CSV (`timestamp`, `x`, `y`) |
 | **Pipeline** | Gap-based segmentation → PCA centerline → endpoint merge → graph |
-| **Output** | JSON graph + `visualize` SVG + schema validation |
+| **Output** | JSON + `visualize` SVG + `validate` + `enrich` + `fuse-lidar` + **`export-bundle`** (3-way) |
 | **Demo** | [Diagram viewer](https://rsasaki0109.github.io/roadgraph_builder/) · **[Map (OSM tiles)](https://rsasaki0109.github.io/roadgraph_builder/map.html)** (enable Pages on `/docs`), static previews in [docs/images](docs/images/) |
 | **Samples** | [Toy CSV](examples/sample_trajectory.csv), [OSM GPS](examples/osm_public_trackpoints.csv) (ODbL) |
-| **Next** | LiDAR / camera / Lanelet2 **stubs** for modular extension |
+| **Next** | Raw camera images **stub**; perception JSON → ``apply-camera`` + OSM tags works |
 
 ### Quick start
 
 ```bash
 python3 -m venv .venv && .venv/bin/pip install -e .
+.venv/bin/roadgraph_builder doctor
 .venv/bin/roadgraph_builder build examples/sample_trajectory.csv out.json
-.venv/bin/roadgraph_builder validate out.json
+.venv/bin/roadgraph_builder enrich out.json out_hd_envelope.json
+.venv/bin/roadgraph_builder validate out_hd_envelope.json
 ```
+
+From the repo root, **`make doctor`**, **`make demo`**, **`make tune`** (bundle + validate for parameter exploration), and **`make test`** are shortcuts (see `Makefile`). Tuning workflow: [docs/bundle_tuning.md](docs/bundle_tuning.md).
+
+### Three targets at once (nav SD / sim / Lanelet) — **export-bundle**
+
+**日本語:** ナビ向け **SD シード**、シミュ用の **フルグラフ＋GeoJSON**、**Lanelet 互換 OSM** を、**いまあるパイプライン**で一括書き出します（完成品 HD ではなく、同じ土台を三系統に分ける）。
+
+```bash
+# WGS84 origin: either pass --origin-json (lat0/lon0 file) or --origin-lat / --origin-lon
+roadgraph_builder export-bundle examples/sample_trajectory.csv ./out_bundle \
+  --origin-json examples/toy_map_origin.json \
+  --lane-width-m 3.5 \
+  --detections-json examples/camera_detections_sample.json
+```
+
+One-shot demo (validates detections, runs bundle, validates `manifest` + `sd_nav` + `road_graph`):
+
+```bash
+./scripts/run_demo_bundle.sh /tmp/my_bundle
+```
+
+**Parameter tuning** (same `export-bundle`, fewer extras; open `sim/map.geojson` in QGIS and adjust `max-step-m` / `merge-endpoint-m` — see [docs/bundle_tuning.md](docs/bundle_tuning.md)):
+
+```bash
+make tune
+# or: ./scripts/run_tuning_bundle.sh /tmp/my_tune
+```
+
+| Output | Role |
+| --- | --- |
+| `out_bundle/manifest.json` | **Provenance** — tool version, UTC time, origin, input basename, output paths |
+| `out_bundle/nav/sd_nav.json` | **SD / routing seed** — topology + edge `length_m`; `allowed_maneuvers` / `allowed_maneuvers_reverse` are **geometry heuristics** at the digitized end/start node (`straight`, and at junctions/dead-ends `left`/`right`/`u_turn` when inferred) |
+| `out_bundle/sim/` | **Simulation / viz** — `road_graph.json`, `map.geojson`, `trajectory.csv` |
+| `out_bundle/lanelet/map.osm` | **Lanelet / JOSM** — OSM XML (with lanelets when L/R boundaries exist) |
+
+Use `--lane-width-m 0` to skip HD-lite ribbon offsets. Origin must match your GeoJSON / Lanelet convention (see `examples/*_origin.json`). Validate **`manifest.json`** with `roadgraph_builder validate-manifest` (`roadgraph_builder/schemas/manifest.schema.json`) and **`nav/sd_nav.json`** with `roadgraph_builder validate-sd-nav` (`sd_nav.schema.json`).
+
+`allowed_maneuvers` is **not** a legal turn-restriction layer. It is a permissive 2D topology hint for routing/display; signs, signals, and turn bans should be carried in optional `turn_restrictions`. Design note: [docs/navigation_turn_restrictions.md](docs/navigation_turn_restrictions.md).
 
 ### Links
 
@@ -33,6 +73,7 @@ python3 -m venv .venv && .venv/bin/pip install -e .
 | --- | --- |
 | **Live viewer** (after Pages) | `https://rsasaki0109.github.io/roadgraph_builder/` |
 | **Changelog** | [CHANGELOG.md](CHANGELOG.md) |
+| **Plan / handoff** | [docs/PLAN.md](docs/PLAN.md) |
 | **PyPI** | Not published by default; see [PyPI (optional)](#pypi-optional) |
 
 ### Forks: URLs and OSM User-Agent
@@ -56,6 +97,19 @@ python3 -m venv .venv && .venv/bin/pip install -e .
 | **This project today** | **Good fit as a seed:** graph + centerlines + topology attributes (`degree`, `junction_hint`), plus GeoJSON on OSM tiles for sanity checks | **Not HD-complete:** lane **boundaries** are not produced yet; LiDAR/camera are **stubs**; Lanelet2 / full semantics are **future** work |
 
 **日本語で一言:** **SD** に向けた「道路のつながり＋中心線」の**中間表現**には使える。**HD** に必要な**レーン境界・高精度・規則**は、別データ（LiDAR 等）とセマンティクス層を足してから、という前提。
+
+### SD → HD pipeline (in this repo)
+
+| Stage | What it does | Status |
+| --- | --- | --- |
+| **1. SD seed** | `build` — graph + centerlines from trajectory CSV | **Implemented** |
+| **2. HD envelope** | `enrich` — `metadata.sd_to_hd`, per-edge `attributes.hd` slots | **Implemented** |
+| **3. Boundaries (HD-lite)** | `enrich --lane-width-m M` — centerline ± half width (no LiDAR) | **Implemented** (geometric prior; not survey HD) |
+| **4. Boundaries (sensor)** | `fuse-lidar` — XY points → per-edge binned median boundaries | **Implemented** (simple proximity; not SLAM-grade) |
+| **5. Semantics** | `apply-camera` — JSON observations → `hd.semantic_rules`; OSM `speed_limit` + regulatory | **Partial** (precomputed JSON) |
+| **6. Export** | `export-lanelet2` → OSM XML (`roadgraph:*` ways + `type=lanelet` relations when L/R exist) | **Implemented** |
+
+`enrich` without `--lane-width-m` only attaches placeholders. With **`--lane-width-m`**, you get **offset polylines** from each edge centerline — useful for visualization and simulation, **not** cm-class survey HD.
 
 ### What you get (and what you do not)
 
@@ -84,7 +138,7 @@ The **`docs/`** folder is a small static site.
 1. In the GitHub repo: **Settings → Pages → Build and deployment → Source**: **Deploy from a branch**, branch **`main`**, folder **`/docs`**, Save.
 2. After a minute, open:
    - **`https://<user>.github.io/roadgraph_builder/`** — diagram viewer (SVG-style pan/zoom)
-   - **`https://<user>.github.io/roadgraph_builder/map.html`** — **real basemap** (OpenStreetMap raster tiles + GeoJSON overlay: trajectory, centerlines, nodes)
+   - **`https://<user>.github.io/roadgraph_builder/map.html`** — **real basemap** (OSM tiles + GeoJSON: trajectory, centerlines, nodes, **HD-lite lane boundaries** when `attributes.hd` is filled — bundled assets use `enrich --lane-width-m 3.5` via `scripts/refresh_docs_assets.py`)
 
 Local preview (no GitHub required):
 
@@ -175,9 +229,55 @@ roadgraph_builder visualize examples/sample_trajectory.csv preview.svg
 5. **Over-merged junctions** — decrease `--merge-endpoint-m`.
 6. **Jagged centerline** — raise `--centerline-bins` for smoother polylines, or lower if you need fewer points.
 
+### Enrich (SD → HD envelope)
+
+After `build`, run `enrich` to attach document `metadata.sd_to_hd` and per-feature `attributes.hd`. Add **`--lane-width-m`** (meters) to generate **left/right boundary polylines** by offsetting the centerline (HD-lite):
+
+```bash
+roadgraph_builder build examples/sample_trajectory.csv out.json
+roadgraph_builder enrich out.json out_hd_envelope.json
+roadgraph_builder enrich out.json out_hd_lite.json --lane-width-m 3.5
+roadgraph_builder validate out_hd_lite.json
+```
+
+### Fuse LiDAR-style XY points (boundaries)
+
+Given a graph JSON and a two-column **x,y** CSV in the **same meter frame** as the trajectory, assign points to nearby edges and write **left/right** boundary polylines (binned median along the centerline):
+
+```bash
+roadgraph_builder build examples/sample_trajectory.csv out.json
+roadgraph_builder fuse-lidar out.json examples/sample_lidar_points.csv fused.json --max-dist-m 5 --bins 32
+roadgraph_builder validate fused.json
+```
+
+Edges with fewer than two accepted points in total are unchanged. Tune `--max-dist-m` for your cloud density.
+
+### Export OSM / Lanelet2 tooling
+
+Writes **OSM XML 0.6** (nodes, ways, relations) in **WGS84** using the same local tangent-plane origin as `export_map_geojson`. Ways use `roadgraph:*`; edges with **both** left and right `hd.lane_boundaries` get a **`type=lanelet`** relation (`left` / `right` members, optional `centerline`).
+
+```bash
+roadgraph_builder build examples/sample_trajectory.csv out.json
+roadgraph_builder enrich out.json out_hd.json --lane-width-m 3.5
+roadgraph_builder export-lanelet2 out_hd.json map.osm --origin-lat 35.68 --origin-lon 139.76
+```
+
+If the JSON has `metadata.map_origin` (`lat0`, `lon0`), you can omit `--origin-lat` / `--origin-lon`.
+
+### Apply camera / perception JSON (semantics)
+
+Use a sidecar JSON with an ``observations`` array (``edge_id``, ``kind``, optional ``value_kmh`` / ``confidence``). Rules merge into ``attributes.hd.semantic_rules``. When exporting OSM lanelets, ``speed_limit`` maps to Lanelet2-style tags; kinds like ``traffic_light`` or ``stop_line`` add ``regulatory_element`` relations.
+
+```bash
+roadgraph_builder validate-detections examples/camera_detections_sample.json
+roadgraph_builder apply-camera graph.json examples/camera_detections_sample.json with_semantics.json
+```
+
+Bundled schema: `roadgraph_builder/schemas/camera_detections.schema.json`. GeoJSON centerlines gain `semantic_summary` for map popups (`docs/map.html`).
+
 ### Validate JSON (schema)
 
-Exports include **`schema_version`** (currently `1`) and are described by `roadgraph_builder/schemas/road_graph.schema.json` (JSON Schema Draft 2020-12).
+Exports include **`schema_version`** (currently `1`) and are described by `roadgraph_builder/schemas/road_graph.schema.json` (JSON Schema Draft 2020-12). Optional top-level **`metadata`** holds pipeline notes (for example `sd_to_hd`). Edge/node **`attributes.hd`** may include **`semantic_rules`** (each rule must have **`kind`**).
 
 ```bash
 roadgraph_builder build examples/sample_trajectory.csv out.json
@@ -195,7 +295,19 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 .venv/bin/pytest
 
 ### CI
 
-GitHub Actions (`.github/workflows/ci.yml`) runs `pytest` on Python 3.10 and 3.12 for every push and pull request to `main`/`master`. Push this repository to GitHub (or fork) to run the workflow on the server.
+GitHub Actions (`.github/workflows/ci.yml`) runs `pytest` on Python 3.10 and 3.12, then **`validate-detections`** on `examples/camera_detections_sample.json`, **`validate`** on `docs/assets/sample_graph.json` and `docs/assets/osm_graph.json`, and **`export-bundle`** then **`validate-manifest`** + **`validate-sd-nav`** + **`validate`** on `manifest.json` / `nav/sd_nav.json` / `sim/road_graph.json`, for every push and pull request to `main`/`master`.
+
+Local parity:
+
+```bash
+roadgraph_builder validate-detections examples/camera_detections_sample.json
+roadgraph_builder validate docs/assets/sample_graph.json
+roadgraph_builder validate docs/assets/osm_graph.json
+roadgraph_builder export-bundle examples/sample_trajectory.csv /tmp/rg_bundle --origin-json examples/toy_map_origin.json --lane-width-m 3.5
+roadgraph_builder validate-manifest /tmp/rg_bundle/manifest.json
+roadgraph_builder validate-sd-nav /tmp/rg_bundle/nav/sd_nav.json
+roadgraph_builder validate /tmp/rg_bundle/sim/road_graph.json
+```
 
 ## Package layout
 
@@ -205,28 +317,30 @@ Python package: `roadgraph_builder/`
 | --- | --- |
 | `roadgraph_builder/core/graph/` | Node, Edge, Graph models |
 | `roadgraph_builder/io/trajectory/` | Trajectory CSV loader |
-| `roadgraph_builder/io/lidar/` | LiDAR loader stubs (future) |
-| `roadgraph_builder/io/camera/` | Camera loader stubs (future) |
-| `roadgraph_builder/io/export/` | JSON exporter; Lanelet2 stub (`export_lanelet2`) |
+| `roadgraph_builder/io/lidar/` | `load_points_xy_csv`, `attach_lidar_points_metadata`; LAS/LAZ still stub |
+| `roadgraph_builder/io/camera/` | `load_camera_detections_json`, `apply_camera_detections_to_graph`; raw image stub |
+| `roadgraph_builder/io/export/` | JSON; GeoJSON; `export_lanelet2`; bundle (`nav`/`sim`/`lanelet`) |
 | `roadgraph_builder/pipeline/` | `build_graph` pipeline |
+| `roadgraph_builder/hd/` | `enrich_sd_to_hd`, `fuse_lane_boundaries_from_points`, centerline offsets |
 | `roadgraph_builder/utils/geometry.py` | Clustering / centerline helpers |
 | `roadgraph_builder/viz/` | SVG export (trajectory + graph) |
 | `roadgraph_builder/semantics/` | Placeholder for lane semantics (separate from geometry) |
-| `roadgraph_builder/schemas/` | JSON Schema for exported graphs |
-| `roadgraph_builder/validation/` | `validate_road_graph_document()` |
+| `roadgraph_builder/schemas/` | `road_graph`, `camera_detections`, `sd_nav`, `manifest` (`.schema.json`) |
+| `roadgraph_builder/validation/` | `validate_*_document()` for graph, detections, `sd_nav`, manifest |
 | `roadgraph_builder/cli/` | CLI |
 | `docs/` | GitHub Pages viewer + bundled sample assets |
 | `scripts/refresh_docs_assets.py` | Regenerate `docs/assets` and `docs/images` |
+| `scripts/run_demo_bundle.sh` | Validate → `export-bundle` → validate outputs (demo) |
 | `roadgraph_builder/io/export/geojson.py` | `export_map_geojson()` for Leaflet / OSM |
-| `roadgraph_builder/utils/geo.py` | meters ↔ WGS84 (local tangent plane) |
+| `roadgraph_builder/utils/geo.py` | meters ↔ WGS84; `load_wgs84_origin_json` |
 | `.github/ABOUT.md` | Short text + topics for GitHub **About** |
 
 ## Future extensions
 
-- **LiDAR** — Edge-aligned boundary polylines, width hints, elevation.
-- **Camera** — Per-edge semantics (signals, stop lines, signs) as attributes.
+- **LiDAR** — `load_points_xy_csv()` loads meter-frame XY text; `fuse_lane_boundaries_from_points()` (CLI **`fuse-lidar`**) fits boundaries by proximity + binned median; `attach_lidar_points_metadata()` only records counts. LAS/LAZ remains `load_lidar_placeholder`.
+- **Camera** — Precomputed JSON (`examples/camera_detections_sample.json`) via ``apply-camera``; raw images still stub.
 - **Semantics layer** — Dedicated module for lane type, rules, and priority (separate from raw geometry).
-- **Lanelet2 export** — Serialize enriched graphs to Lanelet2/OSM-style outputs.
+- **Lanelet2-style OSM** — `export_lanelet2()` writes OSM XML for JOSM; lanelet relations are future work.
 
 Codebase TODOs also mention: graph fusion across tiles/modalities, intersection topology inference, and routing graph generation.
 

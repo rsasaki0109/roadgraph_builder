@@ -31,3 +31,24 @@ jobs:
         env:
           PYTEST_DISABLE_PLUGIN_AUTOLOAD: "1"
         run: pytest
+
+      - name: Validate example camera detections JSON
+        run: roadgraph_builder validate-detections examples/camera_detections_sample.json
+
+      - name: Validate example turn restrictions JSON
+        run: roadgraph_builder validate-turn-restrictions examples/turn_restrictions_sample.json
+
+      - name: Validate bundled graph JSON (GitHub Pages assets)
+        run: |
+          roadgraph_builder validate docs/assets/sample_graph.json
+          roadgraph_builder validate docs/assets/osm_graph.json
+
+      - name: export-bundle + validate bundle outputs
+        run: |
+          roadgraph_builder export-bundle examples/sample_trajectory.csv /tmp/rg_bundle \
+            --origin-json examples/toy_map_origin.json \
+            --lane-width-m 3.5 \
+            --turn-restrictions-json examples/turn_restrictions_sample.json
+          roadgraph_builder validate-sd-nav /tmp/rg_bundle/nav/sd_nav.json
+          roadgraph_builder validate /tmp/rg_bundle/sim/road_graph.json
+          roadgraph_builder validate-manifest /tmp/rg_bundle/manifest.json
