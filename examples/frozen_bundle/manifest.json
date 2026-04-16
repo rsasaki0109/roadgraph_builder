@@ -1,0 +1,25 @@
+{
+  "manifest_version": 1,
+  "generator": "roadgraph_builder",
+  "roadgraph_builder_version": "0.2.0",
+  "generated_at_utc": "2026-04-16T21:19:13Z",
+  "dataset_name": "roadgraph_sample_bundle",
+  "origin_wgs84_deg": {
+    "lat": 52.52,
+    "lon": 13.405
+  },
+  "origin_source": "origin_json",
+  "origin_json": "toy_map_origin.json",
+  "input_trajectory_csv": "sample_trajectory.csv",
+  "lane_width_m": 3.5,
+  "detections_json": "camera_detections_sample.json",
+  "turn_restrictions_json": "turn_restrictions_sample.json",
+  "turn_restrictions_count": 2,
+  "outputs": {
+    "nav_sd_nav": "nav/sd_nav.json",
+    "sim_road_graph": "sim/road_graph.json",
+    "sim_map_geojson": "sim/map.geojson",
+    "sim_trajectory_csv": "sim/trajectory.csv",
+    "lanelet_osm": "lanelet/map.osm"
+  }
+}

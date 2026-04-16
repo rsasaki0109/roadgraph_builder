@@ -1,5 +1,5 @@
 # Run from repository root.
-.PHONY: install test demo tune doctor
+.PHONY: install test demo tune doctor release-bundle
 
 install:
 	python3 -m pip install -e ".[dev]"
@@ -15,3 +15,6 @@ tune:
 
 doctor:
 	roadgraph_builder doctor
+
+release-bundle:
+	bash scripts/build_release_bundle.sh

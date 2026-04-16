@@ -344,6 +344,20 @@ Python package: `roadgraph_builder/`
 
 Codebase TODOs also mention: graph fusion across tiles/modalities, intersection topology inference, and routing graph generation.
 
+## Sample bundle
+
+A frozen reference output lives at [`examples/frozen_bundle/`](examples/frozen_bundle/)
+so you can browse the shape of `export-bundle` without running the pipeline
+(`manifest.json`, `nav/sd_nav.json`, `sim/{road_graph,map,trajectory}`,
+`lanelet/map.osm`). Regenerate with `make release-bundle` or
+`bash scripts/build_release_bundle.sh`; the script also packs
+`dist/roadgraph_sample_bundle.tar.gz` + a sha256 file suitable for attaching
+to a release.
+
+Every `v*` tag push triggers [`.github/workflows/release.yml`](.github/workflows/release.yml),
+which runs the same script and attaches the tarball + sha256 to the auto-created
+GitHub Release.
+
 ## Releases
 
 Changes are listed in [CHANGELOG.md](CHANGELOG.md).
@@ -356,7 +370,9 @@ git push origin main
 git push origin v0.1.0
 ```
 
-On GitHub, open **Releases → Create a new release**, select that tag, and paste the notes from `CHANGELOG.md`.
+The release workflow above then builds and attaches
+`roadgraph_sample_bundle.tar.gz` + `roadgraph_sample_bundle.sha256` to the
+auto-generated release notes.
 
 ## PyPI (optional)
 

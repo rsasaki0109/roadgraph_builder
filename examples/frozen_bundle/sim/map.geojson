@@ -1,0 +1,421 @@
+{
+  "type": "FeatureCollection",
+  "name": "roadgraph_sample_bundle",
+  "properties": {
+    "origin_lat": 52.52,
+    "origin_lon": 13.405,
+    "crs_note": "Local meters projected from this WGS84 origin; see utils/geo.py"
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "trajectory",
+        "dataset": "roadgraph_sample_bundle"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            13.405,
+            52.52
+          ],
+          [
+            13.40507389848599,
+            52.520001798643214
+          ],
+          [
+            13.40514779697198,
+            52.52000449660803
+          ],
+          [
+            13.40522169545797,
+            52.52000629525124
+          ],
+          [
+            13.405738984859903,
+            52.52000899321606
+          ],
+          [
+            13.405812883345893,
+            52.520009892537665
+          ],
+          [
+            13.405886781831883,
+            52.52001079185927
+          ],
+          [
+            13.405960680317873,
+            52.52000899321606
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "lane_centerline",
+        "dataset": "roadgraph_sample_bundle",
+        "edge_id": "e0",
+        "source": "trajectory_mvp",
+        "hd": {
+          "tier": "sd_seed",
+          "target_tier": "hd",
+          "lane_boundaries": {
+            "left": [
+              {
+                "x": -0.06994406711052527,
+                "y": 1.7486016777631315
+              },
+              {
+                "x": 4.912609170348189,
+                "y": 1.947816593036228
+              },
+              {
+                "x": 9.912609170348189,
+                "y": 2.247816593036228
+              },
+              {
+                "x": 14.930055932889475,
+                "y": 2.4486016777631314
+              }
+            ],
+            "right": [
+              {
+                "x": 0.06994406711052527,
+                "y": -1.7486016777631315
+              },
+              {
+                "x": 5.087390829651811,
+                "y": -1.547816593036228
+              },
+              {
+                "x": 10.087390829651811,
+                "y": -1.247816593036228
+              },
+              {
+                "x": 15.069944067110525,
+                "y": -1.0486016777631315
+              }
+            ]
+          },
+          "semantic_rules": [
+            {
+              "edge_id": "e0",
+              "kind": "speed_limit",
+              "value_kmh": 50
+            },
+            {
+              "edge_id": "e0",
+              "kind": "traffic_light",
+              "confidence": 0.82
+            }
+          ],
+          "quality": "centerline_offset_hd_lite",
+          "note": "Offsets from centerline by half lane width; not survey-grade."
+        },
+        "semantic_summary": "speed_limit 50 km/h; traffic_light"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            13.405,
+            52.52
+          ],
+          [
+            13.40507389848599,
+            52.520001798643214
+          ],
+          [
+            13.40514779697198,
+            52.52000449660803
+          ],
+          [
+            13.40522169545797,
+            52.52000629525124
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "lane_boundary_left",
+        "dataset": "roadgraph_sample_bundle",
+        "edge_id": "e0",
+        "side": "left"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            13.404998966247867,
+            52.520015725552696
+          ],
+          [
+            13.40507260687599,
+            52.52001751713547
+          ],
+          [
+            13.40514650536198,
+            52.52002021510029
+          ],
+          [
+            13.405220661705838,
+            52.520022020803935
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "lane_boundary_right",
+        "dataset": "roadgraph_sample_bundle",
+        "edge_id": "e0",
+        "side": "right"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            13.405001033752132,
+            52.51998427444731
+          ],
+          [
+            13.40507519009599,
+            52.519986080150964
+          ],
+          [
+            13.40514908858198,
+            52.51998877811578
+          ],
+          [
+            13.405222729210102,
+            52.51999056969856
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "lane_centerline",
+        "dataset": "roadgraph_sample_bundle",
+        "edge_id": "e1",
+        "source": "trajectory_mvp",
+        "hd": {
+          "tier": "sd_seed",
+          "target_tier": "hd",
+          "lane_boundaries": {
+            "left": [
+              {
+                "x": 49.9650069979007,
+                "y": 2.7496501049650126
+              },
+              {
+                "x": 54.9650069979007,
+                "y": 2.8496501049650123
+              },
+              {
+                "x": 60.01749912506562,
+                "y": 2.949912506561953
+              },
+              {
+                "x": 65.06994406711053,
+                "y": 2.7486016777631317
+              }
+            ],
+            "right": [
+              {
+                "x": 50.0349930020993,
+                "y": -0.7496501049650124
+              },
+              {
+                "x": 55.0349930020993,
+                "y": -0.6496501049650123
+              },
+              {
+                "x": 59.98250087493438,
+                "y": -0.5499125065619532
+              },
+              {
+                "x": 64.93005593288947,
+                "y": -0.7486016777631315
+              }
+            ]
+          },
+          "semantic_rules": [],
+          "quality": "centerline_offset_hd_lite",
+          "note": "Offsets from centerline by half lane width; not survey-grade."
+        }
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            13.405738984859903,
+            52.52000899321606
+          ],
+          [
+            13.405812883345893,
+            52.520009892537665
+          ],
+          [
+            13.405886781831883,
+            52.52001079185927
+          ],
+          [
+            13.405960680317873,
+            52.52000899321606
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "lane_boundary_left",
+        "dataset": "roadgraph_sample_bundle",
+        "edge_id": "e1",
+        "side": "left"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            13.405738467673928,
+            52.520024728197484
+          ],
+          [
+            13.405812366159918,
+            52.52002562751909
+          ],
+          [
+            13.405887040463654,
+            52.52002652920053
+          ],
+          [
+            13.405961714070006,
+            52.52002471876875
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "lane_boundary_right",
+        "dataset": "roadgraph_sample_bundle",
+        "edge_id": "e1",
+        "side": "right"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            13.405739502045877,
+            52.51999325823464
+          ],
+          [
+            13.405813400531867,
+            52.51999415755625
+          ],
+          [
+            13.405886523200113,
+            52.51999505451802
+          ],
+          [
+            13.40595964656574,
+            52.519993267663374
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "node",
+        "dataset": "roadgraph_sample_bundle",
+        "node_id": "n0",
+        "degree": 1,
+        "junction_hint": "dead_end",
+        "hd": {
+          "vertical_model": "unknown",
+          "elevation_m": null
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.405,
+          52.52
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "node",
+        "dataset": "roadgraph_sample_bundle",
+        "node_id": "n1",
+        "degree": 1,
+        "junction_hint": "dead_end",
+        "hd": {
+          "vertical_model": "unknown",
+          "elevation_m": null
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.40522169545797,
+          52.52000629525124
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "node",
+        "dataset": "roadgraph_sample_bundle",
+        "node_id": "n2",
+        "degree": 1,
+        "junction_hint": "dead_end",
+        "hd": {
+          "vertical_model": "unknown",
+          "elevation_m": null
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.405738984859903,
+          52.52000899321606
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "node",
+        "dataset": "roadgraph_sample_bundle",
+        "node_id": "n3",
+        "degree": 1,
+        "junction_hint": "dead_end",
+        "hd": {
+          "vertical_model": "unknown",
+          "elevation_m": null
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          13.405960680317873,
+          52.52000899321606
+        ]
+      }
+    }
+  ]
+}

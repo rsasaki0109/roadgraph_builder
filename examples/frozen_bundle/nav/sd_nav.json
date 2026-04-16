@@ -1,0 +1,82 @@
+{
+  "role": "navigation_sd_seed",
+  "schema_version": 1,
+  "description": "Topology and centerline lengths in the same meter frame as the trajectory CSV. allowed_maneuvers / allowed_maneuvers_reverse are geometry heuristics at the digitized end node and start node (reverse travel along the centerline); not surveyed turn restrictions.",
+  "nodes": [
+    {
+      "id": "n0",
+      "x_m": 0.0,
+      "y_m": 0.0
+    },
+    {
+      "id": "n1",
+      "x_m": 15.0,
+      "y_m": 0.7
+    },
+    {
+      "id": "n2",
+      "x_m": 50.0,
+      "y_m": 1.0
+    },
+    {
+      "id": "n3",
+      "x_m": 65.0,
+      "y_m": 1.0
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0",
+      "start_node_id": "n0",
+      "end_node_id": "n1",
+      "length_m": 15.01698871710472,
+      "polyline_vertex_count": 4,
+      "allowed_maneuvers": [
+        "straight",
+        "u_turn"
+      ],
+      "allowed_maneuvers_reverse": [
+        "straight",
+        "u_turn"
+      ]
+    },
+    {
+      "id": "e1",
+      "start_node_id": "n2",
+      "end_node_id": "n3",
+      "length_m": 15.005998201318711,
+      "polyline_vertex_count": 4,
+      "allowed_maneuvers": [
+        "straight",
+        "u_turn"
+      ],
+      "allowed_maneuvers_reverse": [
+        "straight",
+        "u_turn"
+      ]
+    }
+  ],
+  "turn_restrictions": [
+    {
+      "junction_node_id": "n1",
+      "from_edge_id": "e0",
+      "to_edge_id": "e1",
+      "restriction": "no_left_turn",
+      "from_direction": "forward",
+      "to_direction": "forward",
+      "source": "manual",
+      "id": "tr_toy_001"
+    },
+    {
+      "junction_node_id": "n2",
+      "from_edge_id": "e1",
+      "to_edge_id": "e0",
+      "restriction": "no_u_turn",
+      "from_direction": "reverse",
+      "to_direction": "reverse",
+      "source": "manual",
+      "id": "tr_toy_002",
+      "confidence": 0.9
+    }
+  ]
+}

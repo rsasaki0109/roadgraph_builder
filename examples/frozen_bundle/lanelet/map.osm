@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<osm version="0.6" generator="roadgraph_builder">
+  <node id="1" lat="52.52" lon="13.405">
+    <tag k="roadgraph" v="graph_node"/>
+    <tag k="roadgraph:node_id" v="n0"/>
+  </node>
+  <node id="2" lat="52.5200062953" lon="13.4052216955">
+    <tag k="roadgraph" v="graph_node"/>
+    <tag k="roadgraph:node_id" v="n1"/>
+  </node>
+  <node id="3" lat="52.5200089932" lon="13.4057389849">
+    <tag k="roadgraph" v="graph_node"/>
+    <tag k="roadgraph:node_id" v="n2"/>
+  </node>
+  <node id="4" lat="52.5200089932" lon="13.4059606803">
+    <tag k="roadgraph" v="graph_node"/>
+    <tag k="roadgraph:node_id" v="n3"/>
+  </node>
+  <node id="5" lat="52.52" lon="13.405"/>
+  <node id="6" lat="52.5200017986" lon="13.4050738985"/>
+  <node id="7" lat="52.5200044966" lon="13.405147797"/>
+  <node id="8" lat="52.5200062953" lon="13.4052216955"/>
+  <node id="10" lat="52.5200157256" lon="13.4049989662"/>
+  <node id="11" lat="52.5200175171" lon="13.4050726069"/>
+  <node id="12" lat="52.5200202151" lon="13.4051465054"/>
+  <node id="13" lat="52.5200220208" lon="13.4052206617"/>
+  <node id="15" lat="52.5199842744" lon="13.4050010338"/>
+  <node id="16" lat="52.5199860802" lon="13.4050751901"/>
+  <node id="17" lat="52.5199887781" lon="13.4051490886"/>
+  <node id="18" lat="52.5199905697" lon="13.4052227292"/>
+  <node id="22" lat="52.5200089932" lon="13.4057389849"/>
+  <node id="23" lat="52.5200098925" lon="13.4058128833"/>
+  <node id="24" lat="52.5200107919" lon="13.4058867818"/>
+  <node id="25" lat="52.5200089932" lon="13.4059606803"/>
+  <node id="27" lat="52.5200247282" lon="13.4057384677"/>
+  <node id="28" lat="52.5200256275" lon="13.4058123662"/>
+  <node id="29" lat="52.5200265292" lon="13.4058870405"/>
+  <node id="30" lat="52.5200247188" lon="13.4059617141"/>
+  <node id="32" lat="52.5199932582" lon="13.405739502"/>
+  <node id="33" lat="52.5199941576" lon="13.4058134005"/>
+  <node id="34" lat="52.5199950545" lon="13.4058865232"/>
+  <node id="35" lat="52.5199932677" lon="13.4059596466"/>
+  <way id="9">
+    <nd ref="5"/>
+    <nd ref="6"/>
+    <nd ref="7"/>
+    <nd ref="8"/>
+    <tag k="roadgraph" v="centerline"/>
+    <tag k="roadgraph:edge_id" v="e0"/>
+    <tag k="type" v="line_thin"/>
+    <tag k="subtype" v="solid"/>
+  </way>
+  <way id="14">
+    <nd ref="10"/>
+    <nd ref="11"/>
+    <nd ref="12"/>
+    <nd ref="13"/>
+    <tag k="roadgraph" v="lane_boundary"/>
+    <tag k="roadgraph:edge_id" v="e0"/>
+    <tag k="roadgraph:side" v="left"/>
+    <tag k="type" v="line_thin"/>
+    <tag k="subtype" v="solid"/>
+  </way>
+  <way id="19">
+    <nd ref="15"/>
+    <nd ref="16"/>
+    <nd ref="17"/>
+    <nd ref="18"/>
+    <tag k="roadgraph" v="lane_boundary"/>
+    <tag k="roadgraph:edge_id" v="e0"/>
+    <tag k="roadgraph:side" v="right"/>
+    <tag k="type" v="line_thin"/>
+    <tag k="subtype" v="solid"/>
+  </way>
+  <way id="26">
+    <nd ref="22"/>
+    <nd ref="23"/>
+    <nd ref="24"/>
+    <nd ref="25"/>
+    <tag k="roadgraph" v="centerline"/>
+    <tag k="roadgraph:edge_id" v="e1"/>
+    <tag k="type" v="line_thin"/>
+    <tag k="subtype" v="solid"/>
+  </way>
+  <way id="31">
+    <nd ref="27"/>
+    <nd ref="28"/>
+    <nd ref="29"/>
+    <nd ref="30"/>
+    <tag k="roadgraph" v="lane_boundary"/>
+    <tag k="roadgraph:edge_id" v="e1"/>
+    <tag k="roadgraph:side" v="left"/>
+    <tag k="type" v="line_thin"/>
+    <tag k="subtype" v="solid"/>
+  </way>
+  <way id="36">
+    <nd ref="32"/>
+    <nd ref="33"/>
+    <nd ref="34"/>
+    <nd ref="35"/>
+    <tag k="roadgraph" v="lane_boundary"/>
+    <tag k="roadgraph:edge_id" v="e1"/>
+    <tag k="roadgraph:side" v="right"/>
+    <tag k="type" v="line_thin"/>
+    <tag k="subtype" v="solid"/>
+  </way>
+  <relation id="20">
+    <member type="way" ref="14" role="left"/>
+    <member type="way" ref="19" role="right"/>
+    <member type="way" ref="9" role="centerline"/>
+    <tag k="type" v="lanelet"/>
+    <tag k="subtype" v="road"/>
+    <tag k="location" v="urban"/>
+    <tag k="roadgraph:edge_id" v="e0"/>
+    <tag k="speed_limit" v="50"/>
+  </relation>
+  <relation id="21">
+    <member type="relation" ref="20" role="refers"/>
+    <tag k="type" v="regulatory_element"/>
+    <tag k="subtype" v="traffic_light"/>
+    <tag k="roadgraph:source" v="semantic_rules"/>
+    <tag k="roadgraph:confidence" v="0.8200"/>
+  </relation>
+  <relation id="37">
+    <member type="way" ref="31" role="left"/>
+    <member type="way" ref="36" role="right"/>
+    <member type="way" ref="26" role="centerline"/>
+    <tag k="type" v="lanelet"/>
+    <tag k="subtype" v="road"/>
+    <tag k="location" v="urban"/>
+    <tag k="roadgraph:edge_id" v="e1"/>
+  </relation>
+</osm>

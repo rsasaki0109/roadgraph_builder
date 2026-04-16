@@ -14,6 +14,7 @@ Codex / 次のセッション向け。**事実と意図を分けて**書く。
 - **sd_nav**: `allowed_maneuvers`（digitized 終端ノード）と **`allowed_maneuvers_reverse`**（始端・逆走）を **2D 交差点ヒューリスティック**で付与（`roadgraph_builder/navigation/sd_maneuvers.py`）。
 - **ナビ規制の前提**: `allowed_maneuvers` は **規制なしの幾何ヒント**。ターン禁止は別レイヤー `turn_restrictions` として `sd_nav.schema.json` に optional 統合済み（設計メモ: `docs/navigation_turn_restrictions.md`）。
 - **turn_restrictions 生成**: `export-bundle --turn-restrictions-json` と camera detections の `kind: "turn_restriction"` から `sd_nav.turn_restrictions` を end-to-end で生成（`roadgraph_builder/navigation/turn_restrictions.py`）。manifest に `turn_restrictions_json` / `turn_restrictions_count` を記録。
+- **配布**: `scripts/build_release_bundle.sh` + `.github/workflows/release.yml` で `v*` タグ push 時に `dist/roadgraph_sample_bundle.tar.gz` と sha256 を GitHub Release に自動添付。`examples/frozen_bundle/` に固定サンプルを同梱。
 - **HD**: `enrich_sd_to_hd` が `metadata.sd_to_hd` に **`navigation_hints`**（`sd_nav` 参照）を含める。
 - **検証**: JSON Schema（road_graph / camera_detections / sd_nav / manifest）。CI で bundle 検証あり。
 - **UX**: 空グラフは `ValueError`、CLI は欠落ファイル・検証エラーを **終了コード 1** で明示。
