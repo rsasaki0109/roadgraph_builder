@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Distribution** — `scripts/build_release_bundle.sh` + `.github/workflows/release.yml` attach a validated `roadgraph_sample_bundle.tar.gz` (plus sha256) to every `v*` tag; a trimmed `examples/frozen_bundle/` is committed for quick inspection. `make release-bundle` wraps the script.
 - **PyPI workflow scaffold** — `.github/workflows/pypi.yml` (workflow_dispatch only, PyPI / TestPyPI) builds sdist + wheel and publishes via `pypa/gh-action-pypi-publish`. Wired for Trusted Publisher OIDC; no repository secrets required. Enabling requires configuring Trusted Publishers on PyPI and a matching GitHub Environment.
+- **`junction_hint: "self_loop"`** — nodes whose only incident edge is a legitimate self-loop (round trip / block circuit) are now classified as `self_loop` instead of `through_or_corner`, making large loops discoverable from topology alone.
 
 ### Fixed
 

@@ -75,19 +75,41 @@ def trajectory_to_polylines(traj: Trajectory, params: BuildParams) -> list[list[
 
 
 def annotate_node_degrees(graph: Graph) -> None:
-    """Set node `attributes`: `degree` (undirected) and `junction_hint` for dead-ends / branches."""
+    """Set node `attributes`: `degree` (undirected) and `junction_hint`.
+
+    ``junction_hint`` values:
+
+    - ``multi_branch`` — degree ≥ 3
+    - ``dead_end`` — degree == 1
+    - ``self_loop`` — the only incident edge is a self-loop (start == end);
+      legitimate round-trip / circuit loops land here, since degenerate
+      zero-length self-loops are already dropped in ``polylines_to_graph``.
+    - ``through_or_corner`` — anything else (typically degree 2 straight-through).
+    """
     deg: dict[str, int] = {n.id: 0 for n in graph.nodes}
+    selfloop_only: dict[str, bool] = {n.id: False for n in graph.nodes}
+    incident_count: dict[str, int] = {n.id: 0 for n in graph.nodes}
     for e in graph.edges:
         a, b = e.start_node_id, e.end_node_id
         if a == b:
             deg[a] = deg.get(a, 0) + 2
+            incident_count[a] = incident_count.get(a, 0) + 1
+            # Mark as self-loop candidate; cleared below if any non-loop edge also touches it.
+            if incident_count[a] == 1:
+                selfloop_only[a] = True
         else:
             deg[a] = deg.get(a, 0) + 1
             deg[b] = deg.get(b, 0) + 1
+            incident_count[a] = incident_count.get(a, 0) + 1
+            incident_count[b] = incident_count.get(b, 0) + 1
+            selfloop_only[a] = False
+            selfloop_only[b] = False
     for n in graph.nodes:
         d = deg.get(n.id, 0)
         n.attributes["degree"] = d
-        if d >= 3:
+        if selfloop_only.get(n.id, False) and incident_count.get(n.id, 0) == 1:
+            n.attributes["junction_hint"] = "self_loop"
+        elif d >= 3:
             n.attributes["junction_hint"] = "multi_branch"
         elif d == 1:
             n.attributes["junction_hint"] = "dead_end"

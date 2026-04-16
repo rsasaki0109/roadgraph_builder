@@ -33,3 +33,20 @@ def test_legitimate_loop_is_kept():
     assert edge.start_node_id == edge.end_node_id
     # Arc length ~ 2 * pi * 50 ≈ 314 m, way above the 2*merge threshold.
     assert len(edge.polyline) >= 48
+    loop_node = next(n for n in g.nodes if n.id == edge.start_node_id)
+    assert loop_node.attributes["junction_hint"] == "self_loop"
+    assert loop_node.attributes["degree"] == 2
+
+
+def test_self_loop_with_additional_branch_is_multi_branch():
+    big_loop = _loop_polyline(radius=50.0, center=(100.0, 0.0), n=48)
+    # big_loop starts and ends at (center + (radius, 0)) = (150, 0).
+    # Attach a straight branch that terminates at that same point.
+    branch = [(220.0, 0.0), (185.0, 0.0), (150.0, 0.0)]
+    g = polylines_to_graph([big_loop, branch], BuildParams(merge_endpoint_m=5.0))
+
+    assert len(g.edges) == 2
+    loop_edge = next(e for e in g.edges if e.start_node_id == e.end_node_id)
+    loop_node = next(n for n in g.nodes if n.id == loop_edge.start_node_id)
+    # Loop (degree 2) + branch (degree 1) → total 3 → multi_branch, not self_loop.
+    assert loop_node.attributes["junction_hint"] == "multi_branch"

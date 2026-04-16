@@ -1,5 +1,10 @@
 # Codex handoff: sample-bundle distribution + tagged release
 
+> **Status: DONE** — landed in commits `e4e1cb8` (frozen bundle + release
+> workflow) and `ce27677` (PyPI scaffold), both on main. `make
+> release-bundle`, `examples/frozen_bundle/`, and the `v*`-tag release
+> workflow are live. Handoff kept for historical context.
+
 Target PLAN.md priority 4. Paste the block below into `codex`. Do this track
 after the turn_restrictions handoff has landed so the frozen bundle reflects
 the latest schema.

@@ -1,5 +1,11 @@
 # Codex handoff: turn_restrictions generation entry point
 
+> **Status: DONE** — landed in commit `be0fcf0` (main). `export-bundle
+> --turn-restrictions-json`, camera-detection extraction (`kind:
+> turn_restriction`), `validate-turn-restrictions` CLI + schema, and the
+> toy `examples/turn_restrictions_sample.json` are all live. Handoff kept
+> for historical context.
+
 Target PLAN.md priority 2. Paste the block below into `codex` (or similar) as the
 prompt. Start from a clean branch (e.g. `git switch -c feat/turn-restrictions`).
 

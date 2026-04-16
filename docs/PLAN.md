@@ -65,10 +65,10 @@ make demo    # detections 付きフルデモ
 
 そのまま `codex` に投入できるよう、優先項目ごとに詳細指示を切り出して保存している。
 
-- 優先 2（turn_restrictions 生成入口）: [`docs/handoff/turn_restrictions.md`](./handoff/turn_restrictions.md)
-- 優先 4（配布・タグ付きリリース）: [`docs/handoff/release_distribution.md`](./handoff/release_distribution.md)
+- 優先 2（turn_restrictions 生成入口）: [`docs/handoff/turn_restrictions.md`](./handoff/turn_restrictions.md) — **完了**（`be0fcf0`）
+- 優先 4（配布・タグ付きリリース）: [`docs/handoff/release_distribution.md`](./handoff/release_distribution.md) — **完了**（`e4e1cb8` + PyPI scaffold `ce27677`）
 
-優先 1（実データでの `max-step-m` 等の調整）と優先 3（LAS/LAZ・カメラ生画像）は実走データに依存するため、まず手元データ＋`make tune` を回してから Codex に渡すこと。
+優先 1（実データでの `max-step-m` 等の調整）はパリ OSM トレースで暫定推奨値（`--max-step-m 40 --merge-endpoint-m 8`）を記録済み（`docs/bundle_tuning.md`）。優先 3（LAS/LAZ・カメラ生画像）は実走データに依存するため、まず手元データ＋`make tune` を回してから Codex に渡すこと。
 
 ### 次セッションの進め方
 
