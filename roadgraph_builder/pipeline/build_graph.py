@@ -11,6 +11,7 @@ Separation note:
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 
 import numpy as np
@@ -94,8 +95,24 @@ def annotate_node_degrees(graph: Graph) -> None:
             n.attributes["junction_hint"] = "through_or_corner"
 
 
+def _polyline_length_m(poly: list[tuple[float, float]]) -> float:
+    total = 0.0
+    for i in range(len(poly) - 1):
+        dx = poly[i + 1][0] - poly[i][0]
+        dy = poly[i + 1][1] - poly[i][1]
+        total += math.hypot(dx, dy)
+    return total
+
+
 def polylines_to_graph(polylines: list[list[tuple[float, float]]], params: BuildParams) -> Graph:
-    """Create nodes (merged endpoints) and edges (centerline polylines)."""
+    """Create nodes (merged endpoints) and edges (centerline polylines).
+
+    Edges whose endpoints collapse onto a single node **and** whose polyline
+    arc-length stays within ``2 * merge_endpoint_m`` are dropped as merge
+    artefacts — they encode no direction and no length, yet would otherwise
+    appear as zero-length self-loops in downstream consumers. Legitimate loops
+    (round trips, block circuits) trace longer polylines and survive.
+    """
     work: list[list[tuple[float, float]]] = list(polylines)
     tol = params.simplify_tolerance_m
     if tol is not None and tol > 0:
@@ -113,17 +130,19 @@ def polylines_to_graph(polylines: list[list[tuple[float, float]]], params: Build
         endpoints.append(poly[-1])
 
     node_positions, idx_to_node = merge_endpoints_union_find(endpoints, params.merge_endpoint_m)
-    nodes = [Node(id=nid, position=node_positions[nid]) for nid in sorted(node_positions.keys())]
 
+    selfloop_min_length = 2.0 * params.merge_endpoint_m
     edges: list[Edge] = []
-    for eid, poly in enumerate(work):
-        i0 = 2 * eid
-        i1 = 2 * eid + 1
-        sn = idx_to_node[i0]
-        en = idx_to_node[i1]
+    used_nodes: set[str] = set()
+    next_eid = 0
+    for poly_idx, poly in enumerate(work):
+        sn = idx_to_node[2 * poly_idx]
+        en = idx_to_node[2 * poly_idx + 1]
+        if sn == en and _polyline_length_m(poly) < selfloop_min_length:
+            continue
         edges.append(
             Edge(
-                id=f"e{eid}",
+                id=f"e{next_eid}",
                 start_node_id=sn,
                 end_node_id=en,
                 polyline=list(poly),
@@ -133,6 +152,16 @@ def polylines_to_graph(polylines: list[list[tuple[float, float]]], params: Build
                 },
             )
         )
+        used_nodes.add(sn)
+        used_nodes.add(en)
+        next_eid += 1
+
+    nodes = [
+        Node(id=nid, position=node_positions[nid])
+        for nid in sorted(node_positions.keys())
+        if nid in used_nodes
+    ]
+
     graph = Graph(nodes=nodes, edges=edges)
     annotate_node_degrees(graph)
     return graph
