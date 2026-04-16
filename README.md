@@ -376,13 +376,21 @@ auto-generated release notes.
 
 ## PyPI (optional)
 
-The distribution name in `pyproject.toml` is `roadgraph-builder`. Publishing is manual unless you add your own automation:
+The distribution name in `pyproject.toml` is `roadgraph-builder`.
+
+### Manual publish
 
 1. Create a [PyPI](https://pypi.org/) account and an **API token** with upload permission for this project.
 2. Install build tools: `python -m pip install build twine`.
 3. From a clean checkout: `python -m build` then `twine upload dist/*` (use API token when prompted).
 
-For hands-off uploads from GitHub, configure [Trusted Publishers](https://docs.pypi.org/trusted-publishers/) or a `PYPI_API_TOKEN` secret and a workflow in your fork—this repository does not ship token-based publish secrets.
+### Workflow scaffold (Trusted Publisher, no secrets)
+
+[`.github/workflows/pypi.yml`](.github/workflows/pypi.yml) is a `workflow_dispatch`-only
+scaffold that builds sdist + wheel and publishes via [`pypa/gh-action-pypi-publish`](https://github.com/pypa/gh-action-pypi-publish).
+To enable, configure [Trusted Publishers](https://docs.pypi.org/trusted-publishers/) on
+the PyPI project (`workflow: pypi.yml`, `environment: pypi`) and add a matching
+GitHub Environment. No tokens live in this repository.
 
 ## License
 

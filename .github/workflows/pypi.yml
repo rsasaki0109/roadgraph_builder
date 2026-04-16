@@ -1,0 +1,77 @@
+# Manual PyPI publish for `roadgraph-builder`.
+#
+# Trigger: workflow_dispatch only (no secret tokens are wired in this repo).
+#
+# Trusted Publishers must be configured on PyPI before this will succeed:
+#   https://docs.pypi.org/trusted-publishers/
+# In the roadgraph-builder PyPI project, add a "Pending Publisher" entry with:
+#   owner:           <github-owner>
+#   repository:      roadgraph_builder
+#   workflow:        pypi.yml
+#   environment:     pypi
+# Then, in this repo's settings, create a GitHub Environment named `pypi`
+# (no additional secrets needed). This workflow will exchange the runner's
+# OIDC token for a short-lived PyPI upload token at publish time.
+name: PyPI publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      repository:
+        description: "Which index to publish to"
+        type: choice
+        options:
+          - pypi
+          - testpypi
+        default: pypi
+
+permissions:
+  contents: read
+  id-token: write  # required for Trusted Publisher OIDC exchange
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install build tooling
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install build
+
+      - name: Build sdist and wheel
+        run: python -m build
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/*
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.repository }}
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - name: Publish to PyPI
+        if: ${{ inputs.repository == 'pypi' }}
+        uses: pypa/gh-action-pypi-publish@release/v1
+
+      - name: Publish to TestPyPI
+        if: ${{ inputs.repository == 'testpypi' }}
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
