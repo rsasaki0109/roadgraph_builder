@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`route` CLI + `roadgraph_builder.routing`** — undirected Dijkstra shortest path across the graph by edge polyline length. Usage: `roadgraph_builder route PATH.json FROM_NODE TO_NODE` prints `{from_node, to_node, total_length_m, edge_sequence, node_sequence}` as JSON. Unknown node ids exit 1 with a helpful message; disjoint components raise `ValueError`. Turn restrictions in `nav/sd_nav.json` are intentionally not applied (quick reachability, not legal routing).
 - **LAZ decoding via optional `[laz]` extra** — `pip install 'roadgraph-builder[laz]'` pulls in `laspy[lazrs]`. `load_points_xy_from_las()` (and `fuse-lidar` / `export-bundle --lidar-points`) now route `.laz` through `laspy.read` when the extra is installed, otherwise raise a clear `ImportError` pointing at the install command. Uncompressed `.las` still works without the extra.
 
 ### Changed

@@ -34,6 +34,7 @@ from roadgraph_builder.pipeline.build_graph import (
     build_graph_from_csv,
     build_graph_from_trajectory,
 )
+from roadgraph_builder.routing.shortest_path import shortest_path
 from roadgraph_builder.viz.svg_export import write_trajectory_graph_svg
 
 
@@ -170,6 +171,14 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Print LAS public-header summary (version, point count, bbox, scale) as JSON.",
     )
     ilas.add_argument("input_las", help="Path to a .las file (public header is read; point records untouched).")
+
+    rt = sub.add_parser(
+        "route",
+        help="Undirected Dijkstra shortest path between two node ids in a road graph JSON.",
+    )
+    rt.add_argument("input_json", help="Road graph JSON (e.g. sim/road_graph.json from export-bundle).")
+    rt.add_argument("from_node", help="Source node id (e.g. n0).")
+    rt.add_argument("to_node", help="Destination node id (e.g. n3).")
 
     fuse = sub.add_parser(
         "fuse-lidar",
@@ -401,6 +410,30 @@ def main(argv: list[str] | None = None) -> int:
             SDToHDConfig(lane_width_m=args.lane_width_m),
         )
         export_graph_json(graph, args.output_json)
+        return 0
+    if args.command == "route":
+        graph = _cli_load_graph(args.input_json)
+        try:
+            route = shortest_path(graph, args.from_node, args.to_node)
+        except KeyError as e:
+            print(f"{args.input_json}: {e.args[0]}", file=sys.stderr)
+            return 1
+        except ValueError as e:
+            print(f"{args.input_json}: {e}", file=sys.stderr)
+            return 1
+        print(
+            json.dumps(
+                {
+                    "from_node": route.from_node,
+                    "to_node": route.to_node,
+                    "total_length_m": route.total_length_m,
+                    "edge_sequence": route.edge_sequence,
+                    "node_sequence": route.node_sequence,
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
         return 0
     if args.command == "inspect-lidar":
         p = Path(args.input_las)

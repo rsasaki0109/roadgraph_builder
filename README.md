@@ -265,6 +265,17 @@ roadgraph_builder inspect-lidar examples/sample_lidar.las
 
 Edges with fewer than two accepted points in total are unchanged. Tune `--max-dist-m` for your cloud density.
 
+### Shortest path (routing)
+
+Undirected Dijkstra over centerline lengths. Turn restrictions in `nav/sd_nav.json` are **not** applied — this is a quick reachability helper, not a legal routing engine.
+
+```bash
+roadgraph_builder route examples/frozen_bundle/sim/road_graph.json n0 n1
+# => {"from_node":"n0","to_node":"n1","total_length_m":15.02,"edge_sequence":["e0"],"node_sequence":["n0","n1"]}
+```
+
+Exits with code 1 on unknown node ids or disjoint components.
+
 ### Export OSM / Lanelet2 tooling
 
 Writes **OSM XML 0.6** (nodes, ways, relations) in **WGS84** using the same local tangent-plane origin as `export_map_geojson`. Ways use `roadgraph:*`; edges with **both** left and right `hd.lane_boundaries` get a **`type=lanelet`** relation (`left` / `right` members, optional `centerline`).
