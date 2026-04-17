@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - **CI Node.js 24 opt-in** — every workflow sets `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true` ahead of the GitHub runner switch on 2026-06-02, suppressing the deprecation warning from `actions/checkout@v4` and `actions/setup-python@v5`.
+- **`doctor` self-check expanded** — checks now cover the full example tree (`turn_restrictions_sample.json`, `sample_lidar.las`, `frozen_bundle/manifest.json`, `build_release_bundle.sh`), loads every shipped JSON Schema from the package resources, and reads the bundled LAS header. Missing example files remain non-fatal, but schema-load / LAS-header failures return exit 1.
 
 ### Fixed
 
