@@ -36,6 +36,7 @@ from roadgraph_builder.pipeline.build_graph import (
 )
 from roadgraph_builder.core.graph.stats import graph_stats, junction_stats
 from roadgraph_builder.routing.geojson_export import write_route_geojson
+from roadgraph_builder.routing.nearest import nearest_node
 from roadgraph_builder.routing.shortest_path import shortest_path
 from roadgraph_builder.viz.svg_export import write_trajectory_graph_svg
 
@@ -174,13 +175,60 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     ilas.add_argument("input_las", help="Path to a .las file (public header is read; point records untouched).")
 
+    nn = sub.add_parser(
+        "nearest-node",
+        help="Find the graph node nearest to a query point (lat/lon or meter-frame x/y).",
+    )
+    nn.add_argument("input_json", help="Road graph JSON.")
+    nn_group = nn.add_mutually_exclusive_group(required=True)
+    nn_group.add_argument(
+        "--latlon",
+        nargs=2,
+        type=float,
+        metavar=("LAT", "LON"),
+        help="WGS84 query; needs --origin-lat/--origin-lon or metadata.map_origin.",
+    )
+    nn_group.add_argument(
+        "--xy",
+        nargs=2,
+        type=float,
+        metavar=("X_M", "Y_M"),
+        help="Meter-frame query (same frame as the graph).",
+    )
+    nn.add_argument("--origin-lat", type=float, default=None, metavar="DEG")
+    nn.add_argument("--origin-lon", type=float, default=None, metavar="DEG")
+
     rt = sub.add_parser(
         "route",
-        help="Dijkstra shortest path between two node ids (optional turn_restrictions).",
+        help="Dijkstra shortest path between two nodes (by id or by lat/lon; optional turn_restrictions).",
     )
     rt.add_argument("input_json", help="Road graph JSON (e.g. sim/road_graph.json from export-bundle).")
-    rt.add_argument("from_node", help="Source node id (e.g. n0).")
-    rt.add_argument("to_node", help="Destination node id (e.g. n3).")
+    rt.add_argument(
+        "from_node",
+        nargs="?",
+        help="Source node id (e.g. n0). Omit when using --from-latlon.",
+    )
+    rt.add_argument(
+        "to_node",
+        nargs="?",
+        help="Destination node id (e.g. n3). Omit when using --to-latlon.",
+    )
+    rt.add_argument(
+        "--from-latlon",
+        nargs=2,
+        type=float,
+        default=None,
+        metavar=("LAT", "LON"),
+        help="Snap the source to the node nearest this WGS84 coordinate.",
+    )
+    rt.add_argument(
+        "--to-latlon",
+        nargs=2,
+        type=float,
+        default=None,
+        metavar=("LAT", "LON"),
+        help="Snap the destination to the node nearest this WGS84 coordinate.",
+    )
     rt.add_argument(
         "--turn-restrictions-json",
         type=str,
@@ -461,6 +509,34 @@ def main(argv: list[str] | None = None) -> int:
         )
         export_graph_json(graph, args.output_json)
         return 0
+    if args.command == "nearest-node":
+        graph = _cli_load_graph(args.input_json)
+        try:
+            if args.latlon is not None:
+                result = nearest_node(
+                    graph,
+                    lat=args.latlon[0],
+                    lon=args.latlon[1],
+                    origin_lat=args.origin_lat,
+                    origin_lon=args.origin_lon,
+                )
+            else:
+                result = nearest_node(graph, x_m=args.xy[0], y_m=args.xy[1])
+        except ValueError as e:
+            print(f"{args.input_json}: {e}", file=sys.stderr)
+            return 1
+        print(
+            json.dumps(
+                {
+                    "node_id": result.node_id,
+                    "distance_m": result.distance_m,
+                    "query_xy_m": list(result.query_xy_m),
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        return 0
     if args.command == "stats":
         graph = _cli_load_graph(args.input_json)
         doc = {
@@ -473,6 +549,39 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.command == "route":
         graph = _cli_load_graph(args.input_json)
+
+        def _snap(latlon, positional):
+            if latlon is not None and positional is not None:
+                print("route: pass either a node id or --*-latlon, not both.", file=sys.stderr)
+                return None, None
+            if latlon is not None:
+                try:
+                    result = nearest_node(
+                        graph,
+                        lat=latlon[0],
+                        lon=latlon[1],
+                        origin_lat=args.origin_lat,
+                        origin_lon=args.origin_lon,
+                    )
+                except ValueError as e:
+                    print(f"{args.input_json}: {e}", file=sys.stderr)
+                    return None, None
+                return result.node_id, {
+                    "requested_lat": latlon[0],
+                    "requested_lon": latlon[1],
+                    "distance_m": result.distance_m,
+                }
+            return positional, None
+
+        from_id, from_snap = _snap(args.from_latlon, args.from_node)
+        to_id, to_snap = _snap(args.to_latlon, args.to_node)
+        if from_id is None or to_id is None:
+            if args.from_latlon is None and args.from_node is None:
+                print("route: provide either from_node positional or --from-latlon.", file=sys.stderr)
+            if args.to_latlon is None and args.to_node is None:
+                print("route: provide either to_node positional or --to-latlon.", file=sys.stderr)
+            return 1
+
         restrictions: list[dict] = []
         if args.turn_restrictions_json:
             tr_doc = _load_json_for_cli(args.turn_restrictions_json)
@@ -484,7 +593,7 @@ def main(argv: list[str] | None = None) -> int:
                 restrictions = [r for r in tr_doc if isinstance(r, dict)]
         try:
             route = shortest_path(
-                graph, args.from_node, args.to_node, turn_restrictions=restrictions or None
+                graph, from_id, to_id, turn_restrictions=restrictions or None
             )
         except KeyError as e:
             print(f"{args.input_json}: {e.args[0]}", file=sys.stderr)
@@ -516,6 +625,8 @@ def main(argv: list[str] | None = None) -> int:
                 {
                     "from_node": route.from_node,
                     "to_node": route.to_node,
+                    "snapped_from": from_snap,
+                    "snapped_to": to_snap,
                     "total_length_m": route.total_length_m,
                     "edge_sequence": route.edge_sequence,
                     "edge_directions": route.edge_directions,

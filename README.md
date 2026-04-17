@@ -273,6 +273,11 @@ Edges with fewer than two accepted points in total are unchanged. Tune `--max-di
 Dijkstra over centerline lengths, with optional **turn restrictions**. By default edges are traversable in both directions; with `--turn-restrictions-json` the search respects `no_left_turn` / `no_right_turn` / `no_straight` / `no_u_turn` (forbidden transitions) and `only_left` / `only_right` / `only_straight` (whitelisted transitions) at the specified junction / incoming approach.
 
 ```bash
+# Find the nearest graph node to a coordinate
+roadgraph_builder nearest-node examples/frozen_bundle/sim/road_graph.json \
+  --latlon 52.52 13.4054
+# => {"node_id":"n1","distance_m":1.7,"query_xy_m":[...]}
+
 # Plain reachability
 roadgraph_builder route examples/frozen_bundle/sim/road_graph.json n0 n1
 # => {"from_node":"n0","to_node":"n1","total_length_m":15.02,"edge_sequence":["e0"],"edge_directions":["forward"],"node_sequence":["n0","n1"],"applied_restrictions":0}
@@ -285,6 +290,11 @@ roadgraph_builder route examples/frozen_bundle/sim/road_graph.json n0 n1 \
 roadgraph_builder route examples/frozen_bundle/sim/road_graph.json n0 n1 \
   --output /tmp/route.geojson
 # Origin is read from metadata.map_origin; pass --origin-lat / --origin-lon to override.
+
+# Route by lat/lon — auto-snap to the nearest graph nodes
+roadgraph_builder route examples/frozen_bundle/sim/road_graph.json \
+  --from-latlon 52.520 13.4050 --to-latlon 52.520 13.4056
+# Output includes snapped_from / snapped_to with the distance from the query point to the matched node.
 ```
 
 Exits with code 1 on unknown node ids, disjoint components, or when the restrictions make the pair unreachable.
