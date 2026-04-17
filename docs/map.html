@@ -157,7 +157,11 @@
           onEachFeature: (f, layer) => {
             const p = f.properties || {};
             if (p.kind === "node" && p.node_id) {
-              layer.bindPopup(String(p.node_id) + (p.degree != null ? "<br>degree: " + p.degree : ""));
+              let txt = String(p.node_id);
+              if (p.degree != null) txt += "<br>degree: " + p.degree;
+              if (p.junction_hint) txt += "<br>hint: " + p.junction_hint;
+              if (p.junction_type) txt += "<br>type: " + p.junction_type;
+              layer.bindPopup(txt);
             } else if (p.kind === "centerline" && p.edge_id) {
               let txt = String(p.edge_id);
               if (p.semantic_summary) {

@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **PyPI workflow scaffold** — `.github/workflows/pypi.yml` (workflow_dispatch only, PyPI / TestPyPI) builds sdist + wheel and publishes via `pypa/gh-action-pypi-publish`. Wired for Trusted Publisher OIDC; no repository secrets required. Enabling requires configuring Trusted Publishers on PyPI and a matching GitHub Environment.
 - **`junction_hint: "self_loop"`** — nodes whose only incident edge is a legitimate self-loop (round trip / block circuit) are now classified as `self_loop` instead of `through_or_corner`, making large loops discoverable from topology alone.
 - **`junction_type` classification** — `annotate_junction_types()` tags every `multi_branch` node with a finer geometry-derived label (`t_junction`, `y_junction`, `crossroads`, `x_junction`, `complex_junction`) based on pairwise incident-edge tangent angles. Runs automatically in `build`; non-multi-branch nodes are untouched.
+- **Bundle manifest junctions** — `export-bundle`'s `manifest.json` now carries a `junctions` block with `total_nodes`, a `junction_hint` count, and a `multi_branch_types` breakdown; the same block is mirrored into `graph.metadata.export_bundle.junctions`. `docs/map.html` popups show `junction_hint` / `junction_type` for nodes.
 
 ### Fixed
 

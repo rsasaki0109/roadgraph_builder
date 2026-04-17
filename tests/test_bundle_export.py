@@ -55,3 +55,8 @@ def test_export_map_bundle_writes_nav_sim_lanelet(tmp_path: Path):
     validate_sd_nav_document(nav)
     rg = json.loads((tmp_path / "sim" / "road_graph.json").read_text(encoding="utf-8"))
     validate_road_graph_document(rg)
+    junctions = man["junctions"]
+    assert junctions["total_nodes"] == len(rg["nodes"])
+    assert sum(junctions["hints"].values()) == junctions["total_nodes"]
+    if junctions["multi_branch_types"]:
+        assert sum(junctions["multi_branch_types"].values()) == junctions["hints"].get("multi_branch", 0)

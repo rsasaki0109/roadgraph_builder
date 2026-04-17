@@ -121,6 +121,16 @@ def export_map_bundle(
     merged_restrictions = merge_turn_restrictions(manual_restrictions, camera_restrictions)
     source_counts = Counter(entry["source"] for entry in merged_restrictions)
 
+    junction_hint_counts: Counter[str] = Counter()
+    junction_type_counts: Counter[str] = Counter()
+    for n in graph.nodes:
+        hint = n.attributes.get("junction_hint")
+        if isinstance(hint, str):
+            junction_hint_counts[hint] += 1
+        jtype = n.attributes.get("junction_type")
+        if isinstance(jtype, str):
+            junction_type_counts[jtype] += 1
+
     graph.metadata = {
         **graph.metadata,
         "map_origin": {"lat0": origin_lat, "lon0": origin_lon},
@@ -131,6 +141,11 @@ def export_map_bundle(
             "turn_restrictions": {
                 "count": len(merged_restrictions),
                 "sources": dict(sorted(source_counts.items())),
+            },
+            "junctions": {
+                "total_nodes": len(graph.nodes),
+                "hints": dict(sorted(junction_hint_counts.items())),
+                "multi_branch_types": dict(sorted(junction_type_counts.items())),
             },
         },
     }
@@ -168,6 +183,11 @@ def export_map_bundle(
         "detections_json": Path(detections_json).name if det_path and det_path.is_file() else None,
         "turn_restrictions_json": Path(turn_restrictions_json).name if tr_path and tr_path.is_file() else None,
         "turn_restrictions_count": len(merged_restrictions),
+        "junctions": {
+            "total_nodes": len(graph.nodes),
+            "hints": dict(sorted(junction_hint_counts.items())),
+            "multi_branch_types": dict(sorted(junction_type_counts.items())),
+        },
         "outputs": {
             "nav_sd_nav": "nav/sd_nav.json",
             "sim_road_graph": "sim/road_graph.json",

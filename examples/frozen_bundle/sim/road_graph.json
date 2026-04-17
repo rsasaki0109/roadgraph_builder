@@ -258,6 +258,13 @@
         "sources": {
           "manual": 2
         }
+      },
+      "junctions": {
+        "total_nodes": 4,
+        "hints": {
+          "dead_end": 4
+        },
+        "multi_branch_types": {}
       }
     }
   }

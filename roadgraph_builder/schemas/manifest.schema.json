@@ -41,6 +41,22 @@
     "detections_json": { "type": ["string", "null"] },
     "turn_restrictions_json": { "type": ["string", "null"] },
     "turn_restrictions_count": { "type": "integer", "minimum": 0 },
+    "junctions": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["total_nodes", "hints", "multi_branch_types"],
+      "properties": {
+        "total_nodes": { "type": "integer", "minimum": 0 },
+        "hints": {
+          "type": "object",
+          "additionalProperties": { "type": "integer", "minimum": 0 }
+        },
+        "multi_branch_types": {
+          "type": "object",
+          "additionalProperties": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
     "outputs": {
       "type": "object",
       "additionalProperties": false,
