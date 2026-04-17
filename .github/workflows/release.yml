@@ -8,6 +8,10 @@ on:
     tags:
       - "v*"
 
+# Opt into Node.js 24 for JavaScript actions ahead of the 2026-06-02 switch.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 permissions:
   contents: write
 

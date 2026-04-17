@@ -12,6 +12,7 @@ fi
 OUT="${1:-/tmp/roadgraph_demo_bundle}"
 "$RB" validate-detections examples/camera_detections_sample.json
 "$RB" validate-turn-restrictions examples/turn_restrictions_sample.json
+"$RB" inspect-lidar examples/sample_lidar.las >/dev/null
 "$RB" export-bundle examples/sample_trajectory.csv "$OUT" \
   --origin-json examples/toy_map_origin.json \
   --lane-width-m 3.5 \

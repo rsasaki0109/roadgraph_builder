@@ -5,6 +5,13 @@ on:
     branches: [main, master]
   pull_request:
 
+# Opt into Node.js 24 for JavaScript actions ahead of the 2026-06-02
+# GitHub Actions runner switch. actions/checkout@v4 and
+# actions/setup-python@v5 currently run on Node 20 and emit deprecation
+# warnings unless this flag is set.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -37,6 +44,9 @@ jobs:
 
       - name: Validate example turn restrictions JSON
         run: roadgraph_builder validate-turn-restrictions examples/turn_restrictions_sample.json
+
+      - name: Inspect example LAS header
+        run: roadgraph_builder inspect-lidar examples/sample_lidar.las
 
       - name: Validate bundled graph JSON (GitHub Pages assets)
         run: |

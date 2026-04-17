@@ -16,6 +16,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Bundle manifest junctions** — `export-bundle`'s `manifest.json` now carries a `junctions` block with `total_nodes`, a `junction_hint` count, and a `multi_branch_types` breakdown; the same block is mirrored into `graph.metadata.export_bundle.junctions`. `docs/map.html` popups show `junction_hint` / `junction_type` for nodes.
 - **Bundle manifest graph_stats** — `manifest.json` adds `graph_stats` with `edge_count`, `node_count`, `edge_length` (min/median/max/total in meters), `bbox_m`, and `bbox_wgs84_deg`; consumers can size / locate the graph without parsing `sim/road_graph.json`. Validated by `manifest.schema.json`.
 - **LAS public-header reader** — `read_las_header()` (and new `LASHeader` dataclass) parses version, point count (including the LAS 1.4 extended 64-bit field), point data format / record length, scale, offset, and bbox from the fixed LAS preamble without requiring `laspy` or touching point records. Supports LAS 1.0 – 1.4; LAZ decoding still out of scope. New CLI `inspect-lidar PATH.las` prints the summary as JSON.
+- **Sample LAS artefact** — `scripts/make_sample_las.py` and committed `examples/sample_lidar.las` (52 points, ~1.3 KB). `scripts/run_demo_bundle.sh` and CI now run `inspect-lidar` on the sample so LAS parsing stays exercised.
+
+### Changed
+
+- **CI Node.js 24 opt-in** — every workflow sets `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true` ahead of the GitHub runner switch on 2026-06-02, suppressing the deprecation warning from `actions/checkout@v4` and `actions/setup-python@v5`.
 
 ### Fixed
 
