@@ -17,6 +17,7 @@ from roadgraph_builder.io.export.json_loader import load_graph_json
 from roadgraph_builder.io.camera.detections import apply_camera_detections_to_graph, load_camera_detections_json
 from roadgraph_builder.io.export.bundle import export_map_bundle
 from roadgraph_builder.io.export.lanelet2 import export_lanelet2
+from roadgraph_builder.io.lidar.las import read_las_header
 from roadgraph_builder.io.lidar.points import load_points_xy_csv
 from roadgraph_builder.io.trajectory.loader import load_trajectory_csv
 from roadgraph_builder.cli.doctor import run_doctor
@@ -163,6 +164,12 @@ def _build_parser() -> argparse.ArgumentParser:
         metavar="M",
         help="Lane width in meters: fill left/right boundaries by offsetting edge centerlines (HD-lite).",
     )
+
+    ilas = sub.add_parser(
+        "inspect-lidar",
+        help="Print LAS public-header summary (version, point count, bbox, scale) as JSON.",
+    )
+    ilas.add_argument("input_las", help="Path to a .las file (public header is read; point records untouched).")
 
     fuse = sub.add_parser(
         "fuse-lidar",
@@ -370,6 +377,18 @@ def main(argv: list[str] | None = None) -> int:
             SDToHDConfig(lane_width_m=args.lane_width_m),
         )
         export_graph_json(graph, args.output_json)
+        return 0
+    if args.command == "inspect-lidar":
+        p = Path(args.input_las)
+        if not p.is_file():
+            print(f"File not found: {p}", file=sys.stderr)
+            return 1
+        try:
+            header = read_las_header(p)
+        except ValueError as e:
+            print(f"{p}: {e}", file=sys.stderr)
+            return 1
+        print(json.dumps(header.to_summary(), ensure_ascii=False, indent=2))
         return 0
     if args.command == "fuse-lidar":
         graph = _cli_load_graph(args.input_json)
