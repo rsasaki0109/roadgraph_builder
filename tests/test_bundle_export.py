@@ -60,3 +60,10 @@ def test_export_map_bundle_writes_nav_sim_lanelet(tmp_path: Path):
     assert sum(junctions["hints"].values()) == junctions["total_nodes"]
     if junctions["multi_branch_types"]:
         assert sum(junctions["multi_branch_types"].values()) == junctions["hints"].get("multi_branch", 0)
+    gs = man["graph_stats"]
+    assert gs["edge_count"] == len(rg["edges"])
+    assert gs["node_count"] == len(rg["nodes"])
+    assert gs["edge_length"]["min_m"] <= gs["edge_length"]["median_m"] <= gs["edge_length"]["max_m"]
+    assert gs["bbox_m"]["x_min_m"] <= gs["bbox_m"]["x_max_m"]
+    assert gs["bbox_m"]["y_min_m"] <= gs["bbox_m"]["y_max_m"]
+    assert gs["bbox_wgs84_deg"]["sw_lon"] <= gs["bbox_wgs84_deg"]["ne_lon"]

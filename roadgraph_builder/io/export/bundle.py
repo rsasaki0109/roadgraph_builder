@@ -25,6 +25,69 @@ from roadgraph_builder.navigation.turn_restrictions import (
     merge_turn_restrictions,
     turn_restrictions_from_camera_detections,
 )
+from roadgraph_builder.utils.geo import meters_to_lonlat
+
+
+def _graph_stats(graph: Graph, origin_lat: float, origin_lon: float) -> dict[str, Any]:
+    """Summary that downstream tools can read without parsing the full graph."""
+    edge_count = len(graph.edges)
+    lengths: list[float] = []
+    for e in graph.edges:
+        pl = e.polyline
+        total = 0.0
+        for i in range(len(pl) - 1):
+            dx = float(pl[i + 1][0]) - float(pl[i][0])
+            dy = float(pl[i + 1][1]) - float(pl[i][1])
+            total += math.hypot(dx, dy)
+        lengths.append(total)
+
+    if lengths:
+        srt = sorted(lengths)
+        mid = len(srt) // 2
+        if len(srt) % 2:
+            median_len = float(srt[mid])
+        else:
+            median_len = 0.5 * float(srt[mid - 1] + srt[mid])
+        edge_length = {
+            "min_m": float(min(lengths)),
+            "median_m": median_len,
+            "max_m": float(max(lengths)),
+            "total_m": float(sum(lengths)),
+        }
+    else:
+        edge_length = {"min_m": 0.0, "median_m": 0.0, "max_m": 0.0, "total_m": 0.0}
+
+    xs: list[float] = []
+    ys: list[float] = []
+    for n in graph.nodes:
+        xs.append(float(n.position[0]))
+        ys.append(float(n.position[1]))
+    if xs and ys:
+        bbox_m = {
+            "x_min_m": min(xs),
+            "y_min_m": min(ys),
+            "x_max_m": max(xs),
+            "y_max_m": max(ys),
+        }
+        sw_lon, sw_lat = meters_to_lonlat(bbox_m["x_min_m"], bbox_m["y_min_m"], origin_lat, origin_lon)
+        ne_lon, ne_lat = meters_to_lonlat(bbox_m["x_max_m"], bbox_m["y_max_m"], origin_lat, origin_lon)
+        bbox_wgs84 = {
+            "sw_lon": sw_lon,
+            "sw_lat": sw_lat,
+            "ne_lon": ne_lon,
+            "ne_lat": ne_lat,
+        }
+    else:
+        bbox_m = {"x_min_m": 0.0, "y_min_m": 0.0, "x_max_m": 0.0, "y_max_m": 0.0}
+        bbox_wgs84 = {"sw_lon": origin_lon, "sw_lat": origin_lat, "ne_lon": origin_lon, "ne_lat": origin_lat}
+
+    return {
+        "edge_count": edge_count,
+        "node_count": len(graph.nodes),
+        "edge_length": edge_length,
+        "bbox_m": bbox_m,
+        "bbox_wgs84_deg": bbox_wgs84,
+    }
 
 
 def build_sd_nav_document(
@@ -188,6 +251,7 @@ def export_map_bundle(
             "hints": dict(sorted(junction_hint_counts.items())),
             "multi_branch_types": dict(sorted(junction_type_counts.items())),
         },
+        "graph_stats": _graph_stats(graph, origin_lat, origin_lon),
         "outputs": {
             "nav_sd_nav": "nav/sd_nav.json",
             "sim_road_graph": "sim/road_graph.json",

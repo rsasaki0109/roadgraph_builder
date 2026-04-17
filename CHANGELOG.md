@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`junction_hint: "self_loop"`** — nodes whose only incident edge is a legitimate self-loop (round trip / block circuit) are now classified as `self_loop` instead of `through_or_corner`, making large loops discoverable from topology alone.
 - **`junction_type` classification** — `annotate_junction_types()` tags every `multi_branch` node with a finer geometry-derived label (`t_junction`, `y_junction`, `crossroads`, `x_junction`, `complex_junction`) based on pairwise incident-edge tangent angles. Runs automatically in `build`; non-multi-branch nodes are untouched.
 - **Bundle manifest junctions** — `export-bundle`'s `manifest.json` now carries a `junctions` block with `total_nodes`, a `junction_hint` count, and a `multi_branch_types` breakdown; the same block is mirrored into `graph.metadata.export_bundle.junctions`. `docs/map.html` popups show `junction_hint` / `junction_type` for nodes.
+- **Bundle manifest graph_stats** — `manifest.json` adds `graph_stats` with `edge_count`, `node_count`, `edge_length` (min/median/max/total in meters), `bbox_m`, and `bbox_wgs84_deg`; consumers can size / locate the graph without parsing `sim/road_graph.json`. Validated by `manifest.schema.json`.
 
 ### Fixed
 

@@ -57,6 +57,45 @@
         }
       }
     },
+    "graph_stats": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["edge_count", "node_count", "edge_length", "bbox_m", "bbox_wgs84_deg"],
+      "properties": {
+        "edge_count": { "type": "integer", "minimum": 0 },
+        "node_count": { "type": "integer", "minimum": 0 },
+        "edge_length": {
+          "type": "object",
+          "required": ["min_m", "median_m", "max_m", "total_m"],
+          "properties": {
+            "min_m": { "type": "number", "minimum": 0 },
+            "median_m": { "type": "number", "minimum": 0 },
+            "max_m": { "type": "number", "minimum": 0 },
+            "total_m": { "type": "number", "minimum": 0 }
+          }
+        },
+        "bbox_m": {
+          "type": "object",
+          "required": ["x_min_m", "y_min_m", "x_max_m", "y_max_m"],
+          "properties": {
+            "x_min_m": { "type": "number" },
+            "y_min_m": { "type": "number" },
+            "x_max_m": { "type": "number" },
+            "y_max_m": { "type": "number" }
+          }
+        },
+        "bbox_wgs84_deg": {
+          "type": "object",
+          "required": ["sw_lon", "sw_lat", "ne_lon", "ne_lat"],
+          "properties": {
+            "sw_lon": { "type": "number" },
+            "sw_lat": { "type": "number" },
+            "ne_lon": { "type": "number" },
+            "ne_lat": { "type": "number" }
+          }
+        }
+      }
+    },
     "outputs": {
       "type": "object",
       "additionalProperties": false,
