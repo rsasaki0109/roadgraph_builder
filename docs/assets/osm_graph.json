@@ -1574,6 +1574,11 @@
         "fusion_refine",
         "lanelet2_export"
       ],
+      "navigation_hints": {
+        "sd_nav_maneuvers": "topology_geometry_v1",
+        "reference": "nav/sd_nav.json",
+        "description": "Coarse allowed_maneuvers at digitized end nodes; pair with HD lane boundaries when present."
+      },
       "notes": "Centerline offsets by half lane width; not survey-grade.",
       "lane_width_m": 3.5
     },
