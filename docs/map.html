@@ -105,7 +105,10 @@
           '<div class="lg"><span class="sw" style="background:#ea580c"></span> Centerline</div>' +
           '<div class="lg"><span class="sw" style="background:#16a34a"></span> Lane boundary (L)</div>' +
           '<div class="lg"><span class="sw" style="background:#9333ea"></span> Lane boundary (R)</div>' +
-          '<div class="lg"><span class="sw dot" style="background:#b91c1c;border:2px solid #fff;box-sizing:border-box"></span> Graph node</div>';
+          '<div class="lg"><span class="sw" style="background:#facc15"></span> Route (Dijkstra)</div>' +
+          '<div class="lg"><span class="sw dot" style="background:#b91c1c;border:2px solid #fff;box-sizing:border-box"></span> Graph node</div>' +
+          '<div class="lg"><span class="sw dot" style="background:#10b981;border:2px solid #fff;box-sizing:border-box"></span> Route start</div>' +
+          '<div class="lg"><span class="sw dot" style="background:#ef4444;border:2px solid #fff;box-sizing:border-box"></span> Route end</div>';
         L.DomEvent.disableClickPropagation(div);
         return div;
       };
@@ -125,11 +128,30 @@
         if (k === "lane_boundary_right") {
           return { color: "#9333ea", weight: 3, opacity: 0.88, dashArray: "4 6" };
         }
+        if (k === "route") {
+          return { color: "#facc15", weight: 7, opacity: 0.92 };
+        }
+        if (k === "route_edge") {
+          // Per-edge features are hidden (merged route carries geometry); keep
+          // the popup wiring only by making them invisible.
+          return { color: "#facc15", weight: 0, opacity: 0 };
+        }
         return { color: "#64748b", weight: 2 };
       }
 
       function pointLayer(f, latlng) {
-        if (f.properties && f.properties.kind === "node") {
+        const k = f.properties && f.properties.kind;
+        if (k === "route_start" || k === "route_end") {
+          return L.circleMarker(latlng, {
+            radius: 8,
+            fillColor: k === "route_start" ? "#10b981" : "#ef4444",
+            color: "#fff",
+            weight: 3,
+            opacity: 1,
+            fillOpacity: 1,
+          });
+        }
+        if (k === "node") {
           return L.circleMarker(latlng, {
             radius: 6,
             fillColor: "#b91c1c",
@@ -153,6 +175,41 @@
         osm: "assets/map_osm.geojson",
         toy: "assets/map_toy.geojson",
       };
+      // Optional route overlay per dataset; missing entries simply skip the overlay.
+      const ROUTE_URLS = {
+        paris: "assets/route_paris.geojson",
+      };
+
+      function bindCommonPopups(f, layer) {
+        const p = f.properties || {};
+        if (p.kind === "node" && p.node_id) {
+          let txt = String(p.node_id);
+          if (p.degree != null) txt += "<br>degree: " + p.degree;
+          if (p.junction_hint) txt += "<br>hint: " + p.junction_hint;
+          if (p.junction_type) txt += "<br>type: " + p.junction_type;
+          layer.bindPopup(txt);
+        } else if (p.kind === "centerline" && p.edge_id) {
+          let txt = String(p.edge_id);
+          if (p.semantic_summary) {
+            txt += "<br/>" + String(p.semantic_summary);
+          }
+          layer.bindPopup(txt);
+        } else if (p.kind === "route") {
+          let txt =
+            "route " + String(p.from_node) + " → " + String(p.to_node);
+          if (p.total_length_m != null) {
+            txt += "<br>" + Number(p.total_length_m).toFixed(1) + " m";
+          }
+          if (p.edge_count != null) {
+            txt += "<br>" + p.edge_count + " edges";
+          }
+          layer.bindPopup(txt);
+        } else if (p.kind === "route_start" || p.kind === "route_end") {
+          layer.bindPopup(
+            (p.kind === "route_start" ? "start: " : "end: ") + String(p.node_id)
+          );
+        }
+      }
 
       async function show(which) {
         layerGroup.clearLayers();
@@ -161,24 +218,26 @@
         const gj = L.geoJSON(data, {
           style: styleLine,
           pointToLayer: pointLayer,
-          onEachFeature: (f, layer) => {
-            const p = f.properties || {};
-            if (p.kind === "node" && p.node_id) {
-              let txt = String(p.node_id);
-              if (p.degree != null) txt += "<br>degree: " + p.degree;
-              if (p.junction_hint) txt += "<br>hint: " + p.junction_hint;
-              if (p.junction_type) txt += "<br>type: " + p.junction_type;
-              layer.bindPopup(txt);
-            } else if (p.kind === "centerline" && p.edge_id) {
-              let txt = String(p.edge_id);
-              if (p.semantic_summary) {
-                txt += "<br/>" + String(p.semantic_summary);
-              }
-              layer.bindPopup(txt);
-            }
-          },
+          onEachFeature: bindCommonPopups,
         });
         layerGroup.addLayer(gj);
+
+        const routeUrl = ROUTE_URLS[which];
+        if (routeUrl) {
+          try {
+            const routeData = await loadGeo(routeUrl);
+            const rj = L.geoJSON(routeData, {
+              style: styleLine,
+              pointToLayer: pointLayer,
+              onEachFeature: bindCommonPopups,
+            });
+            layerGroup.addLayer(rj);
+          } catch (err) {
+            // Route overlay is optional; surface in console but do not block.
+            console.warn("route overlay failed:", err);
+          }
+        }
+
         const b = gj.getBounds();
         if (b.isValid()) {
           map.fitBounds(b, { padding: [28, 28], maxZoom: 17 });
