@@ -9,7 +9,7 @@ For centerline-offset lane ribbons without point clouds, see
 """
 
 from roadgraph_builder.io.lidar.fusion import attach_lidar_points_metadata, fuse_lane_boundaries_from_points
-from roadgraph_builder.io.lidar.las import LASHeader, read_las_header
+from roadgraph_builder.io.lidar.las import LASHeader, load_points_xy_from_las, read_las_header
 from roadgraph_builder.io.lidar.loader import load_lidar_placeholder, load_points_xy_csv
 
 __all__ = [
@@ -18,5 +18,6 @@ __all__ = [
     "fuse_lane_boundaries_from_points",
     "load_lidar_placeholder",
     "load_points_xy_csv",
+    "load_points_xy_from_las",
     "read_las_header",
 ]

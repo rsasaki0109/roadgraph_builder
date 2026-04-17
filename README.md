@@ -105,7 +105,7 @@ Use `--lane-width-m 0` to skip HD-lite ribbon offsets. Origin must match your Ge
 | **1. SD seed** | `build` — graph + centerlines from trajectory CSV | **Implemented** |
 | **2. HD envelope** | `enrich` — `metadata.sd_to_hd`, per-edge `attributes.hd` slots | **Implemented** |
 | **3. Boundaries (HD-lite)** | `enrich --lane-width-m M` — centerline ± half width (no LiDAR) | **Implemented** (geometric prior; not survey HD) |
-| **4. Boundaries (sensor)** | `fuse-lidar` — XY points → per-edge binned median boundaries | **Implemented** (simple proximity; not SLAM-grade) |
+| **4. Boundaries (sensor)** | `fuse-lidar` — XY points (CSV or LAS 1.0–1.4) → per-edge binned median boundaries; `inspect-lidar` reports LAS public-header metadata | **Implemented** (simple proximity; not SLAM-grade; LAZ not supported) |
 | **5. Semantics** | `apply-camera` — JSON observations → `hd.semantic_rules`; OSM `speed_limit` + regulatory | **Partial** (precomputed JSON) |
 | **6. Export** | `export-lanelet2` → OSM XML (`roadgraph:*` ways + `type=lanelet` relations when L/R exist) | **Implemented** |
 
@@ -242,12 +242,24 @@ roadgraph_builder validate out_hd_lite.json
 
 ### Fuse LiDAR-style XY points (boundaries)
 
-Given a graph JSON and a two-column **x,y** CSV in the **same meter frame** as the trajectory, assign points to nearby edges and write **left/right** boundary polylines (binned median along the centerline):
+Given a graph JSON and a point set in the **same meter frame** as the trajectory, assign points to nearby edges and write **left/right** boundary polylines (binned median along the centerline). `fuse-lidar` accepts two input shapes and dispatches on the file extension:
+
+- Two-column **x,y** CSV.
+- **LAS 1.0 – 1.4** (uncompressed `.las`) — X/Y are read straight from the public header's point records, scale and offset applied. LAZ is not supported yet.
 
 ```bash
 roadgraph_builder build examples/sample_trajectory.csv out.json
+# text CSV
 roadgraph_builder fuse-lidar out.json examples/sample_lidar_points.csv fused.json --max-dist-m 5 --bins 32
+# LAS (committed sample)
+roadgraph_builder fuse-lidar out.json examples/sample_lidar.las fused_las.json --max-dist-m 5 --bins 16
 roadgraph_builder validate fused.json
+```
+
+Inspect a LAS file's header without touching point records:
+
+```bash
+roadgraph_builder inspect-lidar examples/sample_lidar.las
 ```
 
 Edges with fewer than two accepted points in total are unchanged. Tune `--max-dist-m` for your cloud density.

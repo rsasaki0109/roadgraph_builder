@@ -107,3 +107,58 @@ def test_cli_inspect_lidar_missing_file(tmp_path: Path, capsys):
     assert main(["inspect-lidar", str(missing)]) == 1
     err = capsys.readouterr().err
     assert "File not found" in err
+
+
+def test_load_points_xy_from_las_roundtrip():
+    from roadgraph_builder.io.lidar.las import load_points_xy_from_las
+
+    xy = load_points_xy_from_las("examples/sample_lidar.las")
+    assert xy.shape == (52, 2)
+    assert xy.dtype.name == "float64"
+    assert xy[:, 0].min() == 0.0
+    assert xy[:, 0].max() == 50.0
+    assert xy[:, 1].min() == -1.75
+    assert xy[:, 1].max() == 1.75
+
+
+def test_fuse_lidar_cli_dispatches_by_extension(tmp_path: Path):
+    from roadgraph_builder.cli.main import main
+    from roadgraph_builder.io.export.json_loader import load_graph_json
+    from roadgraph_builder.io.trajectory.loader import load_trajectory_csv
+    from roadgraph_builder.pipeline.build_graph import BuildParams, build_graph_from_trajectory
+    from roadgraph_builder.io.export.json_exporter import export_graph_json
+
+    # Build a small road graph that spans the LAS sample's x-range.
+    traj_csv = tmp_path / "traj.csv"
+    traj_csv.write_text(
+        "timestamp,x,y\n"
+        + "\n".join(f"{i},{float(i)},0.0" for i in range(0, 51, 2))
+        + "\n",
+        encoding="utf-8",
+    )
+    g = build_graph_from_trajectory(load_trajectory_csv(traj_csv), BuildParams())
+    graph_json = tmp_path / "g.json"
+    export_graph_json(g, graph_json)
+
+    out = tmp_path / "g_fused.json"
+    rc = main(
+        [
+            "fuse-lidar",
+            str(graph_json),
+            "examples/sample_lidar.las",
+            str(out),
+            "--max-dist-m",
+            "5.0",
+            "--bins",
+            "16",
+        ]
+    )
+    assert rc == 0
+    fused = load_graph_json(out)
+    # Every edge should now carry left+right boundaries (points bracket the centerline ±1.75 m).
+    assert all(
+        isinstance(e.attributes.get("hd", {}).get("lane_boundaries"), dict)
+        and e.attributes["hd"]["lane_boundaries"].get("left")
+        and e.attributes["hd"]["lane_boundaries"].get("right")
+        for e in fused.edges
+    )

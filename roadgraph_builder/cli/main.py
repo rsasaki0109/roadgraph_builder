@@ -17,7 +17,7 @@ from roadgraph_builder.io.export.json_loader import load_graph_json
 from roadgraph_builder.io.camera.detections import apply_camera_detections_to_graph, load_camera_detections_json
 from roadgraph_builder.io.export.bundle import export_map_bundle
 from roadgraph_builder.io.export.lanelet2 import export_lanelet2
-from roadgraph_builder.io.lidar.las import read_las_header
+from roadgraph_builder.io.lidar.las import load_points_xy_from_las, read_las_header
 from roadgraph_builder.io.lidar.points import load_points_xy_csv
 from roadgraph_builder.io.trajectory.loader import load_trajectory_csv
 from roadgraph_builder.cli.doctor import run_doctor
@@ -173,10 +173,13 @@ def _build_parser() -> argparse.ArgumentParser:
 
     fuse = sub.add_parser(
         "fuse-lidar",
-        help="Fit lane boundaries from a meter-frame XY point CSV (per-edge proximity + binned median).",
+        help="Fit lane boundaries from a meter-frame point set (CSV or LAS) via per-edge proximity + binned median.",
     )
     fuse.add_argument("input_json", help="Road graph JSON")
-    fuse.add_argument("points_csv", help="CSV with x,y columns (same units as graph)")
+    fuse.add_argument(
+        "points_path",
+        help="Point set in graph meters: CSV with x,y columns, or LAS 1.0–1.4 (.las).",
+    )
     fuse.add_argument("output_json", help="Output JSON path")
     fuse.add_argument(
         "--max-dist-m",
@@ -392,10 +395,17 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.command == "fuse-lidar":
         graph = _cli_load_graph(args.input_json)
+        pts_path = Path(args.points_path)
+        if not pts_path.is_file():
+            print(f"File not found: {pts_path}", file=sys.stderr)
+            return 1
         try:
-            pts = load_points_xy_csv(args.points_csv)
-        except FileNotFoundError as e:
-            print(f"File not found: {e.filename}", file=sys.stderr)
+            if pts_path.suffix.lower() == ".las":
+                pts = load_points_xy_from_las(pts_path)
+            else:
+                pts = load_points_xy_csv(pts_path)
+        except ValueError as e:
+            print(f"{pts_path}: {e}", file=sys.stderr)
             return 1
         fuse_lane_boundaries_from_points(
             graph,

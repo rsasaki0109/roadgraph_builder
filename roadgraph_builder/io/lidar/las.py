@@ -16,8 +16,15 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+import numpy as np
+
 
 LAS_SIGNATURE = b"LASF"
+# Point data formats 0–3 share the same 20-byte core (X, Y, Z, intensity,
+# flags, classification, scan_angle_rank, user_data, point_source_id). Formats
+# 1–5 append GPS time / color channels; we only need X/Y so reading the first
+# 12 bytes per record is enough regardless of the record length on disk.
+_SUPPORTED_POINT_FORMATS = frozenset({0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10})
 
 # Offsets into the public header block (LAS 1.0–1.4 share this preamble).
 _OFFSETS = {
@@ -130,4 +137,50 @@ def read_las_header(path: str | Path) -> LASHeader:
     )
 
 
-__all__ = ["LASHeader", "read_las_header"]
+def load_points_xy_from_las(path: str | Path) -> np.ndarray:
+    """Return an ``(N, 2)`` float64 array of X/Y in meters from a LAS file.
+
+    Only the X/Y ints are read from each point record; scale and offset from
+    the public header are applied (``x = x_int * scale_x + offset_x``). Point
+    data formats 0–10 share a common 4-byte X / 4-byte Y / 4-byte Z prefix
+    at the start of every record, so this works without distinguishing the
+    format beyond the header-reported record length.
+    """
+    header = read_las_header(path)
+    if header.point_data_format not in _SUPPORTED_POINT_FORMATS:
+        raise ValueError(
+            f"Unsupported LAS point data format {header.point_data_format} in {path}"
+        )
+
+    record_length = header.point_data_record_length
+    if record_length < 12:
+        raise ValueError(
+            f"LAS point_data_record_length {record_length} in {path} is too small to hold X/Y/Z"
+        )
+
+    scale_x, scale_y, _ = header.scale
+    offset_x, offset_y, _ = header.offset
+    point_count = header.point_count
+
+    p = Path(path)
+    with p.open("rb") as fh:
+        fh.seek(header.offset_to_point_data)
+        blob = fh.read(record_length * point_count)
+    if len(blob) < record_length * point_count:
+        raise ValueError(
+            f"LAS file {p} truncated: expected {record_length * point_count} point bytes, "
+            f"got {len(blob)}"
+        )
+
+    # Slice the X/Y ints out of each record in one pass using numpy strides.
+    buf = np.frombuffer(blob, dtype=np.uint8).reshape(point_count, record_length)
+    xi = buf[:, 0:4].copy().view(np.int32).reshape(point_count)
+    yi = buf[:, 4:8].copy().view(np.int32).reshape(point_count)
+
+    xy = np.empty((point_count, 2), dtype=np.float64)
+    xy[:, 0] = xi.astype(np.float64) * scale_x + offset_x
+    xy[:, 1] = yi.astype(np.float64) * scale_y + offset_y
+    return xy
+
+
+__all__ = ["LASHeader", "load_points_xy_from_las", "read_las_header"]
