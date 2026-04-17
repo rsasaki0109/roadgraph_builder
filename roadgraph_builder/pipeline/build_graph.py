@@ -20,6 +20,7 @@ from roadgraph_builder.core.graph.edge import Edge
 from roadgraph_builder.core.graph.graph import Graph
 from roadgraph_builder.core.graph.node import Node
 from roadgraph_builder.io.trajectory.loader import Trajectory, load_trajectory_csv
+from roadgraph_builder.pipeline.junction_topology import annotate_junction_types
 from roadgraph_builder.utils.geometry import (
     centerline_from_points,
     merge_endpoints_union_find,
@@ -186,6 +187,7 @@ def polylines_to_graph(polylines: list[list[tuple[float, float]]], params: Build
 
     graph = Graph(nodes=nodes, edges=edges)
     annotate_node_degrees(graph)
+    annotate_junction_types(graph)
     return graph
 
 
