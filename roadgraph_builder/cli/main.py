@@ -178,7 +178,7 @@ def _build_parser() -> argparse.ArgumentParser:
     fuse.add_argument("input_json", help="Road graph JSON")
     fuse.add_argument(
         "points_path",
-        help="Point set in graph meters: CSV with x,y columns, or LAS 1.0–1.4 (.las).",
+        help="Point set in graph meters: CSV with x,y columns, LAS 1.0–1.4 (.las), or LAZ (.laz, requires 'laz' extra).",
     )
     fuse.add_argument("output_json", help="Output JSON path")
     fuse.add_argument(
@@ -421,11 +421,14 @@ def main(argv: list[str] | None = None) -> int:
             print(f"File not found: {pts_path}", file=sys.stderr)
             return 1
         try:
-            if pts_path.suffix.lower() == ".las":
+            if pts_path.suffix.lower() in {".las", ".laz"}:
                 pts = load_points_xy_from_las(pts_path)
             else:
                 pts = load_points_xy_csv(pts_path)
         except ValueError as e:
+            print(f"{pts_path}: {e}", file=sys.stderr)
+            return 1
+        except ImportError as e:
             print(f"{pts_path}: {e}", file=sys.stderr)
             return 1
         fuse_lane_boundaries_from_points(

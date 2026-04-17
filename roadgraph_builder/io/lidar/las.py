@@ -4,9 +4,10 @@ Only parses the **Public Header Block** — the fixed-layout preamble — which 
 enough to expose point count, bbox, scale/offset, version, and point format
 without needing to decode the per-point records. Supports LAS 1.0 – 1.4.
 
-LAZ (compressed) files are not supported here: LAZ wraps the same public
-header but deflates the point records, so the header itself is readable, but
-downstream loaders would still need a LAZ-aware decoder to reach the points.
+LAZ (compressed) files are delegated to ``laspy[lazrs]`` when that optional
+dependency is installed (``pip install roadgraph-builder[laz]``). Without
+``laspy`` the LAZ code path raises ``ImportError`` with an actionable message
+and the uncompressed LAS fast path is unaffected.
 """
 
 from __future__ import annotations
@@ -137,15 +138,38 @@ def read_las_header(path: str | Path) -> LASHeader:
     )
 
 
+def _load_points_xy_from_laz(path: Path) -> np.ndarray:
+    """LAZ path: delegate to ``laspy[lazrs]`` if the optional extra is installed."""
+    try:
+        import laspy  # type: ignore[import-not-found]
+    except ImportError as e:  # pragma: no cover - tested via monkeypatch
+        raise ImportError(
+            "LAZ decoding requires the optional 'laz' extra. "
+            "Install with: pip install 'roadgraph-builder[laz]'"
+        ) from e
+    reader = laspy.read(str(path))
+    xy = np.empty((len(reader.x), 2), dtype=np.float64)
+    xy[:, 0] = np.asarray(reader.x, dtype=np.float64)
+    xy[:, 1] = np.asarray(reader.y, dtype=np.float64)
+    return xy
+
+
 def load_points_xy_from_las(path: str | Path) -> np.ndarray:
-    """Return an ``(N, 2)`` float64 array of X/Y in meters from a LAS file.
+    """Return an ``(N, 2)`` float64 array of X/Y in meters from a LAS/LAZ file.
 
     Only the X/Y ints are read from each point record; scale and offset from
     the public header are applied (``x = x_int * scale_x + offset_x``). Point
     data formats 0–10 share a common 4-byte X / 4-byte Y / 4-byte Z prefix
     at the start of every record, so this works without distinguishing the
     format beyond the header-reported record length.
+
+    ``.laz`` files are delegated to ``laspy[lazrs]`` when that optional extra
+    is installed. Without it, calls on ``.laz`` raise ``ImportError`` with
+    instructions; ``.las`` keeps working regardless.
     """
+    p = Path(path)
+    if p.suffix.lower() == ".laz":
+        return _load_points_xy_from_laz(p)
     header = read_las_header(path)
     if header.point_data_format not in _SUPPORTED_POINT_FORMATS:
         raise ValueError(

@@ -242,10 +242,11 @@ roadgraph_builder validate out_hd_lite.json
 
 ### Fuse LiDAR-style XY points (boundaries)
 
-Given a graph JSON and a point set in the **same meter frame** as the trajectory, assign points to nearby edges and write **left/right** boundary polylines (binned median along the centerline). `fuse-lidar` accepts two input shapes and dispatches on the file extension:
+Given a graph JSON and a point set in the **same meter frame** as the trajectory, assign points to nearby edges and write **left/right** boundary polylines (binned median along the centerline). `fuse-lidar` accepts three input shapes and dispatches on the file extension:
 
 - Two-column **x,y** CSV.
-- **LAS 1.0 – 1.4** (uncompressed `.las`) — X/Y are read straight from the public header's point records, scale and offset applied. LAZ is not supported yet.
+- **LAS 1.0 – 1.4** (uncompressed `.las`) — X/Y are read straight from the public header's point records, scale and offset applied.
+- **LAZ** (`.laz`) — compressed LAS; requires the optional `[laz]` extra (`pip install 'roadgraph-builder[laz]'`). Falls back to a clear `ImportError` when the extra is missing.
 
 ```bash
 roadgraph_builder build examples/sample_trajectory.csv out.json

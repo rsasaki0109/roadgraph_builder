@@ -48,6 +48,9 @@ jobs:
       - name: Inspect example LAS header
         run: roadgraph_builder inspect-lidar examples/sample_lidar.las
 
+      - name: Doctor self-check
+        run: roadgraph_builder doctor
+
       - name: Validate bundled graph JSON (GitHub Pages assets)
         run: |
           roadgraph_builder validate docs/assets/sample_graph.json

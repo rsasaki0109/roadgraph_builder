@@ -181,7 +181,7 @@ def export_map_bundle(
         from roadgraph_builder.io.lidar.las import load_points_xy_from_las
         from roadgraph_builder.io.lidar.points import load_points_xy_csv
 
-        if lidar_path.suffix.lower() == ".las":
+        if lidar_path.suffix.lower() in {".las", ".laz"}:
             pts_xy = load_points_xy_from_las(lidar_path)
         else:
             pts_xy = load_points_xy_csv(lidar_path)

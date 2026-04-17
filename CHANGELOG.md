@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **LAZ decoding via optional `[laz]` extra** — `pip install 'roadgraph-builder[laz]'` pulls in `laspy[lazrs]`. `load_points_xy_from_las()` (and `fuse-lidar` / `export-bundle --lidar-points`) now route `.laz` through `laspy.read` when the extra is installed, otherwise raise a clear `ImportError` pointing at the install command. Uncompressed `.las` still works without the extra.
+
+### Changed
+
+- **CI runs `roadgraph_builder doctor`** — every CI run now exercises the doctor self-check (schema load + LAS header read) in addition to the existing validate / export-bundle steps.
+
 ## [0.3.0] — 2026-04-17
 
 ### Added

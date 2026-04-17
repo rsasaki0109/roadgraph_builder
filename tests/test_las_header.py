@@ -121,6 +121,30 @@ def test_load_points_xy_from_las_roundtrip():
     assert xy[:, 1].max() == 1.75
 
 
+def test_load_points_xy_from_las_raises_on_missing_laspy(tmp_path: Path, monkeypatch):
+    """LAZ path should surface a helpful ImportError when laspy is not installed."""
+    import builtins
+    import importlib
+
+    from roadgraph_builder.io.lidar import las
+
+    fake_laz = tmp_path / "fake.laz"
+    fake_laz.write_bytes(b"ignored")  # extension-only dispatch; body unused
+
+    real_import = builtins.__import__
+
+    def _fake_import(name, globals=None, locals=None, fromlist=(), level=0):
+        if name == "laspy":
+            raise ImportError("No module named 'laspy'")
+        return real_import(name, globals, locals, fromlist, level)
+
+    monkeypatch.setattr(builtins, "__import__", _fake_import)
+    # Reload the module to drop any cached laspy symbol path (defensive).
+    importlib.reload(las)
+    with pytest.raises(ImportError, match=r"roadgraph-builder\[laz\]"):
+        las.load_points_xy_from_las(fake_laz)
+
+
 def test_fuse_lidar_cli_dispatches_by_extension(tmp_path: Path):
     from roadgraph_builder.cli.main import main
     from roadgraph_builder.io.export.json_loader import load_graph_json
