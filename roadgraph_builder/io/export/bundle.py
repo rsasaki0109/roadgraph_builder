@@ -14,6 +14,7 @@ import numpy as np
 
 import roadgraph_builder
 from roadgraph_builder.core.graph.graph import Graph
+from roadgraph_builder.core.graph.stats import graph_stats as _graph_stats_impl, junction_stats as _junction_stats_impl
 from roadgraph_builder.hd.pipeline import SDToHDConfig, enrich_sd_to_hd
 from roadgraph_builder.io.camera.detections import apply_camera_detections_to_graph, load_camera_detections_json
 from roadgraph_builder.io.export.geojson import export_map_geojson
@@ -25,69 +26,20 @@ from roadgraph_builder.navigation.turn_restrictions import (
     merge_turn_restrictions,
     turn_restrictions_from_camera_detections,
 )
-from roadgraph_builder.utils.geo import meters_to_lonlat
-
-
 def _graph_stats(graph: Graph, origin_lat: float, origin_lon: float) -> dict[str, Any]:
-    """Summary that downstream tools can read without parsing the full graph."""
-    edge_count = len(graph.edges)
-    lengths: list[float] = []
-    for e in graph.edges:
-        pl = e.polyline
-        total = 0.0
-        for i in range(len(pl) - 1):
-            dx = float(pl[i + 1][0]) - float(pl[i][0])
-            dy = float(pl[i + 1][1]) - float(pl[i][1])
-            total += math.hypot(dx, dy)
-        lengths.append(total)
+    """Summary that downstream tools can read without parsing the full graph.
 
-    if lengths:
-        srt = sorted(lengths)
-        mid = len(srt) // 2
-        if len(srt) % 2:
-            median_len = float(srt[mid])
-        else:
-            median_len = 0.5 * float(srt[mid - 1] + srt[mid])
-        edge_length = {
-            "min_m": float(min(lengths)),
-            "median_m": median_len,
-            "max_m": float(max(lengths)),
-            "total_m": float(sum(lengths)),
-        }
-    else:
-        edge_length = {"min_m": 0.0, "median_m": 0.0, "max_m": 0.0, "total_m": 0.0}
-
-    xs: list[float] = []
-    ys: list[float] = []
-    for n in graph.nodes:
-        xs.append(float(n.position[0]))
-        ys.append(float(n.position[1]))
-    if xs and ys:
-        bbox_m = {
-            "x_min_m": min(xs),
-            "y_min_m": min(ys),
-            "x_max_m": max(xs),
-            "y_max_m": max(ys),
-        }
-        sw_lon, sw_lat = meters_to_lonlat(bbox_m["x_min_m"], bbox_m["y_min_m"], origin_lat, origin_lon)
-        ne_lon, ne_lat = meters_to_lonlat(bbox_m["x_max_m"], bbox_m["y_max_m"], origin_lat, origin_lon)
-        bbox_wgs84 = {
-            "sw_lon": sw_lon,
-            "sw_lat": sw_lat,
-            "ne_lon": ne_lon,
-            "ne_lat": ne_lat,
-        }
-    else:
-        bbox_m = {"x_min_m": 0.0, "y_min_m": 0.0, "x_max_m": 0.0, "y_max_m": 0.0}
-        bbox_wgs84 = {"sw_lon": origin_lon, "sw_lat": origin_lat, "ne_lon": origin_lon, "ne_lat": origin_lat}
-
-    return {
-        "edge_count": edge_count,
-        "node_count": len(graph.nodes),
-        "edge_length": edge_length,
-        "bbox_m": bbox_m,
-        "bbox_wgs84_deg": bbox_wgs84,
-    }
+    Thin wrapper kept for internal use inside ``export_map_bundle``; the
+    public API lives in :mod:`roadgraph_builder.core.graph.stats` as
+    ``graph_stats()``. This wrapper always emits ``bbox_wgs84_deg`` because
+    ``export-bundle`` always carries a concrete origin.
+    """
+    out = _graph_stats_impl(graph, origin_lat=origin_lat, origin_lon=origin_lon)
+    out.setdefault(
+        "bbox_wgs84_deg",
+        {"sw_lon": origin_lon, "sw_lat": origin_lat, "ne_lon": origin_lon, "ne_lat": origin_lat},
+    )
+    return out
 
 
 def build_sd_nav_document(
@@ -207,15 +159,9 @@ def export_map_bundle(
     merged_restrictions = merge_turn_restrictions(manual_restrictions, camera_restrictions)
     source_counts = Counter(entry["source"] for entry in merged_restrictions)
 
-    junction_hint_counts: Counter[str] = Counter()
-    junction_type_counts: Counter[str] = Counter()
-    for n in graph.nodes:
-        hint = n.attributes.get("junction_hint")
-        if isinstance(hint, str):
-            junction_hint_counts[hint] += 1
-        jtype = n.attributes.get("junction_type")
-        if isinstance(jtype, str):
-            junction_type_counts[jtype] += 1
+    junction_block = _junction_stats_impl(graph)
+    junction_hint_counts: Counter[str] = Counter(junction_block["hints"])
+    junction_type_counts: Counter[str] = Counter(junction_block["multi_branch_types"])
 
     lidar_fuse_info: dict[str, Any] | None = None
     if lidar_path is not None and lidar_path.is_file():

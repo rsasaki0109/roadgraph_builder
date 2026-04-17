@@ -34,6 +34,7 @@ from roadgraph_builder.pipeline.build_graph import (
     build_graph_from_csv,
     build_graph_from_trajectory,
 )
+from roadgraph_builder.core.graph.stats import graph_stats, junction_stats
 from roadgraph_builder.routing.shortest_path import shortest_path
 from roadgraph_builder.viz.svg_export import write_trajectory_graph_svg
 
@@ -179,6 +180,26 @@ def _build_parser() -> argparse.ArgumentParser:
     rt.add_argument("input_json", help="Road graph JSON (e.g. sim/road_graph.json from export-bundle).")
     rt.add_argument("from_node", help="Source node id (e.g. n0).")
     rt.add_argument("to_node", help="Destination node id (e.g. n3).")
+
+    st = sub.add_parser(
+        "stats",
+        help="Print graph_stats + junction breakdown for a road graph JSON.",
+    )
+    st.add_argument("input_json", help="Road graph JSON (e.g. sim/road_graph.json).")
+    st.add_argument(
+        "--origin-lat",
+        type=float,
+        default=None,
+        metavar="DEG",
+        help="WGS84 origin latitude. Omit to read metadata.map_origin, or skip bbox_wgs84_deg.",
+    )
+    st.add_argument(
+        "--origin-lon",
+        type=float,
+        default=None,
+        metavar="DEG",
+        help="WGS84 origin longitude. Omit to read metadata.map_origin, or skip bbox_wgs84_deg.",
+    )
 
     fuse = sub.add_parser(
         "fuse-lidar",
@@ -410,6 +431,16 @@ def main(argv: list[str] | None = None) -> int:
             SDToHDConfig(lane_width_m=args.lane_width_m),
         )
         export_graph_json(graph, args.output_json)
+        return 0
+    if args.command == "stats":
+        graph = _cli_load_graph(args.input_json)
+        doc = {
+            "graph_stats": graph_stats(
+                graph, origin_lat=args.origin_lat, origin_lon=args.origin_lon
+            ),
+            "junctions": junction_stats(graph),
+        }
+        print(json.dumps(doc, ensure_ascii=False, indent=2))
         return 0
     if args.command == "route":
         graph = _cli_load_graph(args.input_json)
