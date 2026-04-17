@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] — 2026-04-17
+
 ### Added
 
 - **Distribution** — `scripts/build_release_bundle.sh` + `.github/workflows/release.yml` attach a validated `roadgraph_sample_bundle.tar.gz` (plus sha256) to every `v*` tag; a trimmed `examples/frozen_bundle/` is committed for quick inspection. `make release-bundle` wraps the script.
@@ -28,9 +30,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - **Degenerate self-loops** — `build` now drops edges whose endpoints collapse onto the same node via endpoint-merging *and* whose polyline arc length is below `2 × merge-endpoint-m`. Large legitimate loops (round trips, block circuits) are preserved. Noisy public GPS data that used to produce tens of zero-length self-loops now yields a clean graph.
-- **Navigation restrictions (generator)** — `export-bundle --turn-restrictions-json` plus extraction from camera detections (`kind: turn_restriction`) now populate `sd_nav.turn_restrictions`; new `validate-turn-restrictions` CLI + schema.
 - **Guard rails** — `build` / `visualize` / `export-bundle` fail with a clear message when the trajectory yields **no graph edges** (e.g. too few samples per segment), instead of writing an unusable empty graph.
 - **CLI errors** — Missing input JSON/CSV files print `File not found: …` and exit 1; schema validation errors are prefixed with the file path.
+
+### Added (pipeline backlog landed)
+
+- **Navigation restrictions (generator)** — `export-bundle --turn-restrictions-json` plus extraction from camera detections (`kind: turn_restriction`) now populate `sd_nav.turn_restrictions`; new `validate-turn-restrictions` CLI + schema.
 - **Navigation + HD** — `nav/sd_nav.json` `allowed_maneuvers` inferred at the digitized **end node** from 2D junction geometry (`topology_geometry_v1`); `metadata.sd_to_hd.navigation_hints` points consumers at `sd_nav` and describes pairing with HD lane boundaries.
 - **Navigation restrictions schema** — optional `sd_nav.turn_restrictions` validates directed edge transition restrictions separately from geometry-derived maneuver hints.
 - **Bundle tuning** — `docs/bundle_tuning.md` and `scripts/run_tuning_bundle.sh`; `make tune` runs a minimal `export-bundle` + validation for exploring `max-step-m` / `merge-endpoint-m` with `sim/map.geojson`.
@@ -92,5 +97,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tests and CI (Python 3.10 / 3.12).
 - Stubs: LiDAR, camera, Lanelet2 export.
 
+[0.3.0]: https://github.com/rsasaki0109/roadgraph_builder/releases/tag/v0.3.0
 [0.2.0]: https://github.com/rsasaki0109/roadgraph_builder/releases/tag/v0.2.0
 [0.1.0]: https://github.com/rsasaki0109/roadgraph_builder/releases/tag/v0.1.0
