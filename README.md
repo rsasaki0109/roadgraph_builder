@@ -138,7 +138,10 @@ The **`docs/`** folder is a small static site.
 1. In the GitHub repo: **Settings → Pages → Build and deployment → Source**: **Deploy from a branch**, branch **`main`**, folder **`/docs`**, Save.
 2. After a minute, open:
    - **`https://<user>.github.io/roadgraph_builder/`** — diagram viewer (SVG-style pan/zoom)
-   - **`https://<user>.github.io/roadgraph_builder/map.html`** — **real basemap** (OSM tiles + GeoJSON: trajectory, centerlines, nodes, **HD-lite lane boundaries** when `attributes.hd` is filled — bundled assets use `enrich --lane-width-m 3.5` via `scripts/refresh_docs_assets.py`)
+   - **`https://<user>.github.io/roadgraph_builder/map.html`** — **real basemap** (OSM tiles + GeoJSON: trajectory, centerlines, nodes, **HD-lite lane boundaries** when `attributes.hd` is filled — bundled assets use `enrich --lane-width-m 3.5` via `scripts/refresh_docs_assets.py`). The dropdown selects between three datasets:
+     - **Paris** (default, 123 edges / 223 nodes, 24 km total; `junction_type` includes `y_junction` / `complex_junction` — derived from OSM public GPS, ODbL. See [`docs/assets/ATTRIBUTION.md`](docs/assets/ATTRIBUTION.md).)
+     - **OSM Berlin sample** (4 edges, smaller).
+     - **Toy** (synthetic trajectory from `examples/sample_trajectory.csv`).
 
 Local preview (no GitHub required):
 

@@ -77,6 +77,7 @@
       <label>
         Layer
         <select id="dataset">
+          <option value="paris">Paris (OSM public GPS, ODbL)</option>
           <option value="osm">OSM sample (Berlin area)</option>
           <option value="toy">Toy (synthetic meters → map)</option>
         </select>
@@ -147,9 +148,15 @@
         return res.json();
       }
 
+      const DATASET_URLS = {
+        paris: "assets/map_paris.geojson",
+        osm: "assets/map_osm.geojson",
+        toy: "assets/map_toy.geojson",
+      };
+
       async function show(which) {
         layerGroup.clearLayers();
-        const url = which === "toy" ? "assets/map_toy.geojson" : "assets/map_osm.geojson";
+        const url = DATASET_URLS[which] || DATASET_URLS.osm;
         const data = await loadGeo(url);
         const gj = L.geoJSON(data, {
           style: styleLine,
@@ -192,7 +199,7 @@
         })
         .catch(() => {});
 
-      show("osm").catch((err) => {
+      show("paris").catch((err) => {
         document.querySelector(".bar").appendChild(document.createTextNode(" Load error: " + err));
       });
     </script>
