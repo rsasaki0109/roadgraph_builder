@@ -280,6 +280,11 @@ roadgraph_builder route examples/frozen_bundle/sim/road_graph.json n0 n1
 # Respecting the bundle's nav/sd_nav.json (or a standalone turn_restrictions.json)
 roadgraph_builder route examples/frozen_bundle/sim/road_graph.json n0 n1 \
   --turn-restrictions-json examples/frozen_bundle/nav/sd_nav.json
+
+# Also write a GeoJSON of the traversed centerlines (merged LineString + per-edge features + start/end points)
+roadgraph_builder route examples/frozen_bundle/sim/road_graph.json n0 n1 \
+  --output /tmp/route.geojson
+# Origin is read from metadata.map_origin; pass --origin-lat / --origin-lon to override.
 ```
 
 Exits with code 1 on unknown node ids, disjoint components, or when the restrictions make the pair unreachable.

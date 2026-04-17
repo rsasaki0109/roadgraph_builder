@@ -35,6 +35,7 @@ from roadgraph_builder.pipeline.build_graph import (
     build_graph_from_trajectory,
 )
 from roadgraph_builder.core.graph.stats import graph_stats, junction_stats
+from roadgraph_builder.routing.geojson_export import write_route_geojson
 from roadgraph_builder.routing.shortest_path import shortest_path
 from roadgraph_builder.viz.svg_export import write_trajectory_graph_svg
 
@@ -186,6 +187,27 @@ def _build_parser() -> argparse.ArgumentParser:
         default=None,
         metavar="PATH",
         help="JSON with a 'turn_restrictions' array (nav/sd_nav.json or a standalone turn_restrictions.json).",
+    )
+    rt.add_argument(
+        "--output",
+        type=str,
+        default=None,
+        metavar="PATH",
+        help="Optional GeoJSON path. Writes a FeatureCollection (route LineString + per-edge features + start/end points).",
+    )
+    rt.add_argument(
+        "--origin-lat",
+        type=float,
+        default=None,
+        metavar="DEG",
+        help="WGS84 origin latitude for --output. Falls back to graph metadata.map_origin when omitted.",
+    )
+    rt.add_argument(
+        "--origin-lon",
+        type=float,
+        default=None,
+        metavar="DEG",
+        help="WGS84 origin longitude for --output.",
     )
 
     st = sub.add_parser(
@@ -470,6 +492,25 @@ def main(argv: list[str] | None = None) -> int:
         except ValueError as e:
             print(f"{args.input_json}: {e}", file=sys.stderr)
             return 1
+
+        if args.output:
+            lat0, lon0 = args.origin_lat, args.origin_lon
+            if (lat0 is None) ^ (lon0 is None):
+                print("route --output: pass both --origin-lat and --origin-lon, or neither.", file=sys.stderr)
+                return 1
+            if lat0 is None:
+                mo = graph.metadata.get("map_origin") if isinstance(graph.metadata, dict) else None
+                if isinstance(mo, dict) and "lat0" in mo and "lon0" in mo:
+                    lat0 = float(mo["lat0"])
+                    lon0 = float(mo["lon0"])
+                else:
+                    print(
+                        "route --output: set --origin-lat/--origin-lon or metadata.map_origin {lat0, lon0}.",
+                        file=sys.stderr,
+                    )
+                    return 1
+            write_route_geojson(args.output, graph, route, origin_lat=lat0, origin_lon=lon0)
+
         print(
             json.dumps(
                 {
@@ -480,6 +521,7 @@ def main(argv: list[str] | None = None) -> int:
                     "edge_directions": route.edge_directions,
                     "node_sequence": route.node_sequence,
                     "applied_restrictions": len(restrictions),
+                    "output": args.output if args.output else None,
                 },
                 ensure_ascii=False,
                 indent=2,
