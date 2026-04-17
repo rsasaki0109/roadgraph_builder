@@ -278,6 +278,27 @@ def _build_parser() -> argparse.ArgumentParser:
         metavar="PATH",
         help="Optional manual turn-restrictions JSON merged into nav/sd_nav.json.",
     )
+    bun.add_argument(
+        "--lidar-points",
+        type=str,
+        default=None,
+        metavar="PATH",
+        help="Optional LiDAR point set (CSV or .las) fused into per-edge boundaries.",
+    )
+    bun.add_argument(
+        "--fuse-max-dist-m",
+        type=float,
+        default=5.0,
+        metavar="M",
+        help="Max perpendicular distance from a point to an edge centerline for LiDAR fusion.",
+    )
+    bun.add_argument(
+        "--fuse-bins",
+        type=int,
+        default=32,
+        metavar="N",
+        help="Number of along-edge bins for LiDAR median aggregation.",
+    )
     _add_build_params(bun)
 
     return p
@@ -482,6 +503,9 @@ def main(argv: list[str] | None = None) -> int:
             lane_width_m=lw,
             detections_json=args.detections_json,
             turn_restrictions_json=args.turn_restrictions_json,
+            lidar_points=args.lidar_points,
+            fuse_max_dist_m=args.fuse_max_dist_m,
+            fuse_bins=args.fuse_bins,
             origin_json_path=oj,
         )
         return 0

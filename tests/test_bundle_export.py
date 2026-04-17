@@ -67,3 +67,38 @@ def test_export_map_bundle_writes_nav_sim_lanelet(tmp_path: Path):
     assert gs["bbox_m"]["x_min_m"] <= gs["bbox_m"]["x_max_m"]
     assert gs["bbox_m"]["y_min_m"] <= gs["bbox_m"]["y_max_m"]
     assert gs["bbox_wgs84_deg"]["sw_lon"] <= gs["bbox_wgs84_deg"]["ne_lon"]
+
+
+def test_export_map_bundle_fuses_lidar_from_las(tmp_path: Path):
+    from roadgraph_builder.io.export.json_loader import load_graph_json
+
+    csv_path = ROOT / "examples" / "sample_trajectory.csv"
+    traj = load_trajectory_csv(csv_path)
+    g = build_graph_from_trajectory(traj, BuildParams())
+    export_map_bundle(
+        g,
+        traj.xy,
+        csv_path,
+        tmp_path,
+        origin_lat=52.52,
+        origin_lon=13.405,
+        dataset_name="lidar_bundle",
+        lane_width_m=3.5,
+        lidar_points=ROOT / "examples" / "sample_lidar.las",
+        fuse_max_dist_m=5.0,
+        fuse_bins=16,
+    )
+    man = json.loads((tmp_path / "manifest.json").read_text(encoding="utf-8"))
+    assert man["lidar_points"]["path"] == "sample_lidar.las"
+    assert man["lidar_points"]["point_count"] == 52
+    assert man["lidar_points"]["max_dist_m"] == 5.0
+    assert man["lidar_points"]["bins"] == 16
+    validate_manifest_document(man)
+
+    fused = load_graph_json(tmp_path / "sim" / "road_graph.json")
+    fused_edges = [
+        e for e in fused.edges
+        if e.attributes.get("hd", {}).get("lane_boundaries", {}).get("left")
+        and e.attributes.get("hd", {}).get("lane_boundaries", {}).get("right")
+    ]
+    assert fused_edges, "expected at least one edge with both lidar-fused lane boundaries"

@@ -152,6 +152,9 @@ def export_map_bundle(
     lane_width_m: float | None = 3.5,
     detections_json: str | Path | None = None,
     turn_restrictions_json: str | Path | None = None,
+    lidar_points: str | Path | None = None,
+    fuse_max_dist_m: float = 5.0,
+    fuse_bins: int = 32,
     origin_json_path: str | Path | None = None,
 ) -> None:
     """Write ``nav/``, ``sim/``, ``lanelet/`` under ``out_dir``.
@@ -160,7 +163,8 @@ def export_map_bundle(
     - **sim/** — full ``road_graph.json``, ``map.geojson``, copied ``trajectory.csv``.
     - **lanelet/map.osm** — OSM XML for Lanelet2 / JOSM.
 
-    Optionally runs HD-lite ``enrich`` and ``apply-camera`` before exporting.
+    Optionally runs HD-lite ``enrich``, LiDAR point fusion, and
+    ``apply-camera`` before exporting.
     """
     out = Path(out_dir)
     (out / "nav").mkdir(parents=True, exist_ok=True)
@@ -169,6 +173,25 @@ def export_map_bundle(
 
     if lane_width_m is not None and lane_width_m > 0:
         enrich_sd_to_hd(graph, SDToHDConfig(lane_width_m=lane_width_m))
+
+    lidar_path = Path(lidar_points) if lidar_points else None
+    lidar_point_count: int | None = None
+    if lidar_path is not None and lidar_path.is_file():
+        from roadgraph_builder.hd.lidar_fusion import fuse_lane_boundaries_from_points
+        from roadgraph_builder.io.lidar.las import load_points_xy_from_las
+        from roadgraph_builder.io.lidar.points import load_points_xy_csv
+
+        if lidar_path.suffix.lower() == ".las":
+            pts_xy = load_points_xy_from_las(lidar_path)
+        else:
+            pts_xy = load_points_xy_csv(lidar_path)
+        lidar_point_count = int(pts_xy.shape[0])
+        fuse_lane_boundaries_from_points(
+            graph,
+            pts_xy,
+            max_dist_m=fuse_max_dist_m,
+            bins=fuse_bins,
+        )
 
     det_path = Path(detections_json) if detections_json else None
     camera_observations: list[dict[str, Any]] = []
@@ -194,6 +217,15 @@ def export_map_bundle(
         if isinstance(jtype, str):
             junction_type_counts[jtype] += 1
 
+    lidar_fuse_info: dict[str, Any] | None = None
+    if lidar_path is not None and lidar_path.is_file():
+        lidar_fuse_info = {
+            "path": lidar_path.name,
+            "point_count": lidar_point_count,
+            "max_dist_m": fuse_max_dist_m,
+            "bins": fuse_bins,
+        }
+
     graph.metadata = {
         **graph.metadata,
         "map_origin": {"lat0": origin_lat, "lon0": origin_lon},
@@ -201,6 +233,7 @@ def export_map_bundle(
             "dataset": dataset_name,
             "lane_width_m": lane_width_m,
             "detections_applied": bool(det_path and det_path.is_file()),
+            "lidar_fuse": lidar_fuse_info,
             "turn_restrictions": {
                 "count": len(merged_restrictions),
                 "sources": dict(sorted(source_counts.items())),
@@ -244,6 +277,7 @@ def export_map_bundle(
         "input_trajectory_csv": Path(input_csv_path).name,
         "lane_width_m": lane_width_m,
         "detections_json": Path(detections_json).name if det_path and det_path.is_file() else None,
+        "lidar_points": lidar_fuse_info,
         "turn_restrictions_json": Path(turn_restrictions_json).name if tr_path and tr_path.is_file() else None,
         "turn_restrictions_count": len(merged_restrictions),
         "junctions": {

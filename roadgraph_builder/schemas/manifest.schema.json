@@ -39,6 +39,22 @@
     "input_trajectory_csv": { "type": "string", "minLength": 1 },
     "lane_width_m": { "type": ["number", "null"] },
     "detections_json": { "type": ["string", "null"] },
+    "lidar_points": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "additionalProperties": true,
+          "required": ["path", "point_count", "max_dist_m", "bins"],
+          "properties": {
+            "path": { "type": "string", "minLength": 1 },
+            "point_count": { "type": ["integer", "null"], "minimum": 0 },
+            "max_dist_m": { "type": "number", "minimum": 0 },
+            "bins": { "type": "integer", "minimum": 1 }
+          }
+        }
+      ]
+    },
     "turn_restrictions_json": { "type": ["string", "null"] },
     "turn_restrictions_count": { "type": "integer", "minimum": 0 },
     "junctions": {

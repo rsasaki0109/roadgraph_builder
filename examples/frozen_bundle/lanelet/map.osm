@@ -20,26 +20,34 @@
   <node id="6" lat="52.5200017986" lon="13.4050738985"/>
   <node id="7" lat="52.5200044966" lon="13.405147797"/>
   <node id="8" lat="52.5200062953" lon="13.4052216955"/>
-  <node id="10" lat="52.5200157256" lon="13.4049989662"/>
-  <node id="11" lat="52.5200175171" lon="13.4050726069"/>
-  <node id="12" lat="52.5200202151" lon="13.4051465054"/>
-  <node id="13" lat="52.5200220208" lon="13.4052206617"/>
-  <node id="15" lat="52.5199842744" lon="13.4050010338"/>
-  <node id="16" lat="52.5199860802" lon="13.4050751901"/>
-  <node id="17" lat="52.5199887781" lon="13.4051490886"/>
-  <node id="18" lat="52.5199905697" lon="13.4052227292"/>
-  <node id="22" lat="52.5200089932" lon="13.4057389849"/>
-  <node id="23" lat="52.5200098925" lon="13.4058128833"/>
-  <node id="24" lat="52.5200107919" lon="13.4058867818"/>
-  <node id="25" lat="52.5200089932" lon="13.4059606803"/>
-  <node id="27" lat="52.5200247282" lon="13.4057384677"/>
-  <node id="28" lat="52.5200256275" lon="13.4058123662"/>
-  <node id="29" lat="52.5200265292" lon="13.4058870405"/>
-  <node id="30" lat="52.5200247188" lon="13.4059617141"/>
-  <node id="32" lat="52.5199932582" lon="13.405739502"/>
-  <node id="33" lat="52.5199941576" lon="13.4058134005"/>
-  <node id="34" lat="52.5199950545" lon="13.4058865232"/>
-  <node id="35" lat="52.5199932677" lon="13.4059596466"/>
+  <node id="10" lat="52.5200157381" lon="13.405"/>
+  <node id="11" lat="52.5200157381" lon="13.4050295594"/>
+  <node id="12" lat="52.5200157381" lon="13.4050591188"/>
+  <node id="13" lat="52.5200157381" lon="13.4050886782"/>
+  <node id="14" lat="52.5200157381" lon="13.4051182376"/>
+  <node id="15" lat="52.5200157381" lon="13.405147797"/>
+  <node id="16" lat="52.5200157381" lon="13.4051773564"/>
+  <node id="17" lat="52.5200157381" lon="13.4052069158"/>
+  <node id="18" lat="52.5200157381" lon="13.4052512549"/>
+  <node id="20" lat="52.5199842619" lon="13.405"/>
+  <node id="21" lat="52.5199842619" lon="13.4050295594"/>
+  <node id="22" lat="52.5199842619" lon="13.4050591188"/>
+  <node id="23" lat="52.5199842619" lon="13.4050886782"/>
+  <node id="24" lat="52.5199842619" lon="13.4051182376"/>
+  <node id="25" lat="52.5199842619" lon="13.405147797"/>
+  <node id="26" lat="52.5199842619" lon="13.4051773564"/>
+  <node id="27" lat="52.5199842619" lon="13.4052069158"/>
+  <node id="28" lat="52.5199842619" lon="13.4052512549"/>
+  <node id="32" lat="52.5200089932" lon="13.4057389849"/>
+  <node id="33" lat="52.5200098925" lon="13.4058128833"/>
+  <node id="34" lat="52.5200107919" lon="13.4058867818"/>
+  <node id="35" lat="52.5200089932" lon="13.4059606803"/>
+  <node id="37" lat="52.5200157381" lon="13.4056798661"/>
+  <node id="38" lat="52.5200157381" lon="13.4057094255"/>
+  <node id="39" lat="52.5200157381" lon="13.4057389849"/>
+  <node id="41" lat="52.5199842619" lon="13.4056798661"/>
+  <node id="42" lat="52.5199842619" lon="13.4057094255"/>
+  <node id="43" lat="52.5199842619" lon="13.4057389849"/>
   <way id="9">
     <nd ref="5"/>
     <nd ref="6"/>
@@ -50,46 +58,35 @@
     <tag k="type" v="line_thin"/>
     <tag k="subtype" v="solid"/>
   </way>
-  <way id="14">
+  <way id="19">
     <nd ref="10"/>
     <nd ref="11"/>
     <nd ref="12"/>
     <nd ref="13"/>
-    <tag k="roadgraph" v="lane_boundary"/>
-    <tag k="roadgraph:edge_id" v="e0"/>
-    <tag k="roadgraph:side" v="left"/>
-    <tag k="type" v="line_thin"/>
-    <tag k="subtype" v="solid"/>
-  </way>
-  <way id="19">
+    <nd ref="14"/>
     <nd ref="15"/>
     <nd ref="16"/>
     <nd ref="17"/>
     <nd ref="18"/>
     <tag k="roadgraph" v="lane_boundary"/>
     <tag k="roadgraph:edge_id" v="e0"/>
-    <tag k="roadgraph:side" v="right"/>
+    <tag k="roadgraph:side" v="left"/>
     <tag k="type" v="line_thin"/>
     <tag k="subtype" v="solid"/>
   </way>
-  <way id="26">
+  <way id="29">
+    <nd ref="20"/>
+    <nd ref="21"/>
     <nd ref="22"/>
     <nd ref="23"/>
     <nd ref="24"/>
     <nd ref="25"/>
-    <tag k="roadgraph" v="centerline"/>
-    <tag k="roadgraph:edge_id" v="e1"/>
-    <tag k="type" v="line_thin"/>
-    <tag k="subtype" v="solid"/>
-  </way>
-  <way id="31">
+    <nd ref="26"/>
     <nd ref="27"/>
     <nd ref="28"/>
-    <nd ref="29"/>
-    <nd ref="30"/>
     <tag k="roadgraph" v="lane_boundary"/>
-    <tag k="roadgraph:edge_id" v="e1"/>
-    <tag k="roadgraph:side" v="left"/>
+    <tag k="roadgraph:edge_id" v="e0"/>
+    <tag k="roadgraph:side" v="right"/>
     <tag k="type" v="line_thin"/>
     <tag k="subtype" v="solid"/>
   </way>
@@ -98,15 +95,34 @@
     <nd ref="33"/>
     <nd ref="34"/>
     <nd ref="35"/>
+    <tag k="roadgraph" v="centerline"/>
+    <tag k="roadgraph:edge_id" v="e1"/>
+    <tag k="type" v="line_thin"/>
+    <tag k="subtype" v="solid"/>
+  </way>
+  <way id="40">
+    <nd ref="37"/>
+    <nd ref="38"/>
+    <nd ref="39"/>
+    <tag k="roadgraph" v="lane_boundary"/>
+    <tag k="roadgraph:edge_id" v="e1"/>
+    <tag k="roadgraph:side" v="left"/>
+    <tag k="type" v="line_thin"/>
+    <tag k="subtype" v="solid"/>
+  </way>
+  <way id="44">
+    <nd ref="41"/>
+    <nd ref="42"/>
+    <nd ref="43"/>
     <tag k="roadgraph" v="lane_boundary"/>
     <tag k="roadgraph:edge_id" v="e1"/>
     <tag k="roadgraph:side" v="right"/>
     <tag k="type" v="line_thin"/>
     <tag k="subtype" v="solid"/>
   </way>
-  <relation id="20">
-    <member type="way" ref="14" role="left"/>
-    <member type="way" ref="19" role="right"/>
+  <relation id="30">
+    <member type="way" ref="19" role="left"/>
+    <member type="way" ref="29" role="right"/>
     <member type="way" ref="9" role="centerline"/>
     <tag k="type" v="lanelet"/>
     <tag k="subtype" v="road"/>
@@ -114,17 +130,17 @@
     <tag k="roadgraph:edge_id" v="e0"/>
     <tag k="speed_limit" v="50"/>
   </relation>
-  <relation id="21">
-    <member type="relation" ref="20" role="refers"/>
+  <relation id="31">
+    <member type="relation" ref="30" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="semantic_rules"/>
     <tag k="roadgraph:confidence" v="0.8200"/>
   </relation>
-  <relation id="37">
-    <member type="way" ref="31" role="left"/>
-    <member type="way" ref="36" role="right"/>
-    <member type="way" ref="26" role="centerline"/>
+  <relation id="45">
+    <member type="way" ref="40" role="left"/>
+    <member type="way" ref="44" role="right"/>
+    <member type="way" ref="36" role="centerline"/>
     <tag k="type" v="lanelet"/>
     <tag k="subtype" v="road"/>
     <tag k="location" v="urban"/>

@@ -7,7 +7,8 @@ artifact shape without running the pipeline.
 - `roadgraph_builder_version` at freeze time: **0.2.0**.
 - Input: `examples/sample_trajectory.csv` with
   `examples/toy_map_origin.json`, `examples/camera_detections_sample.json`,
-  and `examples/turn_restrictions_sample.json`.
+  `examples/turn_restrictions_sample.json`, and
+  `examples/sample_lidar.las` (LiDAR points fused via `--lidar-points`).
 
 Regenerate with:
 

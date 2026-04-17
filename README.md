@@ -361,10 +361,12 @@ Codebase TODOs also mention: graph fusion across tiles/modalities, intersection 
 A frozen reference output lives at [`examples/frozen_bundle/`](examples/frozen_bundle/)
 so you can browse the shape of `export-bundle` without running the pipeline
 (`manifest.json`, `nav/sd_nav.json`, `sim/{road_graph,map,trajectory}`,
-`lanelet/map.osm`). Regenerate with `make release-bundle` or
-`bash scripts/build_release_bundle.sh`; the script also packs
-`dist/roadgraph_sample_bundle.tar.gz` + a sha256 file suitable for attaching
-to a release.
+`lanelet/map.osm`). The frozen build runs the **full optional pipeline** —
+HD-lite enrich, LAS-fused LiDAR boundaries, camera detections, and turn
+restrictions — so the output reflects the maximal artifact shape. Regenerate
+with `make release-bundle` or `bash scripts/build_release_bundle.sh`; the
+script also packs `dist/roadgraph_sample_bundle.tar.gz` + a sha256 file
+suitable for attaching to a release.
 
 Every `v*` tag push triggers [`.github/workflows/release.yml`](.github/workflows/release.yml),
 which runs the same script and attaches the tarball + sha256 to the auto-created

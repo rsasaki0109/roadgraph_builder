@@ -2,7 +2,7 @@
   "manifest_version": 1,
   "generator": "roadgraph_builder",
   "roadgraph_builder_version": "0.2.0",
-  "generated_at_utc": "2026-04-17T04:04:52Z",
+  "generated_at_utc": "2026-04-17T04:47:05Z",
   "dataset_name": "roadgraph_sample_bundle",
   "origin_wgs84_deg": {
     "lat": 52.52,
@@ -13,6 +13,12 @@
   "input_trajectory_csv": "sample_trajectory.csv",
   "lane_width_m": 3.5,
   "detections_json": "camera_detections_sample.json",
+  "lidar_points": {
+    "path": "sample_lidar.las",
+    "point_count": 52,
+    "max_dist_m": 5.0,
+    "bins": 16
+  },
   "turn_restrictions_json": "turn_restrictions_sample.json",
   "turn_restrictions_count": 2,
   "junctions": {

@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **LAS public-header reader** — `read_las_header()` (and new `LASHeader` dataclass) parses version, point count (including the LAS 1.4 extended 64-bit field), point data format / record length, scale, offset, and bbox from the fixed LAS preamble without requiring `laspy` or touching point records. Supports LAS 1.0 – 1.4; LAZ decoding still out of scope. New CLI `inspect-lidar PATH.las` prints the summary as JSON.
 - **Sample LAS artefact** — `scripts/make_sample_las.py` and committed `examples/sample_lidar.las` (52 points, ~1.3 KB). `scripts/run_demo_bundle.sh` and CI now run `inspect-lidar` on the sample so LAS parsing stays exercised.
 - **LAS point loader** — `load_points_xy_from_las()` returns an `(N, 2)` float64 array of X/Y in meters (scale + offset applied) without depending on `laspy`. `fuse-lidar` now dispatches on file extension: `.las` uses the LAS loader, anything else continues to read text-format CSV. CLI argument renamed `points_csv` → `points_path`.
+- **`export-bundle --lidar-points PATH`** — one-shot pipeline: trajectory → HD-lite enrich → LiDAR point fusion (CSV or LAS) → camera detections → turn restrictions → three-way export. `--fuse-max-dist-m` / `--fuse-bins` tune the fusion. Manifest records `lidar_points` (path / point_count / max_dist_m / bins); `metadata.export_bundle.lidar_fuse` mirrors it. `scripts/build_release_bundle.sh` now runs with the sample LAS, so `examples/frozen_bundle/` ships LiDAR-fused boundaries.
 
 ### Changed
 

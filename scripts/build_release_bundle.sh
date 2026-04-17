@@ -35,6 +35,9 @@ echo "OUT=$OUT"
   --lane-width-m 3.5 \
   --detections-json examples/camera_detections_sample.json \
   --turn-restrictions-json examples/turn_restrictions_sample.json \
+  --lidar-points examples/sample_lidar.las \
+  --fuse-max-dist-m 5.0 \
+  --fuse-bins 16 \
   --dataset-name roadgraph_sample_bundle
 
 "$RB" validate-manifest "$OUT/manifest.json"
