@@ -175,11 +175,18 @@ def _build_parser() -> argparse.ArgumentParser:
 
     rt = sub.add_parser(
         "route",
-        help="Undirected Dijkstra shortest path between two node ids in a road graph JSON.",
+        help="Dijkstra shortest path between two node ids (optional turn_restrictions).",
     )
     rt.add_argument("input_json", help="Road graph JSON (e.g. sim/road_graph.json from export-bundle).")
     rt.add_argument("from_node", help="Source node id (e.g. n0).")
     rt.add_argument("to_node", help="Destination node id (e.g. n3).")
+    rt.add_argument(
+        "--turn-restrictions-json",
+        type=str,
+        default=None,
+        metavar="PATH",
+        help="JSON with a 'turn_restrictions' array (nav/sd_nav.json or a standalone turn_restrictions.json).",
+    )
 
     st = sub.add_parser(
         "stats",
@@ -444,8 +451,19 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.command == "route":
         graph = _cli_load_graph(args.input_json)
+        restrictions: list[dict] = []
+        if args.turn_restrictions_json:
+            tr_doc = _load_json_for_cli(args.turn_restrictions_json)
+            if isinstance(tr_doc, dict):
+                maybe = tr_doc.get("turn_restrictions", [])
+                if isinstance(maybe, list):
+                    restrictions = [r for r in maybe if isinstance(r, dict)]
+            elif isinstance(tr_doc, list):
+                restrictions = [r for r in tr_doc if isinstance(r, dict)]
         try:
-            route = shortest_path(graph, args.from_node, args.to_node)
+            route = shortest_path(
+                graph, args.from_node, args.to_node, turn_restrictions=restrictions or None
+            )
         except KeyError as e:
             print(f"{args.input_json}: {e.args[0]}", file=sys.stderr)
             return 1
@@ -459,7 +477,9 @@ def main(argv: list[str] | None = None) -> int:
                     "to_node": route.to_node,
                     "total_length_m": route.total_length_m,
                     "edge_sequence": route.edge_sequence,
+                    "edge_directions": route.edge_directions,
                     "node_sequence": route.node_sequence,
+                    "applied_restrictions": len(restrictions),
                 },
                 ensure_ascii=False,
                 indent=2,

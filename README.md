@@ -270,14 +270,19 @@ Edges with fewer than two accepted points in total are unchanged. Tune `--max-di
 
 ### Shortest path (routing)
 
-Undirected Dijkstra over centerline lengths. Turn restrictions in `nav/sd_nav.json` are **not** applied — this is a quick reachability helper, not a legal routing engine.
+Dijkstra over centerline lengths, with optional **turn restrictions**. By default edges are traversable in both directions; with `--turn-restrictions-json` the search respects `no_left_turn` / `no_right_turn` / `no_straight` / `no_u_turn` (forbidden transitions) and `only_left` / `only_right` / `only_straight` (whitelisted transitions) at the specified junction / incoming approach.
 
 ```bash
+# Plain reachability
 roadgraph_builder route examples/frozen_bundle/sim/road_graph.json n0 n1
-# => {"from_node":"n0","to_node":"n1","total_length_m":15.02,"edge_sequence":["e0"],"node_sequence":["n0","n1"]}
+# => {"from_node":"n0","to_node":"n1","total_length_m":15.02,"edge_sequence":["e0"],"edge_directions":["forward"],"node_sequence":["n0","n1"],"applied_restrictions":0}
+
+# Respecting the bundle's nav/sd_nav.json (or a standalone turn_restrictions.json)
+roadgraph_builder route examples/frozen_bundle/sim/road_graph.json n0 n1 \
+  --turn-restrictions-json examples/frozen_bundle/nav/sd_nav.json
 ```
 
-Exits with code 1 on unknown node ids or disjoint components.
+Exits with code 1 on unknown node ids, disjoint components, or when the restrictions make the pair unreachable.
 
 ### Export OSM / Lanelet2 tooling
 
