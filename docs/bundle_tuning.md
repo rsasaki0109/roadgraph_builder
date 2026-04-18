@@ -44,6 +44,28 @@
 
 `allowed_maneuvers` は信号・標識・法規のターン制限ではありません。ターン禁止を入れる場合の設計メモは [navigation_turn_restrictions.md](navigation_turn_restrictions.md)。
 
+## センターライン平滑化（0.3.0 で差し替え）
+
+`centerline_from_points` は **PCA 軸 + 等幅 bin median** から **時系列順
+arc-length + Gaussian 重みづけ resampling**（両端は生 GPS 点に anchor）に
+差し替え済み。`num_bins` は出力サンプル数を指し、任意で
+`smoothing_m` 引数で sigma を上書き可。
+
+Paris 実データ（107 segments、`--max-step-m 40`）での before/after 品質メトリクス:
+
+| 指標 | 旧 (PCA bin median) | 新 (arc-length Gaussian) | 改善 |
+| --- | --- | --- | --- |
+| **平均絶対離散曲率**（rad/頂点） | 0.456 | 0.127 | **−72%** |
+| 同・中央値 | 0.248 | 0.041 | −83% |
+| **RMS perpendicular fit 残差**（m） | 1.62 | 0.95 | **−41%** |
+
+- 旧実装はカーブ区間で直線的な PCA 軸に射影するため、折り返し・交差・ジグザグが発生しがち（実データの 8 ノード LCC は射影アーティファクト経由で偽接続されていた）
+- 新実装は生点に Gaussian-weight を arc-length 空間で掛けるため、曲率情報を保つまま GPS ジッタだけ滑らかにできる
+- 両端 anchor があるので、隣接セグメントとの endpoint-union-find も機能する
+
+メトリクスは `roadgraph_builder.utils.geometry.polyline_mean_abs_curvature` /
+`polyline_rms_residual` で誰でも再計測できる。
+
 ## 実データ観察メモ（OSM 公開 GPS トレース）
 
 パリ中心（`bbox=2.3370,48.8570,2.3570,48.8770`、複数ページ統合で約 6600 点、重複除去後）で

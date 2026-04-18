@@ -7,8 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Centerline smoothing upgrade** — `centerline_from_points` now walks the time-ordered segment, computes cumulative arc length, and resamples at ``num_bins`` positions using a Gaussian window in arc-length space (raw first/last points are anchored so the endpoint-merge union-find still fuses adjacent segments). Replaces the previous PCA-major-axis + bin-median approach, which projected curved roads onto a straight axis and produced wobbly / self-folding polylines. Measured on the Paris OSM trace (107 segments): mean absolute per-vertex turning angle drops from 0.456 rad → 0.127 rad (**−72%**), and mean RMS perpendicular residual drops from 1.62 m → 0.95 m (**−41%**). See `docs/bundle_tuning.md` for the table and the `polyline_mean_abs_curvature` / `polyline_rms_residual` helpers.
+
 ### Added
 
+- **Polyline quality metrics** — `polyline_mean_abs_curvature()` and `polyline_rms_residual()` in `roadgraph_builder.utils.geometry`. Smoothness + data-fit metrics for regression-guarding any future centerline work.
 - **`LICENSE` (MIT)** — repository now ships an MIT license file, © 2026 Ryohei Sasaki; `pyproject.toml` declares `license = { file = "LICENSE" }`, author metadata, and the matching PyPI classifier. README "License" section updated from TODO to the actual notice.
 - **`CONTRIBUTING.md`** — dev-setup recipe, commit / schema / data-hygiene conventions, end-to-end demo commands.
 - **README badges** — CI status, MIT license, Python 3.10 / 3.12 shields.io badges at the top of the README.

@@ -29,8 +29,8 @@
       "id": "e0",
       "start_node_id": "n0",
       "end_node_id": "n1",
-      "length_m": 15.01698871710472,
-      "polyline_vertex_count": 4,
+      "length_m": 15.016988717104724,
+      "polyline_vertex_count": 32,
       "allowed_maneuvers": [
         "straight",
         "u_turn"
@@ -45,7 +45,7 @@
       "start_node_id": "n2",
       "end_node_id": "n3",
       "length_m": 15.005998201318711,
-      "polyline_vertex_count": 4,
+      "polyline_vertex_count": 32,
       "allowed_maneuvers": [
         "straight",
         "u_turn"
