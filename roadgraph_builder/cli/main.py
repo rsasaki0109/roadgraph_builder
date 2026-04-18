@@ -42,6 +42,7 @@ from roadgraph_builder.routing.trip_reconstruction import reconstruct_trips, tri
 from roadgraph_builder.routing.nearest import nearest_node
 from roadgraph_builder.routing.shortest_path import shortest_path
 from roadgraph_builder.semantics.road_class import RoadClassThresholds, infer_road_class
+from roadgraph_builder.semantics.signals import infer_signalized_junctions
 from roadgraph_builder.viz.svg_export import write_trajectory_graph_svg
 
 
@@ -334,6 +335,18 @@ def _build_parser() -> argparse.ArgumentParser:
         metavar="M/S",
         help="Lower bound on median speed for the 'arterial' class.",
     )
+
+    sig = sub.add_parser(
+        "infer-signalized-junctions",
+        help="Tag graph nodes as signalized candidates from stop-window patterns in a GPS trace.",
+    )
+    sig.add_argument("input_json", help="Road graph JSON.")
+    sig.add_argument("input_csv", help="Trajectory CSV (timestamp, x, y).")
+    sig.add_argument("output_json", help="Output JSON path.")
+    sig.add_argument("--stop-speed-mps", type=float, default=0.8, metavar="M/S")
+    sig.add_argument("--stop-min-duration-s", type=float, default=30.0, metavar="S")
+    sig.add_argument("--max-distance-m", type=float, default=20.0, metavar="M")
+    sig.add_argument("--min-stops", type=int, default=2, metavar="N")
 
     mt = sub.add_parser(
         "match-trajectory",
@@ -712,6 +725,30 @@ def main(argv: list[str] | None = None) -> int:
                 json.dumps(doc, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
             )
         print(json.dumps(summary, ensure_ascii=False, indent=2))
+        return 0
+    if args.command == "infer-signalized-junctions":
+        graph = _cli_load_graph(args.input_json)
+        try:
+            traj = load_trajectory_csv(args.input_csv)
+        except FileNotFoundError as e:
+            print(f"File not found: {e.filename}", file=sys.stderr)
+            return 1
+        labelled = infer_signalized_junctions(
+            graph,
+            traj,
+            stop_speed_mps=args.stop_speed_mps,
+            stop_min_duration_s=args.stop_min_duration_s,
+            max_distance_m=args.max_distance_m,
+            min_stops=args.min_stops,
+        )
+        export_graph_json(graph, args.output_json)
+        print(
+            json.dumps(
+                {"signalized_candidates": len(labelled), "details": labelled},
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
         return 0
     if args.command == "infer-road-class":
         graph = _cli_load_graph(args.input_json)
