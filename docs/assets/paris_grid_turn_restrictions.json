@@ -1,0 +1,115 @@
+{
+  "format_version": 1,
+  "turn_restrictions": [
+    {
+      "id": "tr_osm_0000",
+      "junction_node_id": "n439",
+      "from_edge_id": "e351",
+      "from_direction": "forward",
+      "to_edge_id": "e715",
+      "to_direction": "forward",
+      "restriction": "no_left_turn",
+      "source": "osm",
+      "confidence": 0.8
+    },
+    {
+      "id": "tr_osm_0001",
+      "junction_node_id": "n4",
+      "from_edge_id": "e2",
+      "from_direction": "forward",
+      "to_edge_id": "e1029",
+      "to_direction": "forward",
+      "restriction": "no_left_turn",
+      "source": "osm",
+      "confidence": 0.8
+    },
+    {
+      "id": "tr_osm_0002",
+      "junction_node_id": "n248",
+      "from_edge_id": "e715",
+      "from_direction": "forward",
+      "to_edge_id": "e714",
+      "to_direction": "forward",
+      "restriction": "no_left_turn",
+      "source": "osm",
+      "confidence": 0.8
+    },
+    {
+      "id": "tr_osm_0003",
+      "junction_node_id": "n439",
+      "from_edge_id": "e351",
+      "from_direction": "forward",
+      "to_edge_id": "e715",
+      "to_direction": "forward",
+      "restriction": "no_left_turn",
+      "source": "osm",
+      "confidence": 0.8
+    },
+    {
+      "id": "tr_osm_0004",
+      "junction_node_id": "n113",
+      "from_edge_id": "e617",
+      "from_direction": "forward",
+      "to_edge_id": "e76",
+      "to_direction": "forward",
+      "restriction": "no_left_turn",
+      "source": "osm",
+      "confidence": 0.8
+    },
+    {
+      "id": "tr_osm_0005",
+      "junction_node_id": "n393",
+      "from_edge_id": "e741",
+      "from_direction": "reverse",
+      "to_edge_id": "e890",
+      "to_direction": "forward",
+      "restriction": "no_left_turn",
+      "source": "osm",
+      "confidence": 0.8
+    },
+    {
+      "id": "tr_osm_0006",
+      "junction_node_id": "n393",
+      "from_edge_id": "e741",
+      "from_direction": "reverse",
+      "to_edge_id": "e741",
+      "to_direction": "forward",
+      "restriction": "no_u_turn",
+      "source": "osm",
+      "confidence": 0.8
+    },
+    {
+      "id": "tr_osm_0007",
+      "junction_node_id": "n245",
+      "from_edge_id": "e166",
+      "from_direction": "reverse",
+      "to_edge_id": "e632",
+      "to_direction": "forward",
+      "restriction": "only_right",
+      "source": "osm",
+      "confidence": 0.8
+    },
+    {
+      "id": "tr_osm_0008",
+      "junction_node_id": "n9",
+      "from_edge_id": "e5",
+      "from_direction": "reverse",
+      "to_edge_id": "e900",
+      "to_direction": "forward",
+      "restriction": "only_right",
+      "source": "osm",
+      "confidence": 0.8
+    },
+    {
+      "id": "tr_osm_0009",
+      "junction_node_id": "n524",
+      "from_edge_id": "e442",
+      "from_direction": "forward",
+      "to_edge_id": "e790",
+      "to_direction": "forward",
+      "restriction": "no_right_turn",
+      "source": "osm",
+      "confidence": 0.8
+    }
+  ]
+}

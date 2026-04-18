@@ -565,6 +565,68 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     _add_build_params(bun)
 
+    bog = sub.add_parser(
+        "build-osm-graph",
+        help="Build road graph JSON from an Overpass highway-ways dump (e.g. scripts/fetch_osm_highways.py output).",
+    )
+    bog.add_argument("input_json", help="Raw Overpass JSON (ways + nodes).")
+    bog.add_argument("output_json", help="Output road graph JSON path.")
+    bog.add_argument(
+        "--origin-json",
+        type=str,
+        default=None,
+        metavar="PATH",
+        help="JSON with lat0, lon0. Alternative to --origin-lat/--origin-lon.",
+    )
+    bog.add_argument("--origin-lat", type=float, default=None, metavar="DEG")
+    bog.add_argument("--origin-lon", type=float, default=None, metavar="DEG")
+    bog.add_argument(
+        "--highway-classes",
+        type=str,
+        default=None,
+        metavar="LIST",
+        help="Comma-separated highway= values to include (default: drivable set).",
+    )
+    _add_build_params(bog)
+
+    cor = sub.add_parser(
+        "convert-osm-restrictions",
+        help=(
+            "Map OSM type=restriction relations onto an existing road graph. "
+            "Writes a turn_restrictions JSON that export-bundle --turn-restrictions-json consumes."
+        ),
+    )
+    cor.add_argument("graph_json", help="Road graph JSON (with metadata.map_origin).")
+    cor.add_argument("restrictions_json", help="Raw Overpass JSON with restriction relations.")
+    cor.add_argument("output_json", help="Output turn_restrictions JSON path.")
+    cor.add_argument(
+        "--max-snap-m",
+        type=float,
+        default=15.0,
+        metavar="M",
+        help="Max distance from projected OSM via node to nearest graph node.",
+    )
+    cor.add_argument(
+        "--min-alignment",
+        type=float,
+        default=0.3,
+        metavar="COS",
+        help="Min cos(angle) between incident edge tangent and OSM way direction.",
+    )
+    cor.add_argument(
+        "--id-prefix",
+        type=str,
+        default="tr_osm_",
+        help="Prefix for generated turn_restrictions.id entries.",
+    )
+    cor.add_argument(
+        "--skipped-json",
+        type=str,
+        default=None,
+        metavar="PATH",
+        help="Optional path to write per-relation skip reasons.",
+    )
+
     return p
 
 
@@ -1100,6 +1162,85 @@ def main(argv: list[str] | None = None) -> int:
             fuse_bins=args.fuse_bins,
             origin_json_path=oj,
         )
+        return 0
+    if args.command == "build-osm-graph":
+        from roadgraph_builder.io.osm import build_graph_from_overpass_highways
+        params = _build_params_from_args(args)
+        try:
+            raw = json.loads(Path(args.input_json).read_text(encoding="utf-8"))
+        except FileNotFoundError as e:
+            print(f"File not found: {e.filename}", file=sys.stderr)
+            return 1
+        if not isinstance(raw, dict):
+            print("build-osm-graph: input JSON root must be an object.", file=sys.stderr)
+            return 1
+        oj = args.origin_json
+        if oj:
+            try:
+                lat0, lon0 = load_wgs84_origin_json(oj)
+            except FileNotFoundError as e:
+                print(f"File not found: {e.filename}", file=sys.stderr)
+                return 1
+        elif args.origin_lat is not None and args.origin_lon is not None:
+            lat0, lon0 = args.origin_lat, args.origin_lon
+        else:
+            print(
+                "build-osm-graph: pass --origin-json PATH or both --origin-lat and --origin-lon.",
+                file=sys.stderr,
+            )
+            return 1
+        hw_filter = None
+        if args.highway_classes:
+            hw_filter = {c.strip() for c in args.highway_classes.split(",") if c.strip()}
+        graph = build_graph_from_overpass_highways(
+            raw, origin_lat=lat0, origin_lon=lon0, params=params, highway_filter=hw_filter
+        )
+        export_graph_json(graph, args.output_json)
+        print(
+            f"Wrote {args.output_json}: {len(graph.nodes)} nodes, {len(graph.edges)} edges.",
+            file=sys.stderr,
+        )
+        return 0
+    if args.command == "convert-osm-restrictions":
+        from roadgraph_builder.io.osm import (
+            convert_osm_restrictions_to_graph,
+            load_overpass_json,
+        )
+        from roadgraph_builder.io.osm.turn_restrictions import strip_private_fields
+        try:
+            graph = _cli_load_graph(args.graph_json)
+            overpass = load_overpass_json(args.restrictions_json)
+        except FileNotFoundError as e:
+            print(f"File not found: {e.filename}", file=sys.stderr)
+            return 1
+        except KeyError as e:
+            print(f"{e}", file=sys.stderr)
+            return 1
+        try:
+            result = convert_osm_restrictions_to_graph(
+                graph,
+                overpass,
+                max_snap_distance_m=args.max_snap_m,
+                min_edge_tangent_alignment=args.min_alignment,
+                id_prefix=args.id_prefix,
+            )
+        except KeyError as e:
+            print(f"{e}", file=sys.stderr)
+            return 1
+        cleaned = strip_private_fields(result.restrictions)
+        doc = {"format_version": 1, "turn_restrictions": cleaned}
+        Path(args.output_json).write_text(
+            json.dumps(doc, indent=2) + "\n", encoding="utf-8"
+        )
+        print(
+            f"Wrote {args.output_json}: {len(cleaned)} restrictions "
+            f"({len(result.skipped)} skipped).",
+            file=sys.stderr,
+        )
+        if args.skipped_json:
+            Path(args.skipped_json).write_text(
+                json.dumps(result.skipped, indent=2) + "\n", encoding="utf-8"
+            )
         return 0
     return 2
 

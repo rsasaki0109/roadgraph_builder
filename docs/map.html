@@ -90,7 +90,8 @@
       <label>
         Layer
         <select id="dataset">
-          <option value="paris">Paris (OSM public GPS, ODbL)</option>
+          <option value="paris_grid">Paris grid (OSM highways + turn restrictions, ODbL)</option>
+          <option value="paris">Paris (OSM public GPS traces, ODbL)</option>
           <option value="osm">OSM sample (Berlin area)</option>
           <option value="toy">Toy (synthetic meters → map)</option>
         </select>
@@ -111,6 +112,7 @@
 
       const baseLayer = L.layerGroup().addTo(map);
       const routeOverlayLayer = L.layerGroup().addTo(map);
+      const restrictionsOverlayLayer = L.layerGroup().addTo(map);
 
       const legend = L.control({ position: "bottomright" });
       legend.onAdd = function () {
@@ -124,7 +126,8 @@
           '<div class="lg"><span class="sw" style="background:#facc15"></span> Route (Dijkstra)</div>' +
           '<div class="lg"><span class="sw dot" style="background:#b91c1c;border:2px solid #fff;box-sizing:border-box"></span> Graph node</div>' +
           '<div class="lg"><span class="sw dot" style="background:#10b981;border:2px solid #fff;box-sizing:border-box"></span> Route start</div>' +
-          '<div class="lg"><span class="sw dot" style="background:#ef4444;border:2px solid #fff;box-sizing:border-box"></span> Route end</div>';
+          '<div class="lg"><span class="sw dot" style="background:#ef4444;border:2px solid #fff;box-sizing:border-box"></span> Route end</div>' +
+          '<div class="lg"><span class="sw dot" style="background:#dc2626;border:2px solid #fff;box-sizing:border-box"></span> Turn restriction (OSM)</div>';
         L.DomEvent.disableClickPropagation(div);
         return div;
       };
@@ -186,6 +189,7 @@
       }
 
       const DATASET_URLS = {
+        paris_grid: "assets/map_paris_grid.geojson",
         paris: "assets/map_paris.geojson",
         osm: "assets/map_osm.geojson",
         toy: "assets/map_toy.geojson",
@@ -194,6 +198,11 @@
       // as soon as the user picks two nodes.
       const ROUTE_URLS = {
         paris: "assets/route_paris.geojson",
+        paris_grid: "assets/route_paris_grid.geojson",
+      };
+      // Optional turn_restrictions JSON overlay (drawn as markers).
+      const RESTRICTIONS_URLS = {
+        paris_grid: "assets/paris_grid_turn_restrictions.json",
       };
 
       // Per-dataset graph cached for JS Dijkstra.
@@ -461,8 +470,42 @@
         statusText("Click two graph nodes to route between them.");
       }
 
+      function drawRestrictionsOverlay(graph, restrictions) {
+        restrictionsOverlayLayer.clearLayers();
+        for (const r of restrictions) {
+          const ll = graph.nodes.get(r.junction_node_id);
+          if (!ll) continue;
+          const marker = L.circleMarker([ll.lat, ll.lon], {
+            radius: 7,
+            fillColor: "#dc2626",
+            color: "#fff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.95,
+          });
+          const popup =
+            "<b>" +
+            String(r.restriction).replace(/_/g, " ") +
+            "</b><br>junction " +
+            String(r.junction_node_id) +
+            "<br>from " +
+            String(r.from_edge_id) +
+            " (" +
+            String(r.from_direction) +
+            ")<br>to " +
+            String(r.to_edge_id) +
+            " (" +
+            String(r.to_direction) +
+            ")<br>source: " +
+            String(r.source || "osm");
+          marker.bindPopup(popup);
+          restrictionsOverlayLayer.addLayer(marker);
+        }
+      }
+
       async function show(which) {
         baseLayer.clearLayers();
+        restrictionsOverlayLayer.clearLayers();
         clearRoute();
         const url = DATASET_URLS[which] || DATASET_URLS.osm;
         const data = await loadGeo(url);
@@ -474,6 +517,17 @@
           onEachFeature: bindCommonPopups,
         });
         baseLayer.addLayer(gj);
+
+        const restrictionsUrl = RESTRICTIONS_URLS[which];
+        if (restrictionsUrl) {
+          try {
+            const trData = await loadGeo(restrictionsUrl);
+            const list = Array.isArray(trData) ? trData : trData.turn_restrictions || [];
+            drawRestrictionsOverlay(graphCache[which], list);
+          } catch (err) {
+            console.warn("restrictions overlay failed:", err);
+          }
+        }
 
         const routeUrl = ROUTE_URLS[which];
         if (routeUrl) {
@@ -511,7 +565,7 @@
         })
         .catch(() => {});
 
-      show("paris").catch((err) => {
+      show("paris_grid").catch((err) => {
         document.querySelector(".bar").appendChild(document.createTextNode(" Load error: " + err));
       });
     </script>

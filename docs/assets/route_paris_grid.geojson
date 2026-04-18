@@ -1,0 +1,401 @@
+{
+  "type": "FeatureCollection",
+  "name": "route_n312_to_n191",
+  "properties": {
+    "origin_lat": 48.867,
+    "origin_lon": 2.347,
+    "from_node": "n312",
+    "to_node": "n191",
+    "total_length_m": 909.441882468675,
+    "edge_count": 11
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "route",
+        "from_node": "n312",
+        "to_node": "n191",
+        "total_length_m": 909.441882468675,
+        "edge_count": 11
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            2.343178,
+            48.8691431
+          ],
+          [
+            2.3439074,
+            48.8689616
+          ],
+          [
+            2.3446441,
+            48.8687793
+          ],
+          [
+            2.3449091,
+            48.8687145
+          ],
+          [
+            2.3451343,
+            48.8686594
+          ],
+          [
+            2.3451707,
+            48.8686591
+          ],
+          [
+            2.3456135,
+            48.8685509
+          ],
+          [
+            2.3458412,
+            48.8691934
+          ],
+          [
+            2.3458704,
+            48.869251
+          ],
+          [
+            2.3461166,
+            48.8696482
+          ],
+          [
+            2.346733,
+            48.8708741
+          ],
+          [
+            2.3479102,
+            48.8706756
+          ],
+          [
+            2.3478824,
+            48.8708215
+          ],
+          [
+            2.3479005,
+            48.8720024
+          ],
+          [
+            2.3479039,
+            48.8724568
+          ],
+          [
+            2.350047,
+            48.8721309
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "route_edge",
+        "step": 0,
+        "edge_id": "e224",
+        "direction": "forward",
+        "from_node": "n312",
+        "to_node": "n313"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            2.343178,
+            48.8691431
+          ],
+          [
+            2.3439074,
+            48.8689616
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "route_edge",
+        "step": 1,
+        "edge_id": "e657",
+        "direction": "forward",
+        "from_node": "n313",
+        "to_node": "n619"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            2.3439074,
+            48.8689616
+          ],
+          [
+            2.3446441,
+            48.8687793
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "route_edge",
+        "step": 2,
+        "edge_id": "e576",
+        "direction": "forward",
+        "from_node": "n619",
+        "to_node": "n620"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            2.3446441,
+            48.8687793
+          ],
+          [
+            2.3449091,
+            48.8687145
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "route_edge",
+        "step": 3,
+        "edge_id": "e1062",
+        "direction": "forward",
+        "from_node": "n620",
+        "to_node": "n852"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            2.3449091,
+            48.8687145
+          ],
+          [
+            2.3451343,
+            48.8686594
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "route_edge",
+        "step": 4,
+        "edge_id": "e1061",
+        "direction": "forward",
+        "from_node": "n852",
+        "to_node": "n850"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            2.3451343,
+            48.8686594
+          ],
+          [
+            2.3451707,
+            48.8686591
+          ],
+          [
+            2.3456135,
+            48.8685509
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "route_edge",
+        "step": 5,
+        "edge_id": "e1047",
+        "direction": "forward",
+        "from_node": "n850",
+        "to_node": "n169"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            2.3456135,
+            48.8685509
+          ],
+          [
+            2.3458412,
+            48.8691934
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "route_edge",
+        "step": 6,
+        "edge_id": "e513",
+        "direction": "forward",
+        "from_node": "n169",
+        "to_node": "n17"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            2.3458412,
+            48.8691934
+          ],
+          [
+            2.3458704,
+            48.869251
+          ],
+          [
+            2.3461166,
+            48.8696482
+          ],
+          [
+            2.346733,
+            48.8708741
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "route_edge",
+        "step": 7,
+        "edge_id": "e9",
+        "direction": "reverse",
+        "from_node": "n17",
+        "to_node": "n16"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            2.346733,
+            48.8708741
+          ],
+          [
+            2.3479102,
+            48.8706756
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "route_edge",
+        "step": 8,
+        "edge_id": "e338",
+        "direction": "reverse",
+        "from_node": "n16",
+        "to_node": "n172"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            2.3479102,
+            48.8706756
+          ],
+          [
+            2.3478824,
+            48.8708215
+          ],
+          [
+            2.3479005,
+            48.8720024
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "route_edge",
+        "step": 9,
+        "edge_id": "e337",
+        "direction": "reverse",
+        "from_node": "n172",
+        "to_node": "n190"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            2.3479005,
+            48.8720024
+          ],
+          [
+            2.3479039,
+            48.8724568
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "route_edge",
+        "step": 10,
+        "edge_id": "e129",
+        "direction": "forward",
+        "from_node": "n190",
+        "to_node": "n191"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            2.3479039,
+            48.8724568
+          ],
+          [
+            2.350047,
+            48.8721309
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "route_start",
+        "node_id": "n312"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.343178,
+          48.8691431
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "kind": "route_end",
+        "node_id": "n191"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.350047,
+          48.8721309
+        ]
+      }
+    }
+  ]
+}

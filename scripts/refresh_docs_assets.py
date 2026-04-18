@@ -82,11 +82,80 @@ def main() -> None:
         dataset_name="osm",
     )
 
+    # OSM-highway-derived Paris grid + turn_restrictions demo
+    # Fetch + convert are left to the user (requires network access); this
+    # block only regenerates the three committed artefacts when the inputs
+    # already exist under /tmp.
+    paris_highways = Path("/tmp/osm_real_data/paris_highways.json")
+    paris_tr_raw = Path("/tmp/osm_real_data/paris_turn_restrictions_raw.json")
+    paris_origin = ROOT / "examples" / "toy_map_origin.json"  # fallback label
+    paris_origin_json = Path("/tmp/osm_real_data/paris_merged_origin.json")
+    if paris_highways.is_file() and paris_tr_raw.is_file() and paris_origin_json.is_file():
+        from roadgraph_builder.io.osm import (
+            build_graph_from_overpass_highways,
+            convert_osm_restrictions_to_graph,
+            load_overpass_json,
+        )
+        from roadgraph_builder.io.osm.turn_restrictions import strip_private_fields
+        from roadgraph_builder.navigation.turn_restrictions import load_turn_restrictions_json
+        from roadgraph_builder.pipeline.build_graph import BuildParams
+        from roadgraph_builder.routing.geojson_export import write_route_geojson
+        from roadgraph_builder.routing.shortest_path import shortest_path
+        import numpy as np
+
+        lat0, lon0 = _load_origin(paris_origin_json)
+        hovp = load_overpass_json(paris_highways)
+        grid = build_graph_from_overpass_highways(
+            hovp,
+            origin_lat=lat0,
+            origin_lon=lon0,
+            params=BuildParams(
+                simplify_tolerance_m=0.0,
+                post_simplify_tolerance_m=0.0,
+                merge_endpoint_m=2.0,
+            ),
+        )
+        tr_raw = load_overpass_json(paris_tr_raw)
+        conv = convert_osm_restrictions_to_graph(grid, tr_raw, max_snap_distance_m=15.0)
+        cleaned = strip_private_fields(conv.restrictions)
+        (ASSETS / "paris_grid_turn_restrictions.json").write_text(
+            json.dumps({"format_version": 1, "turn_restrictions": cleaned}, indent=2) + "\n",
+            encoding="utf-8",
+        )
+        grid_geo_tmp = ASSETS / "_map_paris_grid.tmp.geojson"
+        export_map_geojson(
+            grid,
+            np.zeros((0, 2)),
+            grid_geo_tmp,
+            origin_lat=lat0,
+            origin_lon=lon0,
+            dataset_name="paris_grid",
+        )
+        raw = json.loads(grid_geo_tmp.read_text(encoding="utf-8"))
+        for f in raw["features"]:
+            p = f["properties"]
+            for k in ("source", "direction_observed"):
+                p.pop(k, None)
+        (ASSETS / "map_paris_grid.geojson").write_text(
+            json.dumps(raw, separators=(",", ":")), encoding="utf-8"
+        )
+        grid_geo_tmp.unlink(missing_ok=True)
+        trs = load_turn_restrictions_json(ASSETS / "paris_grid_turn_restrictions.json")
+        route = shortest_path(grid, "n312", "n191", turn_restrictions=trs)
+        write_route_geojson(
+            ASSETS / "route_paris_grid.geojson",
+            grid,
+            route,
+            origin_lat=lat0,
+            origin_lon=lon0,
+        )
+
     # Viewer metadata (bounds hint optional)
     meta = {
         "datasets": [
             {"id": "toy", "label": "Toy trajectory", "graph": "assets/sample_graph.json", "csv": "assets/sample_trajectory.csv"},
             {"id": "osm", "label": "OSM public GPS (Berlin area sample)", "graph": "assets/osm_graph.json", "csv": "assets/osm_trajectory.csv"},
+            {"id": "paris_grid", "label": "Paris OSM-highway grid (turn_restrictions demo)", "map": "assets/map_paris_grid.geojson", "restrictions": "assets/paris_grid_turn_restrictions.json"},
         ]
     }
     (ASSETS / "viewer_config.json").write_text(json.dumps(meta, indent=2) + "\n", encoding="utf-8")

@@ -32,6 +32,13 @@ Codex / 次のセッション向け。**事実と意図を分けて**書く。
 - CLI: `route`（id or `--from-latlon`/`--to-latlon`）、`--turn-restrictions-json`、`--output PATH.geojson`、`nearest-node`、`stats`。
 - `core.graph.stats.graph_stats` / `junction_stats` は `export-bundle` と `stats` CLI が共有。
 
+### OSM 連携（turn_restrictions 実データ）
+
+- **`build-osm-graph`**: `scripts/fetch_osm_highways.py` が Overpass からダウンした highway ways を `polylines_to_graph` に流し込む。全 OSM 交差点が graph junction になるので、turn_restrictions の `via_node` を素直にマップできる。`roadgraph_builder.io.osm.build_graph_from_overpass_highways`。
+- **`convert-osm-restrictions`**: OSM `type=restriction` リレーションを graph-space `turn_restrictions.json` に変換。via→最寄り node snap + way tangent alignment で from/to edge を決定。`no_u_turn` / same-way は `from_edge == to_edge` を許可。未マップ relation は `--skipped-json` にリーズン付きで出力。
+- **Paris bbox 検証**: 11 OSM restrictions のうち **10 がマップ成功**。`route n312→n191` が `--turn-restrictions-json` 有無で 878 m→909 m に変わる（detour される）。
+- **Viewer**: `docs/map.html` のデフォルトが `paris_grid` に移動。赤ドットマーカーで restriction junction を表示、pop-up に restriction 種別と from/to edge。pre-baked overlay `route_paris_grid.geojson` は制限順守ルート。
+
 ### LiDAR / カメラ
 
 - **LAS 1.0–1.4 ヘッダ読み**: `io.lidar.las.read_las_header`（`laspy` 非依存）、`inspect-lidar` CLI。
@@ -78,7 +85,7 @@ Codex / 次のセッション向け。**事実と意図を分けて**書く。
 どれも user 指示待ち。重要度ではなく "やれば効く度":
 
 1. **`v0.3.0` タグ release** — すぐ実行可。Release notes は `CHANGELOG.md [0.3.0]` から自動生成される。
-2. **turn_restrictions 実データ化** — Paris / 他の都市で手編集 or camera detection ベースの具体例を作り、`docs/assets` に足す。click-to-route UI の restrictions 対応が見えるようになる。
+2. **Viewer JS Dijkstra で turn_restrictions 順守** — 現状 click-to-route は制限無視（pre-baked overlay のみ順守）。`(node, incoming_edge, direction)` 状態付き JS Dijkstra にすれば interactive に効く。
 3. **LAS/LAZ 実データ検証** — OpenTopography / USGS 3DEP など公開 LAS でヘッダ + 点読みを検証。必要なら合成 LAS 以外にリアル LAS サンプル（数 MB）を同梱検討。
 4. **カメラ画像 → 投影** — `io/camera/` に画像 → 2D 投影 → 検出 JSON のパイプラインを stub → 実装。
 
