@@ -45,6 +45,7 @@ def test_cli_completions_match_subparsers():
         "nearest-node",
         "route",
         "stats",
+        "match-trajectory",
         "fuse-lidar",
         "export-lanelet2",
         "apply-camera",

@@ -36,6 +36,7 @@ from roadgraph_builder.pipeline.build_graph import (
 )
 from roadgraph_builder.core.graph.stats import graph_stats, junction_stats
 from roadgraph_builder.routing.geojson_export import write_route_geojson
+from roadgraph_builder.routing.map_match import coverage_stats, snap_trajectory_to_graph
 from roadgraph_builder.routing.nearest import nearest_node
 from roadgraph_builder.routing.shortest_path import shortest_path
 from roadgraph_builder.viz.svg_export import write_trajectory_graph_svg
@@ -272,6 +273,27 @@ def _build_parser() -> argparse.ArgumentParser:
         default=None,
         metavar="DEG",
         help="WGS84 origin longitude for --output.",
+    )
+
+    mt = sub.add_parser(
+        "match-trajectory",
+        help="Snap a trajectory CSV to the graph (per-sample nearest-edge projection).",
+    )
+    mt.add_argument("input_json", help="Road graph JSON.")
+    mt.add_argument("input_csv", help="Trajectory CSV (timestamp, x, y) in the graph's meter frame.")
+    mt.add_argument(
+        "--max-distance-m",
+        type=float,
+        default=15.0,
+        metavar="M",
+        help="Samples farther than this from any edge are reported as unmatched.",
+    )
+    mt.add_argument(
+        "--output",
+        type=str,
+        default=None,
+        metavar="PATH",
+        help="Optional JSON path to write the per-sample snap details.",
     )
 
     st = sub.add_parser(
@@ -563,6 +585,39 @@ def main(argv: list[str] | None = None) -> int:
                 indent=2,
             )
         )
+        return 0
+    if args.command == "match-trajectory":
+        graph = _cli_load_graph(args.input_json)
+        try:
+            traj = load_trajectory_csv(args.input_csv)
+        except FileNotFoundError as e:
+            print(f"File not found: {e.filename}", file=sys.stderr)
+            return 1
+        snapped = snap_trajectory_to_graph(graph, traj.xy, max_distance_m=args.max_distance_m)
+        stats = coverage_stats(snapped)
+        doc = {
+            "stats": stats,
+            "samples": [
+                {
+                    "index": s.index,
+                    "edge_id": s.edge_id,
+                    "distance_m": s.distance_m,
+                    "arc_length_m": s.arc_length_m,
+                    "edge_length_m": s.edge_length_m,
+                    "t": s.t,
+                    "projection_xy_m": list(s.projection_xy_m),
+                }
+                if s is not None
+                else {"index": i, "unmatched": True}
+                for i, s in enumerate(snapped)
+            ],
+        }
+        if args.output:
+            Path(args.output).write_text(
+                json.dumps(doc, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+            )
+        # Always print the stats block so single-run operators see the summary.
+        print(json.dumps(stats, ensure_ascii=False, indent=2))
         return 0
     if args.command == "stats":
         graph = _cli_load_graph(args.input_json)

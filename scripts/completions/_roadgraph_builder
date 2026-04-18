@@ -26,6 +26,7 @@ _roadgraph_builder() {
         'nearest-node:Find graph node nearest to a lat/lon or x/y'
         'route:Dijkstra shortest path'
         'stats:Print graph_stats + junction counts'
+        'match-trajectory:Snap a trajectory CSV to the graph'
         'fuse-lidar:Fit lane boundaries from CSV / LAS / LAZ points'
         'export-lanelet2:Write OSM XML 0.6 (Lanelet2 / JOSM)'
         'apply-camera:Merge camera detections into attributes.hd.semantic_rules'

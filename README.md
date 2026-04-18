@@ -282,6 +282,18 @@ roadgraph_builder inspect-lidar examples/sample_lidar.las
 
 Edges with fewer than two accepted points in total are unchanged. Tune `--max-dist-m` for your cloud density.
 
+### Map matching (snap a trajectory to the graph)
+
+Given a road graph and a new trajectory CSV in the same meter frame, `match-trajectory` projects each sample onto the closest edge's polyline and summarises how well the trajectory tracks the graph.
+
+```bash
+roadgraph_builder match-trajectory /tmp/rg_bundle/sim/road_graph.json \
+  examples/sample_trajectory.csv --max-distance-m 5 --output /tmp/match.json
+# Summary on stdout; per-sample snap details in /tmp/match.json
+```
+
+Samples farther than `--max-distance-m` from any edge are reported as unmatched in both the summary and the detailed JSON.
+
 ### Shortest path (routing)
 
 Dijkstra over centerline lengths, with optional **turn restrictions**. By default edges are traversable in both directions; with `--turn-restrictions-json` the search respects `no_left_turn` / `no_right_turn` / `no_straight` / `no_u_turn` (forbidden transitions) and `only_left` / `only_right` / `only_straight` (whitelisted transitions) at the specified junction / incoming approach.
