@@ -111,11 +111,20 @@ def build_map_geojson(
         for x, y in e.polyline:
             lon, lat = meters_to_lonlat(float(x), float(y), origin_lat, origin_lon)
             coords.append([lon, lat])
+        length_m = 0.0
+        pl = e.polyline
+        for i in range(len(pl) - 1):
+            dx = float(pl[i + 1][0]) - float(pl[i][0])
+            dy = float(pl[i + 1][1]) - float(pl[i][1])
+            length_m += (dx * dx + dy * dy) ** 0.5
         cl_props: dict[str, Any] = {
+            **{k: v for k, v in e.attributes.items()},
             "kind": "centerline",
             "dataset": dataset_name,
             "edge_id": e.id,
-            **{k: v for k, v in e.attributes.items()},
+            "start_node_id": e.start_node_id,
+            "end_node_id": e.end_node_id,
+            "length_m": length_m,
         }
         hd = e.attributes.get("hd")
         if isinstance(hd, dict):

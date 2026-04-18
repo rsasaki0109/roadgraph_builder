@@ -2,7 +2,7 @@
   "manifest_version": 1,
   "generator": "roadgraph_builder",
   "roadgraph_builder_version": "0.3.0",
-  "generated_at_utc": "2026-04-17T05:21:29Z",
+  "generated_at_utc": "2026-04-18T00:21:54Z",
   "dataset_name": "roadgraph_sample_bundle",
   "origin_wgs84_deg": {
     "lat": 52.52,

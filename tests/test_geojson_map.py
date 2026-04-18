@@ -61,3 +61,32 @@ def test_build_map_geojson_semantic_summary():
     cl = [f for f in fc["features"] if f["properties"].get("kind") == "centerline"]
     assert len(cl) == 1
     assert "30" in cl[0]["properties"].get("semantic_summary", "")
+
+
+def test_build_map_geojson_centerline_adjacency_and_length():
+    g = Graph(
+        nodes=[
+            Node(id="n0", position=(0.0, 0.0)),
+            Node(id="n1", position=(10.0, 0.0)),
+        ],
+        edges=[
+            Edge(
+                id="e0",
+                start_node_id="n0",
+                end_node_id="n1",
+                polyline=[(0.0, 0.0), (5.0, 0.0), (10.0, 0.0)],
+                attributes={"kind": "lane_centerline", "source": "trajectory_mvp"},
+            )
+        ],
+    )
+    traj = np.zeros((0, 2), dtype=np.float64)
+    fc = build_map_geojson(g, traj, origin_lat=0.0, origin_lon=0.0, dataset_name="t")
+    cls = [f for f in fc["features"] if f["properties"].get("kind") == "centerline"]
+    assert len(cls) == 1
+    p = cls[0]["properties"]
+    # GeoJSON kind must win over edge.attributes["kind"].
+    assert p["kind"] == "centerline"
+    assert p["start_node_id"] == "n0"
+    assert p["end_node_id"] == "n1"
+    assert p["length_m"] == 10.0
+    assert p["edge_id"] == "e0"

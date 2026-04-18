@@ -28,10 +28,23 @@
       .bar a {
         color: #7dd3fc;
       }
-      select {
+      select,
+      button {
         font: inherit;
-        padding: 4px 8px;
+        padding: 4px 10px;
         border-radius: 6px;
+        border: 1px solid #334155;
+        background: #1e293b;
+        color: #f8fafc;
+        cursor: pointer;
+      }
+      button:disabled {
+        opacity: 0.5;
+        cursor: default;
+      }
+      #route-status {
+        font-size: 12px;
+        opacity: 0.8;
       }
       .map-legend {
         background: rgba(255, 255, 255, 0.94);
@@ -82,6 +95,8 @@
           <option value="toy">Toy (synthetic meters → map)</option>
         </select>
       </label>
+      <button id="clear-route" title="Clear the current route selection">Clear route</button>
+      <span id="route-status">Click two graph nodes to route between them.</span>
       <a href="index.html">Diagram viewer</a>
       <a id="repo" href="#">GitHub</a>
     </div>
@@ -94,7 +109,8 @@
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
       }).addTo(map);
 
-      let layerGroup = L.layerGroup().addTo(map);
+      const baseLayer = L.layerGroup().addTo(map);
+      const routeOverlayLayer = L.layerGroup().addTo(map);
 
       const legend = L.control({ position: "bottomright" });
       legend.onAdd = function () {
@@ -119,7 +135,7 @@
         if (k === "trajectory") {
           return { color: "#2563eb", weight: 4, opacity: 0.75 };
         }
-        if (k === "centerline") {
+        if (k === "centerline" || k === "lane_centerline") {
           return { color: "#ea580c", weight: 5, opacity: 0.9 };
         }
         if (k === "lane_boundary_left") {
@@ -132,8 +148,7 @@
           return { color: "#facc15", weight: 7, opacity: 0.92 };
         }
         if (k === "route_edge") {
-          // Per-edge features are hidden (merged route carries geometry); keep
-          // the popup wiring only by making them invisible.
+          // Per-edge features are hidden (merged route carries geometry).
           return { color: "#facc15", weight: 0, opacity: 0 };
         }
         return { color: "#64748b", weight: 2 };
@@ -175,10 +190,19 @@
         osm: "assets/map_osm.geojson",
         toy: "assets/map_toy.geojson",
       };
-      // Optional route overlay per dataset; missing entries simply skip the overlay.
+      // Optional pre-baked route overlay. Dynamic click-to-route replaces this
+      // as soon as the user picks two nodes.
       const ROUTE_URLS = {
         paris: "assets/route_paris.geojson",
       };
+
+      // Per-dataset graph cached for JS Dijkstra.
+      const graphCache = {};
+      let currentRouteSelection = { from: null, to: null };
+
+      function statusText(msg) {
+        document.getElementById("route-status").textContent = msg;
+      }
 
       function bindCommonPopups(f, layer) {
         const p = f.properties || {};
@@ -188,15 +212,21 @@
           if (p.junction_hint) txt += "<br>hint: " + p.junction_hint;
           if (p.junction_type) txt += "<br>type: " + p.junction_type;
           layer.bindPopup(txt);
-        } else if (p.kind === "centerline" && p.edge_id) {
+          layer.on("click", (ev) => {
+            L.DomEvent.stopPropagation(ev);
+            onNodeClick(p.node_id);
+          });
+        } else if ((p.kind === "centerline" || p.kind === "lane_centerline") && p.edge_id) {
           let txt = String(p.edge_id);
           if (p.semantic_summary) {
             txt += "<br/>" + String(p.semantic_summary);
           }
+          if (p.length_m != null) {
+            txt += "<br/>" + Number(p.length_m).toFixed(1) + " m";
+          }
           layer.bindPopup(txt);
         } else if (p.kind === "route") {
-          let txt =
-            "route " + String(p.from_node) + " → " + String(p.to_node);
+          let txt = "route " + String(p.from_node) + " → " + String(p.to_node);
           if (p.total_length_m != null) {
             txt += "<br>" + Number(p.total_length_m).toFixed(1) + " m";
           }
@@ -211,16 +241,233 @@
         }
       }
 
+      // Build adjacency + node lookup from a map GeoJSON FeatureCollection.
+      function buildGraph(data) {
+        const adj = new Map(); // node_id -> Array<{edge_id, length_m, neighbor, coords}>
+        const nodes = new Map(); // node_id -> {lat, lon}
+        const edges = new Map(); // edge_id -> {coords, start, end}
+        for (const f of data.features) {
+          const p = f.properties || {};
+          if (p.kind === "node" && p.node_id && f.geometry && f.geometry.type === "Point") {
+            const c = f.geometry.coordinates;
+            nodes.set(p.node_id, { lat: c[1], lon: c[0] });
+          } else if (
+            (p.kind === "centerline" || p.kind === "lane_centerline") &&
+            p.edge_id &&
+            p.start_node_id &&
+            p.end_node_id &&
+            typeof p.length_m === "number" &&
+            f.geometry &&
+            f.geometry.type === "LineString"
+          ) {
+            const coords = f.geometry.coordinates;
+            edges.set(p.edge_id, { coords, start: p.start_node_id, end: p.end_node_id, length: p.length_m });
+            if (!adj.has(p.start_node_id)) adj.set(p.start_node_id, []);
+            adj.get(p.start_node_id).push({
+              edge_id: p.edge_id,
+              length: p.length_m,
+              neighbor: p.end_node_id,
+              reverse: false,
+            });
+            if (p.start_node_id !== p.end_node_id) {
+              if (!adj.has(p.end_node_id)) adj.set(p.end_node_id, []);
+              adj.get(p.end_node_id).push({
+                edge_id: p.edge_id,
+                length: p.length_m,
+                neighbor: p.start_node_id,
+                reverse: true,
+              });
+            }
+          }
+        }
+        return { adj, nodes, edges };
+      }
+
+      // Tiny binary-heap Dijkstra; enough for the demo sizes (~200 nodes).
+      function dijkstra(graph, fromNode, toNode) {
+        if (!graph.adj.has(fromNode)) return null;
+        if (!graph.adj.has(toNode) && fromNode !== toNode) return null;
+        const dist = new Map();
+        const prev = new Map();
+        dist.set(fromNode, 0);
+        const heap = [[0, fromNode]];
+        const popMin = () => {
+          const top = heap[0];
+          const last = heap.pop();
+          if (heap.length) {
+            heap[0] = last;
+            let i = 0;
+            for (;;) {
+              const l = 2 * i + 1;
+              const r = 2 * i + 2;
+              let best = i;
+              if (l < heap.length && heap[l][0] < heap[best][0]) best = l;
+              if (r < heap.length && heap[r][0] < heap[best][0]) best = r;
+              if (best === i) break;
+              [heap[i], heap[best]] = [heap[best], heap[i]];
+              i = best;
+            }
+          }
+          return top;
+        };
+        const push = (entry) => {
+          heap.push(entry);
+          let i = heap.length - 1;
+          while (i > 0) {
+            const parent = (i - 1) >> 1;
+            if (heap[parent][0] <= heap[i][0]) break;
+            [heap[i], heap[parent]] = [heap[parent], heap[i]];
+            i = parent;
+          }
+        };
+        while (heap.length) {
+          const [d, u] = popMin();
+          if (u === toNode) break;
+          if (d > (dist.get(u) ?? Infinity)) continue;
+          const outs = graph.adj.get(u) || [];
+          for (const out of outs) {
+            const nd = d + out.length;
+            if (nd < (dist.get(out.neighbor) ?? Infinity)) {
+              dist.set(out.neighbor, nd);
+              prev.set(out.neighbor, { from: u, edge_id: out.edge_id, reverse: out.reverse });
+              push([nd, out.neighbor]);
+            }
+          }
+        }
+        if (!dist.has(toNode)) return null;
+        const nodesSeq = [toNode];
+        const edgesSeq = [];
+        const dirSeq = [];
+        let cur = toNode;
+        while (prev.has(cur)) {
+          const step = prev.get(cur);
+          edgesSeq.push(step.edge_id);
+          dirSeq.push(step.reverse ? "reverse" : "forward");
+          cur = step.from;
+          nodesSeq.push(cur);
+        }
+        nodesSeq.reverse();
+        edgesSeq.reverse();
+        dirSeq.reverse();
+        return { totalLength: dist.get(toNode), nodes: nodesSeq, edges: edgesSeq, directions: dirSeq };
+      }
+
+      function drawDynamicRoute(graph, dij) {
+        routeOverlayLayer.clearLayers();
+        const coords = [];
+        for (let i = 0; i < dij.edges.length; i++) {
+          const e = graph.edges.get(dij.edges[i]);
+          const c = e.coords.slice();
+          if (dij.directions[i] === "reverse") c.reverse();
+          if (!coords.length) coords.push(...c);
+          else coords.push(...c.slice(1));
+        }
+        if (!coords.length) return;
+        const line = L.polyline(
+          coords.map((p) => [p[1], p[0]]),
+          { color: "#facc15", weight: 7, opacity: 0.92 }
+        );
+        line.bindPopup(
+          "route " +
+            dij.nodes[0] +
+            " → " +
+            dij.nodes[dij.nodes.length - 1] +
+            "<br>" +
+            dij.totalLength.toFixed(1) +
+            " m<br>" +
+            dij.edges.length +
+            " edges"
+        );
+        routeOverlayLayer.addLayer(line);
+
+        const startLL = graph.nodes.get(dij.nodes[0]);
+        const endLL = graph.nodes.get(dij.nodes[dij.nodes.length - 1]);
+        if (startLL) {
+          routeOverlayLayer.addLayer(
+            L.circleMarker([startLL.lat, startLL.lon], {
+              radius: 8,
+              fillColor: "#10b981",
+              color: "#fff",
+              weight: 3,
+              opacity: 1,
+              fillOpacity: 1,
+            }).bindPopup("start: " + dij.nodes[0])
+          );
+        }
+        if (endLL) {
+          routeOverlayLayer.addLayer(
+            L.circleMarker([endLL.lat, endLL.lon], {
+              radius: 8,
+              fillColor: "#ef4444",
+              color: "#fff",
+              weight: 3,
+              opacity: 1,
+              fillOpacity: 1,
+            }).bindPopup("end: " + dij.nodes[dij.nodes.length - 1])
+          );
+        }
+      }
+
+      function onNodeClick(nodeId) {
+        const sel = currentRouteSelection;
+        if (!sel.from) {
+          sel.from = nodeId;
+          sel.to = null;
+          statusText("from = " + nodeId + " — click another node to route");
+          return;
+        }
+        if (sel.from === nodeId) {
+          statusText("same node — pick a different destination");
+          return;
+        }
+        sel.to = nodeId;
+        const which = document.getElementById("dataset").value;
+        const graph = graphCache[which];
+        if (!graph) {
+          statusText("dataset graph not loaded yet");
+          return;
+        }
+        const dij = dijkstra(graph, sel.from, sel.to);
+        if (!dij) {
+          statusText("no path " + sel.from + " → " + sel.to + " (different components?)");
+          return;
+        }
+        drawDynamicRoute(graph, dij);
+        statusText(
+          "route " +
+            sel.from +
+            " → " +
+            sel.to +
+            ": " +
+            dij.totalLength.toFixed(1) +
+            " m · " +
+            dij.edges.length +
+            " edges · click another node for a new from"
+        );
+        // Leave from empty so the next click sets a new "from".
+        sel.from = null;
+        sel.to = null;
+      }
+
+      function clearRoute() {
+        routeOverlayLayer.clearLayers();
+        currentRouteSelection = { from: null, to: null };
+        statusText("Click two graph nodes to route between them.");
+      }
+
       async function show(which) {
-        layerGroup.clearLayers();
+        baseLayer.clearLayers();
+        clearRoute();
         const url = DATASET_URLS[which] || DATASET_URLS.osm;
         const data = await loadGeo(url);
+        graphCache[which] = buildGraph(data);
+
         const gj = L.geoJSON(data, {
           style: styleLine,
           pointToLayer: pointLayer,
           onEachFeature: bindCommonPopups,
         });
-        layerGroup.addLayer(gj);
+        baseLayer.addLayer(gj);
 
         const routeUrl = ROUTE_URLS[which];
         if (routeUrl) {
@@ -231,9 +478,8 @@
               pointToLayer: pointLayer,
               onEachFeature: bindCommonPopups,
             });
-            layerGroup.addLayer(rj);
+            routeOverlayLayer.addLayer(rj);
           } catch (err) {
-            // Route overlay is optional; surface in console but do not block.
             console.warn("route overlay failed:", err);
           }
         }
@@ -249,6 +495,7 @@
       document.getElementById("dataset").addEventListener("change", (e) => {
         show(e.target.value).catch((err) => alert(String(err)));
       });
+      document.getElementById("clear-route").addEventListener("click", clearRoute);
 
       fetch("assets/site.json")
         .then((r) => r.json())

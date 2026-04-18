@@ -54,9 +54,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "roadgraph_sample_bundle",
-        "edge_id": "e0",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -154,6 +152,11 @@
           "quality": "lidar_binned_median",
           "note": "Boundaries from XY points near centerline (binned median); not survey-grade."
         },
+        "dataset": "roadgraph_sample_bundle",
+        "edge_id": "e0",
+        "start_node_id": "n0",
+        "end_node_id": "n1",
+        "length_m": 15.01698871710472,
         "semantic_summary": "speed_limit 50 km/h; traffic_light"
       },
       "geometry": {
@@ -281,9 +284,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "roadgraph_sample_bundle",
-        "edge_id": "e1",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -321,7 +322,12 @@
           "semantic_rules": [],
           "quality": "lidar_binned_median",
           "note": "Boundaries from XY points near centerline (binned median); not survey-grade."
-        }
+        },
+        "dataset": "roadgraph_sample_bundle",
+        "edge_id": "e1",
+        "start_node_id": "n2",
+        "end_node_id": "n3",
+        "length_m": 15.005998201318711
       },
       "geometry": {
         "type": "LineString",

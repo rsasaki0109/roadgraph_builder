@@ -26558,9 +26558,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e0",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -26606,7 +26604,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e0",
+        "start_node_id": "n0",
+        "end_node_id": "n1",
+        "length_m": 43.05939708276463
       },
       "geometry": {
         "type": "LineString",
@@ -26693,9 +26696,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e1",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -26965,7 +26966,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e1",
+        "start_node_id": "n2",
+        "end_node_id": "n3",
+        "length_m": 664.4176113416672
       },
       "geometry": {
         "type": "LineString",
@@ -27388,9 +27394,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e2",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -27660,7 +27664,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e2",
+        "start_node_id": "n4",
+        "end_node_id": "n5",
+        "length_m": 257.8629361860474
       },
       "geometry": {
         "type": "LineString",
@@ -28083,9 +28092,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e3",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -28339,7 +28346,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e3",
+        "start_node_id": "n6",
+        "end_node_id": "n7",
+        "length_m": 189.90351738000967
       },
       "geometry": {
         "type": "LineString",
@@ -28738,9 +28750,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e4",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -29010,7 +29020,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e4",
+        "start_node_id": "n8",
+        "end_node_id": "n9",
+        "length_m": 1319.23142730596
       },
       "geometry": {
         "type": "LineString",
@@ -29433,9 +29448,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e5",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -29705,7 +29718,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e5",
+        "start_node_id": "n0",
+        "end_node_id": "n10",
+        "length_m": 564.5410033260906
       },
       "geometry": {
         "type": "LineString",
@@ -30128,9 +30146,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e6",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -30368,7 +30384,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e6",
+        "start_node_id": "n11",
+        "end_node_id": "n12",
+        "length_m": 375.8464450583704
       },
       "geometry": {
         "type": "LineString",
@@ -30743,9 +30764,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e7",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -30783,7 +30802,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e7",
+        "start_node_id": "n13",
+        "end_node_id": "n14",
+        "length_m": 27.91605900027948
       },
       "geometry": {
         "type": "LineString",
@@ -30858,9 +30882,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e8",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -30906,7 +30928,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e8",
+        "start_node_id": "n15",
+        "end_node_id": "n16",
+        "length_m": 9.171910162118417
       },
       "geometry": {
         "type": "LineString",
@@ -30993,9 +31020,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e9",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -31041,7 +31066,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e9",
+        "start_node_id": "n17",
+        "end_node_id": "n18",
+        "length_m": 44.85081063181906
       },
       "geometry": {
         "type": "LineString",
@@ -31128,9 +31158,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e10",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -31200,7 +31228,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e10",
+        "start_node_id": "n19",
+        "end_node_id": "n20",
+        "length_m": 111.73555633975228
       },
       "geometry": {
         "type": "LineString",
@@ -31323,9 +31356,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e11",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -31371,7 +31402,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e11",
+        "start_node_id": "n21",
+        "end_node_id": "n22",
+        "length_m": 91.26780418256442
       },
       "geometry": {
         "type": "LineString",
@@ -31458,9 +31494,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e12",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -31570,7 +31604,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e12",
+        "start_node_id": "n23",
+        "end_node_id": "n24",
+        "length_m": 183.11068021753707
       },
       "geometry": {
         "type": "LineString",
@@ -31753,9 +31792,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e13",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -31833,7 +31870,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e13",
+        "start_node_id": "n26",
+        "end_node_id": "n19",
+        "length_m": 70.83612670836159
       },
       "geometry": {
         "type": "LineString",
@@ -31968,9 +32010,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e14",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -32000,7 +32040,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e14",
+        "start_node_id": "n29",
+        "end_node_id": "n30",
+        "length_m": 20.45328831499045
       },
       "geometry": {
         "type": "LineString",
@@ -32063,9 +32108,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e15",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -32095,7 +32138,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e15",
+        "start_node_id": "n31",
+        "end_node_id": "n32",
+        "length_m": 16.166738896769303
       },
       "geometry": {
         "type": "LineString",
@@ -32158,9 +32206,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e16",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -32214,7 +32260,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e16",
+        "start_node_id": "n33",
+        "end_node_id": "n34",
+        "length_m": 20.676359599561685
       },
       "geometry": {
         "type": "LineString",
@@ -32313,9 +32364,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e17",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -32369,7 +32418,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e17",
+        "start_node_id": "n35",
+        "end_node_id": "n36",
+        "length_m": 72.12689057303683
       },
       "geometry": {
         "type": "LineString",
@@ -32468,9 +32522,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e18",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -32508,7 +32560,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e18",
+        "start_node_id": "n37",
+        "end_node_id": "n38",
+        "length_m": 43.318177410858105
       },
       "geometry": {
         "type": "LineString",
@@ -32583,9 +32640,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e19",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -32615,7 +32670,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e19",
+        "start_node_id": "n39",
+        "end_node_id": "n40",
+        "length_m": 36.87737530076169
       },
       "geometry": {
         "type": "LineString",
@@ -32678,9 +32738,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e20",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -32726,7 +32784,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e20",
+        "start_node_id": "n41",
+        "end_node_id": "n42",
+        "length_m": 40.447227912079384
       },
       "geometry": {
         "type": "LineString",
@@ -32813,9 +32876,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e21",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -32965,7 +33026,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e21",
+        "start_node_id": "n43",
+        "end_node_id": "n44",
+        "length_m": 127.42230134095536
       },
       "geometry": {
         "type": "LineString",
@@ -33208,9 +33274,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e22",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -33248,7 +33312,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e22",
+        "start_node_id": "n45",
+        "end_node_id": "n46",
+        "length_m": 50.865221775355096
       },
       "geometry": {
         "type": "LineString",
@@ -33323,9 +33392,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e23",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -33595,7 +33662,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e23",
+        "start_node_id": "n47",
+        "end_node_id": "n48",
+        "length_m": 1090.4859524235326
       },
       "geometry": {
         "type": "LineString",
@@ -34018,9 +34090,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e24",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -34258,7 +34328,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e24",
+        "start_node_id": "n49",
+        "end_node_id": "n0",
+        "length_m": 184.57858279198274
       },
       "geometry": {
         "type": "LineString",
@@ -34633,9 +34708,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e25",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -34729,7 +34802,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e25",
+        "start_node_id": "n50",
+        "end_node_id": "n51",
+        "length_m": 216.39270254252403
       },
       "geometry": {
         "type": "LineString",
@@ -34888,9 +34966,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e26",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -34968,7 +35044,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e26",
+        "start_node_id": "n52",
+        "end_node_id": "n53",
+        "length_m": 79.76627673779728
       },
       "geometry": {
         "type": "LineString",
@@ -35103,9 +35184,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e27",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -35151,7 +35230,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e27",
+        "start_node_id": "n54",
+        "end_node_id": "n55",
+        "length_m": 53.036783215565904
       },
       "geometry": {
         "type": "LineString",
@@ -35238,9 +35322,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e28",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -35278,7 +35360,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e28",
+        "start_node_id": "n56",
+        "end_node_id": "n57",
+        "length_m": 52.54120003053082
       },
       "geometry": {
         "type": "LineString",
@@ -35353,9 +35440,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e29",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -35385,7 +35470,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e29",
+        "start_node_id": "n58",
+        "end_node_id": "n59",
+        "length_m": 33.41824511251117
       },
       "geometry": {
         "type": "LineString",
@@ -35448,9 +35538,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e30",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -35488,7 +35576,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e30",
+        "start_node_id": "n60",
+        "end_node_id": "n61",
+        "length_m": 40.468286017046424
       },
       "geometry": {
         "type": "LineString",
@@ -35563,9 +35656,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e31",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -35611,7 +35702,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e31",
+        "start_node_id": "n62",
+        "end_node_id": "n63",
+        "length_m": 68.04749369694821
       },
       "geometry": {
         "type": "LineString",
@@ -35698,9 +35794,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e32",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -35746,7 +35840,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e32",
+        "start_node_id": "n64",
+        "end_node_id": "n65",
+        "length_m": 17.046810724031584
       },
       "geometry": {
         "type": "LineString",
@@ -35833,9 +35932,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e33",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -36105,7 +36202,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e33",
+        "start_node_id": "n66",
+        "end_node_id": "n67",
+        "length_m": 1153.0064615855745
       },
       "geometry": {
         "type": "LineString",
@@ -36528,9 +36630,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e34",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -36600,7 +36700,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e34",
+        "start_node_id": "n68",
+        "end_node_id": "n69",
+        "length_m": 164.75927928186658
       },
       "geometry": {
         "type": "LineString",
@@ -36723,9 +36828,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e35",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -36763,7 +36866,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e35",
+        "start_node_id": "n70",
+        "end_node_id": "n71",
+        "length_m": 44.9638850393541
       },
       "geometry": {
         "type": "LineString",
@@ -36838,9 +36946,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e36",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -36894,7 +37000,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e36",
+        "start_node_id": "n72",
+        "end_node_id": "n73",
+        "length_m": 71.58372421862781
       },
       "geometry": {
         "type": "LineString",
@@ -36993,9 +37104,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e37",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -37025,7 +37134,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e37",
+        "start_node_id": "n74",
+        "end_node_id": "n75",
+        "length_m": 25.331580694110347
       },
       "geometry": {
         "type": "LineString",
@@ -37088,9 +37202,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e38",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -37144,7 +37256,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e38",
+        "start_node_id": "n76",
+        "end_node_id": "n77",
+        "length_m": 68.51290770405322
       },
       "geometry": {
         "type": "LineString",
@@ -37243,9 +37360,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e39",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -37307,7 +37422,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e39",
+        "start_node_id": "n78",
+        "end_node_id": "n79",
+        "length_m": 92.54410029003711
       },
       "geometry": {
         "type": "LineString",
@@ -37418,9 +37538,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e40",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -37450,7 +37568,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e40",
+        "start_node_id": "n80",
+        "end_node_id": "n81",
+        "length_m": 21.21622537391708
       },
       "geometry": {
         "type": "LineString",
@@ -37513,9 +37636,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e41",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -37545,7 +37666,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e41",
+        "start_node_id": "n82",
+        "end_node_id": "n83",
+        "length_m": 23.71778425316593
       },
       "geometry": {
         "type": "LineString",
@@ -37608,9 +37734,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e42",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -37640,7 +37764,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e42",
+        "start_node_id": "n84",
+        "end_node_id": "n85",
+        "length_m": 37.496436868484516
       },
       "geometry": {
         "type": "LineString",
@@ -37703,9 +37832,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e43",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -37735,7 +37862,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e43",
+        "start_node_id": "n86",
+        "end_node_id": "n87",
+        "length_m": 12.00866416350511
       },
       "geometry": {
         "type": "LineString",
@@ -37798,9 +37930,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e44",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -37838,7 +37968,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e44",
+        "start_node_id": "n88",
+        "end_node_id": "n89",
+        "length_m": 31.955890972836308
       },
       "geometry": {
         "type": "LineString",
@@ -37913,9 +38048,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e45",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -37953,7 +38086,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e45",
+        "start_node_id": "n90",
+        "end_node_id": "n91",
+        "length_m": 41.99341613284991
       },
       "geometry": {
         "type": "LineString",
@@ -38028,9 +38166,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e46",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -38060,7 +38196,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e46",
+        "start_node_id": "n93",
+        "end_node_id": "n94",
+        "length_m": 10.652040126898907
       },
       "geometry": {
         "type": "LineString",
@@ -38123,9 +38264,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e47",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -38155,7 +38294,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e47",
+        "start_node_id": "n95",
+        "end_node_id": "n96",
+        "length_m": 39.19380826155142
       },
       "geometry": {
         "type": "LineString",
@@ -38218,9 +38362,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e48",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -38250,7 +38392,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e48",
+        "start_node_id": "n97",
+        "end_node_id": "n98",
+        "length_m": 20.421787295143595
       },
       "geometry": {
         "type": "LineString",
@@ -38313,9 +38460,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e49",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -38433,7 +38578,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e49",
+        "start_node_id": "n99",
+        "end_node_id": "n100",
+        "length_m": 264.65161475832423
       },
       "geometry": {
         "type": "LineString",
@@ -38628,9 +38778,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e50",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -38684,7 +38832,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e50",
+        "start_node_id": "n101",
+        "end_node_id": "n102",
+        "length_m": 84.61785965969898
       },
       "geometry": {
         "type": "LineString",
@@ -38783,9 +38936,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e51",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -38815,7 +38966,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e51",
+        "start_node_id": "n103",
+        "end_node_id": "n104",
+        "length_m": 31.908597934011155
       },
       "geometry": {
         "type": "LineString",
@@ -38878,9 +39034,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e52",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -38926,7 +39080,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e52",
+        "start_node_id": "n105",
+        "end_node_id": "n106",
+        "length_m": 57.424723350121866
       },
       "geometry": {
         "type": "LineString",
@@ -39013,9 +39172,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e53",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -39181,7 +39338,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e53",
+        "start_node_id": "n107",
+        "end_node_id": "n108",
+        "length_m": 163.93484262828207
       },
       "geometry": {
         "type": "LineString",
@@ -39448,9 +39610,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e54",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -39600,7 +39760,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e54",
+        "start_node_id": "n109",
+        "end_node_id": "n110",
+        "length_m": 206.15688585249683
       },
       "geometry": {
         "type": "LineString",
@@ -39843,9 +40008,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e55",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -40035,7 +40198,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e55",
+        "start_node_id": "n111",
+        "end_node_id": "n109",
+        "length_m": 172.91930701952714
       },
       "geometry": {
         "type": "LineString",
@@ -40338,9 +40506,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e56",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -40450,7 +40616,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e56",
+        "start_node_id": "n112",
+        "end_node_id": "n113",
+        "length_m": 109.13703747807587
       },
       "geometry": {
         "type": "LineString",
@@ -40633,9 +40804,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e57",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -40689,7 +40858,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e57",
+        "start_node_id": "n114",
+        "end_node_id": "n115",
+        "length_m": 26.998329027476682
       },
       "geometry": {
         "type": "LineString",
@@ -40788,9 +40962,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e58",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -40820,7 +40992,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e58",
+        "start_node_id": "n116",
+        "end_node_id": "n117",
+        "length_m": 16.28849315007373
       },
       "geometry": {
         "type": "LineString",
@@ -40883,9 +41060,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e59",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -40939,7 +41114,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e59",
+        "start_node_id": "n118",
+        "end_node_id": "n119",
+        "length_m": 27.565643920665703
       },
       "geometry": {
         "type": "LineString",
@@ -41038,9 +41218,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e60",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -41166,7 +41344,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e60",
+        "start_node_id": "n121",
+        "end_node_id": "n122",
+        "length_m": 92.88005387579113
       },
       "geometry": {
         "type": "LineString",
@@ -41373,9 +41556,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e61",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -41461,7 +41642,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e61",
+        "start_node_id": "n123",
+        "end_node_id": "n124",
+        "length_m": 61.14019366622401
       },
       "geometry": {
         "type": "LineString",
@@ -41608,9 +41794,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e62",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -41720,7 +41904,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e62",
+        "start_node_id": "n125",
+        "end_node_id": "n126",
+        "length_m": 110.77178682940797
       },
       "geometry": {
         "type": "LineString",
@@ -41903,9 +42092,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e63",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -41975,7 +42162,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e63",
+        "start_node_id": "n127",
+        "end_node_id": "n128",
+        "length_m": 37.965542564481126
       },
       "geometry": {
         "type": "LineString",
@@ -42098,9 +42290,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e64",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -42226,7 +42416,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e64",
+        "start_node_id": "n126",
+        "end_node_id": "n129",
+        "length_m": 69.27075925486012
       },
       "geometry": {
         "type": "LineString",
@@ -42433,9 +42628,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e65",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -42489,7 +42682,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e65",
+        "start_node_id": "n130",
+        "end_node_id": "n131",
+        "length_m": 54.23121619009944
       },
       "geometry": {
         "type": "LineString",
@@ -42588,9 +42786,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e66",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -42628,7 +42824,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e66",
+        "start_node_id": "n133",
+        "end_node_id": "n134",
+        "length_m": 60.23676782994018
       },
       "geometry": {
         "type": "LineString",
@@ -42703,9 +42904,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e67",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -42759,7 +42958,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e67",
+        "start_node_id": "n135",
+        "end_node_id": "n136",
+        "length_m": 47.71342779051845
       },
       "geometry": {
         "type": "LineString",
@@ -42858,9 +43062,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e68",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -42906,7 +43108,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e68",
+        "start_node_id": "n137",
+        "end_node_id": "n138",
+        "length_m": 48.970278505294885
       },
       "geometry": {
         "type": "LineString",
@@ -42993,9 +43200,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e69",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -43033,7 +43238,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e69",
+        "start_node_id": "n140",
+        "end_node_id": "n141",
+        "length_m": 33.39839439145538
       },
       "geometry": {
         "type": "LineString",
@@ -43108,9 +43318,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e70",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -43244,7 +43452,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e70",
+        "start_node_id": "n142",
+        "end_node_id": "n143",
+        "length_m": 158.78555530407084
       },
       "geometry": {
         "type": "LineString",
@@ -43463,9 +43676,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e71",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -43543,7 +43754,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e71",
+        "start_node_id": "n144",
+        "end_node_id": "n145",
+        "length_m": 96.52670254980731
       },
       "geometry": {
         "type": "LineString",
@@ -43678,9 +43894,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e72",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -43806,7 +44020,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e72",
+        "start_node_id": "n147",
+        "end_node_id": "n148",
+        "length_m": 99.38462188266332
       },
       "geometry": {
         "type": "LineString",
@@ -44013,9 +44232,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e73",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -44085,7 +44302,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e73",
+        "start_node_id": "n149",
+        "end_node_id": "n95",
+        "length_m": 66.22337733577956
       },
       "geometry": {
         "type": "LineString",
@@ -44208,9 +44430,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e74",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -44376,7 +44596,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e74",
+        "start_node_id": "n150",
+        "end_node_id": "n151",
+        "length_m": 144.21685027649912
       },
       "geometry": {
         "type": "LineString",
@@ -44643,9 +44868,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e75",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -44683,7 +44906,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e75",
+        "start_node_id": "n152",
+        "end_node_id": "n153",
+        "length_m": 21.302643146999145
       },
       "geometry": {
         "type": "LineString",
@@ -44758,9 +44986,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e76",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -44982,7 +45208,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e76",
+        "start_node_id": "n150",
+        "end_node_id": "n154",
+        "length_m": 344.7807900278804
       },
       "geometry": {
         "type": "LineString",
@@ -45333,9 +45564,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e77",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -45381,7 +45610,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e77",
+        "start_node_id": "n155",
+        "end_node_id": "n156",
+        "length_m": 16.96320735603095
       },
       "geometry": {
         "type": "LineString",
@@ -45468,9 +45702,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e78",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -45524,7 +45756,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e78",
+        "start_node_id": "n157",
+        "end_node_id": "n158",
+        "length_m": 48.359805903770166
       },
       "geometry": {
         "type": "LineString",
@@ -45623,9 +45860,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e79",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -45775,7 +46010,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e79",
+        "start_node_id": "n159",
+        "end_node_id": "n160",
+        "length_m": 175.742743901174
       },
       "geometry": {
         "type": "LineString",
@@ -46018,9 +46258,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e80",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -46066,7 +46304,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e80",
+        "start_node_id": "n161",
+        "end_node_id": "n162",
+        "length_m": 16.915860686195906
       },
       "geometry": {
         "type": "LineString",
@@ -46153,9 +46396,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e81",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -46353,7 +46594,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e81",
+        "start_node_id": "n163",
+        "end_node_id": "n164",
+        "length_m": 324.59346054153144
       },
       "geometry": {
         "type": "LineString",
@@ -46668,9 +46914,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e82",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -46940,7 +47184,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e82",
+        "start_node_id": "n111",
+        "end_node_id": "n165",
+        "length_m": 698.8662351152058
       },
       "geometry": {
         "type": "LineString",
@@ -47363,9 +47612,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e83",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -47635,7 +47882,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e83",
+        "start_node_id": "n167",
+        "end_node_id": "n168",
+        "length_m": 1021.1167568949745
       },
       "geometry": {
         "type": "LineString",
@@ -48058,9 +48310,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e84",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -48330,7 +48580,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e84",
+        "start_node_id": "n111",
+        "end_node_id": "n169",
+        "length_m": 978.4199389502451
       },
       "geometry": {
         "type": "LineString",
@@ -48753,9 +49008,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e85",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -48793,7 +49046,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e85",
+        "start_node_id": "n170",
+        "end_node_id": "n171",
+        "length_m": 39.28240320439157
       },
       "geometry": {
         "type": "LineString",
@@ -48868,9 +49126,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e86",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -48916,7 +49172,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e86",
+        "start_node_id": "n172",
+        "end_node_id": "n173",
+        "length_m": 65.57666386753507
       },
       "geometry": {
         "type": "LineString",
@@ -49003,9 +49264,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e87",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -49099,7 +49358,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e87",
+        "start_node_id": "n174",
+        "end_node_id": "n175",
+        "length_m": 223.7421724332986
       },
       "geometry": {
         "type": "LineString",
@@ -49258,9 +49522,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e88",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -49298,7 +49560,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e88",
+        "start_node_id": "n176",
+        "end_node_id": "n177",
+        "length_m": 40.50055201367607
       },
       "geometry": {
         "type": "LineString",
@@ -49373,9 +49640,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e89",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -49437,7 +49702,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e89",
+        "start_node_id": "n178",
+        "end_node_id": "n179",
+        "length_m": 86.82310835845038
       },
       "geometry": {
         "type": "LineString",
@@ -49548,9 +49818,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e90",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -49604,7 +49872,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e90",
+        "start_node_id": "n180",
+        "end_node_id": "n181",
+        "length_m": 65.89049009455485
       },
       "geometry": {
         "type": "LineString",
@@ -49703,9 +49976,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e91",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -49919,7 +50190,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e91",
+        "start_node_id": "n182",
+        "end_node_id": "n183",
+        "length_m": 170.37988985616693
       },
       "geometry": {
         "type": "LineString",
@@ -50258,9 +50534,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e92",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -50530,7 +50804,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e92",
+        "start_node_id": "n184",
+        "end_node_id": "n185",
+        "length_m": 620.0452576608088
       },
       "geometry": {
         "type": "LineString",
@@ -50953,9 +51232,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e93",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -51097,7 +51374,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e93",
+        "start_node_id": "n52",
+        "end_node_id": "n169",
+        "length_m": 209.7493571203006
       },
       "geometry": {
         "type": "LineString",
@@ -51328,9 +51610,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e94",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -51360,7 +51640,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e94",
+        "start_node_id": "n187",
+        "end_node_id": "n188",
+        "length_m": 8.603897540811152
       },
       "geometry": {
         "type": "LineString",
@@ -51423,9 +51708,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e95",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -51455,7 +51738,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e95",
+        "start_node_id": "n190",
+        "end_node_id": "n191",
+        "length_m": 38.696011158627066
       },
       "geometry": {
         "type": "LineString",
@@ -51518,9 +51806,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e96",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -51558,7 +51844,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e96",
+        "start_node_id": "n192",
+        "end_node_id": "n193",
+        "length_m": 9.042910677638961
       },
       "geometry": {
         "type": "LineString",
@@ -51633,9 +51924,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e97",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -51673,7 +51962,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e97",
+        "start_node_id": "n194",
+        "end_node_id": "n55",
+        "length_m": 13.519576512282438
       },
       "geometry": {
         "type": "LineString",
@@ -51748,9 +52042,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e98",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -51828,7 +52120,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e98",
+        "start_node_id": "n195",
+        "end_node_id": "n196",
+        "length_m": 66.97996818167367
       },
       "geometry": {
         "type": "LineString",
@@ -51963,9 +52260,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e99",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -52003,7 +52298,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e99",
+        "start_node_id": "n197",
+        "end_node_id": "n198",
+        "length_m": 42.87638433725084
       },
       "geometry": {
         "type": "LineString",
@@ -52078,9 +52378,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e100",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -52150,7 +52448,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e100",
+        "start_node_id": "n199",
+        "end_node_id": "n81",
+        "length_m": 223.4457156935208
       },
       "geometry": {
         "type": "LineString",
@@ -52273,9 +52576,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e101",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -52409,7 +52710,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e101",
+        "start_node_id": "n200",
+        "end_node_id": "n201",
+        "length_m": 521.3991684719946
       },
       "geometry": {
         "type": "LineString",
@@ -52628,9 +52934,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e102",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -52660,7 +52964,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e102",
+        "start_node_id": "n202",
+        "end_node_id": "n203",
+        "length_m": 39.8666565922935
       },
       "geometry": {
         "type": "LineString",
@@ -52723,9 +53032,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e103",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -52771,7 +53078,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e103",
+        "start_node_id": "n93",
+        "end_node_id": "n204",
+        "length_m": 111.38000392788969
       },
       "geometry": {
         "type": "LineString",
@@ -52858,9 +53170,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e104",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -52898,7 +53208,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e104",
+        "start_node_id": "n95",
+        "end_node_id": "n205",
+        "length_m": 78.08426098159627
       },
       "geometry": {
         "type": "LineString",
@@ -52973,9 +53288,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e105",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -53005,7 +53318,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e105",
+        "start_node_id": "n206",
+        "end_node_id": "n124",
+        "length_m": 38.3845374767559
       },
       "geometry": {
         "type": "LineString",
@@ -53068,9 +53386,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e106",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -53196,7 +53512,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e106",
+        "start_node_id": "n50",
+        "end_node_id": "n51",
+        "length_m": 229.3874480608224
       },
       "geometry": {
         "type": "LineString",
@@ -53403,9 +53724,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e107",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -53443,7 +53762,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e107",
+        "start_node_id": "n207",
+        "end_node_id": "n208",
+        "length_m": 12.117103274824935
       },
       "geometry": {
         "type": "LineString",
@@ -53518,9 +53842,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e108",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -53630,7 +53952,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e108",
+        "start_node_id": "n209",
+        "end_node_id": "n210",
+        "length_m": 63.8158080712163
       },
       "geometry": {
         "type": "LineString",
@@ -53813,9 +54140,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e109",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -53877,7 +54202,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e109",
+        "start_node_id": "n211",
+        "end_node_id": "n212",
+        "length_m": 29.405492751557272
       },
       "geometry": {
         "type": "LineString",
@@ -53988,9 +54318,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e110",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -54036,7 +54364,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e110",
+        "start_node_id": "n213",
+        "end_node_id": "n214",
+        "length_m": 16.81168520666038
       },
       "geometry": {
         "type": "LineString",
@@ -54123,9 +54456,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e111",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -54371,7 +54702,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e111",
+        "start_node_id": "n215",
+        "end_node_id": "n216",
+        "length_m": 370.4151773206273
       },
       "geometry": {
         "type": "LineString",
@@ -54758,9 +55094,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e112",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -55030,7 +55364,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e112",
+        "start_node_id": "n217",
+        "end_node_id": "n218",
+        "length_m": 193.8938912193815
       },
       "geometry": {
         "type": "LineString",
@@ -55453,9 +55792,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e113",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -55725,7 +56062,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e113",
+        "start_node_id": "n219",
+        "end_node_id": "n98",
+        "length_m": 1121.9005119218841
       },
       "geometry": {
         "type": "LineString",
@@ -56148,9 +56490,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e114",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -56412,7 +56752,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e114",
+        "start_node_id": "n111",
+        "end_node_id": "n220",
+        "length_m": 56.00665058832084
       },
       "geometry": {
         "type": "LineString",
@@ -56823,9 +57168,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e115",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -57095,7 +57438,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e115",
+        "start_node_id": "n221",
+        "end_node_id": "n222",
+        "length_m": 240.77592709638844
       },
       "geometry": {
         "type": "LineString",
@@ -57518,9 +57866,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e116",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -57766,7 +58112,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e116",
+        "start_node_id": "n223",
+        "end_node_id": "n133",
+        "length_m": 172.7065380978588
       },
       "geometry": {
         "type": "LineString",
@@ -58153,9 +58504,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e117",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -58417,7 +58766,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e117",
+        "start_node_id": "n224",
+        "end_node_id": "n225",
+        "length_m": 365.519688473527
       },
       "geometry": {
         "type": "LineString",
@@ -58828,9 +59182,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e118",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -59084,7 +59436,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e118",
+        "start_node_id": "n226",
+        "end_node_id": "n227",
+        "length_m": 194.7968316427486
       },
       "geometry": {
         "type": "LineString",
@@ -59483,9 +59840,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e119",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -59755,7 +60110,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e119",
+        "start_node_id": "n228",
+        "end_node_id": "n229",
+        "length_m": 1351.4845448487367
       },
       "geometry": {
         "type": "LineString",
@@ -60178,9 +60538,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e120",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -60370,7 +60728,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e120",
+        "start_node_id": "n182",
+        "end_node_id": "n183",
+        "length_m": 165.9932610571806
       },
       "geometry": {
         "type": "LineString",
@@ -60673,9 +61036,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e121",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -60945,7 +61306,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e121",
+        "start_node_id": "n230",
+        "end_node_id": "n231",
+        "length_m": 1565.2628830335714
       },
       "geometry": {
         "type": "LineString",
@@ -61368,9 +61734,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "paris_demo",
-        "edge_id": "e122",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -61640,7 +62004,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "paris_demo",
+        "edge_id": "e122",
+        "start_node_id": "n232",
+        "end_node_id": "n233",
+        "length_m": 1390.2380328082093
       },
       "geometry": {
         "type": "LineString",

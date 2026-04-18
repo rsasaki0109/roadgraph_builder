@@ -3222,9 +3222,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "osm",
-        "edge_id": "e0",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -3498,6 +3496,11 @@
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
         },
+        "dataset": "osm",
+        "edge_id": "e0",
+        "start_node_id": "n0",
+        "end_node_id": "n1",
+        "length_m": 413.25509721197193,
         "semantic_summary": "speed_limit 50 km/h; traffic_light"
       },
       "geometry": {
@@ -3909,9 +3912,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "osm",
-        "edge_id": "e1",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -4181,7 +4182,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "osm",
+        "edge_id": "e1",
+        "start_node_id": "n2",
+        "end_node_id": "n3",
+        "length_m": 145.1552216370098
       },
       "geometry": {
         "type": "LineString",
@@ -4604,9 +4610,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "osm",
-        "edge_id": "e2",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -4876,7 +4880,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "osm",
+        "edge_id": "e2",
+        "start_node_id": "n4",
+        "end_node_id": "n5",
+        "length_m": 217.59644013650953
       },
       "geometry": {
         "type": "LineString",
@@ -5299,9 +5308,7 @@
     {
       "type": "Feature",
       "properties": {
-        "kind": "lane_centerline",
-        "dataset": "osm",
-        "edge_id": "e3",
+        "kind": "centerline",
         "source": "trajectory_mvp",
         "hd": {
           "tier": "sd_seed",
@@ -5451,7 +5458,12 @@
           "semantic_rules": [],
           "quality": "centerline_offset_hd_lite",
           "note": "Offsets from centerline by half lane width; not survey-grade."
-        }
+        },
+        "dataset": "osm",
+        "edge_id": "e3",
+        "start_node_id": "n6",
+        "end_node_id": "n5",
+        "length_m": 75.27968614742112
       },
       "geometry": {
         "type": "LineString",
