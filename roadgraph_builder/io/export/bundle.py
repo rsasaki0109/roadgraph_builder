@@ -65,24 +65,40 @@ def build_sd_nav_document(
             dx = float(pl[i + 1][0]) - float(pl[i][0])
             dy = float(pl[i + 1][1]) - float(pl[i][1])
             length_m += math.hypot(dx, dy)
-        edges.append(
-            {
-                "id": e.id,
-                "start_node_id": e.start_node_id,
-                "end_node_id": e.end_node_id,
-                "length_m": length_m,
-                "polyline_vertex_count": len(pl),
-                "allowed_maneuvers": allowed_maneuvers_for_edge(graph, e),
-                "allowed_maneuvers_reverse": allowed_maneuvers_for_edge_reverse(graph, e),
-            }
+        direction_observed = (
+            e.attributes.get("direction_observed") if isinstance(e.attributes, dict) else None
         )
+        if direction_observed not in {"forward_only", "bidirectional"}:
+            direction_observed = None  # unknown; caller never set it
+        allowed_forward = allowed_maneuvers_for_edge(graph, e)
+        # Suppress reverse maneuvers only when we explicitly saw the edge in
+        # one direction only. "Unknown" (no direction_observed attribute, e.g.
+        # hand-built Graphs) falls back to the pre-direction behaviour and
+        # publishes both sides, which stays permissive and backward-compatible.
+        if direction_observed == "forward_only":
+            allowed_reverse: list[str] = []
+        else:
+            allowed_reverse = allowed_maneuvers_for_edge_reverse(graph, e)
+        edge_doc: dict[str, Any] = {
+            "id": e.id,
+            "start_node_id": e.start_node_id,
+            "end_node_id": e.end_node_id,
+            "length_m": length_m,
+            "polyline_vertex_count": len(pl),
+            "allowed_maneuvers": allowed_forward,
+            "allowed_maneuvers_reverse": allowed_reverse,
+        }
+        if direction_observed is not None:
+            edge_doc["direction_observed"] = direction_observed
+        edges.append(edge_doc)
     doc: dict[str, Any] = {
         "role": "navigation_sd_seed",
         "schema_version": 1,
         "description": (
             "Topology and centerline lengths in the same meter frame as the trajectory CSV. "
             "allowed_maneuvers / allowed_maneuvers_reverse are geometry heuristics at the digitized "
-            "end node and start node (reverse travel along the centerline); not surveyed turn restrictions."
+            "end node and start node (reverse travel along the centerline); not surveyed turn restrictions. "
+            "allowed_maneuvers_reverse stays empty when direction_observed is forward_only."
         ),
         "nodes": nodes,
         "edges": edges,

@@ -82,6 +82,11 @@
           "end_node_id": { "type": "string" },
           "length_m": { "type": "number", "minimum": 0 },
           "polyline_vertex_count": { "type": "integer", "minimum": 0 },
+          "direction_observed": {
+            "type": "string",
+            "enum": ["forward_only", "bidirectional"],
+            "description": "Which traversal directions the source trajectory covered for this edge. Does not imply legal one-way status."
+          },
           "allowed_maneuvers": {
             "type": "array",
             "description": "Coarse hints at the digitized end node: straight plus left/right/u_turn from 2D junction geometry when applicable (heuristic, not surveyed).",
@@ -89,7 +94,7 @@
           },
           "allowed_maneuvers_reverse": {
             "type": "array",
-            "description": "Same as allowed_maneuvers but when traversing the link opposite to digitization (arriving at the original start node).",
+            "description": "Same as allowed_maneuvers but when traversing the link opposite to digitization (arriving at the original start node). Empty when direction_observed is forward_only.",
             "items": { "type": "string", "enum": ["straight", "left", "right", "u_turn"] }
           }
         }

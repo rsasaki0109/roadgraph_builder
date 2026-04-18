@@ -1,7 +1,7 @@
 {
   "role": "navigation_sd_seed",
   "schema_version": 1,
-  "description": "Topology and centerline lengths in the same meter frame as the trajectory CSV. allowed_maneuvers / allowed_maneuvers_reverse are geometry heuristics at the digitized end node and start node (reverse travel along the centerline); not surveyed turn restrictions.",
+  "description": "Topology and centerline lengths in the same meter frame as the trajectory CSV. allowed_maneuvers / allowed_maneuvers_reverse are geometry heuristics at the digitized end node and start node (reverse travel along the centerline); not surveyed turn restrictions. allowed_maneuvers_reverse stays empty when direction_observed is forward_only.",
   "nodes": [
     {
       "id": "n0",
@@ -35,10 +35,8 @@
         "straight",
         "u_turn"
       ],
-      "allowed_maneuvers_reverse": [
-        "straight",
-        "u_turn"
-      ]
+      "allowed_maneuvers_reverse": [],
+      "direction_observed": "forward_only"
     },
     {
       "id": "e1",
@@ -50,10 +48,8 @@
         "straight",
         "u_turn"
       ],
-      "allowed_maneuvers_reverse": [
-        "straight",
-        "u_turn"
-      ]
+      "allowed_maneuvers_reverse": [],
+      "direction_observed": "forward_only"
     }
   ],
   "turn_restrictions": [
