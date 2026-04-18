@@ -36,6 +36,7 @@ from roadgraph_builder.pipeline.build_graph import (
 )
 from roadgraph_builder.core.graph.stats import graph_stats, junction_stats
 from roadgraph_builder.routing.geojson_export import write_route_geojson
+from roadgraph_builder.routing.hmm_match import hmm_match_trajectory
 from roadgraph_builder.routing.map_match import coverage_stats, snap_trajectory_to_graph
 from roadgraph_builder.routing.nearest import nearest_node
 from roadgraph_builder.routing.shortest_path import shortest_path
@@ -331,6 +332,25 @@ def _build_parser() -> argparse.ArgumentParser:
         default=None,
         metavar="PATH",
         help="Optional JSON path to write the per-sample snap details.",
+    )
+    mt.add_argument(
+        "--hmm",
+        action="store_true",
+        help="Viterbi-decode over candidate edges (prefers sequences consistent with the graph topology) instead of per-sample nearest-edge.",
+    )
+    mt.add_argument(
+        "--gps-sigma-m",
+        type=float,
+        default=5.0,
+        metavar="M",
+        help="Gaussian GPS-noise sigma for the HMM emission score (only with --hmm).",
+    )
+    mt.add_argument(
+        "--transition-limit-m",
+        type=float,
+        default=200.0,
+        metavar="M",
+        help="Cap on Dijkstra transition distance between consecutive HMM candidates (only with --hmm).",
     )
 
     st = sub.add_parser(
@@ -650,11 +670,42 @@ def main(argv: list[str] | None = None) -> int:
         except FileNotFoundError as e:
             print(f"File not found: {e.filename}", file=sys.stderr)
             return 1
-        snapped = snap_trajectory_to_graph(graph, traj.xy, max_distance_m=args.max_distance_m)
-        stats = coverage_stats(snapped)
-        doc = {
-            "stats": stats,
-            "samples": [
+        if args.hmm:
+            hmm_result = hmm_match_trajectory(
+                graph,
+                traj.xy,
+                candidate_radius_m=args.max_distance_m,
+                gps_sigma_m=args.gps_sigma_m,
+                transition_limit_m=args.transition_limit_m,
+            )
+            total = len(hmm_result)
+            matched = [h for h in hmm_result if h is not None]
+            edges_touched = {h.edge_id for h in matched}
+            dists = [h.distance_m for h in matched]
+            stats = {
+                "samples": total,
+                "matched": len(matched),
+                "matched_ratio": (len(matched) / total) if total else 0.0,
+                "edges_touched": len(edges_touched),
+                "mean_distance_m": float(sum(dists) / len(dists)) if dists else 0.0,
+                "max_distance_m": float(max(dists)) if dists else 0.0,
+                "algorithm": "hmm_viterbi",
+            }
+            samples_doc = [
+                {
+                    "index": h.index,
+                    "edge_id": h.edge_id,
+                    "distance_m": h.distance_m,
+                    "projection_xy_m": list(h.projection_xy_m),
+                }
+                if h is not None
+                else {"index": i, "unmatched": True}
+                for i, h in enumerate(hmm_result)
+            ]
+        else:
+            snapped = snap_trajectory_to_graph(graph, traj.xy, max_distance_m=args.max_distance_m)
+            stats = {**coverage_stats(snapped), "algorithm": "nearest_edge"}
+            samples_doc = [
                 {
                     "index": s.index,
                     "edge_id": s.edge_id,
@@ -667,8 +718,8 @@ def main(argv: list[str] | None = None) -> int:
                 if s is not None
                 else {"index": i, "unmatched": True}
                 for i, s in enumerate(snapped)
-            ],
-        }
+            ]
+        doc = {"stats": stats, "samples": samples_doc}
         if args.output:
             Path(args.output).write_text(
                 json.dumps(doc, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"

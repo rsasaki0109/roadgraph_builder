@@ -73,7 +73,7 @@ fuse-lidar export-lanelet2 apply-camera export-bundle"
 --from-latlon --to-latlon" -- "$cur"))
                 ;;
             match-trajectory)
-                COMPREPLY=($(compgen -W "--max-distance-m --output" -- "$cur"))
+                COMPREPLY=($(compgen -W "--max-distance-m --output --hmm --gps-sigma-m --transition-limit-m" -- "$cur"))
                 ;;
             infer-road-class)
                 COMPREPLY=($(compgen -W "--max-distance-m --min-samples --highway-mps --arterial-mps" -- "$cur"))
