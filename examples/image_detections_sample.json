@@ -1,0 +1,41 @@
+{
+  "format_version": 1,
+  "_comment": "Two frames from a vehicle driving straight along +x with the sample camera calibration. Each detection references a pixel (u, v); the projector snaps the ray onto the flat ground plane and then onto the nearest graph edge.",
+  "image_detections": [
+    {
+      "image_id": "img_0001",
+      "pose": {
+        "translation_m": [0.0, 0.0, 0.0],
+        "rotation_rpy_rad": [0.0, 0.0, 0.0]
+      },
+      "detections": [
+        {
+          "kind": "lane_marking",
+          "pixel": { "u": 640.0, "v": 720.0 },
+          "value": "solid_white",
+          "confidence": 0.92
+        },
+        {
+          "kind": "stop_line",
+          "pixel": { "u": 620.0, "v": 680.0 },
+          "confidence": 0.85
+        }
+      ]
+    },
+    {
+      "image_id": "img_0002",
+      "pose": {
+        "translation_m": [5.0, 0.0, 0.0],
+        "rotation_rpy_rad": [0.0, 0.0, 0.0]
+      },
+      "detections": [
+        {
+          "kind": "speed_limit",
+          "pixel": { "u": 900.0, "v": 600.0 },
+          "value_kmh": 50,
+          "confidence": 0.78
+        }
+      ]
+    }
+  ]
+}

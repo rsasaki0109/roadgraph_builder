@@ -47,7 +47,8 @@ Codex / 次のセッション向け。**事実と意図を分けて**書く。
 - **サンプル LAS**: `examples/sample_lidar.las`（52 点、1.3 KB、`scripts/make_sample_las.py` で再生成可）。
 - **fuse-lidar**: CSV / LAS / LAZ を拡張子で dispatch。
 - **cross-format regression**: `tests/test_las_cross_format.py` が laspy で生成した PDRF 0-10 × LAS 1.2/1.3/1.4 全パターン + 64-bit extended point count を our reader と byte-match。out-of-band verification では PDAL の 7 real LAS (autzen_trim 3.7 MB / 110K pts 含む) で全パス、`fuse-lidar` も実稼働確認。
-- **camera detections**: JSON で `apply-camera`、GeoJSON `semantic_summary` に反映。
+- **camera detections (edge-keyed)**: JSON で `apply-camera`、GeoJSON `semantic_summary` に反映。
+- **camera 画像 → graph-edge pipeline**: `io/camera/{calibration,projection,pipeline}.py` + `project-camera` CLI。pinhole K + `camera_to_vehicle` rigid mount + per-image vehicle pose を合成して pixel→world ground plane→最寄 edge snap までを 1 コマンドで処理。horizon 超 ray / edge 遠 projection は drop カウント付き。example: `examples/camera_calibration_sample.json` + `examples/image_detections_sample.json`。
 
 ### 検証 / CI / 配布
 
@@ -87,7 +88,8 @@ Codex / 次のセッション向け。**事実と意図を分けて**書く。
 
 1. **`v0.3.0` タグ release** — すぐ実行可。Release notes は `CHANGELOG.md [0.3.0]` から自動生成される。
 2. **Viewer JS Dijkstra で turn_restrictions 順守** — 現状 click-to-route は制限無視（pre-baked overlay のみ順守）。`(node, incoming_edge, direction)` 状態付き JS Dijkstra にすれば interactive に効く。
-3. **カメラ画像 → 投影** — `io/camera/` に画像 → 2D 投影 → 検出 JSON のパイプラインを stub → 実装。
+3. **カメラ lens distortion 対応** — 現状は歪みなしのピンホール。実画像ベースのデモには radial/tangential distortion (OpenCV 5-coef) のサポートが要る。`CameraIntrinsic` に `distortion` フィールド + `pixel_to_ground` で undistort pass を追加。
+4. **実画像デモ** — Mapillary (CC-BY-SA) または KITTI で具体例を作る。ライセンス整理が必要。
 
 ## 全体俯瞰
 

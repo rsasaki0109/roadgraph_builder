@@ -627,6 +627,33 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Optional path to write per-relation skip reasons.",
     )
 
+    pc = sub.add_parser(
+        "project-camera",
+        help=(
+            "Project per-image pixel detections onto the ground plane using a "
+            "pinhole camera + per-image vehicle pose, snap to the nearest graph "
+            "edge, and write an edge-keyed camera_detections.json."
+        ),
+    )
+    pc.add_argument("calibration_json", help="Camera calibration JSON (intrinsic + camera_to_vehicle).")
+    pc.add_argument("image_detections_json", help="Per-image pixel detections JSON.")
+    pc.add_argument("graph_json", help="Road graph JSON (same world meter frame as vehicle poses).")
+    pc.add_argument("output_json", help="Output camera_detections.json path.")
+    pc.add_argument(
+        "--ground-z-m",
+        type=float,
+        default=0.0,
+        metavar="M",
+        help="Height of the assumed-flat ground plane in the world frame.",
+    )
+    pc.add_argument(
+        "--max-edge-distance-m",
+        type=float,
+        default=5.0,
+        metavar="M",
+        help="Max perpendicular distance from a projected detection to a graph edge.",
+    )
+
     return p
 
 
@@ -1241,6 +1268,41 @@ def main(argv: list[str] | None = None) -> int:
             Path(args.skipped_json).write_text(
                 json.dumps(result.skipped, indent=2) + "\n", encoding="utf-8"
             )
+        return 0
+    if args.command == "project-camera":
+        from roadgraph_builder.io.camera import (
+            load_camera_calibration,
+            load_image_detections_json,
+            project_image_detections_to_graph_edges,
+        )
+        try:
+            calib = load_camera_calibration(args.calibration_json)
+            items = load_image_detections_json(args.image_detections_json)
+            graph = _cli_load_graph(args.graph_json)
+        except FileNotFoundError as e:
+            print(f"File not found: {e.filename}", file=sys.stderr)
+            return 1
+        except (KeyError, ValueError, TypeError) as e:
+            print(f"{e}", file=sys.stderr)
+            return 1
+        result = project_image_detections_to_graph_edges(
+            items,
+            calib,
+            graph,
+            ground_z_m=args.ground_z_m,
+            max_edge_distance_m=args.max_edge_distance_m,
+        )
+        doc = {"format_version": 1, "observations": result.observations}
+        Path(args.output_json).write_text(
+            json.dumps(doc, indent=2) + "\n", encoding="utf-8"
+        )
+        print(
+            f"Wrote {args.output_json}: {len(result.observations)} observations "
+            f"(projected {result.projected_count}, "
+            f"dropped_above_horizon {result.dropped_above_horizon}, "
+            f"dropped_no_edge {result.dropped_no_edge}).",
+            file=sys.stderr,
+        )
         return 0
     return 2
 
