@@ -26,6 +26,7 @@ from roadgraph_builder.utils.geometry import (
     merge_endpoints_union_find,
     simplify_polyline_rdp,
     split_indices_by_step,
+    split_polylines_at_t_junctions,
 )
 
 
@@ -146,6 +147,11 @@ def polylines_to_graph(polylines: list[list[tuple[float, float]]], params: Build
             sp = simplify_polyline_rdp(poly, tol)
             if len(sp) >= 2:
                 work.append(sp)
+
+    # Detect T-junctions: if one polyline's endpoint lands near another's
+    # interior, split the second so the pair can be merged into a junction
+    # node in the union-find below.
+    work = split_polylines_at_t_junctions(work, params.merge_endpoint_m)
 
     endpoints: list[tuple[float, float]] = []
     for poly in work:

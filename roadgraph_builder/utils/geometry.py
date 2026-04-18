@@ -26,6 +26,129 @@ def _point_segment_distance(px: float, py: float, ax: float, ay: float, bx: floa
     return float(np.hypot(px - qx, py - qy))
 
 
+def _closest_point_on_polyline(
+    px: float, py: float, poly: list[tuple[float, float]]
+) -> tuple[float, tuple[float, float], int, float]:
+    """Return ``(distance, point, segment_index, arc_length_along_poly)`` to the polyline.
+
+    ``segment_index`` is the starting vertex of the segment that owns the closest
+    point. ``arc_length_along_poly`` is measured from ``poly[0]`` to the projection.
+    """
+    best_d = float("inf")
+    best_pt = (poly[0][0], poly[0][1])
+    best_idx = 0
+    best_arc = 0.0
+    cum = 0.0
+    for i in range(len(poly) - 1):
+        ax, ay = poly[i]
+        bx, by = poly[i + 1]
+        abx, aby = bx - ax, by - ay
+        ab2 = abx * abx + aby * aby
+        if ab2 < 1e-18:
+            t_clamped = 0.0
+            qx, qy = ax, ay
+        else:
+            t = ((px - ax) * abx + (py - ay) * aby) / ab2
+            t_clamped = max(0.0, min(1.0, t))
+            qx = ax + t_clamped * abx
+            qy = ay + t_clamped * aby
+        d = float(np.hypot(px - qx, py - qy))
+        if d < best_d:
+            best_d = d
+            best_pt = (qx, qy)
+            best_idx = i
+            seg_len = float(np.hypot(abx, aby))
+            best_arc = cum + t_clamped * seg_len
+        cum += float(np.hypot(abx, aby))
+    return best_d, best_pt, best_idx, best_arc
+
+
+def split_polylines_at_t_junctions(
+    polylines: list[list[tuple[float, float]]],
+    merge_threshold_m: float,
+    *,
+    min_interior_m: float = 1.0,
+) -> list[list[tuple[float, float]]]:
+    """Split every polyline where another polyline's endpoint falls near its interior.
+
+    Treats the endpoint-proximity graph as a junction hint: if endpoint ``E`` of
+    polyline ``A`` is within ``merge_threshold_m`` of a non-endpoint point on
+    polyline ``B``, inject the projected point into ``B`` and split ``B`` into
+    two polylines that share that junction vertex. The subsequent endpoint-merge
+    union-find then fuses ``E`` and the new junction into a single graph node,
+    turning what used to be two disjoint edges into a real T-junction.
+
+    ``min_interior_m`` keeps us from splitting right next to ``B``'s own endpoints
+    (those cases are already handled by the endpoint-merge pass).
+    """
+    if merge_threshold_m <= 0:
+        return [list(pl) for pl in polylines]
+
+    # Working list; we may subdivide entries, so iterate indices + re-scan.
+    work: list[list[tuple[float, float]]] = [list(pl) for pl in polylines]
+
+    def polyline_arc_length(pl: list[tuple[float, float]]) -> float:
+        total = 0.0
+        for i in range(len(pl) - 1):
+            dx = pl[i + 1][0] - pl[i][0]
+            dy = pl[i + 1][1] - pl[i][1]
+            total += float(np.hypot(dx, dy))
+        return total
+
+    # Collect every endpoint that could act as a "junction seed": the first and
+    # last vertex of each polyline. For very short polylines we skip splitting.
+    changed = True
+    # One pass is usually enough, but allow a couple of iterations because a
+    # split can expose new T-junctions on the freshly-created halves.
+    max_passes = 3
+    for _pass in range(max_passes):
+        if not changed:
+            break
+        changed = False
+        endpoints: list[tuple[float, float]] = []
+        for pl in work:
+            if len(pl) >= 2:
+                endpoints.append(pl[0])
+                endpoints.append(pl[-1])
+
+        new_work: list[list[tuple[float, float]]] = []
+        for idx, pl in enumerate(work):
+            if len(pl) < 3:
+                new_work.append(pl)
+                continue
+            # Find the best (single) T-projection for this polyline this pass.
+            best = None  # (endpoint_xy, projection, segment_idx, arc_along)
+            for (ex, ey) in endpoints:
+                # Skip this polyline's own endpoints.
+                if (ex, ey) == pl[0] or (ex, ey) == pl[-1]:
+                    continue
+                d, pt, seg_i, arc_along = _closest_point_on_polyline(ex, ey, pl)
+                if d > merge_threshold_m:
+                    continue
+                # Reject projections too close to this polyline's own ends.
+                total_len = polyline_arc_length(pl)
+                if arc_along < min_interior_m or (total_len - arc_along) < min_interior_m:
+                    continue
+                if best is None or d < best[0]:
+                    best = (d, pt, seg_i, arc_along)
+            if best is None:
+                new_work.append(pl)
+                continue
+            _d, proj_pt, seg_i, _arc = best
+            # Split pl at seg_i into [pl[:seg_i+1] + proj_pt] and [proj_pt + pl[seg_i+1:]].
+            left = list(pl[: seg_i + 1]) + [proj_pt]
+            right = [proj_pt] + list(pl[seg_i + 1:])
+            if len(left) >= 2 and len(right) >= 2:
+                new_work.append(left)
+                new_work.append(right)
+                changed = True
+            else:
+                new_work.append(pl)
+        work = new_work
+
+    return work
+
+
 def simplify_polyline_rdp(points: list[tuple[float, float]], epsilon: float) -> list[tuple[float, float]]:
     """Douglas–Peucker simplification (2D). Keeps endpoints; epsilon in same units as coordinates."""
     if epsilon <= 0 or len(points) < 3:

@@ -44,6 +44,30 @@
 
 `allowed_maneuvers` は信号・標識・法規のターン制限ではありません。ターン禁止を入れる場合の設計メモは [navigation_turn_restrictions.md](navigation_turn_restrictions.md)。
 
+## T 接続検出によるグラフ連結性向上（0.3.0 で追加）
+
+`polylines_to_graph` は endpoint union-find に加え、先に
+**`split_polylines_at_t_junctions`** を呼ぶ: あるポリラインの端点が別の
+ポリラインの **内部近傍**（既定 `min_interior_m=1.0` m 以上端から離れる）
+にある場合、相手側を projection 点で分割して共通ノードを作る。これにより
+「終点マージでは拾えない T 字路」が正しく junction として表現される。
+
+Paris 実データ（`--max-step-m 40 --merge-endpoint-m 8`）での before/after:
+
+| 指標 | before (endpoint merge のみ) | after (T 接続も) |
+| --- | --- | --- |
+| edges | 123 | **221** |
+| nodes | 223 | 217 |
+| **LCC (最大連結成分) ノード数** | **5** | **84** |
+| LCC ノード比率 | 2% | 40% |
+| multi_branch ノード | 3 | 72 |
+| うち `t_junction` | 0 | 12 |
+| うち `y_junction` | 2 | 37 |
+| うち `complex_junction` | 1 | 23 |
+
+実データで 3 km レベルの経路が `route` で引けるようになった（`n210 → n219`、
+6 edge、3004 m）。旧実装では 1 km 以上の連結経路がほぼ存在しなかった。
+
 ## センターライン平滑化（0.3.0 で差し替え）
 
 `centerline_from_points` は **PCA 軸 + 等幅 bin median** から **時系列順
