@@ -20,8 +20,8 @@ _roadgraph_builder_completions() {
     local subcommands="doctor build visualize validate validate-detections \
 validate-sd-nav validate-manifest validate-turn-restrictions enrich \
 inspect-lidar nearest-node route stats match-trajectory infer-road-class \
-infer-signalized-junctions reconstruct-trips fuse-lidar export-lanelet2 \
-apply-camera export-bundle"
+infer-signalized-junctions fuse-traces reconstruct-trips fuse-lidar \
+export-lanelet2 apply-camera export-bundle"
 
     # Top-level position: either a flag or a subcommand.
     if ((cword == 1)); then
@@ -84,6 +84,9 @@ apply-camera export-bundle"
                 ;;
             infer-signalized-junctions)
                 COMPREPLY=($(compgen -W "--stop-speed-mps --stop-min-duration-s --max-distance-m --min-stops" -- "$cur"))
+                ;;
+            fuse-traces)
+                COMPREPLY=($(compgen -W "--snap-max-distance-m" -- "$cur"))
                 ;;
             stats)
                 COMPREPLY=($(compgen -W "--origin-lat --origin-lon" -- "$cur"))

@@ -43,6 +43,7 @@ from roadgraph_builder.routing.nearest import nearest_node
 from roadgraph_builder.routing.shortest_path import shortest_path
 from roadgraph_builder.semantics.road_class import RoadClassThresholds, infer_road_class
 from roadgraph_builder.semantics.signals import infer_signalized_junctions
+from roadgraph_builder.semantics.trace_fusion import coverage_buckets, fuse_traces_into_graph
 from roadgraph_builder.viz.svg_export import write_trajectory_graph_svg
 
 
@@ -347,6 +348,25 @@ def _build_parser() -> argparse.ArgumentParser:
     sig.add_argument("--stop-min-duration-s", type=float, default=30.0, metavar="S")
     sig.add_argument("--max-distance-m", type=float, default=20.0, metavar="M")
     sig.add_argument("--min-stops", type=int, default=2, metavar="N")
+
+    ft = sub.add_parser(
+        "fuse-traces",
+        help="Overlay multiple trajectories onto a fixed graph; record per-edge observation stats.",
+    )
+    ft.add_argument("input_json", help="Road graph JSON (e.g. sim/road_graph.json).")
+    ft.add_argument(
+        "trajectory_csvs",
+        nargs="+",
+        help="One or more trajectory CSVs in the graph's meter frame.",
+    )
+    ft.add_argument("output_json", help="Enriched road graph JSON path.")
+    ft.add_argument(
+        "--snap-max-distance-m",
+        type=float,
+        default=15.0,
+        metavar="M",
+        help="Samples farther than this are ignored per trajectory.",
+    )
 
     mt = sub.add_parser(
         "match-trajectory",
@@ -725,6 +745,38 @@ def main(argv: list[str] | None = None) -> int:
                 json.dumps(doc, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
             )
         print(json.dumps(summary, ensure_ascii=False, indent=2))
+        return 0
+    if args.command == "fuse-traces":
+        graph = _cli_load_graph(args.input_json)
+        trajectories = []
+        for p in args.trajectory_csvs:
+            try:
+                trajectories.append(load_trajectory_csv(p))
+            except FileNotFoundError as e:
+                print(f"File not found: {e.filename}", file=sys.stderr)
+                return 1
+        stats = fuse_traces_into_graph(
+            graph,
+            trajectories,
+            snap_max_distance_m=args.snap_max_distance_m,
+        )
+        export_graph_json(graph, args.output_json)
+        buckets = coverage_buckets(stats)
+        total_matched = sum(s.matched_samples for s in stats.values())
+        total_traces_seen = sum(s.trace_observation_count for s in stats.values())
+        print(
+            json.dumps(
+                {
+                    "trajectories": len(trajectories),
+                    "edges_with_observations": sum(1 for s in stats.values() if s.trace_observation_count > 0),
+                    "total_matched_samples": total_matched,
+                    "total_trace_edge_hits": total_traces_seen,
+                    "coverage_buckets": buckets,
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
         return 0
     if args.command == "infer-signalized-junctions":
         graph = _cli_load_graph(args.input_json)

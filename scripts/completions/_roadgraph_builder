@@ -30,6 +30,7 @@ _roadgraph_builder() {
         'infer-road-class:Classify edges as highway/arterial/residential from GPS speed'
         'reconstruct-trips:Partition trajectory into discrete trips (gaps + stops)'
         'infer-signalized-junctions:Flag nodes as signalized candidates from repeated stops'
+        'fuse-traces:Overlay multiple trajectories; record per-edge coverage stats'
         'fuse-lidar:Fit lane boundaries from CSV / LAS / LAZ points'
         'export-lanelet2:Write OSM XML 0.6 (Lanelet2 / JOSM)'
         'apply-camera:Merge camera detections into attributes.hd.semantic_rules'
