@@ -39,7 +39,7 @@ apply-camera export-bundle"
         --origin-json | --detections-json | --turn-restrictions-json | \
         --lidar-points | --points-path | --output | --input_json | --input_las | \
         --input_csv | --output_json | --output_svg | --output_osm | --output_dir | \
-        --points_csv | --points_path)
+        --points_csv | --points_path | --extra-csv)
             _filedir
             return 0
             ;;
@@ -53,7 +53,7 @@ apply-camera export-bundle"
 --max-step-m --merge-endpoint-m --centerline-bins --simplify-tolerance \
 --lane-width-m --dataset-name --origin-json --origin-lat --origin-lon \
 --detections-json --turn-restrictions-json --lidar-points --fuse-max-dist-m \
---fuse-bins --width --height" -- "$cur"))
+--fuse-bins --width --height --extra-csv" -- "$cur"))
                 ;;
             enrich)
                 COMPREPLY=($(compgen -W "--lane-width-m" -- "$cur"))

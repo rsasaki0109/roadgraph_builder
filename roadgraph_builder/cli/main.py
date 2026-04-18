@@ -19,7 +19,7 @@ from roadgraph_builder.io.export.bundle import export_map_bundle
 from roadgraph_builder.io.export.lanelet2 import export_lanelet2
 from roadgraph_builder.io.lidar.las import load_points_xy_from_las, read_las_header
 from roadgraph_builder.io.lidar.points import load_points_xy_csv
-from roadgraph_builder.io.trajectory.loader import load_trajectory_csv
+from roadgraph_builder.io.trajectory.loader import load_multi_trajectory_csvs, load_trajectory_csv
 from roadgraph_builder.cli.doctor import run_doctor
 from roadgraph_builder.utils.geo import load_wgs84_origin_json
 from roadgraph_builder.validation import (
@@ -118,6 +118,13 @@ def _build_parser() -> argparse.ArgumentParser:
     b = sub.add_parser("build", help="Build graph from trajectory CSV and write JSON.")
     b.add_argument("input_csv", help="Input CSV with columns timestamp, x, y")
     b.add_argument("output_json", help="Output JSON path")
+    b.add_argument(
+        "--extra-csv",
+        action="append",
+        default=[],
+        metavar="PATH",
+        help="Additional trajectory CSV to concatenate with the primary input (same meter origin). Repeatable.",
+    )
     _add_build_params(b)
 
     v = sub.add_parser("visualize", help="Build graph from CSV and write trajectory+graph SVG.")
@@ -415,6 +422,13 @@ def _build_parser() -> argparse.ArgumentParser:
         metavar="N",
         help="Number of along-edge bins for LiDAR median aggregation.",
     )
+    bun.add_argument(
+        "--extra-csv",
+        action="append",
+        default=[],
+        metavar="PATH",
+        help="Additional trajectory CSV to concatenate with the primary input (same meter origin). Repeatable.",
+    )
     _add_build_params(bun)
 
     return p
@@ -427,7 +441,11 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "build":
         params = _build_params_from_args(args)
         try:
-            graph = build_graph_from_csv(args.input_csv, params)
+            if args.extra_csv:
+                traj = load_multi_trajectory_csvs([args.input_csv, *args.extra_csv])
+                graph = build_graph_from_trajectory(traj, params)
+            else:
+                graph = build_graph_from_csv(args.input_csv, params)
         except FileNotFoundError as e:
             print(f"File not found: {e.filename}", file=sys.stderr)
             return 1
@@ -717,7 +735,10 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "export-bundle":
         params = _build_params_from_args(args)
         try:
-            traj = load_trajectory_csv(args.input_csv)
+            if args.extra_csv:
+                traj = load_multi_trajectory_csvs([args.input_csv, *args.extra_csv])
+            else:
+                traj = load_trajectory_csv(args.input_csv)
             graph = build_graph_from_trajectory(traj, params)
         except FileNotFoundError as e:
             print(f"File not found: {e.filename}", file=sys.stderr)

@@ -35,6 +35,16 @@ python3 -m venv .venv && .venv/bin/pip install -e .
 
 From the repo root, **`make doctor`**, **`make demo`**, **`make tune`** (bundle + validate for parameter exploration), and **`make test`** are shortcuts (see `Makefile`). Tuning workflow: [docs/bundle_tuning.md](docs/bundle_tuning.md).
 
+### Multiple passes over the same area (`--extra-csv`)
+
+`build` and `export-bundle` accept repeated `--extra-csv PATH` to concatenate extra trajectory CSVs that share the primary input's meter origin. Overlapping passes get fused (duplicate / near-parallel merge); non-overlapping passes land as independent polylines. `attributes.direction_observed` on each edge flips to `bidirectional` when at least one pass traversed the edge in the opposite direction.
+
+```bash
+roadgraph_builder build examples/sample_trajectory.csv out.json \
+  --extra-csv examples/another_pass.csv \
+  --extra-csv examples/yet_another_pass.csv
+```
+
 ### Three targets at once (nav SD / sim / Lanelet) — **export-bundle**
 
 **日本語:** ナビ向け **SD シード**、シミュ用の **フルグラフ＋GeoJSON**、**Lanelet 互換 OSM** を、**いまあるパイプライン**で一括書き出します（完成品 HD ではなく、同じ土台を三系統に分ける）。

@@ -53,3 +53,24 @@ def load_trajectory_csv(path: str | Path) -> Trajectory:
     xy = np.asarray(rows_xy, dtype=np.float64)
     order = np.argsort(timestamps)
     return Trajectory(timestamps=timestamps[order], xy=xy[order])
+
+
+def load_multi_trajectory_csvs(paths) -> Trajectory:
+    """Concatenate several trajectory CSVs assumed to share the same meter origin.
+
+    Takes an iterable of file paths (primary first); returns a single
+    :class:`Trajectory` whose samples are **not** re-sorted across files (each
+    file's internal timestamp order is preserved, but the concatenation order
+    reflects the argument order). Gap-based segmentation downstream still
+    treats spatial jumps between files as new segments, so two non-overlapping
+    passes will naturally become separate polylines while overlapping traces
+    get fused by the existing duplicate / near-parallel merge passes.
+    """
+    trajectories = [load_trajectory_csv(p) for p in paths]
+    if not trajectories:
+        raise ValueError("load_multi_trajectory_csvs requires at least one path")
+    if len(trajectories) == 1:
+        return trajectories[0]
+    timestamps = np.concatenate([t.timestamps for t in trajectories])
+    xy = np.concatenate([t.xy for t in trajectories], axis=0)
+    return Trajectory(timestamps=timestamps, xy=xy)
