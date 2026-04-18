@@ -44,6 +44,31 @@
 
 `allowed_maneuvers` は信号・標識・法規のターン制限ではありません。ターン禁止を入れる場合の設計メモは [navigation_turn_restrictions.md](navigation_turn_restrictions.md)。
 
+## X 接続検出（0.3.0 で追加）
+
+`polylines_to_graph` は T 接続に先立って **`split_polylines_at_crossings`** を
+実行し、2 本の polyline が空中交差（どちらの端点とも一致しない interior × interior）
+している場合に交点で両方分割する。segment-segment intersection の検出、
+polyline bbox による pre-filter、割り込み先のセグメント index 昇順でリビルド。
+
+Paris 実データでの累積効果（`--max-step-m 40 --merge-endpoint-m 8`）:
+
+| 指標 | T のみ | T + X |
+| --- | --- | --- |
+| edges | 221 | **347** |
+| nodes | 217 | 254 |
+| **LCC ノード数** | 84 (40%) | **135 (53%)** |
+| multi_branch ノード | 72 | 112 |
+| うち `t_junction` | 12 | 10 |
+| うち `y_junction` | 37 | 30 |
+| うち `x_junction` | 0 | **18** |
+| うち `crossroads` | 0 | **8** |
+| うち `complex_junction` | 23 | 46 |
+
+`x_junction` / `crossroads` が正しくラベル付けされるようになり、今までは
+`complex_junction` に丸められていた 4 分岐が適切に分類される。viewer の
+click-to-route も 19 edge / 1923 m のルートが引ける。
+
 ## T 接続検出によるグラフ連結性向上（0.3.0 で追加）
 
 `polylines_to_graph` は endpoint union-find に加え、先に

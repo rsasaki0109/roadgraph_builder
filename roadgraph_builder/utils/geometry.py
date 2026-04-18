@@ -63,6 +63,127 @@ def _closest_point_on_polyline(
     return best_d, best_pt, best_idx, best_arc
 
 
+def _segment_segment_intersection(
+    a0: tuple[float, float],
+    a1: tuple[float, float],
+    b0: tuple[float, float],
+    b1: tuple[float, float],
+) -> tuple[float, float] | None:
+    """Return the unique interior crossing of two segments, else ``None``.
+
+    Rejects collinear overlaps and endpoint touches — both are better handled by
+    the endpoint union-find / T-junction split passes. Only strict interior
+    crossings ``(0 < t < 1, 0 < u < 1)`` return a point.
+    """
+    d1x = a1[0] - a0[0]
+    d1y = a1[1] - a0[1]
+    d2x = b1[0] - b0[0]
+    d2y = b1[1] - b0[1]
+    denom = d1x * d2y - d1y * d2x
+    if abs(denom) < 1e-12:
+        return None
+    ox = b0[0] - a0[0]
+    oy = b0[1] - a0[1]
+    t = (ox * d2y - oy * d2x) / denom
+    u = (ox * d1y - oy * d1x) / denom
+    eps = 1e-9
+    if t <= eps or t >= 1.0 - eps or u <= eps or u >= 1.0 - eps:
+        return None
+    return (a0[0] + t * d1x, a0[1] + t * d1y)
+
+
+def _polyline_bbox(poly: list[tuple[float, float]]) -> tuple[float, float, float, float]:
+    xs = [p[0] for p in poly]
+    ys = [p[1] for p in poly]
+    return (min(xs), min(ys), max(xs), max(ys))
+
+
+def _bboxes_overlap(a: tuple[float, float, float, float], b: tuple[float, float, float, float]) -> bool:
+    return not (a[2] < b[0] or b[2] < a[0] or a[3] < b[1] or b[3] < a[1])
+
+
+def split_polylines_at_crossings(
+    polylines: list[list[tuple[float, float]]],
+) -> list[list[tuple[float, float]]]:
+    """Split every pair of polylines that strictly cross each other.
+
+    Detects interior X-shaped crossings (both parameters strictly between 0 and
+    1) and injects the intersection point into both polylines. Multiple
+    crossings with the same polyline are collected and applied in sorted
+    segment order. Endpoint-touch and T-style cases are intentionally ignored
+    — ``split_polylines_at_t_junctions`` handles those.
+
+    Uses polyline bounding-box pre-filter to keep the brute-force pair loop
+    manageable on realistic graph sizes (Paris: ~250 polylines).
+    """
+    n = len(polylines)
+    if n < 2:
+        return [list(pl) for pl in polylines]
+    # Per-polyline list of (segment_index, point) where we will inject the vertex.
+    splits: list[list[tuple[int, tuple[float, float]]]] = [[] for _ in range(n)]
+    bboxes = [_polyline_bbox(pl) if len(pl) >= 2 else None for pl in polylines]
+
+    for i in range(n):
+        if bboxes[i] is None or len(polylines[i]) < 2:
+            continue
+        for j in range(i + 1, n):
+            if bboxes[j] is None or len(polylines[j]) < 2:
+                continue
+            if not _bboxes_overlap(bboxes[i], bboxes[j]):
+                continue
+            pli = polylines[i]
+            plj = polylines[j]
+            for si in range(len(pli) - 1):
+                a0, a1 = pli[si], pli[si + 1]
+                for sj in range(len(plj) - 1):
+                    b0, b1 = plj[sj], plj[sj + 1]
+                    cross = _segment_segment_intersection(a0, a1, b0, b1)
+                    if cross is None:
+                        continue
+                    splits[i].append((si, cross))
+                    splits[j].append((sj, cross))
+
+    out: list[list[tuple[float, float]]] = []
+    for idx, pl in enumerate(polylines):
+        injections = splits[idx]
+        if not injections:
+            out.append(list(pl))
+            continue
+        # Apply injections sorted by segment index (stable per-segment ordering
+        # within the same segment is OK because we inject a single 2-point
+        # segment split — multiple in-segment crossings inject in any order).
+        injections.sort(key=lambda s: s[0])
+        new_pl: list[tuple[float, float]] = [pl[0]]
+        for si in range(len(pl) - 1):
+            for inj_si, inj_pt in injections:
+                if inj_si == si and inj_pt != new_pl[-1] and inj_pt != pl[si + 1]:
+                    new_pl.append(inj_pt)
+            new_pl.append(pl[si + 1])
+
+        # Now cut new_pl into sub-polylines wherever an injected point sits as
+        # an interior vertex. Since union-find will fuse them later, it suffices
+        # to emit each maximal sub-polyline and let the endpoint merger handle
+        # the shared junction vertex.
+        cross_pts = {pt for _si, pt in injections}
+        last_cut = 0
+        emitted = False
+        for k in range(1, len(new_pl) - 1):
+            if new_pl[k] in cross_pts:
+                sub = new_pl[last_cut : k + 1]
+                if len(sub) >= 2:
+                    out.append(list(sub))
+                    emitted = True
+                last_cut = k
+        tail = new_pl[last_cut:]
+        if len(tail) >= 2:
+            out.append(list(tail))
+            emitted = True
+        if not emitted:
+            out.append(list(pl))
+
+    return out
+
+
 def split_polylines_at_t_junctions(
     polylines: list[list[tuple[float, float]]],
     merge_threshold_m: float,
