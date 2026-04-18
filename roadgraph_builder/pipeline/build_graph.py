@@ -129,6 +129,106 @@ def _polyline_length_m(poly: list[tuple[float, float]]) -> float:
     return total
 
 
+def _resample_polyline_at_arclen(
+    poly: list[tuple[float, float]], n_samples: int
+) -> list[tuple[float, float]]:
+    """Resample ``poly`` at ``n_samples`` uniformly-spaced arc-length positions."""
+    if len(poly) < 2 or n_samples < 2:
+        return list(poly)
+    xs = [p[0] for p in poly]
+    ys = [p[1] for p in poly]
+    seg_len = [
+        math.hypot(xs[i + 1] - xs[i], ys[i + 1] - ys[i]) for i in range(len(poly) - 1)
+    ]
+    cum = [0.0]
+    for s in seg_len:
+        cum.append(cum[-1] + s)
+    total = cum[-1]
+    if total < 1e-9:
+        return [poly[0]] * n_samples
+    out: list[tuple[float, float]] = []
+    j = 0
+    for i in range(n_samples):
+        target = total * i / (n_samples - 1)
+        while j + 1 < len(cum) and cum[j + 1] < target:
+            j += 1
+        if j + 1 >= len(cum):
+            out.append((xs[-1], ys[-1]))
+            continue
+        span = cum[j + 1] - cum[j]
+        if span < 1e-12:
+            out.append((xs[j], ys[j]))
+        else:
+            t = (target - cum[j]) / span
+            out.append((xs[j] + t * (xs[j + 1] - xs[j]), ys[j] + t * (ys[j + 1] - ys[j])))
+    return out
+
+
+def merge_duplicate_edges(graph: Graph, *, resample_bins: int = 32) -> int:
+    """Collapse edges that share the **same endpoint pair** into one averaged edge.
+
+    A GPS trip that traverses the same road more than once produces several
+    polylines with the same start/end nodes after endpoint union-find. Instead
+    of shipping them as parallel duplicates we resample each polyline at
+    ``resample_bins`` arc-length-uniform samples, reorient those that were
+    walked in the opposite direction, and average to get one cleaner centerline.
+    Returns the number of edges removed by merging.
+    """
+    from collections import defaultdict
+
+    groups: dict[tuple[str, str], list[Edge]] = defaultdict(list)
+    for e in graph.edges:
+        key = tuple(sorted((e.start_node_id, e.end_node_id)))
+        groups[key].append(e)
+
+    merged_removed = 0
+    kept: list[Edge] = []
+    for key, group in groups.items():
+        if len(group) == 1:
+            kept.append(group[0])
+            continue
+        # Merge: reorient every polyline to match the canonical direction of the
+        # first edge in the group, resample to a common length, and average.
+        primary = group[0]
+        canonical_start, canonical_end = primary.start_node_id, primary.end_node_id
+        resampled: list[list[tuple[float, float]]] = []
+        for e in group:
+            pl = list(e.polyline)
+            if (e.start_node_id, e.end_node_id) != (canonical_start, canonical_end):
+                pl = list(reversed(pl))
+            resampled.append(_resample_polyline_at_arclen(pl, resample_bins))
+
+        avg = [
+            (
+                sum(pl[i][0] for pl in resampled) / len(resampled),
+                sum(pl[i][1] for pl in resampled) / len(resampled),
+            )
+            for i in range(resample_bins)
+        ]
+        # Preserve the attributes of the first edge; note how many originals merged.
+        attrs = dict(primary.attributes)
+        attrs["merged_edge_count"] = len(group)
+        merged_removed += len(group) - 1
+        kept.append(
+            Edge(
+                id=primary.id,  # renumbered below
+                start_node_id=canonical_start,
+                end_node_id=canonical_end,
+                polyline=avg,
+                attributes=attrs,
+            )
+        )
+
+    if merged_removed == 0:
+        return 0
+
+    # Renumber sequentially.
+    for i, e in enumerate(kept):
+        e.id = f"e{i}"
+    graph.edges = kept
+    return merged_removed
+
+
 def polylines_to_graph(polylines: list[list[tuple[float, float]]], params: BuildParams) -> Graph:
     """Create nodes (merged endpoints) and edges (centerline polylines).
 
@@ -197,6 +297,9 @@ def polylines_to_graph(polylines: list[list[tuple[float, float]]], params: Build
     ]
 
     graph = Graph(nodes=nodes, edges=edges)
+    # Fuse multiple passes over the same (start, end) node pair — averaged
+    # centerline instead of several parallel duplicates.
+    merge_duplicate_edges(graph, resample_bins=params.centerline_bins)
     annotate_node_degrees(graph)
     annotate_junction_types(graph)
     return graph
