@@ -46,6 +46,7 @@ Codex / 次のセッション向け。**事実と意図を分けて**書く。
 - **LAZ optional**: `pip install 'roadgraph-builder[laz]'` で `laspy[lazrs]` 経由、未インストール時は明示 `ImportError`。
 - **サンプル LAS**: `examples/sample_lidar.las`（52 点、1.3 KB、`scripts/make_sample_las.py` で再生成可）。
 - **fuse-lidar**: CSV / LAS / LAZ を拡張子で dispatch。
+- **cross-format regression**: `tests/test_las_cross_format.py` が laspy で生成した PDRF 0-10 × LAS 1.2/1.3/1.4 全パターン + 64-bit extended point count を our reader と byte-match。out-of-band verification では PDAL の 7 real LAS (autzen_trim 3.7 MB / 110K pts 含む) で全パス、`fuse-lidar` も実稼働確認。
 - **camera detections**: JSON で `apply-camera`、GeoJSON `semantic_summary` に反映。
 
 ### 検証 / CI / 配布
@@ -86,8 +87,7 @@ Codex / 次のセッション向け。**事実と意図を分けて**書く。
 
 1. **`v0.3.0` タグ release** — すぐ実行可。Release notes は `CHANGELOG.md [0.3.0]` から自動生成される。
 2. **Viewer JS Dijkstra で turn_restrictions 順守** — 現状 click-to-route は制限無視（pre-baked overlay のみ順守）。`(node, incoming_edge, direction)` 状態付き JS Dijkstra にすれば interactive に効く。
-3. **LAS/LAZ 実データ検証** — OpenTopography / USGS 3DEP など公開 LAS でヘッダ + 点読みを検証。必要なら合成 LAS 以外にリアル LAS サンプル（数 MB）を同梱検討。
-4. **カメラ画像 → 投影** — `io/camera/` に画像 → 2D 投影 → 検出 JSON のパイプラインを stub → 実装。
+3. **カメラ画像 → 投影** — `io/camera/` に画像 → 2D 投影 → 検出 JSON のパイプラインを stub → 実装。
 
 ## 全体俯瞰
 
