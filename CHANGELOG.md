@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`docs/ARCHITECTURE.md`** — a single-page map of the codebase with Mermaid diagrams (data flow, package layout, `export-bundle` sequence, schema graph, routing subsystem, CI/release). Linked from README and PLAN so new contributors (and future sessions) can orient in one read.
 - **Click-to-route in the Leaflet viewer** — `docs/map.html` now loads the map GeoJSON into a JS-side adjacency and runs a binary-heap Dijkstra when you click two graph nodes. The computed route replaces the pre-baked overlay, and a "Clear route" button / status line sits in the top bar. Works on any dataset because the data is self-contained.
 - **Centerline adjacency in map GeoJSON** — `build_map_geojson` now emits `start_node_id`, `end_node_id`, and `length_m` on each centerline feature, and pins `kind: "centerline"` after the edge-attribute spread so the GeoJSON layer tag no longer collides with the internal `kind: "lane_centerline"` attribute. Existing consumers that ignored those properties are unaffected; the Leaflet viewer uses them for the client-side routing.
 - **`nearest-node` CLI + `roadgraph_builder.routing.nearest_node`** — given a query point in lat/lon (with origin from `--origin-lat/--origin-lon` or `metadata.map_origin`) or in the graph's meter frame (`--xy`), return the closest `Node` id plus the straight-line distance. Returns a `NearestNode(node_id, distance_m, query_xy_m)` dataclass from Python and a JSON summary from the CLI.

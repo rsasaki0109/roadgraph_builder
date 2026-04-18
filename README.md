@@ -358,6 +358,10 @@ roadgraph_builder validate /tmp/rg_bundle/sim/road_graph.json
 
 ## Package layout
 
+See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for a single-page map
+with Mermaid diagrams of the data flow, CLI surface, bundle layout, and
+routing subsystem.
+
 Python package: `roadgraph_builder/`
 
 | Path | Role |
