@@ -39,6 +39,7 @@ from roadgraph_builder.routing.geojson_export import write_route_geojson
 from roadgraph_builder.routing.map_match import coverage_stats, snap_trajectory_to_graph
 from roadgraph_builder.routing.nearest import nearest_node
 from roadgraph_builder.routing.shortest_path import shortest_path
+from roadgraph_builder.semantics.road_class import RoadClassThresholds, infer_road_class
 from roadgraph_builder.viz.svg_export import write_trajectory_graph_svg
 
 
@@ -273,6 +274,42 @@ def _build_parser() -> argparse.ArgumentParser:
         default=None,
         metavar="DEG",
         help="WGS84 origin longitude for --output.",
+    )
+
+    irc = sub.add_parser(
+        "infer-road-class",
+        help="Classify every edge as highway/arterial/residential from observed GPS speed.",
+    )
+    irc.add_argument("input_json", help="Road graph JSON.")
+    irc.add_argument("input_csv", help="Trajectory CSV (timestamp, x, y).")
+    irc.add_argument("output_json", help="Output JSON path.")
+    irc.add_argument(
+        "--max-distance-m",
+        type=float,
+        default=15.0,
+        metavar="M",
+        help="Samples farther than this from any edge are skipped.",
+    )
+    irc.add_argument(
+        "--min-samples",
+        type=int,
+        default=3,
+        metavar="N",
+        help="Minimum consecutive-sample observations per edge before labelling.",
+    )
+    irc.add_argument(
+        "--highway-mps",
+        type=float,
+        default=20.0,
+        metavar="M/S",
+        help="Lower bound on median speed for the 'highway' class.",
+    )
+    irc.add_argument(
+        "--arterial-mps",
+        type=float,
+        default=10.0,
+        metavar="M/S",
+        help="Lower bound on median speed for the 'arterial' class.",
     )
 
     mt = sub.add_parser(
@@ -585,6 +622,26 @@ def main(argv: list[str] | None = None) -> int:
                 indent=2,
             )
         )
+        return 0
+    if args.command == "infer-road-class":
+        graph = _cli_load_graph(args.input_json)
+        try:
+            traj = load_trajectory_csv(args.input_csv)
+        except FileNotFoundError as e:
+            print(f"File not found: {e.filename}", file=sys.stderr)
+            return 1
+        counts = infer_road_class(
+            graph,
+            traj,
+            max_distance_m=args.max_distance_m,
+            min_samples=args.min_samples,
+            thresholds=RoadClassThresholds(
+                highway_mps=args.highway_mps,
+                arterial_mps=args.arterial_mps,
+            ),
+        )
+        export_graph_json(graph, args.output_json)
+        print(json.dumps({"road_class_counts": counts, "total_edges": len(graph.edges)}, ensure_ascii=False, indent=2))
         return 0
     if args.command == "match-trajectory":
         graph = _cli_load_graph(args.input_json)

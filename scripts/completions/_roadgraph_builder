@@ -27,6 +27,7 @@ _roadgraph_builder() {
         'route:Dijkstra shortest path'
         'stats:Print graph_stats + junction counts'
         'match-trajectory:Snap a trajectory CSV to the graph'
+        'infer-road-class:Classify edges as highway/arterial/residential from GPS speed'
         'fuse-lidar:Fit lane boundaries from CSV / LAS / LAZ points'
         'export-lanelet2:Write OSM XML 0.6 (Lanelet2 / JOSM)'
         'apply-camera:Merge camera detections into attributes.hd.semantic_rules'
