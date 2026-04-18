@@ -38,8 +38,15 @@ class BuildParams:
     max_step_m: float = 25.0
     merge_endpoint_m: float = 8.0
     centerline_bins: int = 32
-    #: Douglas–Peucker tolerance (meters); None disables simplification.
+    #: Douglas–Peucker tolerance (meters) applied on the raw segment
+    #: polylines *before* graph assembly. ``None`` disables.
     simplify_tolerance_m: float | None = None
+    #: Douglas–Peucker tolerance (meters) applied to every final edge
+    #: polyline *after* all merge / split / consolidation passes. A small
+    #: value (0.3 m default) drops the oversampling produced by the fixed
+    #: ``centerline_bins`` resample while keeping the geometry intact.
+    #: ``None`` disables the post pass; set to 0 for an explicit no-op.
+    post_simplify_tolerance_m: float | None = 0.3
 
 
 def _orient_polyline_to_trajectory(
@@ -562,6 +569,15 @@ def polylines_to_graph(polylines: list[list[tuple[float, float]]], params: Build
     )
     annotate_node_degrees(graph)
     annotate_junction_types(graph)
+    # Post-merge RDP: drop oversampling introduced by the fixed-bin resample
+    # (straight 10 m edges ending up with 32 vertices at 0.3 m spacing).
+    _tol = params.post_simplify_tolerance_m
+    if _tol is not None and _tol > 0:
+        for e in graph.edges:
+            if len(e.polyline) > 2:
+                simplified = simplify_polyline_rdp(e.polyline, _tol)
+                if len(simplified) >= 2:
+                    e.polyline = simplified
     return graph
 
 

@@ -2,7 +2,7 @@
   "manifest_version": 1,
   "generator": "roadgraph_builder",
   "roadgraph_builder_version": "0.3.0",
-  "generated_at_utc": "2026-04-18T11:21:17Z",
+  "generated_at_utc": "2026-04-18T11:48:25Z",
   "dataset_name": "roadgraph_sample_bundle",
   "origin_wgs84_deg": {
     "lat": 52.52,
@@ -32,10 +32,10 @@
     "edge_count": 2,
     "node_count": 4,
     "edge_length": {
-      "min_m": 15.005998201318711,
-      "median_m": 15.011493459211717,
-      "max_m": 15.016988717104724,
-      "total_m": 30.022986918423435
+      "min_m": 15.0,
+      "median_m": 15.008162225205314,
+      "max_m": 15.016324450410627,
+      "total_m": 30.01632445041063
     },
     "bbox_m": {
       "x_min_m": 0.0,
