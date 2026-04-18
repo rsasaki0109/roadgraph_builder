@@ -38,6 +38,7 @@ from roadgraph_builder.core.graph.stats import graph_stats, junction_stats
 from roadgraph_builder.routing.geojson_export import write_route_geojson
 from roadgraph_builder.routing.hmm_match import hmm_match_trajectory
 from roadgraph_builder.routing.map_match import coverage_stats, snap_trajectory_to_graph
+from roadgraph_builder.routing.trip_reconstruction import reconstruct_trips, trip_stats_summary
 from roadgraph_builder.routing.nearest import nearest_node
 from roadgraph_builder.routing.shortest_path import shortest_path
 from roadgraph_builder.semantics.road_class import RoadClassThresholds, infer_road_class
@@ -276,6 +277,27 @@ def _build_parser() -> argparse.ArgumentParser:
         metavar="DEG",
         help="WGS84 origin longitude for --output.",
     )
+
+    rtp = sub.add_parser(
+        "reconstruct-trips",
+        help="Partition a long trajectory into discrete trips (gaps + stops + graph snap).",
+    )
+    rtp.add_argument("input_json", help="Road graph JSON.")
+    rtp.add_argument("input_csv", help="Trajectory CSV (timestamp, x, y) in the graph's meter frame.")
+    rtp.add_argument(
+        "--output",
+        type=str,
+        default=None,
+        metavar="PATH",
+        help="Optional JSON path to write {stats, trips}.",
+    )
+    rtp.add_argument("--max-time-gap-s", type=float, default=300.0, metavar="S")
+    rtp.add_argument("--max-spatial-gap-m", type=float, default=200.0, metavar="M")
+    rtp.add_argument("--stop-speed-mps", type=float, default=0.8, metavar="M/S")
+    rtp.add_argument("--stop-min-duration-s", type=float, default=60.0, metavar="S")
+    rtp.add_argument("--min-trip-samples", type=int, default=3, metavar="N")
+    rtp.add_argument("--min-trip-distance-m", type=float, default=10.0, metavar="M")
+    rtp.add_argument("--snap-max-distance-m", type=float, default=20.0, metavar="M")
 
     irc = sub.add_parser(
         "infer-road-class",
@@ -642,6 +664,54 @@ def main(argv: list[str] | None = None) -> int:
                 indent=2,
             )
         )
+        return 0
+    if args.command == "reconstruct-trips":
+        graph = _cli_load_graph(args.input_json)
+        try:
+            traj = load_trajectory_csv(args.input_csv)
+        except FileNotFoundError as e:
+            print(f"File not found: {e.filename}", file=sys.stderr)
+            return 1
+        trips = reconstruct_trips(
+            graph,
+            traj,
+            max_time_gap_s=args.max_time_gap_s,
+            max_spatial_gap_m=args.max_spatial_gap_m,
+            stop_speed_mps=args.stop_speed_mps,
+            stop_min_duration_s=args.stop_min_duration_s,
+            min_trip_samples=args.min_trip_samples,
+            min_trip_distance_m=args.min_trip_distance_m,
+            snap_max_distance_m=args.snap_max_distance_m,
+        )
+        summary = trip_stats_summary(trips)
+        doc = {
+            "stats": summary,
+            "trips": [
+                {
+                    "trip_id": t.trip_id,
+                    "start_index": t.start_index,
+                    "end_index": t.end_index,
+                    "start_timestamp": t.start_timestamp,
+                    "end_timestamp": t.end_timestamp,
+                    "duration_s": t.duration_s,
+                    "start_xy_m": list(t.start_xy_m),
+                    "end_xy_m": list(t.end_xy_m),
+                    "start_edge_id": t.start_edge_id,
+                    "end_edge_id": t.end_edge_id,
+                    "edge_sequence": t.edge_sequence,
+                    "sample_count": t.sample_count,
+                    "matched_sample_count": t.matched_sample_count,
+                    "total_distance_m": t.total_distance_m,
+                    "mean_speed_mps": t.mean_speed_mps,
+                }
+                for t in trips
+            ],
+        }
+        if args.output:
+            Path(args.output).write_text(
+                json.dumps(doc, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+            )
+        print(json.dumps(summary, ensure_ascii=False, indent=2))
         return 0
     if args.command == "infer-road-class":
         graph = _cli_load_graph(args.input_json)

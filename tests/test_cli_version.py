@@ -47,6 +47,7 @@ def test_cli_completions_match_subparsers():
         "stats",
         "match-trajectory",
         "infer-road-class",
+        "reconstruct-trips",
         "fuse-lidar",
         "export-lanelet2",
         "apply-camera",

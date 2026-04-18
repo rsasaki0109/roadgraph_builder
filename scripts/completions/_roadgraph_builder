@@ -28,6 +28,7 @@ _roadgraph_builder() {
         'stats:Print graph_stats + junction counts'
         'match-trajectory:Snap a trajectory CSV to the graph'
         'infer-road-class:Classify edges as highway/arterial/residential from GPS speed'
+        'reconstruct-trips:Partition trajectory into discrete trips (gaps + stops)'
         'fuse-lidar:Fit lane boundaries from CSV / LAS / LAZ points'
         'export-lanelet2:Write OSM XML 0.6 (Lanelet2 / JOSM)'
         'apply-camera:Merge camera detections into attributes.hd.semantic_rules'
