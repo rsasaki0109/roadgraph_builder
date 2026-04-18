@@ -243,6 +243,112 @@ def merge_duplicate_edges(graph: Graph, *, resample_bins: int = 32) -> int:
     return merged_removed
 
 
+def consolidate_clustered_junctions(
+    graph: Graph, *, tolerance_m: float, resample_bins: int = 32
+) -> int:
+    """Unify ``multi_branch`` nodes that sit within ``tolerance_m`` of each other.
+
+    After the split / endpoint-merge / duplicate-merge passes, a single real
+    intersection can still be represented by two or three ``multi_branch``
+    nodes a couple of meters apart — each anchored by a different polyline
+    that entered the junction from a slightly different offset. This pass
+    finds those small clusters via union-find on pairwise distance, collapses
+    each cluster to a single node at the centroid, rewrites every incident
+    edge, and re-runs :func:`merge_duplicate_edges` to fold any pair that now
+    shares the same endpoint set.
+
+    Returns the number of multi_branch nodes absorbed (cluster_size − 1 per
+    cluster).
+    """
+    if tolerance_m <= 0:
+        return 0
+    mb_nodes = [n for n in graph.nodes if n.attributes.get("junction_hint") == "multi_branch"]
+    if len(mb_nodes) < 2:
+        return 0
+
+    parent: dict[str, str] = {n.id: n.id for n in mb_nodes}
+
+    def _find(x: str) -> str:
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+
+    def _union(a: str, b: str) -> None:
+        ra, rb = _find(a), _find(b)
+        if ra != rb:
+            parent[ra] = rb
+
+    for i in range(len(mb_nodes)):
+        a = mb_nodes[i]
+        for j in range(i + 1, len(mb_nodes)):
+            b = mb_nodes[j]
+            dx = a.position[0] - b.position[0]
+            dy = a.position[1] - b.position[1]
+            if math.hypot(dx, dy) < tolerance_m:
+                _union(a.id, b.id)
+
+    # Group by cluster root.
+    from collections import defaultdict
+
+    clusters: dict[str, list[str]] = defaultdict(list)
+    for nid in parent:
+        clusters[_find(nid)].append(nid)
+    absorbed = sum(len(m) - 1 for m in clusters.values() if len(m) > 1)
+    if absorbed == 0:
+        return 0
+
+    # Pick canonical + centroid for each cluster with >1 members.
+    id_to_node = {n.id: n for n in graph.nodes}
+    canonical: dict[str, str] = {}
+    new_positions: dict[str, tuple[float, float]] = {}
+    for root, members in clusters.items():
+        if len(members) == 1:
+            continue
+        canon = min(members)
+        xs = [id_to_node[m].position[0] for m in members]
+        ys = [id_to_node[m].position[1] for m in members]
+        pos = (sum(xs) / len(xs), sum(ys) / len(ys))
+        for m in members:
+            canonical[m] = canon
+        new_positions[canon] = pos
+
+    if not canonical:
+        return 0
+
+    # Rebuild node list: drop absorbed members, update canonical positions.
+    keep_nodes: list[Node] = []
+    dropped_ids = {m for members in clusters.values() if len(members) > 1 for m in members if m != min(members)}
+    for n in graph.nodes:
+        if n.id in dropped_ids:
+            continue
+        if n.id in new_positions:
+            keep_nodes.append(Node(id=n.id, position=new_positions[n.id], attributes=dict(n.attributes)))
+        else:
+            keep_nodes.append(n)
+
+    # Rewrite edges.
+    new_edges: list[Edge] = []
+    for e in graph.edges:
+        sn = canonical.get(e.start_node_id, e.start_node_id)
+        en = canonical.get(e.end_node_id, e.end_node_id)
+        new_edges.append(
+            Edge(
+                id=e.id,
+                start_node_id=sn,
+                end_node_id=en,
+                polyline=list(e.polyline),
+                attributes=dict(e.attributes),
+            )
+        )
+    graph.nodes = keep_nodes
+    graph.edges = new_edges
+
+    # Fresh duplicate merge in case the cluster collapse produced new duplicates.
+    merge_duplicate_edges(graph, resample_bins=resample_bins)
+    return absorbed
+
+
 def merge_near_parallel_edges(
     graph: Graph, *, tolerance_m: float, resample_bins: int = 32
 ) -> int:
@@ -441,6 +547,17 @@ def polylines_to_graph(polylines: list[list[tuple[float, float]]], params: Build
     merge_near_parallel_edges(
         graph,
         tolerance_m=params.merge_endpoint_m,
+        resample_bins=params.centerline_bins,
+    )
+    # annotate_node_degrees needs to run before junction consolidation so we
+    # know which nodes are multi_branch.
+    annotate_node_degrees(graph)
+    # Collapse small clusters of multi_branch nodes (same intersection split
+    # across multiple anchor points). Use a slightly larger tolerance than the
+    # endpoint-merge to catch junction-class drift the earlier passes missed.
+    consolidate_clustered_junctions(
+        graph,
+        tolerance_m=1.75 * params.merge_endpoint_m,
         resample_bins=params.centerline_bins,
     )
     annotate_node_degrees(graph)
