@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pytest)",
+      "Bash(pytest *)",
+      "Bash(ctest *)",
+      "Bash(gh run watch *)",
+      "Bash(git fetch)",
+      "Bash(git fetch *)",
+      "Bash(ruff check *)",
+      "Bash(ruff format --check *)"
+    ]
+  }
+}
