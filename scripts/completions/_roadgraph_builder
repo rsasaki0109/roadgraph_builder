@@ -1,0 +1,91 @@
+#compdef roadgraph_builder
+# Zsh completion for `roadgraph_builder`.
+#
+# Install (user):
+#     mkdir -p ~/.zsh/completions
+#     cp scripts/completions/_roadgraph_builder ~/.zsh/completions/
+#     # Add to ~/.zshrc:
+#     fpath=(~/.zsh/completions $fpath)
+#     autoload -Uz compinit && compinit
+#
+# Updated alongside roadgraph_builder/cli/main.py.
+
+_roadgraph_builder() {
+    local -a subcommands
+    subcommands=(
+        'doctor:Install / asset self-check'
+        'build:Build graph from trajectory CSV and write JSON'
+        'visualize:Build graph from CSV and write SVG'
+        'validate:Validate a road_graph JSON'
+        'validate-detections:Validate camera detections JSON'
+        'validate-sd-nav:Validate SD nav JSON'
+        'validate-manifest:Validate export-bundle manifest'
+        'validate-turn-restrictions:Validate turn_restrictions JSON'
+        'enrich:Attach SD→HD metadata and optional lane boundaries'
+        'inspect-lidar:Print LAS public-header summary as JSON'
+        'nearest-node:Find graph node nearest to a lat/lon or x/y'
+        'route:Dijkstra shortest path'
+        'stats:Print graph_stats + junction counts'
+        'fuse-lidar:Fit lane boundaries from CSV / LAS / LAZ points'
+        'export-lanelet2:Write OSM XML 0.6 (Lanelet2 / JOSM)'
+        'apply-camera:Merge camera detections into attributes.hd.semantic_rules'
+        'export-bundle:Write nav/sim/lanelet outputs in one directory'
+    )
+
+    _arguments -C \
+        '(-h --help)'{-h,--help}'[Show help]' \
+        '(-V --version)'{-V,--version}'[Print package version and exit]' \
+        '1: :->cmd' \
+        '*:: :->args'
+
+    case $state in
+        cmd)
+            _describe 'command' subcommands
+            ;;
+        args)
+            case $line[1] in
+                route)
+                    _arguments \
+                        '--turn-restrictions-json[Turn restrictions JSON]:file:_files' \
+                        '--output[Route GeoJSON output path]:file:_files' \
+                        '--origin-lat[WGS84 origin latitude]:float:' \
+                        '--origin-lon[WGS84 origin longitude]:float:' \
+                        '--from-latlon[Source lat/lon]:float float:' \
+                        '--to-latlon[Destination lat/lon]:float float:' \
+                        '*:file:_files'
+                    ;;
+                nearest-node)
+                    _arguments \
+                        '--latlon[Query lat/lon]:lat lon:' \
+                        '--xy[Query x/y in meters]:x y:' \
+                        '--origin-lat[WGS84 origin latitude]:float:' \
+                        '--origin-lon[WGS84 origin longitude]:float:' \
+                        '*:file:_files'
+                    ;;
+                export-bundle)
+                    _arguments \
+                        '--origin-json[Origin JSON path]:file:_files' \
+                        '--origin-lat[WGS84 origin latitude]:float:' \
+                        '--origin-lon[WGS84 origin longitude]:float:' \
+                        '--dataset-name[Dataset label]:string:' \
+                        '--lane-width-m[HD-lite lane width (m)]:float:' \
+                        '--detections-json[Camera detections JSON]:file:_files' \
+                        '--turn-restrictions-json[Turn restrictions JSON]:file:_files' \
+                        '--lidar-points[LiDAR points CSV/LAS/LAZ]:file:_files' \
+                        '--fuse-max-dist-m[LiDAR fuse max distance (m)]:float:' \
+                        '--fuse-bins[LiDAR fuse along-edge bins]:int:' \
+                        '--max-step-m[Trajectory split gap (m)]:float:' \
+                        '--merge-endpoint-m[Endpoint merge radius (m)]:float:' \
+                        '--centerline-bins[PCA bin count]:int:' \
+                        '--simplify-tolerance[Douglas–Peucker tolerance (m)]:float:' \
+                        '*:file:_files'
+                    ;;
+                *)
+                    _arguments '*:file:_files'
+                    ;;
+            esac
+            ;;
+    esac
+}
+
+_roadgraph_builder "$@"

@@ -101,7 +101,16 @@ def _cli_load_graph(path_str: str):
 
 
 def _build_parser() -> argparse.ArgumentParser:
+    from roadgraph_builder import __version__ as _pkg_version
+
     p = argparse.ArgumentParser(prog="roadgraph_builder", description="Build a road graph from sensor exports.")
+    p.add_argument(
+        "-V",
+        "--version",
+        action="version",
+        version=f"roadgraph_builder {_pkg_version}",
+        help="Print package version and exit.",
+    )
     sub = p.add_subparsers(dest="command", required=True)
 
     sub.add_parser("doctor", help="Print version, Python, and whether example files exist (cwd = repo root).")

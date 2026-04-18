@@ -411,6 +411,29 @@ Every `v*` tag push triggers [`.github/workflows/release.yml`](.github/workflows
 which runs the same script and attaches the tarball + sha256 to the auto-created
 GitHub Release.
 
+## Shell completion
+
+Hand-written bash and zsh completion scripts live under
+[`scripts/completions/`](scripts/completions/). They complete the 17
+subcommands and the common `--turn-restrictions-json` / `--output` /
+`--origin-*` / `--lidar-points` style path arguments.
+
+```bash
+# Bash (per-user)
+mkdir -p ~/.local/share/bash-completion/completions
+cp scripts/completions/roadgraph_builder.bash \
+   ~/.local/share/bash-completion/completions/roadgraph_builder
+
+# Zsh (per-user)
+mkdir -p ~/.zsh/completions
+cp scripts/completions/_roadgraph_builder ~/.zsh/completions/
+# then in ~/.zshrc:
+#   fpath=(~/.zsh/completions $fpath)
+#   autoload -Uz compinit && compinit
+```
+
+`roadgraph_builder --version` (or `-V`) prints the installed package version.
+
 ## Releases
 
 Changes are listed in [CHANGELOG.md](CHANGELOG.md).
