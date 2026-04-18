@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`attributes.direction_observed` on every edge** — `forward_only` when only the digitized start → end direction was observed in the source trajectory, `bidirectional` when `merge_duplicate_edges` / `merge_near_parallel_edges` folded in at least one pass that traversed the edge in the opposite direction. Downstream SD / routing consumers get an honest upper bound on one-way likelihood. `docs/map.html` popups show the label alongside the `merged_edge_count`. Paris: 38 / 242 edges are bidirectional.
 - **Polyline quality metrics** — `polyline_mean_abs_curvature()` and `polyline_rms_residual()` in `roadgraph_builder.utils.geometry`. Smoothness + data-fit metrics for regression-guarding any future centerline work.
 - **`LICENSE` (MIT)** — repository now ships an MIT license file, © 2026 Ryohei Sasaki; `pyproject.toml` declares `license = { file = "LICENSE" }`, author metadata, and the matching PyPI classifier. README "License" section updated from TODO to the actual notice.
 - **`CONTRIBUTING.md`** — dev-setup recipe, commit / schema / data-hygiene conventions, end-to-end demo commands.

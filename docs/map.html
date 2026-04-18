@@ -224,6 +224,12 @@
           if (p.length_m != null) {
             txt += "<br/>" + Number(p.length_m).toFixed(1) + " m";
           }
+          if (p.direction_observed) {
+            txt += "<br/>dir: " + String(p.direction_observed);
+          }
+          if (p.merged_edge_count && p.merged_edge_count > 1) {
+            txt += "<br/>merged passes: " + p.merged_edge_count;
+          }
           layer.bindPopup(txt);
         } else if (p.kind === "route") {
           let txt = "route " + String(p.from_node) + " → " + String(p.to_node);

@@ -56,6 +56,7 @@
       "properties": {
         "kind": "centerline",
         "source": "trajectory_mvp",
+        "direction_observed": "forward_only",
         "hd": {
           "tier": "sd_seed",
           "target_tier": "hd",
@@ -398,6 +399,7 @@
       "properties": {
         "kind": "centerline",
         "source": "trajectory_mvp",
+        "direction_observed": "forward_only",
         "hd": {
           "tier": "sd_seed",
           "target_tier": "hd",

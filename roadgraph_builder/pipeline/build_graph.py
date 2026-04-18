@@ -192,10 +192,21 @@ def merge_duplicate_edges(graph: Graph, *, resample_bins: int = 32) -> int:
         primary = group[0]
         canonical_start, canonical_end = primary.start_node_id, primary.end_node_id
         resampled: list[list[tuple[float, float]]] = []
+        saw_reverse = False
+        saw_forward = False
         for e in group:
             pl = list(e.polyline)
-            if (e.start_node_id, e.end_node_id) != (canonical_start, canonical_end):
+            was_reverse = (e.start_node_id, e.end_node_id) != (canonical_start, canonical_end)
+            if was_reverse:
                 pl = list(reversed(pl))
+                saw_reverse = True
+            else:
+                saw_forward = True
+            # Carry through any prior bidirectional marker (from an earlier pass).
+            prev_dir = e.attributes.get("direction_observed")
+            if prev_dir == "bidirectional":
+                saw_forward = True
+                saw_reverse = True
             resampled.append(_resample_polyline_at_arclen(pl, resample_bins))
 
         avg = [
@@ -208,6 +219,9 @@ def merge_duplicate_edges(graph: Graph, *, resample_bins: int = 32) -> int:
         # Preserve the attributes of the first edge; note how many originals merged.
         attrs = dict(primary.attributes)
         attrs["merged_edge_count"] = len(group)
+        attrs["direction_observed"] = (
+            "bidirectional" if saw_forward and saw_reverse else "forward_only"
+        )
         merged_removed += len(group) - 1
         kept.append(
             Edge(
@@ -401,6 +415,9 @@ def polylines_to_graph(polylines: list[list[tuple[float, float]]], params: Build
                 attributes={
                     "kind": "lane_centerline",
                     "source": "trajectory_mvp",
+                    # Polyline is already time-ordered, so start → end matches
+                    # the direction the trajectory traversed the segment.
+                    "direction_observed": "forward_only",
                 },
             )
         )
