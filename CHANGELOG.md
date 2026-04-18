@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`LICENSE` (MIT)** — repository now ships an MIT license file, © 2026 Ryohei Sasaki; `pyproject.toml` declares `license = { file = "LICENSE" }`, author metadata, and the matching PyPI classifier. README "License" section updated from TODO to the actual notice.
+- **`CONTRIBUTING.md`** — dev-setup recipe, commit / schema / data-hygiene conventions, end-to-end demo commands.
+- **README badges** — CI status, MIT license, Python 3.10 / 3.12 shields.io badges at the top of the README.
+- **`make docs` (pdoc)** — new optional `[docs]` extra (`pdoc>=14.0`) and a Make target that renders the public API into `build/docs/`. `build/` added to `.gitignore`.
 - **`--version` / `-V` flag** — top-level argparse flag on `roadgraph_builder` prints the installed package version (`roadgraph_builder 0.3.0`) and exits 0.
 - **Shell completions** — hand-written bash (`scripts/completions/roadgraph_builder.bash`) and zsh (`scripts/completions/_roadgraph_builder`) scripts cover every subcommand, the top-level `--version` / `--help`, and the common file-path arguments (`--turn-restrictions-json`, `--output`, `--origin-json`, `--lidar-points`, etc.). Install instructions added to README. A smoke test cross-checks the completion scripts against the argparse subparser list so drift gets caught on CI.
 - **`docs/ARCHITECTURE.md`** — a single-page map of the codebase with Mermaid diagrams (data flow, package layout, `export-bundle` sequence, schema graph, routing subsystem, CI/release). Linked from README and PLAN so new contributors (and future sessions) can orient in one read.

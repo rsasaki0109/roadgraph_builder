@@ -1,5 +1,5 @@
 # Run from repository root.
-.PHONY: install test demo tune doctor release-bundle
+.PHONY: install test demo tune doctor release-bundle docs
 
 install:
 	python3 -m pip install -e ".[dev]"
@@ -18,3 +18,9 @@ doctor:
 
 release-bundle:
 	bash scripts/build_release_bundle.sh
+
+# pdoc-based API docs → build/docs/roadgraph_builder/. Requires the `[docs]`
+# extra (`pip install -e ".[docs]"`).
+docs:
+	pdoc -o build/docs roadgraph_builder
+	@echo "Open build/docs/roadgraph_builder.html in a browser."

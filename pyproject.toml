@@ -8,6 +8,16 @@ version = "0.3.0"
 description = "Construct road graphs from trajectory, LiDAR, and camera data."
 readme = "README.md"
 requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [{ name = "Ryohei Sasaki" }]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: GIS",
+]
 dependencies = [
     "numpy>=1.24",
     "jsonschema>=4.19",
@@ -21,6 +31,11 @@ dev = [
 # in native extensions; uncompressed LAS still works without this extra.
 laz = [
     "laspy[lazrs]>=2.5",
+]
+# `make docs` uses pdoc (pure Python; no external system deps) to render
+# docstrings into a static site under build/docs/.
+docs = [
+    "pdoc>=14.0",
 ]
 
 [project.urls]

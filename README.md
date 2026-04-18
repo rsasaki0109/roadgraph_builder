@@ -1,5 +1,9 @@
 # roadgraph_builder
 
+[![CI](https://github.com/rsasaki0109/roadgraph_builder/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/rsasaki0109/roadgraph_builder/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.10%20%7C%203.12-blue.svg)](pyproject.toml)
+
 **Construct road graphs from trajectory, LiDAR, and camera data** (MVP: **trajectory CSV only**).
 
 This project builds a **graph-first** intermediate representation: **nodes** (junctions/endpoints) and **edges** (lane/road segments) with **centerline polylines** and optional **attributes**. Output is **JSON** (`schema_version`) with optional **SVG** previews and an **interactive viewer** on **GitHub Pages** (`docs/`).
@@ -411,6 +415,13 @@ Every `v*` tag push triggers [`.github/workflows/release.yml`](.github/workflows
 which runs the same script and attaches the tarball + sha256 to the auto-created
 GitHub Release.
 
+## API docs (pdoc)
+
+`make docs` renders docstrings into a static site under `build/docs/`.
+Requires the `[docs]` extra (`pip install -e ".[docs]"`). Open
+`build/docs/roadgraph_builder.html` in a browser. Not deployed to a
+public URL — this is for local reference only.
+
 ## Shell completion
 
 Hand-written bash and zsh completion scripts live under
@@ -468,6 +479,12 @@ To enable, configure [Trusted Publishers](https://docs.pypi.org/trusted-publishe
 the PyPI project (`workflow: pypi.yml`, `environment: pypi`) and add a matching
 GitHub Environment. No tokens live in this repository.
 
+## Contributing
+
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for dev setup, test commands, and
+the conventions used across the repo (one-topic commits, no Co-Authored-By
+trailers, schema discipline, data hygiene).
+
 ## License
 
-Add a license file as needed for your OSS project.
+Released under the [MIT License](LICENSE). © 2026 Ryohei Sasaki.
