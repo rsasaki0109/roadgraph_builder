@@ -159,6 +159,10 @@ def export_lanelet2(
             },
         )
 
+    # Track edge_id → lanelet relation id so the post-pass can wire junction
+    # connectivity between consecutive lanelets.
+    lanelet_id_by_edge: dict[str, int] = {}
+
     for e in graph.edges:
         center_nd: list[int] = []
         for x, y in e.polyline:
@@ -227,7 +231,41 @@ def export_lanelet2(
             ]
             lanelet_tags.extend(_lanelet_tags_from_semantic_rules(hd_use.get("semantic_rules")))
             ll_rid = new_relation(members, lanelet_tags)
+            lanelet_id_by_edge[e.id] = ll_rid
             _emit_regulatory_elements_for_lanelet(hd_use.get("semantic_rules"), ll_rid, new_relation)
+
+    # Lane connectivity: for every graph node where ≥2 lanelets meet, emit one
+    # `type=regulatory_element subtype=lane_connection` relation listing each
+    # incident lanelet as a member. The member role records whether the
+    # lanelet's canonical start or end node anchors the junction, so a
+    # downstream consumer can distinguish incoming from outgoing.
+    if lanelet_id_by_edge:
+        node_lanelets: dict[str, list[tuple[int, str]]] = {}
+        for e in graph.edges:
+            rid = lanelet_id_by_edge.get(e.id)
+            if rid is None:
+                continue
+            node_lanelets.setdefault(e.start_node_id, []).append((rid, "from_start"))
+            if e.end_node_id != e.start_node_id:
+                node_lanelets.setdefault(e.end_node_id, []).append((rid, "from_end"))
+        node_attrs = {n.id: dict(n.attributes) for n in graph.nodes}
+        for node_id, entries in node_lanelets.items():
+            if len(entries) < 2:
+                continue
+            members = [("relation", rid, role) for rid, role in entries]
+            conn_tags = [
+                ("type", "regulatory_element"),
+                ("subtype", "lane_connection"),
+                ("roadgraph", "lane_connection"),
+                ("roadgraph:junction_node_id", str(node_id)),
+            ]
+            jt = node_attrs.get(node_id, {}).get("junction_type")
+            if isinstance(jt, str):
+                conn_tags.append(("roadgraph:junction_type", jt))
+            jh = node_attrs.get(node_id, {}).get("junction_hint")
+            if isinstance(jh, str):
+                conn_tags.append(("roadgraph:junction_hint", jh))
+            new_relation(members, conn_tags)
 
     for c in node_children:
         root.append(c)
