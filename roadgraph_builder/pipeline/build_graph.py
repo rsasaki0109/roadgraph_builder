@@ -229,6 +229,124 @@ def merge_duplicate_edges(graph: Graph, *, resample_bins: int = 32) -> int:
     return merged_removed
 
 
+def merge_near_parallel_edges(
+    graph: Graph, *, tolerance_m: float, resample_bins: int = 32
+) -> int:
+    """Merge edges whose endpoint *pairs* are both within ``tolerance_m``.
+
+    Duplicate-edge folding only catches pairs that already share the exact same
+    two node ids. After the T / X split passes, many trajectories still produce
+    pairs of edges whose endpoints land on **nearby but distinct** nodes —
+    essentially the same road walked twice, but with each pass anchoring to a
+    slightly different junction cluster.
+
+    For every edge pair ``(a, b)`` where the sum of endpoint-to-endpoint
+    distances is below ``2 * tolerance_m`` (trying both forward and reversed
+    pairings), this function unifies the corresponding node ids via union-find,
+    picks a single canonical id per cluster, collapses the Graph to one node
+    per cluster at the centroid position, rewrites every edge to the canonical
+    ids, and finally calls :func:`merge_duplicate_edges` to average what are
+    now identical endpoint pairs.
+
+    Returns the number of edges removed by the follow-up merge.
+    """
+    if tolerance_m <= 0 or len(graph.edges) < 2:
+        return 0
+
+    node_pos: dict[str, tuple[float, float]] = {n.id: tuple(n.position) for n in graph.nodes}
+
+    parent: dict[str, str] = {nid: nid for nid in node_pos}
+
+    def _find(x: str) -> str:
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+
+    def _union(a: str, b: str) -> None:
+        ra, rb = _find(a), _find(b)
+        if ra != rb:
+            parent[ra] = rb
+
+    def _dist(a: str, b: str) -> float:
+        ax, ay = node_pos[a]
+        bx, by = node_pos[b]
+        return math.hypot(ax - bx, ay - by)
+
+    edges = list(graph.edges)
+    threshold_total = 2.0 * tolerance_m
+
+    for i in range(len(edges)):
+        ea = edges[i]
+        for j in range(i + 1, len(edges)):
+            eb = edges[j]
+            # Already identical endpoint sets — handled by merge_duplicate_edges.
+            same_pair = {ea.start_node_id, ea.end_node_id} == {eb.start_node_id, eb.end_node_id}
+            if same_pair:
+                continue
+            fwd = _dist(ea.start_node_id, eb.start_node_id) + _dist(ea.end_node_id, eb.end_node_id)
+            rev = _dist(ea.start_node_id, eb.end_node_id) + _dist(ea.end_node_id, eb.start_node_id)
+            if min(fwd, rev) >= threshold_total:
+                continue
+            if fwd <= rev:
+                _union(ea.start_node_id, eb.start_node_id)
+                _union(ea.end_node_id, eb.end_node_id)
+            else:
+                _union(ea.start_node_id, eb.end_node_id)
+                _union(ea.end_node_id, eb.start_node_id)
+
+    # Group nodes by cluster root; skip clusters of size 1 (nothing to do).
+    clusters: dict[str, list[str]] = {}
+    for nid in node_pos:
+        clusters.setdefault(_find(nid), []).append(nid)
+    changed = any(len(members) > 1 for members in clusters.values())
+    if not changed:
+        return 0
+
+    # Canonical id per cluster: smallest original id (stable). Position: centroid.
+    canonical: dict[str, str] = {}
+    new_positions: dict[str, tuple[float, float]] = {}
+    for root, members in clusters.items():
+        canon = min(members)
+        xs = [node_pos[m][0] for m in members]
+        ys = [node_pos[m][1] for m in members]
+        pos = (sum(xs) / len(xs), sum(ys) / len(ys))
+        for m in members:
+            canonical[m] = canon
+        new_positions[canon] = pos
+
+    # Rewrite edges. Preserve existing Node.attributes for the canonical id.
+    canon_attrs: dict[str, dict] = {}
+    for n in graph.nodes:
+        c = canonical[n.id]
+        if c == n.id:
+            canon_attrs[c] = dict(n.attributes)
+    new_nodes = [
+        Node(id=canon, position=new_positions[canon], attributes=canon_attrs.get(canon, {}))
+        for canon in sorted(new_positions.keys())
+    ]
+
+    new_edges: list[Edge] = []
+    for e in graph.edges:
+        sn = canonical[e.start_node_id]
+        en = canonical[e.end_node_id]
+        new_edges.append(
+            Edge(
+                id=e.id,
+                start_node_id=sn,
+                end_node_id=en,
+                polyline=list(e.polyline),
+                attributes=dict(e.attributes),
+            )
+        )
+    graph.nodes = new_nodes
+    graph.edges = new_edges
+
+    # After unification the previously near-parallel edges now share the same
+    # endpoint set and can be averaged by merge_duplicate_edges.
+    return merge_duplicate_edges(graph, resample_bins=resample_bins)
+
+
 def polylines_to_graph(polylines: list[list[tuple[float, float]]], params: BuildParams) -> Graph:
     """Create nodes (merged endpoints) and edges (centerline polylines).
 
@@ -300,6 +418,14 @@ def polylines_to_graph(polylines: list[list[tuple[float, float]]], params: Build
     # Fuse multiple passes over the same (start, end) node pair — averaged
     # centerline instead of several parallel duplicates.
     merge_duplicate_edges(graph, resample_bins=params.centerline_bins)
+    # Then catch near-parallel pairs whose endpoints are close-but-distinct,
+    # by unifying their node ids and re-running the duplicate merge. Uses the
+    # same endpoint-merge threshold as the initial union-find.
+    merge_near_parallel_edges(
+        graph,
+        tolerance_m=params.merge_endpoint_m,
+        resample_bins=params.centerline_bins,
+    )
     annotate_node_degrees(graph)
     annotate_junction_types(graph)
     return graph
