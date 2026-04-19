@@ -101,12 +101,46 @@ def _parse_restrictions(
     return forbidden, mandatory
 
 
+def _observation_count(edge) -> int:  # type: ignore[no-untyped-def]
+    """Return trace_observation_count from edge.attributes.trace_stats, or 0."""
+    attrs = edge.attributes if isinstance(edge.attributes, dict) else {}
+    ts = attrs.get("trace_stats")
+    if isinstance(ts, dict):
+        v = ts.get("trace_observation_count", 0)
+        try:
+            return int(v)
+        except (TypeError, ValueError):
+            return 0
+    return 0
+
+
+def _hd_confidence(edge) -> float | None:  # type: ignore[no-untyped-def]
+    """Return hd_refinement.confidence from edge.attributes.hd, or None."""
+    attrs = edge.attributes if isinstance(edge.attributes, dict) else {}
+    hd = attrs.get("hd")
+    if isinstance(hd, dict):
+        ref = hd.get("hd_refinement")
+        if isinstance(ref, dict):
+            c = ref.get("confidence")
+            if c is not None:
+                try:
+                    return float(c)
+                except (TypeError, ValueError):
+                    pass
+    return None
+
+
 def shortest_path(
     graph: "Graph",
     from_node: str,
     to_node: str,
     *,
     turn_restrictions: Iterable[dict] | None = None,
+    # 0.6.0 optional cost hooks
+    prefer_observed: bool = False,
+    min_confidence: float | None = None,
+    observed_bonus: float = 0.5,
+    unobserved_penalty: float = 2.0,
 ) -> Route:
     """Return the shortest :class:`Route` between two node ids.
 
@@ -114,9 +148,17 @@ def shortest_path(
     semantics of ``no_*`` entries and the whitelist semantics of ``only_*``
     entries at the specified junction / incoming approach.
 
+    0.6.0 uncertainty-aware cost hooks:
+    - ``prefer_observed=True``: multiply edge cost by ``observed_bonus`` when
+      ``trace_observation_count > 0`` else by ``unobserved_penalty``.
+    - ``min_confidence=X``: exclude edges whose ``hd_refinement.confidence < X``
+      from the search (they are skipped during expansion).
+
+    When all hooks are None/False, behavior is identical to 0.5.0.
+
     Raises:
         KeyError: ``from_node`` or ``to_node`` is not in the graph.
-        ValueError: No path exists under the supplied restrictions.
+        ValueError: No path exists under the supplied restrictions (or confidence filter).
     """
     node_ids = {n.id for n in graph.nodes}
     if from_node not in node_ids:
@@ -124,10 +166,30 @@ def shortest_path(
     if to_node not in node_ids:
         raise KeyError(f"to_node {to_node!r} is not in the graph")
 
-    # Directed adjacency: node -> list of (edge_id, direction, neighbor_node_id, length_m).
+    # Build per-edge metadata for cost hooks.
+    edge_obs: dict[str, int] = {}
+    edge_conf: dict[str, float | None] = {}
+    for e in graph.edges:
+        edge_obs[e.id] = _observation_count(e)
+        edge_conf[e.id] = _hd_confidence(e)
+
+    # Directed adjacency: node -> list of (edge_id, direction, neighbor_node_id, base_length_m).
     adj: dict[str, list[tuple[str, str, str, float]]] = {nid: [] for nid in node_ids}
     for e in graph.edges:
+        # Skip edges below min_confidence threshold.
+        if min_confidence is not None:
+            conf = edge_conf.get(e.id)
+            if conf is not None and conf < min_confidence:
+                continue
+
         length_m = _edge_length_m(e)
+
+        # Apply prefer_observed cost multiplier.
+        if prefer_observed:
+            obs = edge_obs.get(e.id, 0)
+            multiplier = observed_bonus if obs > 0 else unobserved_penalty
+            length_m = length_m * multiplier
+
         adj.setdefault(e.start_node_id, []).append(
             (e.id, "forward", e.end_node_id, length_m)
         )
@@ -187,6 +249,11 @@ def shortest_path(
             best_state = state
 
     if best_state is None or best_cost == math.inf:
+        if min_confidence is not None:
+            raise ValueError(
+                f"no path from {from_node!r} to {to_node!r} "
+                f"(some edges may be excluded by --min-confidence {min_confidence})"
+            )
         raise ValueError(f"no path from {from_node!r} to {to_node!r}")
 
     nodes: list[str] = [to_node]
@@ -202,11 +269,17 @@ def shortest_path(
     edges.reverse()
     dirs.reverse()
 
+    # total_length_m: when cost hooks are active, the Dijkstra dist is weighted
+    # (not the true arc length). Reconstruct the actual arc length from the
+    # chosen edge sequence so the returned value is always in real meters.
+    edge_by_id = {e.id: e for e in graph.edges}
+    actual_length = sum(_edge_length_m(edge_by_id[eid]) for eid in edges if eid in edge_by_id)
+
     return Route(
         from_node=from_node,
         to_node=to_node,
         node_sequence=nodes,
         edge_sequence=edges,
         edge_directions=dirs,
-        total_length_m=best_cost,
+        total_length_m=actual_length,
     )

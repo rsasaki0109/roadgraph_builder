@@ -294,6 +294,40 @@ def _build_parser() -> argparse.ArgumentParser:
         metavar="DEG",
         help="WGS84 origin longitude for --output.",
     )
+    rt.add_argument(
+        "--prefer-observed",
+        action="store_true",
+        default=False,
+        help=(
+            "Prefer edges with trace observations over unobserved edges. "
+            "Multiplies cost of observed edges by --observed-bonus and unobserved "
+            "edges by --unobserved-penalty."
+        ),
+    )
+    rt.add_argument(
+        "--min-confidence",
+        type=float,
+        default=None,
+        metavar="FLOAT",
+        help=(
+            "Exclude edges whose hd_refinement.confidence < FLOAT from the search. "
+            "Exits 1 with an error message when no path is reachable."
+        ),
+    )
+    rt.add_argument(
+        "--observed-bonus",
+        type=float,
+        default=0.5,
+        metavar="FLOAT",
+        help="Cost multiplier for observed edges when --prefer-observed is set (default 0.5).",
+    )
+    rt.add_argument(
+        "--unobserved-penalty",
+        type=float,
+        default=2.0,
+        metavar="FLOAT",
+        help="Cost multiplier for unobserved edges when --prefer-observed is set (default 2.0).",
+    )
 
     rtp = sub.add_parser(
         "reconstruct-trips",
@@ -1189,7 +1223,14 @@ def main(argv: list[str] | None = None) -> int:
                 restrictions = [r for r in tr_doc if isinstance(r, dict)]
         try:
             route = shortest_path(
-                graph, from_id, to_id, turn_restrictions=restrictions or None
+                graph,
+                from_id,
+                to_id,
+                turn_restrictions=restrictions or None,
+                prefer_observed=getattr(args, "prefer_observed", False),
+                min_confidence=getattr(args, "min_confidence", None),
+                observed_bonus=getattr(args, "observed_bonus", 0.5),
+                unobserved_penalty=getattr(args, "unobserved_penalty", 2.0),
             )
         except KeyError as e:
             print(f"{args.input_json}: {e.args[0]}", file=sys.stderr)
