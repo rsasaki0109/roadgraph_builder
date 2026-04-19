@@ -382,7 +382,7 @@ roadgraph_builder project-camera \
 
 Above-horizon rays and detections farther than `--max-edge-distance-m` from any edge are dropped and counted separately; the CLI prints the breakdown on exit.
 
-See [`docs/camera_pipeline_demo.md`](docs/camera_pipeline_demo.md) for an end-to-end walkthrough plus a recipe for plugging in real data (Mapillary CC-BY-SA or KITTI).
+See [`docs/camera_pipeline_demo.md`](docs/camera_pipeline_demo.md) for an end-to-end walkthrough plus a recipe for plugging in your own data (the shipped demo is synthetic-but-realistic so round-trip ground truth is provable).
 
 ### Apply camera / perception JSON (semantics)
 
@@ -462,7 +462,7 @@ Python package: `roadgraph_builder/`
 
 ## Future extensions
 
-- **Real-image demo** — `project-camera` works on any pixel-detections JSON + calibration, but the repo only ships synthetic + ground-truth data (`examples/demo_*.json`). Wiring in a Mapillary / KITTI sample with correct attribution would showcase the camera pipeline on a real photograph. See [`docs/camera_pipeline_demo.md`](docs/camera_pipeline_demo.md).
+- **Real-data camera integration (user-driven)** — `project-camera` works on any pixel-detections JSON + calibration. The shipped demo is synthetic with embedded ground truth so round-trip accuracy is provable; users wanting to run it on real photography can follow `docs/camera_pipeline_demo.md`. This repo intentionally does not ship imagery with viral license terms (e.g. Mapillary CC-BY-SA) so the MIT distribution stays unambiguous.
 - **LiDAR-derived lane centerlines** — today `fuse-lidar` fits the *boundary ribbon* from nearby points; a future pass could infer per-lane centerlines directly from the cloud.
 - **Semantics layer** — broader lane-type / rule / priority model (separate from raw geometry) beyond the current `attributes.hd.semantic_rules` free-form dict.
 - **HD-complete Lanelet2 export** — the current `export_lanelet2` emits lanelet relations where boundaries exist and a regulatory-element relation per junction; full Autoware-ready HD export (traffic signals as referenced points, stop lines as ways, right-of-way relations) is still future work.

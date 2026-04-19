@@ -89,8 +89,9 @@ Codex / 次のセッション向け。**事実と意図を分けて**書く。
 どれも user 指示待ち。重要度ではなく "やれば効く度":
 
 1. **`v0.4.0` タグ release** — すぐ実行可。main は 0.4.0 に bump 済 + CHANGELOG 整理済。
-2. **実画像デモ実装** — 現状は合成だが ground-truth 保証のデモ。Mapillary CC-BY-SA で実画像を一枚だけ注釈して end-to-end を回す例を `docs/camera_pipeline_demo.md` のレシピ通りに作ると説得力が増す。
-3. **実走データ追加 tuning** — Paris OSM 以外の bbox で `make tune`。
+2. **実走データ追加 tuning** — Paris OSM 以外の bbox で `make tune`。
+
+Mapillary 連携の実画像デモは **2026-04-19 の判断でやめ**。`docs/camera_pipeline_demo.md` の「plugging in real data」の記述は user 向けのレシピとして残すが、同梱デモとしては synthetic ground-truth の `examples/demo_*.json` が最終形。CC-BY-SA の viral clause を MIT repo に混ぜ込むのを避ける判断。
 
 ## 全体俯瞰
 
