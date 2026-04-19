@@ -539,6 +539,29 @@ def _build_parser() -> argparse.ArgumentParser:
             "single-lanelet output. Without this flag, behavior is identical to 0.5.0."
         ),
     )
+    exo.add_argument(
+        "--speed-limit-tagging",
+        choices=["lanelet-attr", "regulatory-element"],
+        default="lanelet-attr",
+        metavar="{lanelet-attr,regulatory-element}",
+        help=(
+            "Speed limit tagging style (default: lanelet-attr = inline tag on lanelet, "
+            "matching 0.5.0 behavior). Use regulatory-element for strict Lanelet2 spec compliance."
+        ),
+    )
+    exo.add_argument(
+        "--lane-markings-json",
+        type=str,
+        default=None,
+        metavar="PATH",
+        help="Optional lane_markings.json for solid/dashed boundary subtype classification.",
+    )
+
+    vlt = sub.add_parser(
+        "validate-lanelet2-tags",
+        help="Check required Lanelet2 tags (subtype, location) on all lanelet relations in an OSM file.",
+    )
+    vlt.add_argument("input_osm", help="OSM XML file produced by export-lanelet2.")
 
     cam = sub.add_parser(
         "apply-camera",
@@ -1322,11 +1345,54 @@ def main(argv: list[str] | None = None) -> int:
                     file=sys.stderr,
                 )
                 return 1
+        lm_data = None
+        if getattr(args, "lane_markings_json", None):
+            raw_lm = _load_json_for_cli(args.lane_markings_json)
+            if not isinstance(raw_lm, dict):
+                print("export-lanelet2: --lane-markings-json must be a JSON object.", file=sys.stderr)
+                return 1
+            lm_data = raw_lm
         if getattr(args, "per_lane", False):
             from roadgraph_builder.io.export.lanelet2 import export_lanelet2_per_lane
             export_lanelet2_per_lane(graph, args.output_osm, origin_lat=lat0, origin_lon=lon0)
         else:
-            export_lanelet2(graph, args.output_osm, origin_lat=lat0, origin_lon=lon0)
+            export_lanelet2(
+                graph,
+                args.output_osm,
+                origin_lat=lat0,
+                origin_lon=lon0,
+                speed_limit_tagging=getattr(args, "speed_limit_tagging", "lanelet-attr"),
+                lane_markings=lm_data,
+            )
+        return 0
+    if args.command == "validate-lanelet2-tags":
+        from roadgraph_builder.io.export.lanelet2 import validate_lanelet2_tags
+        osm_path = Path(args.input_osm)
+        if not osm_path.is_file():
+            print(f"File not found: {osm_path}", file=sys.stderr)
+            return 1
+        try:
+            errors, warnings = validate_lanelet2_tags(osm_path)
+        except Exception as exc:
+            print(f"validate-lanelet2-tags: failed to parse {osm_path}: {exc}", file=sys.stderr)
+            return 1
+        for w in warnings:
+            print(f"WARNING: {w}", file=sys.stderr)
+        if errors:
+            for err in errors:
+                print(f"ERROR: {err}", file=sys.stderr)
+            print(f"validate-lanelet2-tags: {len(errors)} error(s) found.", file=sys.stderr)
+            return 1
+        print(
+            json.dumps(
+                {
+                    "result": "ok",
+                    "warnings": len(warnings),
+                    "errors": 0,
+                },
+                indent=2,
+            )
+        )
         return 0
     if args.command == "apply-camera":
         graph = _cli_load_graph(args.input_json)

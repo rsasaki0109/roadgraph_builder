@@ -83,6 +83,180 @@ def _emit_regulatory_elements_for_lanelet(
         )
 
 
+# ---------------------------------------------------------------------------
+# δ. Lanelet2 fidelity helpers
+# ---------------------------------------------------------------------------
+
+
+def _speed_limit_tags(semantic_rules: list[dict]) -> list[tuple[str, str]]:
+    """Extract speed limit tags from semantic_rules for regulatory_element export.
+
+    Returns a list of (key, value) tag pairs for the fastest-match speed limit
+    (minimum value_kmh across all speed_limit rules).
+    """
+    speeds: list[int] = []
+    for r in semantic_rules:
+        if not isinstance(r, dict):
+            continue
+        if r.get("kind") == "speed_limit" and "value_kmh" in r:
+            try:
+                speeds.append(int(float(r["value_kmh"])))
+            except (TypeError, ValueError):
+                continue
+    if not speeds:
+        return []
+    return [("speed_limit", str(min(speeds))), ("type", "speed_limit")]
+
+
+def _lane_marking_subtype(boundary_candidates: list[dict] | None) -> str:
+    """Classify a set of lane-marking candidates as 'solid' or 'dashed'.
+
+    Uses intensity_median and point_count density as a heuristic:
+    - If any candidate has intensity_median >= 180 (bright paint) and
+      a density >= 0.5 pts/m → 'solid'.
+    - Otherwise → 'dashed'.
+    Defaults to 'solid' when no candidates are supplied.
+    """
+    if not boundary_candidates:
+        return "solid"
+    for c in boundary_candidates:
+        if not isinstance(c, dict):
+            continue
+        intensity = c.get("intensity_median", 0.0)
+        point_count = c.get("point_count", 0)
+        polyline = c.get("polyline_m", [])
+        # Estimate polyline length.
+        length_m = max(len(polyline) - 1, 1)  # rough lower bound
+        density = point_count / length_m if length_m > 0 else 0.0
+        if intensity >= 180 and density >= 0.5:
+            return "solid"
+    return "dashed"
+
+
+def _build_traffic_light_regulatory(
+    tl_rule: dict,
+    lanelet_relation_id: int,
+    new_node_fn,
+    new_relation_fn,
+    origin_lat: float,
+    origin_lon: float,
+) -> int | None:
+    """Build a traffic_light regulatory_element relation.
+
+    Returns the new relation id, or None if the rule lacks position data.
+    The traffic light node is placed at world_xy_m if available.
+    """
+    world_xy = tl_rule.get("world_xy_m")
+    if world_xy is None:
+        return None
+
+    from roadgraph_builder.utils.geo import meters_to_lonlat as _mtll
+    if isinstance(world_xy, dict):
+        x, y = float(world_xy.get("x", 0.0)), float(world_xy.get("y", 0.0))
+    elif isinstance(world_xy, (list, tuple)) and len(world_xy) >= 2:
+        x, y = float(world_xy[0]), float(world_xy[1])
+    else:
+        return None
+
+    lon, lat = _mtll(x, y, origin_lat, origin_lon)
+    tl_node_id = new_node_fn(lat, lon, {"type": "traffic_light"})
+    members: list[tuple[str, int, str]] = [
+        ("relation", lanelet_relation_id, "refers"),
+        ("node", tl_node_id, "refers"),
+    ]
+    tags: list[tuple[str, str]] = [
+        ("type", "regulatory_element"),
+        ("subtype", "traffic_light"),
+        ("roadgraph:source", "camera_detections"),
+    ]
+    conf = tl_rule.get("confidence")
+    if conf is not None:
+        try:
+            tags.append(("roadgraph:confidence", f"{float(conf):.4f}"))
+        except (TypeError, ValueError):
+            pass
+    return new_relation_fn(members, tags)
+
+
+def _build_right_of_way_regulatory(
+    turn_restriction: dict,
+    lane_members: list[tuple[str, int, str]],
+    new_relation_fn,
+) -> int | None:
+    """Build a right_of_way regulatory_element from a turn_restriction dict.
+
+    Returns the new relation id or None when lane_members is empty.
+    """
+    if not lane_members:
+        return None
+    tags: list[tuple[str, str]] = [
+        ("type", "regulatory_element"),
+        ("subtype", "right_of_way"),
+        ("roadgraph:source", "turn_restrictions"),
+    ]
+    restriction = turn_restriction.get("restriction", "")
+    if isinstance(restriction, str):
+        tags.append(("roadgraph:restriction", restriction))
+    return new_relation_fn(lane_members, tags)
+
+
+def _build_speed_limit_regulatory(
+    speed_kmh: int,
+    lanelet_relation_id: int,
+    new_relation_fn,
+) -> int:
+    """Build a separate speed_limit regulatory_element relation (L2 spec style)."""
+    members: list[tuple[str, int, str]] = [
+        ("relation", lanelet_relation_id, "refers"),
+    ]
+    tags: list[tuple[str, str]] = [
+        ("type", "regulatory_element"),
+        ("subtype", "speed_limit"),
+        ("speed_limit", str(speed_kmh)),
+        ("roadgraph:source", "semantic_rules"),
+    ]
+    return new_relation_fn(members, tags)
+
+
+# ---------------------------------------------------------------------------
+# δ. validate_lanelet2_tags helper (used by CLI)
+# ---------------------------------------------------------------------------
+
+
+def validate_lanelet2_tags(osm_path: str | Path) -> tuple[list[str], list[str]]:
+    """Parse an OSM XML file and check required Lanelet2 tags on lanelet relations.
+
+    Required tags (per Lanelet2 spec): ``type=lanelet``, ``subtype``, ``location``,
+    ``one_way`` (optional warning), ``speed_limit`` (optional warning).
+    This function treats missing ``subtype`` or ``location`` as errors; missing
+    ``speed_limit`` as a warning.
+
+    Returns:
+        (errors, warnings) — both lists of human-readable strings.
+        If errors is non-empty, the caller should exit 1.
+    """
+    osm_path = Path(osm_path)
+    tree = ET.parse(osm_path)
+    root = tree.getroot()
+
+    errors: list[str] = []
+    warnings: list[str] = []
+
+    for rel in root.findall("relation"):
+        tags = {t.get("k"): t.get("v") for t in rel.findall("tag")}
+        if tags.get("type") != "lanelet":
+            continue
+        rel_id = rel.get("id", "?")
+        if not tags.get("subtype"):
+            errors.append(f"relation {rel_id}: missing required tag 'subtype'")
+        if not tags.get("location"):
+            errors.append(f"relation {rel_id}: missing required tag 'location'")
+        if not tags.get("speed_limit"):
+            warnings.append(f"relation {rel_id}: no 'speed_limit' tag (informational)")
+
+    return errors, warnings
+
+
 def export_lanelet2_per_lane(
     graph: Graph,
     path: str | Path,
@@ -319,6 +493,8 @@ def export_lanelet2(
     origin_lat: float,
     origin_lon: float,
     generator: str = "roadgraph_builder",
+    speed_limit_tagging: str = "lanelet-attr",
+    lane_markings: dict | None = None,
 ) -> None:
     """Write OSM XML with centerlines, optional lane boundary ways, and lanelet relations.
 
@@ -333,6 +509,16 @@ def export_lanelet2(
     ``attributes.hd.semantic_rules`` (list of dicts) adds ``speed_limit`` on the
     lanelet and optional ``type=regulatory_element`` relations for kinds such as
     ``traffic_light`` or ``stop_line``.
+
+    Args:
+        speed_limit_tagging: ``"lanelet-attr"`` (default, 0.5.0 behavior — speed_limit
+            as a tag on the lanelet relation) or ``"regulatory-element"`` (Lanelet2 spec
+            style — emits a separate ``type=regulatory_element, subtype=speed_limit``
+            relation and omits the inline tag).
+        lane_markings: Optional lane_markings.json dict.  When supplied, boundary ways
+            get a ``subtype`` tag of ``solid`` or ``dashed`` based on intensity_median
+            and point density heuristic.  Without this, all boundary ways get
+            ``subtype=solid`` (0.5.0 behavior).
     """
     path = Path(path)
     root = ET.Element("osm", version="0.6", generator=generator)
@@ -417,6 +603,14 @@ def export_lanelet2(
         if isinstance(hd, dict):
             lb = hd.get("lane_boundaries")
             if isinstance(lb, dict):
+                # Determine boundary subtype from lane_markings heuristic (δ).
+                lm_candidates = None
+                if lane_markings is not None:
+                    lm_candidates = [
+                        c for c in lane_markings.get("candidates", [])
+                        if isinstance(c, dict) and c.get("edge_id") == e.id
+                    ]
+                boundary_subtype = _lane_marking_subtype(lm_candidates)
                 for side in ("left", "right"):
                     raw = lb.get(side)
                     if not isinstance(raw, list) or len(raw) < 2:
@@ -436,7 +630,7 @@ def export_lanelet2(
                             ("roadgraph:edge_id", str(e.id)),
                             ("roadgraph:side", side),
                             ("type", "line_thin"),
-                            ("subtype", "solid"),
+                            ("subtype", boundary_subtype),
                         ],
                     )
                     if side == "left":
@@ -458,10 +652,32 @@ def export_lanelet2(
                 ("location", "urban"),
                 ("roadgraph:edge_id", str(e.id)),
             ]
-            lanelet_tags.extend(_lanelet_tags_from_semantic_rules(hd_use.get("semantic_rules")))
-            ll_rid = new_relation(members, lanelet_tags)
-            lanelet_id_by_edge[e.id] = ll_rid
-            _emit_regulatory_elements_for_lanelet(hd_use.get("semantic_rules"), ll_rid, new_relation)
+            # δ: speed_limit tagging mode.
+            if speed_limit_tagging == "regulatory-element":
+                # Emit a separate speed_limit regulatory_element; omit inline tag.
+                semantic_rules = hd_use.get("semantic_rules")
+                if isinstance(semantic_rules, list):
+                    speeds = []
+                    for r in semantic_rules:
+                        if isinstance(r, dict) and r.get("kind") == "speed_limit" and "value_kmh" in r:
+                            try:
+                                speeds.append(int(float(r["value_kmh"])))
+                            except (TypeError, ValueError):
+                                pass
+                    ll_rid = new_relation(members, lanelet_tags)
+                    lanelet_id_by_edge[e.id] = ll_rid
+                    if speeds:
+                        _build_speed_limit_regulatory(min(speeds), ll_rid, new_relation)
+                    _emit_regulatory_elements_for_lanelet(semantic_rules, ll_rid, new_relation)
+                else:
+                    ll_rid = new_relation(members, lanelet_tags)
+                    lanelet_id_by_edge[e.id] = ll_rid
+            else:
+                # Default (lanelet-attr): speed_limit as inline tag (0.5.0 behavior).
+                lanelet_tags.extend(_lanelet_tags_from_semantic_rules(hd_use.get("semantic_rules")))
+                ll_rid = new_relation(members, lanelet_tags)
+                lanelet_id_by_edge[e.id] = ll_rid
+                _emit_regulatory_elements_for_lanelet(hd_use.get("semantic_rules"), ll_rid, new_relation)
 
     # Lane connectivity: for every graph node where ≥2 lanelets meet, emit one
     # `type=regulatory_element subtype=lane_connection` relation listing each
