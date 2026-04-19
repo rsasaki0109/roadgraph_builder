@@ -74,6 +74,21 @@ Codex / 次のセッション向け。**事実と意図を分けて**書く。
 - **E2E CLI 回帰テスト**: `tests/test_cli_end_to_end.py` が `build → export-bundle → validate-* → stats → route` を subprocess で通す。
 - **ARCHITECTURE.md**: Mermaid 6 枚（data flow / package graph / export-bundle sequence / schema graph / routing / CI）+ CLI → entry point 表 + モジュール索引。
 
+## 次バージョン v0.5.0 スコープ
+
+**2026-04-19 決定:** 下記 4 機能を v0.5.0 に入れる。Codex が着手できる
+実装仕様は [`docs/ROADMAP_0.5.md`](./ROADMAP_0.5.md) に分離した。
+
+| 機能 | 新 CLI | 主モジュール |
+| --- | --- | --- |
+| A. LiDAR intensity ベースの車線塗装検出 | `detect-lane-markings` | `roadgraph_builder/io/lidar/lane_marking.py` |
+| B. Turn-by-turn ナビ命令生成 | `guidance` | `roadgraph_builder/navigation/guidance.py` |
+| C. 性能ベンチマーク | `make bench` | `scripts/run_benchmarks.py` |
+| D. HD-lite の multi-source 補正 | `enrich --lane-markings-json` 等 | `roadgraph_builder/hd/refinement.py` |
+
+独立に並列着手可。各機能は 1 PR / 1 コミット単位、`[Unreleased]` に追記
+しながら進める。release prep 手順は ROADMAP_0.5.md の最後に記載。
+
 ## 未確認・要フォロー
 
 - **実走データ（IMU/GNSS 投影済み xy）での追加パラメータ調整** — Tokyo 丸の内〜日本橋
@@ -81,21 +96,11 @@ Codex / 次のセッション向け。**事実と意図を分けて**書く。
   `docs/bundle_tuning.md` に記載済み。Tokyo は Paris より OSM GPS トレースが疎で
   LCC 13–17% が上限、`40/8` が妥当だと確認。さらに別地域／高密度な車載 CSV を
   入れての挙動確認はまだ。`make tune` を回すところから。
-- **`v0.3.0` / `v0.4.0` タグ push** — 0.3.0 は `f8cd7eb` で準備済み、0.4.0 は main HEAD で bump 済みだが、どちらも tag push は user 明示指示で保留。 release したくなったら:
-  ```bash
-  git tag -a v0.4.0 -m "Release 0.4.0"
-  git push origin v0.4.0
-  ```
-  `release.yml` が tarball + sha256 を Release に添付する。
-
-## 次の優先（提案）
-
-どれも user 指示待ち。重要度ではなく "やれば効く度":
-
-1. **`v0.4.0` タグ release** — すぐ実行可。main は 0.4.0 に bump 済 + CHANGELOG 整理済。
-2. **実走データ追加 tuning** — Paris OSM 以外の bbox で `make tune`。
 
 Mapillary 連携の実画像デモは **2026-04-19 の判断でやめ**。`docs/camera_pipeline_demo.md` の「plugging in real data」の記述は user 向けのレシピとして残すが、同梱デモとしては synthetic ground-truth の `examples/demo_*.json` が最終形。CC-BY-SA の viral clause を MIT repo に混ぜ込むのを避ける判断。
+
+PyPI 公開は **2026-04-19 に「やらない」** 判断。`.github/workflows/pypi.yml` は
+scaffold のまま据え置き、distribution は GitHub Release tarball のみ。
 
 ## 全体俯瞰
 
