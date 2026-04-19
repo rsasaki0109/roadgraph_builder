@@ -21,7 +21,8 @@ _roadgraph_builder_completions() {
 validate-sd-nav validate-manifest validate-turn-restrictions enrich \
 inspect-lidar nearest-node route stats match-trajectory infer-road-class \
 infer-signalized-junctions fuse-traces reconstruct-trips fuse-lidar \
-export-lanelet2 apply-camera export-bundle"
+export-lanelet2 apply-camera export-bundle build-osm-graph \
+convert-osm-restrictions project-camera"
 
     # Top-level position: either a flag or a subcommand.
     if ((cword == 1)); then

@@ -49,6 +49,9 @@ Codex / 次のセッション向け。**事実と意図を分けて**書く。
 - **cross-format regression**: `tests/test_las_cross_format.py` が laspy で生成した PDRF 0-10 × LAS 1.2/1.3/1.4 全パターン + 64-bit extended point count を our reader と byte-match。out-of-band verification では PDAL の 7 real LAS (autzen_trim 3.7 MB / 110K pts 含む) で全パス、`fuse-lidar` も実稼働確認。
 - **camera detections (edge-keyed)**: JSON で `apply-camera`、GeoJSON `semantic_summary` に反映。
 - **camera 画像 → graph-edge pipeline**: `io/camera/{calibration,projection,pipeline}.py` + `project-camera` CLI。pinhole K + `camera_to_vehicle` rigid mount + per-image vehicle pose を合成して pixel→world ground plane→最寄 edge snap までを 1 コマンドで処理。horizon 超 ray / edge 遠 projection は drop カウント付き。example: `examples/camera_calibration_sample.json` + `examples/image_detections_sample.json`。
+- **Brown-Conrady lens distortion**: `CameraIntrinsic.distortion` (k1,k2,p1,p2,k3 OpenCV order) + `undistort_pixel_to_normalized` の fixed-point iteration。`pixel_to_ground` が自動経路選択。cv2 と 1e-6 で一致。
+- **realistic demo**: `scripts/generate_camera_demo.py` で wide-angle camera + distortion 込みの synthetic ground-truth データを生成。shipped: `examples/demo_*.json`。`tests/test_camera_demo_roundtrip.py` が < 10 cm recovery を regression 保証。
+- **Viewer TR-aware JS Dijkstra**: click-to-route が `(node, incoming_edge, direction)` 状態で `no_*` / `only_*` 制限を honor。Paris grid で実動。`tests/test_viewer_js_dijkstra.py` + `tests/js/test_viewer_dijkstra.mjs` が Node subprocess で regression。
 
 ### 検証 / CI / 配布
 
@@ -74,11 +77,10 @@ Codex / 次のセッション向け。**事実と意図を分けて**書く。
 ## 未確認・要フォロー
 
 - **実走データ（IMU/GNSS 投影済み xy）での追加パラメータ調整** — Paris OSM 以外のデータで挙動を確認するのが望ましい。`make tune` を回すところから。
-- **カメラ生画像 → 投影** — 現状は detections JSON しか受けない。画像 pipeline は未着手。
-- **`v0.3.0` タグ push** — 準備済み（commit `f8cd7eb`）だがユーザー明示指示で保留中。次に release したくなったら:
+- **`v0.3.0` / `v0.4.0` タグ push** — 0.3.0 は `f8cd7eb` で準備済み、0.4.0 は main HEAD で bump 済みだが、どちらも tag push は user 明示指示で保留。 release したくなったら:
   ```bash
-  git tag -a v0.3.0 -m "Release 0.3.0"
-  git push origin v0.3.0
+  git tag -a v0.4.0 -m "Release 0.4.0"
+  git push origin v0.4.0
   ```
   `release.yml` が tarball + sha256 を Release に添付する。
 
@@ -86,10 +88,9 @@ Codex / 次のセッション向け。**事実と意図を分けて**書く。
 
 どれも user 指示待ち。重要度ではなく "やれば効く度":
 
-1. **`v0.3.0` タグ release** — すぐ実行可。Release notes は `CHANGELOG.md [0.3.0]` から自動生成される。
-2. **Viewer JS Dijkstra で turn_restrictions 順守** — 現状 click-to-route は制限無視（pre-baked overlay のみ順守）。`(node, incoming_edge, direction)` 状態付き JS Dijkstra にすれば interactive に効く。
-3. **カメラ lens distortion 対応** — 現状は歪みなしのピンホール。実画像ベースのデモには radial/tangential distortion (OpenCV 5-coef) のサポートが要る。`CameraIntrinsic` に `distortion` フィールド + `pixel_to_ground` で undistort pass を追加。
-4. **実画像デモ** — Mapillary (CC-BY-SA) または KITTI で具体例を作る。ライセンス整理が必要。
+1. **`v0.4.0` タグ release** — すぐ実行可。main は 0.4.0 に bump 済 + CHANGELOG 整理済。
+2. **実画像デモ実装** — 現状は合成だが ground-truth 保証のデモ。Mapillary CC-BY-SA で実画像を一枚だけ注釈して end-to-end を回す例を `docs/camera_pipeline_demo.md` のレシピ通りに作ると説得力が増す。
+3. **実走データ追加 tuning** — Paris OSM 以外の bbox で `make tune`。
 
 ## 全体俯瞰
 

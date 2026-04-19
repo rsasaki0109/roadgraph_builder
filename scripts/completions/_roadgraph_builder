@@ -35,6 +35,9 @@ _roadgraph_builder() {
         'export-lanelet2:Write OSM XML 0.6 (Lanelet2 / JOSM)'
         'apply-camera:Merge camera detections into attributes.hd.semantic_rules'
         'export-bundle:Write nav/sim/lanelet outputs in one directory'
+        'build-osm-graph:Build road graph from Overpass highway ways'
+        'convert-osm-restrictions:Map OSM type=restriction onto graph turn_restrictions'
+        'project-camera:Project image pixels through a pinhole camera onto graph edges'
     )
 
     _arguments -C \
