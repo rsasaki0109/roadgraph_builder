@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/rsasaki0109/roadgraph_builder/lane_markings.schema.json",
+  "title": "lane_markings.json",
+  "type": "object",
+  "required": ["candidates"],
+  "properties": {
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["edge_id", "side", "polyline_m"],
+        "properties": {
+          "edge_id": {"type": "string"},
+          "side": {"enum": ["left", "right", "center"]},
+          "polyline_m": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {"type": "number"},
+              "minItems": 2,
+              "maxItems": 2
+            }
+          },
+          "intensity_median": {"type": "number"},
+          "point_count": {"type": "integer"}
+        }
+      }
+    }
+  }
+}

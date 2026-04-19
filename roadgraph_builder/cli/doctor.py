@@ -30,6 +30,7 @@ _SCHEMA_FILES = (
     "sd_nav.schema.json",
     "manifest.schema.json",
     "turn_restrictions.schema.json",
+    "lane_markings.schema.json",
 )
 
 

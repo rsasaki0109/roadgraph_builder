@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **`detect-lane-markings` CLI** — per-edge LiDAR intensity-peak extraction that recovers left/right/center lane marking candidates from a LAS point cloud without ML; writes `lane_markings.json` validated by `lane_markings.schema.json`.
+
 ## [0.4.0] — 2026-04-19
 
 ### Changed

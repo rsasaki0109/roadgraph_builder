@@ -24,6 +24,7 @@ from roadgraph_builder.cli.doctor import run_doctor
 from roadgraph_builder.utils.geo import load_wgs84_origin_json
 from roadgraph_builder.validation import (
     validate_camera_detections_document,
+    validate_lane_markings_document,
     validate_manifest_document,
     validate_road_graph_document,
     validate_sd_nav_document,
@@ -653,6 +654,24 @@ def _build_parser() -> argparse.ArgumentParser:
         metavar="M",
         help="Max perpendicular distance from a projected detection to a graph edge.",
     )
+
+    dlm = sub.add_parser(
+        "detect-lane-markings",
+        help="Detect lane markings from LiDAR intensity peaks; write lane_markings.json.",
+    )
+    dlm.add_argument("graph_json", help="Road graph JSON.")
+    dlm.add_argument("points_las", help="LAS/LAZ point cloud with intensity column (meter frame).")
+    dlm.add_argument("--output", type=str, default="lane_markings.json", metavar="PATH", help="Output JSON path (default: lane_markings.json).")
+    dlm.add_argument("--max-lateral-m", type=float, default=2.5, metavar="M", help="Max lateral distance from edge centerline to consider (m).")
+    dlm.add_argument("--intensity-percentile", type=float, default=85.0, metavar="PCT", help="Percentile threshold for intensity peaks.")
+    dlm.add_argument("--bin-m", type=float, default=1.0, metavar="M", help="Along-edge bin size (m).")
+    dlm.add_argument("--min-points-per-bin", type=int, default=3, metavar="N", help="Min points per bin to form a cluster.")
+
+    vlm = sub.add_parser(
+        "validate-lane-markings",
+        help="Validate a lane_markings.json against lane_markings.schema.json.",
+    )
+    vlm.add_argument("input_json", help="lane_markings.json produced by detect-lane-markings.")
 
     return p
 
@@ -1309,6 +1328,82 @@ def main(argv: list[str] | None = None) -> int:
             f"dropped_no_edge {result.dropped_no_edge}).",
             file=sys.stderr,
         )
+        return 0
+    if args.command == "detect-lane-markings":
+        import numpy as _dlm_np
+        from roadgraph_builder.io.lidar.lane_marking import detect_lane_markings as _detect_lane_markings
+        from roadgraph_builder.io.lidar.las import read_las_header as _read_las_header_dlm
+        graph_data = _load_json_for_cli(args.graph_json)
+        if not isinstance(graph_data, dict):
+            print("detect-lane-markings: graph JSON root must be an object.", file=sys.stderr)
+            return 1
+        pts_path = Path(args.points_las)
+        if not pts_path.is_file():
+            print(f"File not found: {pts_path}", file=sys.stderr)
+            return 1
+        try:
+            if pts_path.suffix.lower() in {".las", ".laz"}:
+                _hdr = _read_las_header_dlm(pts_path)
+                record_length = _hdr.point_data_record_length
+                point_count = _hdr.point_count
+                with pts_path.open("rb") as _fh:
+                    _fh.seek(_hdr.offset_to_point_data)
+                    blob = _fh.read(record_length * point_count)
+                _buf = _dlm_np.frombuffer(blob, dtype=_dlm_np.uint8).reshape(point_count, record_length)
+                _xi = _buf[:, 0:4].copy().view(_dlm_np.int32).reshape(point_count)
+                _yi = _buf[:, 4:8].copy().view(_dlm_np.int32).reshape(point_count)
+                _zi = _buf[:, 8:12].copy().view(_dlm_np.int32).reshape(point_count)
+                _ii = _buf[:, 12:14].copy().view(_dlm_np.uint16).reshape(point_count)
+                _sx, _sy, _sz = _hdr.scale
+                _ox, _oy, _oz = _hdr.offset
+                pts_xyzi = _dlm_np.empty((point_count, 4), dtype=_dlm_np.float64)
+                pts_xyzi[:, 0] = _xi.astype(_dlm_np.float64) * _sx + _ox
+                pts_xyzi[:, 1] = _yi.astype(_dlm_np.float64) * _sy + _oy
+                pts_xyzi[:, 2] = _zi.astype(_dlm_np.float64) * _sz + _oz
+                pts_xyzi[:, 3] = _ii.astype(_dlm_np.float64)
+            else:
+                print(f"detect-lane-markings: only LAS/LAZ files are supported, got {pts_path.suffix}", file=sys.stderr)
+                return 1
+        except ValueError as e:
+            print(f"{pts_path}: {e}", file=sys.stderr)
+            return 1
+        candidates = _detect_lane_markings(
+            graph_data,
+            pts_xyzi,
+            max_lateral_m=args.max_lateral_m,
+            intensity_percentile=args.intensity_percentile,
+            along_edge_bin_m=args.bin_m,
+            min_points_per_bin=args.min_points_per_bin,
+        )
+        doc = {
+            "candidates": [
+                {
+                    "edge_id": c.edge_id,
+                    "side": c.side,
+                    "polyline_m": [list(pt) for pt in c.polyline_m],
+                    "intensity_median": c.intensity_median,
+                    "point_count": c.point_count,
+                }
+                for c in candidates
+            ]
+        }
+        out_path = Path(args.output)
+        out_path.write_text(json.dumps(doc, indent=2) + "\n", encoding="utf-8")
+        print(
+            f"Wrote {out_path}: {len(candidates)} candidates.",
+            file=sys.stderr,
+        )
+        return 0
+    if args.command == "validate-lane-markings":
+        data = _load_json_for_cli(args.input_json)
+        if not isinstance(data, dict):
+            print("JSON root must be an object", file=sys.stderr)
+            return 1
+        try:
+            validate_lane_markings_document(data)
+        except ValidationError as e:
+            _validation_error(args.input_json, e)
+            return 1
         return 0
     return 2
 
