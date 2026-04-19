@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **CI activates the optional-dependency regression paths** — `.github/workflows/ci.yml` now installs `[dev,laz]` + `opencv-python-headless` + `actions/setup-node@v4` before running pytest, so the three previously-skipping regression paths run on every push: `tests/test_las_cross_format.py` (12 parametrised LAS version × PDRF combos via `laspy`), `tests/test_camera_distortion.py::test_undistortion_matches_cv2` (our fixed-point inversion vs `cv2.undistortPointsIter`), and `tests/test_viewer_js_dijkstra.py` (the viewer TR-aware Dijkstra smoke via Node.js 24). Skip-on-missing logic is preserved so a bare `[dev]` local install still passes.
+
 ### Added
 
 - **Embedded attribution + license on OSM-derived assets** — `export_map_geojson`, `write_route_geojson` and `convert-osm-restrictions` now accept optional `attribution` / `license_name` / `license_url` parameters that get embedded in the output file's top-level `properties` (geojson) or as top-level siblings of `turn_restrictions` (TR JSON). `turn_restrictions.schema.json` gained three optional fields for the same trio. All six shipped OSM-derived assets (`map_osm.geojson`, `map_paris.geojson`, `route_paris.geojson`, `map_paris_grid.geojson`, `route_paris_grid.geojson`, `paris_grid_turn_restrictions.json`) are rebaked with `"© OpenStreetMap contributors"` + `"ODbL-1.0"` + the opendatacommons URL, so consumers who see only one file still know where it came from. `docs/assets/ATTRIBUTION.md` still ships as the canonical attribution manifest alongside. `tests/test_attribution.py` guards the pass-through on both exporters plus a shipped-asset regression so future re-bakes can't accidentally drop the fields.

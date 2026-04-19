@@ -32,7 +32,19 @@ jobs:
       - name: Install
         run: |
           python -m pip install --upgrade pip
-          pip install -e ".[dev]"
+          pip install -e ".[dev,laz]"
+          # Optional extras for CI-only regression tests:
+          #  - opencv-python-headless activates test_camera_distortion's
+          #    cv2.undistortPointsIter cross-check against our pure-numpy
+          #    Brown-Conrady inversion.
+          #  - Node.js (provided by actions/setup-node below) activates the
+          #    tests/test_viewer_js_dijkstra regression on docs/map.html.
+          pip install "opencv-python-headless>=4.8"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
 
       - name: Test
         env:
