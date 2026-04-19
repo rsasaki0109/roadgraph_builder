@@ -467,6 +467,48 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Number of bins along each edge for median aggregation.",
     )
 
+    ilc = sub.add_parser(
+        "infer-lane-count",
+        help="Infer per-edge lane count and lane geometries; writes hd.lane_count + hd.lanes[] into the graph JSON.",
+    )
+    ilc.add_argument("input_json", help="Road graph JSON (e.g. from enrich or export-bundle).")
+    ilc.add_argument("output_json", help="Output enriched road graph JSON path.")
+    ilc.add_argument(
+        "--lane-markings-json",
+        type=str,
+        default=None,
+        metavar="PATH",
+        help="Optional lane_markings.json from detect-lane-markings for paint-marker clustering.",
+    )
+    ilc.add_argument(
+        "--base-lane-width-m",
+        type=float,
+        default=3.5,
+        metavar="M",
+        help="Assumed single-lane width in meters (default 3.5).",
+    )
+    ilc.add_argument(
+        "--split-gap-m",
+        type=float,
+        default=2.0,
+        metavar="M",
+        help="1-D agglomerative clustering gap threshold (meters, default 2.0).",
+    )
+    ilc.add_argument(
+        "--min-lanes",
+        type=int,
+        default=1,
+        metavar="N",
+        help="Floor on inferred lane count (default 1).",
+    )
+    ilc.add_argument(
+        "--max-lanes",
+        type=int,
+        default=6,
+        metavar="N",
+        help="Ceiling on inferred lane count (default 6).",
+    )
+
     exo = sub.add_parser(
         "export-lanelet2",
         help="Write OSM XML 0.6 (WGS84) with centerlines and hd lane boundaries for JOSM / Lanelet2 tooling.",
@@ -486,6 +528,16 @@ def _build_parser() -> argparse.ArgumentParser:
         default=None,
         metavar="DEG",
         help="WGS84 origin longitude (degrees).",
+    )
+    exo.add_argument(
+        "--per-lane",
+        action="store_true",
+        default=False,
+        help=(
+            "Expand each edge into one lanelet per lane using attributes.hd.lanes[] "
+            "(populated by infer-lane-count). Edges without hd.lanes fall back to "
+            "single-lanelet output. Without this flag, behavior is identical to 0.5.0."
+        ),
     )
 
     cam = sub.add_parser(
@@ -1197,6 +1249,62 @@ def main(argv: list[str] | None = None) -> int:
         )
         export_graph_json(graph, args.output_json)
         return 0
+    if args.command == "infer-lane-count":
+        from roadgraph_builder.hd.lane_inference import infer_lane_counts as _infer_lane_counts
+        graph = _cli_load_graph(args.input_json)
+        graph_json = json.loads(Path(args.input_json).read_text(encoding="utf-8"))
+        lm_data = None
+        if args.lane_markings_json:
+            raw_lm = _load_json_for_cli(args.lane_markings_json)
+            if not isinstance(raw_lm, dict):
+                print("infer-lane-count: --lane-markings-json must be a JSON object.", file=sys.stderr)
+                return 1
+            lm_data = raw_lm
+        inferences = _infer_lane_counts(
+            graph_json,
+            lane_markings=lm_data,
+            base_lane_width_m=args.base_lane_width_m,
+            split_gap_m=args.split_gap_m,
+            min_lanes=args.min_lanes,
+            max_lanes=args.max_lanes,
+        )
+        # Write lane_count + lanes[] into each edge's attributes.hd.
+        inf_by_id = {inf.edge_id: inf for inf in inferences}
+        for edge in graph.edges:
+            inf = inf_by_id.get(edge.id)
+            if inf is None:
+                continue
+            attrs = dict(edge.attributes)
+            hd = dict(attrs.get("hd", {}))
+            hd["lane_count"] = inf.lane_count
+            hd["lanes"] = [
+                {
+                    "lane_index": lg.lane_index,
+                    "offset_m": lg.offset_m,
+                    "centerline_m": [list(pt) for pt in lg.centerline_m],
+                    "confidence": lg.confidence,
+                }
+                for lg in inf.lanes
+            ]
+            hd["lane_inference_sources"] = inf.sources_used
+            attrs["hd"] = hd
+            edge.attributes = attrs
+        export_graph_json(graph, args.output_json)
+        total_lanes = sum(inf.lane_count for inf in inferences)
+        print(
+            json.dumps(
+                {
+                    "edges_processed": len(inferences),
+                    "total_lanes_inferred": total_lanes,
+                    "sources_summary": {
+                        src: sum(1 for inf in inferences if src in inf.sources_used)
+                        for src in ("lane_markings", "trace_stats", "default")
+                    },
+                },
+                indent=2,
+            )
+        )
+        return 0
     if args.command == "export-lanelet2":
         graph = _cli_load_graph(args.input_json)
         lat0, lon0 = args.origin_lat, args.origin_lon
@@ -1214,7 +1322,11 @@ def main(argv: list[str] | None = None) -> int:
                     file=sys.stderr,
                 )
                 return 1
-        export_lanelet2(graph, args.output_osm, origin_lat=lat0, origin_lon=lon0)
+        if getattr(args, "per_lane", False):
+            from roadgraph_builder.io.export.lanelet2 import export_lanelet2_per_lane
+            export_lanelet2_per_lane(graph, args.output_osm, origin_lat=lat0, origin_lon=lon0)
+        else:
+            export_lanelet2(graph, args.output_osm, origin_lat=lat0, origin_lon=lon0)
         return 0
     if args.command == "apply-camera":
         graph = _cli_load_graph(args.input_json)

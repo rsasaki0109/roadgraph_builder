@@ -47,6 +47,24 @@
       },
       "description": "Camera / perception observations merged into an edge (see camera_detections.schema.json)."
     },
+    "lane_geometry": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["lane_index", "offset_m", "centerline_m", "confidence"],
+      "properties": {
+        "lane_index": { "type": "integer", "minimum": 0 },
+        "offset_m": { "type": "number" },
+        "centerline_m": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": { "type": "number" },
+            "minItems": 2
+          }
+        },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
     "hd_block": {
       "type": "object",
       "additionalProperties": true,
@@ -56,6 +74,22 @@
         "target_tier": { "type": "string" },
         "quality": { "type": "string" },
         "note": { "type": "string" },
+        "lane_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 6,
+          "description": "Inferred number of lanes for this edge (optional, added by infer-lane-count)."
+        },
+        "lanes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/lane_geometry" },
+          "description": "Per-lane geometry list (optional, added by infer-lane-count)."
+        },
+        "lane_inference_sources": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Sources used by infer-lane-count."
+        },
         "lane_boundaries": {
           "type": "object",
           "additionalProperties": true,

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **`infer-lane-count` CLI + per-lane Lanelet2 export (`export-lanelet2 --per-lane`)** — `roadgraph_builder/hd/lane_inference.py` infers per-edge lane count and per-lane centerlines from `lane_markings.json` (1-D agglomerative clustering of paint-marker lateral offsets) with fallback to `trace_stats.perpendicular_offsets` mode counting; results written into `attributes.hd.lane_count` / `attributes.hd.lanes[]`. `export_lanelet2_per_lane` expands each edge with `hd.lanes` data into one lanelet per lane (with `roadgraph:lane_index` tag) and emits `lane_change` regulatory_element relations for adjacent pairs; edges without lane data fall back to the standard 1-lanelet/edge output. `road_graph.schema.json` gains optional `lane_count` (int, 1–6) and `lanes[]` (array with `lane_index` / `offset_m` / `centerline_m` / `confidence`) fields in the `hd_block` definition.
+
 ## [0.5.0] — 2026-04-20
 
 ### Added
