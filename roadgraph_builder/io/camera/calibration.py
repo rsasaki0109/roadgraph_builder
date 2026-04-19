@@ -29,7 +29,26 @@ import numpy as np
 
 @dataclass(frozen=True)
 class CameraIntrinsic:
-    """Pinhole camera intrinsic parameters (no distortion for MVP)."""
+    """Pinhole camera intrinsic parameters with optional Brown-Conrady distortion.
+
+    ``distortion`` holds the OpenCV-order 5-coefficient vector
+    ``(k1, k2, p1, p2, k3)`` — ``k1 k2 k3`` are radial, ``p1 p2`` are
+    tangential. An empty tuple (the default) means "undistorted pinhole".
+
+    The distortion model matches ``cv2.undistortPoints`` with
+    ``R=None, P=None``: given normalised undistorted coordinates ``(x, y)`` the
+    distorted normalised coordinates are::
+
+        r2 = x*x + y*y
+        radial = 1 + k1*r2 + k2*r2**2 + k3*r2**3
+        x_d = x * radial + 2*p1*x*y + p2*(r2 + 2*x*x)
+        y_d = y * radial + p1*(r2 + 2*y*y) + 2*p2*x*y
+
+    :meth:`undistort_pixel_to_normalized` inverts this (fixed-point iteration)
+    to recover the undistorted ray direction ``(x, y, 1)`` for a distorted
+    pixel ``(u, v)``. For the no-distortion case it degenerates to the plain
+    ``K^{-1} * [u, v, 1]``.
+    """
 
     fx: float
     fy: float
@@ -37,6 +56,7 @@ class CameraIntrinsic:
     cy: float
     image_width: int = 0  # 0 means unknown / any
     image_height: int = 0
+    distortion: tuple[float, ...] = ()
 
     @property
     def matrix(self) -> np.ndarray:
@@ -50,6 +70,44 @@ class CameraIntrinsic:
             dtype=np.float64,
         )
 
+    @property
+    def distortion_array(self) -> np.ndarray:
+        """Always return a length-5 ``(k1, k2, p1, p2, k3)`` vector (zero-padded)."""
+        d = list(self.distortion)
+        while len(d) < 5:
+            d.append(0.0)
+        return np.asarray(d[:5], dtype=np.float64)
+
+    def undistort_pixel_to_normalized(
+        self, u: float, v: float, *, max_iters: int = 12, tol: float = 1e-9
+    ) -> tuple[float, float]:
+        """Pixel ``(u, v)`` → undistorted normalized camera coordinate ``(x, y)``.
+
+        Returns ``((u - cx) / fx, (v - cy) / fy)`` when ``distortion`` is empty
+        or all-zero. Otherwise runs a fixed-point iteration on the Brown-
+        Conrady model. Converges in ~5 iterations for realistic wide-angle
+        distortion; ``max_iters`` guards against divergent cases.
+        """
+        xd = (u - self.cx) / self.fx
+        yd = (v - self.cy) / self.fy
+        if not any(self.distortion):
+            return xd, yd
+        k1, k2, p1, p2, k3 = self.distortion_array
+        x = xd
+        y = yd
+        for _ in range(max_iters):
+            r2 = x * x + y * y
+            radial = 1.0 + k1 * r2 + k2 * r2 * r2 + k3 * r2 * r2 * r2
+            dx_tang = 2.0 * p1 * x * y + p2 * (r2 + 2.0 * x * x)
+            dy_tang = p1 * (r2 + 2.0 * y * y) + 2.0 * p2 * x * y
+            x_next = (xd - dx_tang) / radial
+            y_next = (yd - dy_tang) / radial
+            if abs(x_next - x) < tol and abs(y_next - y) < tol:
+                x, y = x_next, y_next
+                break
+            x, y = x_next, y_next
+        return x, y
+
     def to_dict(self) -> dict[str, Any]:
         out: dict[str, Any] = {
             "fx": self.fx,
@@ -59,6 +117,9 @@ class CameraIntrinsic:
         }
         if self.image_width or self.image_height:
             out["image_size"] = {"width": self.image_width, "height": self.image_height}
+        if any(self.distortion):
+            d = self.distortion_array.tolist()
+            out["distortion"] = {"k1": d[0], "k2": d[1], "p1": d[2], "p2": d[3], "k3": d[4]}
         return out
 
     @staticmethod
@@ -67,6 +128,18 @@ class CameraIntrinsic:
             if k not in data:
                 raise KeyError(f"intrinsic.{k} required")
         size = data.get("image_size") or {}
+        dist_raw = data.get("distortion")
+        distortion: tuple[float, ...] = ()
+        if isinstance(dist_raw, dict):
+            distortion = (
+                float(dist_raw.get("k1", 0.0)),
+                float(dist_raw.get("k2", 0.0)),
+                float(dist_raw.get("p1", 0.0)),
+                float(dist_raw.get("p2", 0.0)),
+                float(dist_raw.get("k3", 0.0)),
+            )
+        elif isinstance(dist_raw, (list, tuple)):
+            distortion = tuple(float(c) for c in dist_raw[:5])
         return CameraIntrinsic(
             fx=float(data["fx"]),
             fy=float(data["fy"]),
@@ -74,6 +147,7 @@ class CameraIntrinsic:
             cy=float(data["cy"]),
             image_width=int(size.get("width", 0)),
             image_height=int(size.get("height", 0)),
+            distortion=distortion,
         )
 
 

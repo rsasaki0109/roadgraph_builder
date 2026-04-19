@@ -66,10 +66,11 @@ def pixel_to_ground(
     ``None`` when the ray is parallel to the ground or hits at an infinite
     distance (pixel above the horizon).
     """
-    K = calibration.intrinsic.matrix
     # Pixel to normalised camera-frame ray (optical: +x right, +y down, +z fwd).
-    K_inv = np.linalg.inv(K)
-    ray_optical = K_inv @ np.array([u, v, 1.0], dtype=np.float64)
+    # Runs the Brown-Conrady undistortion pass when the calibration carries
+    # distortion coefficients; falls back to K^{-1}*[u,v,1] otherwise.
+    xn, yn = calibration.intrinsic.undistort_pixel_to_normalized(u, v)
+    ray_optical = np.array([xn, yn, 1.0], dtype=np.float64)
     # Optical to body-frame ray (so we can stack with the body-frame mount).
     ray_body_in_camera = np.linalg.inv(_BODY_TO_OPTICAL) @ ray_optical
     # Camera mount: rotate body-frame vector by the camera's body-frame rotation.
