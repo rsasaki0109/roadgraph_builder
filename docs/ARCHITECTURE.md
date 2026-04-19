@@ -18,10 +18,15 @@ flowchart LR
         D[Camera detections JSON<br/>observations: edge_id, kind, ...]
         L[LiDAR points<br/>CSV or LAS/LAZ]
         R[Turn restrictions JSON<br/>manual or sd_nav shape]
+        HW[OSM highway ways<br/>Overpass JSON]
+        OSMR[OSM type=restriction<br/>Overpass JSON]
+        IMG[Image-space detections<br/>+ camera calibration]
     end
 
     T --> B[build<br/>pipeline.build_graph]
+    HW --> BOG[build-osm-graph<br/>io.osm.graph_builder]
     B --> G((Graph<br/>nodes, edges<br/>metadata.map_origin))
+    BOG --> G
 
     G -->|lane_width_m > 0| E[enrich<br/>hd.pipeline]
     E --> G
@@ -31,6 +36,12 @@ flowchart LR
 
     D -. optional .-> C[apply-camera<br/>io.camera.detections]
     C -. attributes.hd.semantic_rules .-> G
+
+    IMG -. optional .-> PC[project-camera<br/>io.camera.pipeline]
+    PC -. edge-keyed camera_detections.json .-> D
+
+    OSMR -. optional .-> COR[convert-osm-restrictions<br/>io.osm.turn_restrictions]
+    COR -. turn_restrictions.json .-> R
 
     R -. optional .-> TR[turn_restrictions<br/>navigation.turn_restrictions]
     TR -. merged list .-> NAV
@@ -45,7 +56,7 @@ flowchart LR
     O --> SIM
     O --> LL
 
-    SIM --> V[docs/map.html<br/>Leaflet viewer<br/>JS Dijkstra click-to-route]
+    SIM --> V[docs/map.html<br/>Leaflet viewer<br/>TR-aware JS Dijkstra]
 ```
 
 ## Packages
@@ -74,14 +85,26 @@ flowchart TD
     subgraph io
         trajectory.loader
         camera.detections
+        camera.calibration
+        camera.projection
+        camera.pipeline
         lidar.points
         lidar.las
         lidar.fusion
+        osm.graph_builder
+        osm.turn_restrictions
         export.geojson
         export.json_exporter
         export.json_loader
         export.lanelet2
         export.bundle
+    end
+
+    subgraph semantics
+        trace_fusion
+        trip_reconstruction
+        road_class
+        signalized
     end
 
     subgraph navigation
@@ -113,6 +136,8 @@ flowchart TD
     io --> core.graph
     navigation --> core.graph
     routing --> core.graph
+    semantics --> core.graph
+    semantics --> routing
 
     export.bundle --> pipeline
     export.bundle --> hd
@@ -148,6 +173,14 @@ thin argparse dispatcher in `roadgraph_builder/cli/main.py`.
 | `stats` | road_graph | `{graph_stats, junctions}` JSON | `core.graph.stats.graph_stats` / `junction_stats` |
 | `nearest-node` | road_graph + query point | `{node_id, distance_m, query_xy_m}` JSON | `routing.nearest.nearest_node` |
 | `route` | road_graph + (node ids or lat/lon) + optional restrictions | route JSON (+ optional GeoJSON via `--output`) | `routing.shortest_path` / `routing.geojson_export.write_route_geojson` |
+| `match-trajectory` | road_graph + trajectory CSV | per-sample snap JSON + coverage summary | `routing.map_match.snap_trajectory_to_graph` / `routing.hmm_match.hmm_match_trajectory` |
+| `fuse-traces` | road_graph + list of trajectories | road_graph JSON with `attributes.trace_stats` | `semantics.trace_fusion.fuse_traces_into_graph` |
+| `reconstruct-trips` | road_graph + long trajectory | trip list JSON | `semantics.trip_reconstruction.reconstruct_trips` |
+| `infer-road-class` | road_graph + trajectory | road_graph JSON with per-edge speed / class | `semantics.road_class.infer_road_class` |
+| `infer-signalized-junctions` | road_graph + trajectory | road_graph JSON with `signalized_candidate` node tags | `semantics.signalized.infer_signalized_junctions` |
+| `build-osm-graph` | raw Overpass JSON (highway ways) + origin | road_graph JSON | `io.osm.graph_builder.build_graph_from_overpass_highways` |
+| `convert-osm-restrictions` | road_graph + Overpass JSON (restriction relations) | `turn_restrictions.json` (schema-valid) | `io.osm.turn_restrictions.convert_osm_restrictions_to_graph` |
+| `project-camera` | camera calibration + image detections + road_graph | `camera_detections.json` (edge-keyed) | `io.camera.pipeline.project_image_detections_to_graph_edges` |
 
 ## `export-bundle` internals
 
@@ -274,10 +307,15 @@ flowchart TD
 | `roadgraph_builder/hd/pipeline.py`, `boundaries.py` | SD→HD envelope, centerline-offset lane boundaries |
 | `roadgraph_builder/hd/lidar_fusion.py` | Per-edge proximity + binned median boundaries from XY point sets |
 | `roadgraph_builder/io/trajectory/loader.py` | Trajectory CSV reader (`timestamp,x,y`) |
-| `roadgraph_builder/io/camera/detections.py` | Load + apply camera detections (`semantic_rules` on edges) |
+| `roadgraph_builder/io/camera/detections.py` | Load + apply precomputed edge-keyed camera detections (`semantic_rules` on edges) |
+| `roadgraph_builder/io/camera/calibration.py` | `CameraIntrinsic` (+ optional Brown-Conrady distortion, `undistort_pixel_to_normalized`), `RigidTransform`, `CameraCalibration` (+ JSON loader) |
+| `roadgraph_builder/io/camera/projection.py` | `pixel_to_ground` (pinhole ray → world ground plane), `project_image_detections` (apply to an image_detections document) |
+| `roadgraph_builder/io/camera/pipeline.py` | `project_image_detections_to_graph_edges` — image-space pixels → world XY → nearest graph edge → edge-keyed observations |
+| `roadgraph_builder/io/osm/graph_builder.py` | `build_graph_from_overpass_highways` — OSM highway ways → polylines → graph (every OSM junction becomes a graph node) |
+| `roadgraph_builder/io/osm/turn_restrictions.py` | `convert_osm_restrictions_to_graph` — OSM `type=restriction` relations snapped onto graph edges by via-node + tangent alignment |
 | `roadgraph_builder/io/lidar/points.py` | XY CSV loader |
 | `roadgraph_builder/io/lidar/las.py` | LAS 1.0–1.4 public-header reader + X/Y numpy loader; LAZ dispatch via `laspy` when the `[laz]` extra is installed |
-| `roadgraph_builder/io/export/geojson.py` | WGS84 `FeatureCollection` writer (trajectory, centerlines with `start_node_id`/`end_node_id`/`length_m`, HD boundaries, nodes) |
+| `roadgraph_builder/io/export/geojson.py` | WGS84 `FeatureCollection` writer (trajectory, centerlines with `start_node_id`/`end_node_id`/`length_m`, HD boundaries, nodes); optional `attribution` / `license` / `license_url` fields for derivative datasets |
 | `roadgraph_builder/io/export/json_exporter.py`, `json_loader.py` | Round-trip road graph JSON |
 | `roadgraph_builder/io/export/lanelet2.py` | OSM XML 0.6 exporter with `roadgraph:*` tags and optional lanelet relations |
 | `roadgraph_builder/io/export/bundle.py` | `export_map_bundle` — the three-way export + manifest |

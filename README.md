@@ -16,12 +16,14 @@ Use the short description and topics listed in [`.github/ABOUT.md`](.github/ABOU
 
 | Area | What works today |
 | --- | --- |
-| **Input** | Trajectory CSV (`timestamp`, `x`, `y`) |
-| **Pipeline** | Gap-based segmentation → PCA centerline → endpoint merge → graph |
-| **Output** | JSON + `visualize` SVG + `validate` + `enrich` + `fuse-lidar` + **`export-bundle`** (3-way) |
-| **Demo** | [Diagram viewer](https://rsasaki0109.github.io/roadgraph_builder/) · **[Map (OSM tiles)](https://rsasaki0109.github.io/roadgraph_builder/map.html)** (enable Pages on `/docs`), static previews in [docs/images](docs/images/) |
-| **Samples** | [Toy CSV](examples/sample_trajectory.csv), [OSM GPS](examples/osm_public_trackpoints.csv) (ODbL) |
-| **Next** | Raw camera images **stub**; perception JSON → ``apply-camera`` + OSM tags works |
+| **Input** | Trajectory CSV (`timestamp`, `x`, `y`) · OSM highway ways (Overpass JSON) · LAS 1.0-1.4 / LAZ point clouds · image-space pixel detections + camera calibration |
+| **Pipeline** | Gap-based segmentation → arc-length Gaussian centerline → X/T-split + union-find → duplicate / near-parallel merge → junction consolidation → post-simplify. Separate OSM-highway path via `build-osm-graph` for topology-honest grids. |
+| **Routing** | Directed-state Dijkstra honouring `no_*` / `only_*` turn restrictions. OSM `type=restriction` relations map onto graph edges via `convert-osm-restrictions`. |
+| **Perception** | Pixel detections + pinhole calibration (OpenCV 5-coef Brown-Conrady distortion) → world ground plane → nearest edge via `project-camera`. Edge-keyed camera observations merge into `attributes.hd.semantic_rules` via `apply-camera`. |
+| **LiDAR** | `fuse-lidar` accepts CSV / LAS / LAZ and fits per-edge binned median lane boundaries. `inspect-lidar` reports LAS public-header metadata. |
+| **Output** | JSON (+ schema), GeoJSON, OSM XML 0.6 (Lanelet2-compatible), SVG. **`export-bundle`** writes nav / sim / lanelet / manifest in one directory. |
+| **Demo** | [Diagram viewer](https://rsasaki0109.github.io/roadgraph_builder/) · **[Map (OSM tiles)](https://rsasaki0109.github.io/roadgraph_builder/map.html)** (TR-aware click-to-route), static previews in [docs/images](docs/images/). |
+| **Samples** | [Toy CSV](examples/sample_trajectory.csv), [OSM GPS](examples/osm_public_trackpoints.csv) (ODbL), [camera calibration + pixel detections](examples/demo_camera_calibration.json), [Paris OSM-grid + turn_restrictions](docs/assets/map_paris_grid.geojson) (ODbL). |
 
 ### Quick start
 
@@ -119,9 +121,11 @@ Use `--lane-width-m 0` to skip HD-lite ribbon offsets. Origin must match your Ge
 | **1. SD seed** | `build` — graph + centerlines from trajectory CSV | **Implemented** |
 | **2. HD envelope** | `enrich` — `metadata.sd_to_hd`, per-edge `attributes.hd` slots | **Implemented** |
 | **3. Boundaries (HD-lite)** | `enrich --lane-width-m M` — centerline ± half width (no LiDAR) | **Implemented** (geometric prior; not survey HD) |
-| **4. Boundaries (sensor)** | `fuse-lidar` — XY points (CSV or LAS 1.0–1.4) → per-edge binned median boundaries; `inspect-lidar` reports LAS public-header metadata | **Implemented** (simple proximity; not SLAM-grade; LAZ not supported) |
-| **5. Semantics** | `apply-camera` — JSON observations → `hd.semantic_rules`; OSM `speed_limit` + regulatory | **Partial** (precomputed JSON) |
-| **6. Export** | `export-lanelet2` → OSM XML (`roadgraph:*` ways + `type=lanelet` relations when L/R exist) | **Implemented** |
+| **4. Boundaries (sensor)** | `fuse-lidar` — XY points (CSV or LAS 1.0–1.4 / LAZ) → per-edge binned median boundaries; `inspect-lidar` reports LAS public-header metadata | **Implemented** (simple proximity; not SLAM-grade; cross-format regression + real-data verification against 7 PDAL test LAS files incl. autzen_trim 110 K pts) |
+| **5. Semantics (image)** | `project-camera` — pixel detections + pinhole camera (with Brown-Conrady distortion) + per-image vehicle pose → world ground plane → nearest edge; output is edge-keyed `camera_detections.json` | **Implemented** (pipeline math; detection + calibration are the caller's responsibility) |
+| **6. Semantics (edge-keyed)** | `apply-camera` — JSON observations → `hd.semantic_rules`; OSM `speed_limit` + regulatory | **Implemented** |
+| **7. Turn restrictions** | `convert-osm-restrictions` — OSM `type=restriction` relations → graph-space `turn_restrictions.json`; `route --turn-restrictions-json` honours `no_*` / `only_*` at each junction | **Implemented** |
+| **8. Export** | `export-lanelet2` → OSM XML (`roadgraph:*` ways + `type=lanelet` relations + `type=regulatory_element, subtype=lane_connection` for junctions) | **Implemented** |
 
 `enrich` without `--lane-width-m` only attaches placeholders. With **`--lane-width-m`**, you get **offset polylines** from each edge centerline — useful for visualization and simulation, **not** cm-class survey HD.
 
@@ -152,8 +156,9 @@ The **`docs/`** folder is a small static site.
 1. In the GitHub repo: **Settings → Pages → Build and deployment → Source**: **Deploy from a branch**, branch **`main`**, folder **`/docs`**, Save.
 2. After a minute, open:
    - **`https://<user>.github.io/roadgraph_builder/`** — diagram viewer (SVG-style pan/zoom)
-   - **`https://<user>.github.io/roadgraph_builder/map.html`** — **real basemap** (OSM tiles + GeoJSON: trajectory, centerlines, nodes, **HD-lite lane boundaries** when `attributes.hd` is filled — bundled assets use `enrich --lane-width-m 3.5` via `scripts/refresh_docs_assets.py`). The dropdown selects between three datasets:
-     - **Paris** (default, 123 edges / 223 nodes, 24 km total; `junction_type` includes `y_junction` / `complex_junction` — derived from OSM public GPS, ODbL. See [`docs/assets/ATTRIBUTION.md`](docs/assets/ATTRIBUTION.md).)
+   - **`https://<user>.github.io/roadgraph_builder/map.html`** — **real basemap** (OSM tiles + GeoJSON: trajectory, centerlines, nodes, **HD-lite lane boundaries** when `attributes.hd` is filled — bundled assets use `enrich --lane-width-m 3.5` via `scripts/refresh_docs_assets.py`). Click any two nodes to route between them; the JS Dijkstra is **directed-state and TR-aware** when the dataset ships a restrictions overlay. The dropdown selects between four datasets:
+     - **Paris grid** (default, 855 nodes / 1081 edges — derived from OSM highway ways, ships with 10 OSM turn restrictions as red-dot markers. ODbL.)
+     - **Paris** (older, trajectory-derived, 123 edges / 223 nodes; from OSM public GPS, ODbL.)
      - **OSM Berlin sample** (4 edges, smaller).
      - **Toy** (synthetic trajectory from `examples/sample_trajectory.csv`).
 
@@ -337,6 +342,48 @@ roadgraph_builder export-lanelet2 out_hd.json map.osm --origin-lat 35.68 --origi
 
 If the JSON has `metadata.map_origin` (`lat0`, `lon0`), you can omit `--origin-lat` / `--origin-lon`.
 
+### Build a graph from OSM highways (and map turn restrictions)
+
+`build-osm-graph` takes a raw Overpass response of drivable `way["highway"]`s and runs the same X/T-split + endpoint union-find pipeline used for trajectory CSVs — every OSM junction becomes a graph node with `metadata.map_origin` preserved. `convert-osm-restrictions` then snaps OSM `type=restriction` relations onto that graph (via-node → nearest graph node within `--max-snap-m`, from/to ways matched by edge tangent alignment) and writes a schema-valid `turn_restrictions.json` that `export-bundle --turn-restrictions-json` and `route --turn-restrictions-json` consume.
+
+```bash
+# Fetch OSM (raw outputs stay under /tmp by convention)
+python scripts/fetch_osm_highways.py --bbox "2.337,48.857,2.357,48.877" \
+  -o /tmp/paris_highways.json
+python scripts/fetch_osm_turn_restrictions.py --bbox "2.337,48.857,2.357,48.877" \
+  -o /tmp/paris_turn_restrictions.json
+
+# Build graph + map restrictions
+roadgraph_builder build-osm-graph /tmp/paris_highways.json /tmp/paris_grid.json \
+  --origin-lat 48.867 --origin-lon 2.347 \
+  --simplify-tolerance 0.0 --merge-endpoint-m 2.0
+roadgraph_builder convert-osm-restrictions /tmp/paris_grid.json \
+  /tmp/paris_turn_restrictions.json /tmp/paris_turn_restrictions_graph.json \
+  --skipped-json /tmp/paris_tr_skipped.json
+
+# Route honouring the restrictions
+roadgraph_builder route /tmp/paris_grid.json n312 n191 \
+  --turn-restrictions-json /tmp/paris_turn_restrictions_graph.json
+```
+
+The `scripts/fetch_osm_*.py` helpers accept `--endpoint` (or `OVERPASS_ENDPOINT`) so you can point at a mirror if the default instance is saturated.
+
+### Project camera pixels onto graph edges
+
+`project-camera` takes a `CameraCalibration` (intrinsic `fx, fy, cx, cy` + optional Brown-Conrady distortion `(k1, k2, p1, p2, k3)` + rigid `camera_to_vehicle` mount) and a per-image pixel-detections JSON (each image carries its vehicle pose + a list of `(u, v, kind)` detections), projects every pixel onto the ground plane at `--ground-z-m`, and snaps the result to the nearest graph edge within `--max-edge-distance-m`. Output matches `camera_detections.schema.json` so `apply-camera` / `export-bundle` consume it unchanged.
+
+```bash
+roadgraph_builder project-camera \
+  examples/demo_camera_calibration.json \
+  examples/demo_image_detections.json \
+  graph.json camera_detections.json \
+  --max-edge-distance-m 5
+```
+
+Above-horizon rays and detections farther than `--max-edge-distance-m` from any edge are dropped and counted separately; the CLI prints the breakdown on exit.
+
+See [`docs/camera_pipeline_demo.md`](docs/camera_pipeline_demo.md) for an end-to-end walkthrough plus a recipe for plugging in real data (Mapillary CC-BY-SA or KITTI).
+
 ### Apply camera / perception JSON (semantics)
 
 Use a sidecar JSON with an ``observations`` array (``edge_id``, ``kind``, optional ``value_kmh`` / ``confidence``). Rules merge into ``attributes.hd.semantic_rules``. When exporting OSM lanelets, ``speed_limit`` maps to Lanelet2-style tags; kinds like ``traffic_light`` or ``stop_line`` add ``regulatory_element`` relations.
@@ -394,9 +441,10 @@ Python package: `roadgraph_builder/`
 | --- | --- |
 | `roadgraph_builder/core/graph/` | Node, Edge, Graph models |
 | `roadgraph_builder/io/trajectory/` | Trajectory CSV loader |
-| `roadgraph_builder/io/lidar/` | `load_points_xy_csv`, `attach_lidar_points_metadata`; LAS/LAZ still stub |
-| `roadgraph_builder/io/camera/` | `load_camera_detections_json`, `apply_camera_detections_to_graph`; raw image stub |
-| `roadgraph_builder/io/export/` | JSON; GeoJSON; `export_lanelet2`; bundle (`nav`/`sim`/`lanelet`) |
+| `roadgraph_builder/io/lidar/` | `load_points_xy_csv`, `load_points_xy_from_las`, `read_las_header` (pure-Python LAS 1.0-1.4 reader, LAZ via optional `[laz]` extra) |
+| `roadgraph_builder/io/camera/` | `load_camera_detections_json`, `apply_camera_detections_to_graph`, `CameraCalibration` + `pixel_to_ground` + `project_image_detections_to_graph_edges` (pinhole + Brown-Conrady distortion) |
+| `roadgraph_builder/io/osm/` | `build_graph_from_overpass_highways`, `convert_osm_restrictions_to_graph` (Overpass → graph / turn_restrictions) |
+| `roadgraph_builder/io/export/` | JSON; GeoJSON (optional attribution/license fields); `export_lanelet2`; bundle (`nav`/`sim`/`lanelet`) |
 | `roadgraph_builder/pipeline/` | `build_graph` pipeline |
 | `roadgraph_builder/hd/` | `enrich_sd_to_hd`, `fuse_lane_boundaries_from_points`, centerline offsets |
 | `roadgraph_builder/utils/geometry.py` | Clustering / centerline helpers |
@@ -414,12 +462,12 @@ Python package: `roadgraph_builder/`
 
 ## Future extensions
 
-- **LiDAR** — `load_points_xy_csv()` loads meter-frame XY text; `fuse_lane_boundaries_from_points()` (CLI **`fuse-lidar`**) fits boundaries by proximity + binned median; `attach_lidar_points_metadata()` only records counts. LAS/LAZ remains `load_lidar_placeholder`.
-- **Camera** — Precomputed JSON (`examples/camera_detections_sample.json`) via ``apply-camera``; raw images still stub.
-- **Semantics layer** — Dedicated module for lane type, rules, and priority (separate from raw geometry).
-- **Lanelet2-style OSM** — `export_lanelet2()` writes OSM XML for JOSM; lanelet relations are future work.
+- **Real-image demo** — `project-camera` works on any pixel-detections JSON + calibration, but the repo only ships synthetic + ground-truth data (`examples/demo_*.json`). Wiring in a Mapillary / KITTI sample with correct attribution would showcase the camera pipeline on a real photograph. See [`docs/camera_pipeline_demo.md`](docs/camera_pipeline_demo.md).
+- **LiDAR-derived lane centerlines** — today `fuse-lidar` fits the *boundary ribbon* from nearby points; a future pass could infer per-lane centerlines directly from the cloud.
+- **Semantics layer** — broader lane-type / rule / priority model (separate from raw geometry) beyond the current `attributes.hd.semantic_rules` free-form dict.
+- **HD-complete Lanelet2 export** — the current `export_lanelet2` emits lanelet relations where boundaries exist and a regulatory-element relation per junction; full Autoware-ready HD export (traffic signals as referenced points, stop lines as ways, right-of-way relations) is still future work.
 
-Codebase TODOs also mention: graph fusion across tiles/modalities, intersection topology inference, and routing graph generation.
+Codebase TODOs also mention: graph fusion across tiles/modalities and routing graph generation for other pathfinders (A* / Contraction Hierarchies).
 
 ## Sample bundle
 
@@ -447,7 +495,7 @@ public URL — this is for local reference only.
 ## Shell completion
 
 Hand-written bash and zsh completion scripts live under
-[`scripts/completions/`](scripts/completions/). They complete the 17
+[`scripts/completions/`](scripts/completions/). They complete the 25
 subcommands and the common `--turn-restrictions-json` / `--output` /
 `--origin-*` / `--lidar-points` style path arguments.
 
