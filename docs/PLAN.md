@@ -81,6 +81,18 @@ Codex / 次のセッション向け。**事実と意図を分けて**書く。
 - **E2E CLI 回帰テスト**: `tests/test_cli_end_to_end.py` が `build → export-bundle → validate-* → stats → route` を subprocess で通す。
 - **ARCHITECTURE.md**: Mermaid 6 枚（data flow / package graph / export-bundle sequence / schema graph / routing / CI）+ CLI → entry point 表 + モジュール索引。
 
+## 次バージョン v0.6.0 スコープ
+
+**2026-04-20 決定:** テーマ "HD-lite closes the loop"、下記 3 機能を v0.6.0 に入れる。Codex / Sonnet が着手できる実装仕様は [`docs/ROADMAP_0.6.md`](./ROADMAP_0.6.md) に分離した。
+
+| 機能 | 新 / 拡張 CLI | 主モジュール |
+| --- | --- | --- |
+| α. Lane-count inference + multi-lane HD | `infer-lane-count`（新）+ `export-lanelet2 --per-lane`（拡張） | `roadgraph_builder/hd/lane_inference.py` |
+| δ. Lanelet2 fidelity upgrade | `validate-lanelet2-tags`（新） | `roadgraph_builder/io/export/lanelet2.py`（拡張） |
+| ε. Uncertainty-aware routing | `route --prefer-observed` / `--min-confidence`（拡張） | `roadgraph_builder/routing/shortest_path.py`（拡張） |
+
+α → (δ ⨯ ε) 並列可能。δ は α の per-lane 出力を優先消費するが α 未完でもフォールバック可。ε は α/δ 非依存。
+
 ## リリース履歴
 
 - **v0.5.0 (2026-04-20):** 4 機能 landed — A `detect-lane-markings`, B `guidance`, C `make bench`, D HD-lite multi-source refinement。実装仕様は [`docs/ROADMAP_0.5.md`](./ROADMAP_0.5.md)。GitHub Release: https://github.com/rsasaki0109/roadgraph_builder/releases/tag/v0.5.0
