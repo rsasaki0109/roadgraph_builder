@@ -298,14 +298,49 @@
         return { adj, nodes, edges };
       }
 
-      // Tiny binary-heap Dijkstra; enough for the demo sizes (~200 nodes).
-      function dijkstra(graph, fromNode, toNode) {
+      // Build lookup tables from a turn_restrictions list. Keys are
+      // "junction|from_edge|from_direction" strings.
+      //  - noTransitions: key -> Set of banned "to_edge|to_direction"
+      //  - onlyTransitions: key -> allowed "to_edge|to_direction" (exactly one)
+      // If a key has an only_* entry, every transition other than the allowed
+      // one is banned regardless of no_* data.
+      function buildRestrictionIndex(list) {
+        const noT = new Map();
+        const onlyT = new Map();
+        if (!Array.isArray(list)) return { noT, onlyT };
+        for (const r of list) {
+          if (!r || !r.junction_node_id || !r.from_edge_id || !r.to_edge_id) continue;
+          const fromKey =
+            r.junction_node_id + "|" + r.from_edge_id + "|" + (r.from_direction || "forward");
+          const toKey = r.to_edge_id + "|" + (r.to_direction || "forward");
+          const k = String(r.restriction || "");
+          if (k.startsWith("only_")) {
+            onlyT.set(fromKey, toKey);
+          } else if (k.startsWith("no_")) {
+            if (!noT.has(fromKey)) noT.set(fromKey, new Set());
+            noT.get(fromKey).add(toKey);
+          }
+        }
+        return { noT, onlyT };
+      }
+
+      // Directed-state binary-heap Dijkstra. State is
+      //   (node, incoming_edge_id | null, incoming_direction | null)
+      // so we can honour turn_restrictions at each junction. Initial state at
+      // the start node has no incoming edge (unrestricted first step).
+      function dijkstra(graph, fromNode, toNode, restrictions) {
         if (!graph.adj.has(fromNode)) return null;
         if (!graph.adj.has(toNode) && fromNode !== toNode) return null;
+        const rx = restrictions || { noT: new Map(), onlyT: new Map() };
+
+        const stateKey = (node, inEdge, inDir) =>
+          node + "|" + (inEdge || "") + "|" + (inDir || "");
+        const startKey = stateKey(fromNode, null, null);
+
         const dist = new Map();
         const prev = new Map();
-        dist.set(fromNode, 0);
-        const heap = [[0, fromNode]];
+        dist.set(startKey, 0);
+        const heap = [[0, fromNode, null, null]];
         const popMin = () => {
           const top = heap[0];
           const last = heap.pop();
@@ -335,36 +370,61 @@
             i = parent;
           }
         };
+
+        let bestGoalKey = null;
+        let bestGoalDist = Infinity;
         while (heap.length) {
-          const [d, u] = popMin();
-          if (u === toNode) break;
-          if (d > (dist.get(u) ?? Infinity)) continue;
+          const [d, u, inEdge, inDir] = popMin();
+          const key = stateKey(u, inEdge, inDir);
+          if (d > (dist.get(key) ?? Infinity)) continue;
+          if (u === toNode && d < bestGoalDist) {
+            bestGoalDist = d;
+            bestGoalKey = key;
+            continue;
+          }
+          if (d >= bestGoalDist) continue;
           const outs = graph.adj.get(u) || [];
           for (const out of outs) {
+            const outDir = out.reverse ? "reverse" : "forward";
+            // Turn-restriction check: only applies when we have an incoming edge.
+            if (inEdge) {
+              const fromKey = u + "|" + inEdge + "|" + inDir;
+              const outKey = out.edge_id + "|" + outDir;
+              if (rx.onlyT.has(fromKey) && rx.onlyT.get(fromKey) !== outKey) continue;
+              const banned = rx.noT.get(fromKey);
+              if (banned && banned.has(outKey)) continue;
+            }
             const nd = d + out.length;
-            if (nd < (dist.get(out.neighbor) ?? Infinity)) {
-              dist.set(out.neighbor, nd);
-              prev.set(out.neighbor, { from: u, edge_id: out.edge_id, reverse: out.reverse });
-              push([nd, out.neighbor]);
+            const nkey = stateKey(out.neighbor, out.edge_id, outDir);
+            if (nd < (dist.get(nkey) ?? Infinity)) {
+              dist.set(nkey, nd);
+              prev.set(nkey, { fromKey: key, edge_id: out.edge_id, direction: outDir, node: u });
+              push([nd, out.neighbor, out.edge_id, outDir]);
             }
           }
         }
-        if (!dist.has(toNode)) return null;
+        if (bestGoalKey === null) return null;
+
         const nodesSeq = [toNode];
         const edgesSeq = [];
         const dirSeq = [];
-        let cur = toNode;
+        let cur = bestGoalKey;
         while (prev.has(cur)) {
           const step = prev.get(cur);
           edgesSeq.push(step.edge_id);
-          dirSeq.push(step.reverse ? "reverse" : "forward");
-          cur = step.from;
-          nodesSeq.push(cur);
+          dirSeq.push(step.direction);
+          nodesSeq.push(step.node);
+          cur = step.fromKey;
         }
         nodesSeq.reverse();
         edgesSeq.reverse();
         dirSeq.reverse();
-        return { totalLength: dist.get(toNode), nodes: nodesSeq, edges: edgesSeq, directions: dirSeq };
+        return {
+          totalLength: bestGoalDist,
+          nodes: nodesSeq,
+          edges: edgesSeq,
+          directions: dirSeq,
+        };
       }
 
       function drawDynamicRoute(graph, dij) {
@@ -442,12 +502,15 @@
           statusText("dataset graph not loaded yet");
           return;
         }
-        const dij = dijkstra(graph, sel.from, sel.to);
+        const dij = dijkstra(graph, sel.from, sel.to, graph.restrictions);
         if (!dij) {
-          statusText("no path " + sel.from + " → " + sel.to + " (different components?)");
+          statusText("no path " + sel.from + " → " + sel.to + " (restrictions or disconnected)");
           return;
         }
         drawDynamicRoute(graph, dij);
+        const trCount = graph.restrictions
+          ? graph.restrictions.noT.size + graph.restrictions.onlyT.size
+          : 0;
         statusText(
           "route " +
             sel.from +
@@ -457,7 +520,9 @@
             dij.totalLength.toFixed(1) +
             " m · " +
             dij.edges.length +
-            " edges · click another node for a new from"
+            " edges" +
+            (trCount ? " · " + trCount + " TR honoured" : "") +
+            " · click another node for a new from"
         );
         // Leave from empty so the next click sets a new "from".
         sel.from = null;
@@ -523,6 +588,7 @@
           try {
             const trData = await loadGeo(restrictionsUrl);
             const list = Array.isArray(trData) ? trData : trData.turn_restrictions || [];
+            graphCache[which].restrictions = buildRestrictionIndex(list);
             drawRestrictionsOverlay(graphCache[which], list);
           } catch (err) {
             console.warn("restrictions overlay failed:", err);
