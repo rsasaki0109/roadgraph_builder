@@ -13,7 +13,7 @@ Codex / 次のセッション向け。**事実と意図を分けて**書く。
 
 ### パイプライン / エクスポート
 
-- CLI: `build`, `visualize`, `validate`, `validate-detections`, `validate-sd-nav`, `validate-manifest`, `validate-turn-restrictions`, `enrich`, `inspect-lidar`, `nearest-node`, `route`, `stats`, `fuse-lidar`, `export-lanelet2`, `apply-camera`, `export-bundle`, `doctor`。
+- CLI: `build`, `visualize`, `validate`, `validate-detections`, `validate-sd-nav`, `validate-manifest`, `validate-turn-restrictions`, `validate-lane-markings`, `validate-guidance`, `enrich`, `inspect-lidar`, `nearest-node`, `route`, `stats`, `fuse-lidar`, `export-lanelet2`, `apply-camera`, `export-bundle`, `detect-lane-markings`, `guidance`, `doctor`（他 `reconstruct-trips` / `infer-road-class` / `infer-signalized-junctions` / `fuse-traces` / `match-trajectory` / `build-osm-graph` / `convert-osm-restrictions` / `project-camera` も継続サポート）。
 - `export-bundle` → `nav/sd_nav.json`, `sim/{road_graph.json,map.geojson,trajectory.csv}`, `lanelet/map.osm`, `manifest.json`。`--lidar-points`（CSV/LAS/LAZ）/ `--detections-json` / `--turn-restrictions-json` で 1 コマンドでフル構成の artefact が出る。
 - `manifest.json` は `graph_stats`（edge/node 数・長さ min/median/max/total・bbox m & WGS84）、`junctions`（hint カウント + multi_branch の junction_type 内訳）、`turn_restrictions_*`、`lidar_points` を持つ。`manifest.schema.json` で検証。
 - HD: `enrich_sd_to_hd` が `metadata.sd_to_hd` に **`navigation_hints`**（`sd_nav` 参照）を含める。
@@ -52,12 +52,19 @@ Codex / 次のセッション向け。**事実と意図を分けて**書く。
 - **Brown-Conrady lens distortion**: `CameraIntrinsic.distortion` (k1,k2,p1,p2,k3 OpenCV order) + `undistort_pixel_to_normalized` の fixed-point iteration。`pixel_to_ground` が自動経路選択。cv2 と 1e-6 で一致。
 - **realistic demo**: `scripts/generate_camera_demo.py` で wide-angle camera + distortion 込みの synthetic ground-truth データを生成。shipped: `examples/demo_*.json`。`tests/test_camera_demo_roundtrip.py` が < 10 cm recovery を regression 保証。
 - **Viewer TR-aware JS Dijkstra**: click-to-route が `(node, incoming_edge, direction)` 状態で `no_*` / `only_*` 制限を honor。Paris grid で実動。`tests/test_viewer_js_dijkstra.py` + `tests/js/test_viewer_dijkstra.mjs` が Node subprocess で regression。
+- **LiDAR intensity-based lane marking 検出（0.5.0 追加）**: `io/lidar/lane_marking.py::detect_lane_markings` が LAS 点群から per-edge で left / right / center 候補を抽出（intensity percentile + along-edge binning、ML 非使用）。`detect-lane-markings` / `validate-lane-markings` CLI。`lane_markings.schema.json` で検証。
+- **HD-lite multi-source 補正（0.5.0 追加）**: `hd/refinement.py::refine_hd_edges` が lane markings / `trace_stats` / camera observations を混ぜて per-edge の refined half-width + confidence を計算。`enrich --lane-markings-json` / `--camera-detections-json` と `export-bundle --lane-markings-json` / `--camera-detections-refine-json` で注入。結果は `metadata.hd_refinement` に残る。
+
+### ナビ guidance（0.5.0 追加）
+
+- **`guidance` CLI**: `route.geojson` + `sd_nav.json` を入力に、`depart` / `arrive` / `straight` / `slight_left` / `left` / `sharp_left` / `slight_right` / `right` / `sharp_right` / `u_turn` / `continue` のカテゴリ付き Turn-by-turn step 列を生成（`navigation/guidance.py::build_guidance`）。heading_change_deg は正右・負左。Paris grid で end-to-end regression。`guidance.schema.json` + `validate-guidance` CLI。
 
 ### 検証 / CI / 配布
 
-- JSON Schema（road_graph / camera_detections / sd_nav / manifest / turn_restrictions）。全て `importlib.resources` 経由で読込、`doctor` が起動時自己チェック。
+- JSON Schema（road_graph / camera_detections / sd_nav / manifest / turn_restrictions / **lane_markings / guidance**）。全て `importlib.resources` 経由で読込、`doctor` が起動時自己チェック。
 - CI: pytest（Python 3.10 / 3.12）+ 各 `validate-*` + `export-bundle` + `inspect-lidar` + `doctor` を全 push で走らせる。Node.js 24 opt-in 済。
 - **配布**: `scripts/build_release_bundle.sh` + `.github/workflows/release.yml` で `v*` タグ push 時に `dist/roadgraph_sample_bundle.tar.gz` と sha256 を GitHub Release に自動添付。`examples/frozen_bundle/` に 0.3.0 時点の固定サンプルを同梱。
+- **Benchmarks（0.5.0 追加）**: `scripts/run_benchmarks.py` / `make bench` が `polylines_to_graph_paris` / `polylines_to_graph_10k_synth`（現状は 10×10 grid）/ `shortest_path_paris`（100 クエリ）/ `export_bundle_end_to_end` の wall-time を計測。`--baseline baseline.json` で 3× 劣化時 exit 1。`docs/benchmarks.md` に v0.5.0 baseline 記載。CI は opt-in（`workflow_dispatch`）。
 - **PyPI scaffold**: `.github/workflows/pypi.yml`（workflow_dispatch, Trusted Publisher, secrets なし）。有効化には PyPI 側の Trusted Publisher 設定 + GitHub Environment `pypi` が必要。
 
 ### 可視化
@@ -74,20 +81,12 @@ Codex / 次のセッション向け。**事実と意図を分けて**書く。
 - **E2E CLI 回帰テスト**: `tests/test_cli_end_to_end.py` が `build → export-bundle → validate-* → stats → route` を subprocess で通す。
 - **ARCHITECTURE.md**: Mermaid 6 枚（data flow / package graph / export-bundle sequence / schema graph / routing / CI）+ CLI → entry point 表 + モジュール索引。
 
-## 次バージョン v0.5.0 スコープ
+## リリース履歴
 
-**2026-04-19 決定:** 下記 4 機能を v0.5.0 に入れる。Codex が着手できる
-実装仕様は [`docs/ROADMAP_0.5.md`](./ROADMAP_0.5.md) に分離した。
-
-| 機能 | 新 CLI | 主モジュール |
-| --- | --- | --- |
-| A. LiDAR intensity ベースの車線塗装検出 | `detect-lane-markings` | `roadgraph_builder/io/lidar/lane_marking.py` |
-| B. Turn-by-turn ナビ命令生成 | `guidance` | `roadgraph_builder/navigation/guidance.py` |
-| C. 性能ベンチマーク | `make bench` | `scripts/run_benchmarks.py` |
-| D. HD-lite の multi-source 補正 | `enrich --lane-markings-json` 等 | `roadgraph_builder/hd/refinement.py` |
-
-独立に並列着手可。各機能は 1 PR / 1 コミット単位、`[Unreleased]` に追記
-しながら進める。release prep 手順は ROADMAP_0.5.md の最後に記載。
+- **v0.5.0 (2026-04-20):** 4 機能 landed — A `detect-lane-markings`, B `guidance`, C `make bench`, D HD-lite multi-source refinement。実装仕様は [`docs/ROADMAP_0.5.md`](./ROADMAP_0.5.md)。GitHub Release: https://github.com/rsasaki0109/roadgraph_builder/releases/tag/v0.5.0
+- **v0.4.0 (2026-04-19):** OSM turn_restrictions pipeline + LAS cross-format regression + camera projection + lens distortion + viewer TR-aware JS Dijkstra + self-contained camera demo。
+- **v0.3.0:** prep のみで tag は切らず（user 判断）。ルーティング / T・X 接続分割 / centerline smoothing 等が入った節目。
+- **v0.2.0 / v0.1.0:** 初期。
 
 ## 未確認・要フォロー
 
@@ -135,7 +134,7 @@ make release-bundle  # dist/roadgraph_sample_bundle.tar.gz + sha256
 
 ## 引き継ぎチェックリスト
 
-- [ ] `main` の `pytest` が通ること（現状 129 passed + 1 skipped）。
+- [ ] `main` の `pytest` が通ること（v0.5.0 時点で 303 passed + 3 skipped）。
 - [ ] `CHANGELOG.md` の `[Unreleased]` にユーザー向け変更を足すこと。
 - [ ] スキーマ変更時は **対応する `validate_*` と CI** を更新すること。
 - [ ] 機密（IMEI、キー、生ダンプ）は **コミットしない**こと。

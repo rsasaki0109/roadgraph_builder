@@ -18,10 +18,12 @@ Use the short description and topics listed in [`.github/ABOUT.md`](.github/ABOU
 | --- | --- |
 | **Input** | Trajectory CSV (`timestamp`, `x`, `y`) · OSM highway ways (Overpass JSON) · LAS 1.0-1.4 / LAZ point clouds · image-space pixel detections + camera calibration |
 | **Pipeline** | Gap-based segmentation → arc-length Gaussian centerline → X/T-split + union-find → duplicate / near-parallel merge → junction consolidation → post-simplify. Separate OSM-highway path via `build-osm-graph` for topology-honest grids. |
-| **Routing** | Directed-state Dijkstra honouring `no_*` / `only_*` turn restrictions. OSM `type=restriction` relations map onto graph edges via `convert-osm-restrictions`. |
-| **Perception** | Pixel detections + pinhole calibration (OpenCV 5-coef Brown-Conrady distortion) → world ground plane → nearest edge via `project-camera`. Edge-keyed camera observations merge into `attributes.hd.semantic_rules` via `apply-camera`. |
-| **LiDAR** | `fuse-lidar` accepts CSV / LAS / LAZ and fits per-edge binned median lane boundaries. `inspect-lidar` reports LAS public-header metadata. |
+| **Routing** | Directed-state Dijkstra honouring `no_*` / `only_*` turn restrictions. OSM `type=restriction` relations map onto graph edges via `convert-osm-restrictions`. Turn-by-turn guidance via **`guidance`**. |
+| **Perception** | Pixel detections + pinhole calibration (OpenCV 5-coef Brown-Conrady distortion) → world ground plane → nearest edge via `project-camera`. Edge-keyed camera observations merge into `attributes.hd.semantic_rules` via `apply-camera`, and feed HD-lite refinement via `enrich --camera-detections-json`. |
+| **LiDAR** | `fuse-lidar` accepts CSV / LAS / LAZ and fits per-edge binned median lane boundaries. `inspect-lidar` reports LAS public-header metadata. **`detect-lane-markings`** extracts painted-line candidates from intensity peaks. |
+| **HD-lite** | `enrich --lane-width-m` for envelope + offset boundaries. `enrich --lane-markings-json` / `--camera-detections-json` fuses LiDAR markings + `trace_stats` + camera observations into per-edge half-width + confidence (`metadata.hd_refinement`). |
 | **Output** | JSON (+ schema), GeoJSON, OSM XML 0.6 (Lanelet2-compatible), SVG. **`export-bundle`** writes nav / sim / lanelet / manifest in one directory. |
+| **Benchmarks** | `make bench` runs a deterministic wall-clock suite (build / shortest path / export-bundle); `--baseline` compares against recorded numbers with a 3× regression gate. Baseline in [`docs/benchmarks.md`](docs/benchmarks.md). |
 | **Demo** | [Diagram viewer](https://rsasaki0109.github.io/roadgraph_builder/) · **[Map (OSM tiles)](https://rsasaki0109.github.io/roadgraph_builder/map.html)** (TR-aware click-to-route), static previews in [docs/images](docs/images/). |
 | **Samples** | [Toy CSV](examples/sample_trajectory.csv), [OSM GPS](examples/osm_public_trackpoints.csv) (ODbL), [camera calibration + pixel detections](examples/demo_camera_calibration.json), [Paris OSM-grid + turn_restrictions](docs/assets/map_paris_grid.geojson) (ODbL). |
 
@@ -262,6 +264,8 @@ roadgraph_builder enrich out.json out_hd_lite.json --lane-width-m 3.5
 roadgraph_builder validate out_hd_lite.json
 ```
 
+**Multi-source refinement (0.5.0+).** With `--lane-markings-json` / `--camera-detections-json` the enrich pass fuses per-edge half-width + confidence from LiDAR-derived lane markings, `attributes.trace_stats` (when trace fusion has run), and camera observations into `metadata.hd_refinement`. Absent sources are simply skipped, so the command degrades gracefully. `export-bundle` exposes the same flags as `--lane-markings-json` / `--camera-detections-refine-json`.
+
 ### Fuse LiDAR-style XY points (boundaries)
 
 Given a graph JSON and a point set in the **same meter frame** as the trajectory, assign points to nearby edges and write **left/right** boundary polylines (binned median along the centerline). `fuse-lidar` accepts three input shapes and dispatches on the file extension:
@@ -286,6 +290,16 @@ roadgraph_builder inspect-lidar examples/sample_lidar.las
 ```
 
 Edges with fewer than two accepted points in total are unchanged. Tune `--max-dist-m` for your cloud density.
+
+### Detect lane markings (LiDAR intensity, 0.5.0+)
+
+`detect-lane-markings` recovers painted lane lines without ML by extracting high-intensity peaks per edge (percentile threshold + along-edge binning + lateral clustering). Points within `--max-lateral-m` of each edge centerline are projected to (along, across) coordinates; sustained clusters above the intensity threshold become left / right / center candidates. Writes `lane_markings.json` that `validate-lane-markings` and `enrich --lane-markings-json` consume.
+
+```bash
+roadgraph_builder detect-lane-markings out.json points.las lane_markings.json \
+  --max-lateral-m 2.5 --intensity-percentile 85 --along-edge-bin-m 1.0
+roadgraph_builder validate-lane-markings lane_markings.json
+```
 
 ### Map matching (snap a trajectory to the graph)
 
@@ -329,6 +343,18 @@ roadgraph_builder route examples/frozen_bundle/sim/road_graph.json \
 ```
 
 Exits with code 1 on unknown node ids, disjoint components, or when the restrictions make the pair unreachable.
+
+### Turn-by-turn guidance (0.5.0+)
+
+After `route --output` produces a route GeoJSON, `guidance` converts the merged LineString + per-edge features into a step list with maneuver categories (`depart` / `arrive` / `straight` / `slight_left` / `left` / `sharp_left` / `slight_right` / `right` / `sharp_right` / `u_turn` / `continue`). Heading change is signed (+ right, − left). Uses `sd_nav.json`'s `allowed_maneuvers` + the edge geometry — no extra data needed beyond the existing bundle.
+
+```bash
+roadgraph_builder route out.json n0 n9 --output /tmp/route.geojson
+roadgraph_builder guidance /tmp/route.geojson /tmp/bundle/nav/sd_nav.json \
+  --output /tmp/guidance.json \
+  --slight-deg 20 --sharp-deg 120 --u-turn-deg 165
+roadgraph_builder validate-guidance /tmp/guidance.json
+```
 
 ### Export OSM / Lanelet2 tooling
 
@@ -412,6 +438,10 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 .venv/bin/pytest
 ```
 
 `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1` avoids loading broken global `pytest` plugins on some systems (for example ROS) that are unrelated to this project.
+
+### Benchmarks (0.5.0+)
+
+`make bench` (or `python scripts/run_benchmarks.py`) runs a fixed set of deterministic wall-clock timings: `polylines_to_graph_paris` / `polylines_to_graph_10k_synth` (a ~2 200-point synthetic grid) / `shortest_path_paris` (100 random queries) / `export_bundle_end_to_end`. Finishes under a minute on a laptop CPU. Pass `--baseline baseline.json` to compare and exit non-zero when any metric is ≥ 3× slower than the baseline — use this as a regression gate before a release. Latest numbers live in [`docs/benchmarks.md`](docs/benchmarks.md).
 
 ### CI
 

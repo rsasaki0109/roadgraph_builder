@@ -80,6 +80,7 @@ flowchart TD
         pipeline_hd[hd.pipeline]
         boundaries
         lidar_fusion
+        refinement
     end
 
     subgraph io
@@ -91,6 +92,7 @@ flowchart TD
         lidar.points
         lidar.las
         lidar.fusion
+        lidar.lane_marking
         osm.graph_builder
         osm.turn_restrictions
         export.geojson
@@ -110,6 +112,7 @@ flowchart TD
     subgraph navigation
         sd_maneuvers
         turn_restrictions
+        guidance
     end
 
     subgraph routing
@@ -124,6 +127,8 @@ flowchart TD
         manifest.schema
         camera_detections.schema
         turn_restrictions.schema
+        lane_markings.schema
+        guidance.schema
     end
 
     subgraph cli
@@ -181,6 +186,10 @@ thin argparse dispatcher in `roadgraph_builder/cli/main.py`.
 | `build-osm-graph` | raw Overpass JSON (highway ways) + origin | road_graph JSON | `io.osm.graph_builder.build_graph_from_overpass_highways` |
 | `convert-osm-restrictions` | road_graph + Overpass JSON (restriction relations) | `turn_restrictions.json` (schema-valid) | `io.osm.turn_restrictions.convert_osm_restrictions_to_graph` |
 | `project-camera` | camera calibration + image detections + road_graph | `camera_detections.json` (edge-keyed) | `io.camera.pipeline.project_image_detections_to_graph_edges` |
+| `detect-lane-markings` | road_graph + LAS/LAZ points (with intensity) | `lane_markings.json` (per-edge left/right/center candidates) | `io.lidar.lane_marking.detect_lane_markings` |
+| `validate-lane-markings` | a `lane_markings.json` | — (exit 0 / 1) | `validation.validate_lane_markings_document` |
+| `guidance` | route GeoJSON + sd_nav JSON | `guidance.json` (turn-by-turn step list) | `navigation.guidance.build_guidance` |
+| `validate-guidance` | a `guidance.json` | — (exit 0 / 1) | `validation.validate_guidance_document` |
 
 ## `export-bundle` internals
 
@@ -249,6 +258,8 @@ flowchart LR
     MF[manifest.schema.json] -.validated by.-> vMF[validate_manifest_document]
     CD[camera_detections.schema.json] -.validated by.-> vCD[validate_camera_detections_document]
     TR[turn_restrictions.schema.json] -.validated by.-> vTR[validate_turn_restrictions_document]
+    LM[lane_markings.schema.json] -.validated by.-> vLM[validate_lane_markings_document]
+    GD[guidance.schema.json] -.validated by.-> vGD[validate_guidance_document]
 
     SDN -.embeds.-> TR
     MF -.references.-> RG
@@ -304,8 +315,9 @@ flowchart TD
 | `roadgraph_builder/core/graph/{graph,node,edge,stats}.py` | In-memory Graph / Node / Edge + stat helpers |
 | `roadgraph_builder/pipeline/build_graph.py` | Trajectory → polylines → merged-endpoint graph (drops degenerate self-loops) |
 | `roadgraph_builder/pipeline/junction_topology.py` | Classifies multi_branch nodes into `t_junction` / `y_junction` / `crossroads` / `x_junction` / `complex_junction` |
-| `roadgraph_builder/hd/pipeline.py`, `boundaries.py` | SD→HD envelope, centerline-offset lane boundaries |
+| `roadgraph_builder/hd/pipeline.py`, `boundaries.py` | SD→HD envelope, centerline-offset lane boundaries; accepts optional `refinements=` list |
 | `roadgraph_builder/hd/lidar_fusion.py` | Per-edge proximity + binned median boundaries from XY point sets |
+| `roadgraph_builder/hd/refinement.py` | `refine_hd_edges` — multi-source per-edge half-width + confidence from lane_markings / trace_stats / camera observations |
 | `roadgraph_builder/io/trajectory/loader.py` | Trajectory CSV reader (`timestamp,x,y`) |
 | `roadgraph_builder/io/camera/detections.py` | Load + apply precomputed edge-keyed camera detections (`semantic_rules` on edges) |
 | `roadgraph_builder/io/camera/calibration.py` | `CameraIntrinsic` (+ optional Brown-Conrady distortion, `undistort_pixel_to_normalized`), `RigidTransform`, `CameraCalibration` (+ JSON loader) |
@@ -315,12 +327,14 @@ flowchart TD
 | `roadgraph_builder/io/osm/turn_restrictions.py` | `convert_osm_restrictions_to_graph` — OSM `type=restriction` relations snapped onto graph edges by via-node + tangent alignment |
 | `roadgraph_builder/io/lidar/points.py` | XY CSV loader |
 | `roadgraph_builder/io/lidar/las.py` | LAS 1.0–1.4 public-header reader + X/Y numpy loader; LAZ dispatch via `laspy` when the `[laz]` extra is installed |
+| `roadgraph_builder/io/lidar/lane_marking.py` | `detect_lane_markings` — per-edge intensity-peak extraction that recovers left/right/center lane marking polylines from LAS/LAZ point clouds |
 | `roadgraph_builder/io/export/geojson.py` | WGS84 `FeatureCollection` writer (trajectory, centerlines with `start_node_id`/`end_node_id`/`length_m`, HD boundaries, nodes); optional `attribution` / `license` / `license_url` fields for derivative datasets |
 | `roadgraph_builder/io/export/json_exporter.py`, `json_loader.py` | Round-trip road graph JSON |
 | `roadgraph_builder/io/export/lanelet2.py` | OSM XML 0.6 exporter with `roadgraph:*` tags and optional lanelet relations |
 | `roadgraph_builder/io/export/bundle.py` | `export_map_bundle` — the three-way export + manifest |
 | `roadgraph_builder/navigation/sd_maneuvers.py` | Geometry-only `allowed_maneuvers(_reverse)` at each digitized end node |
 | `roadgraph_builder/navigation/turn_restrictions.py` | Loader + camera extraction + merge for `sd_nav.turn_restrictions` |
+| `roadgraph_builder/navigation/guidance.py` | `build_guidance` — turn-by-turn GuidanceStep list from route GeoJSON + sd_nav (depart / arrive / slight / left / right / sharp / u_turn / continue categories) |
 | `roadgraph_builder/routing/shortest_path.py` | Directed-state Dijkstra that honours `no_*` / `only_*` restrictions |
 | `roadgraph_builder/routing/nearest.py` | `nearest_node` (xy or lat/lon) |
 | `roadgraph_builder/routing/geojson_export.py` | Route → GeoJSON FeatureCollection |
@@ -330,7 +344,7 @@ flowchart TD
 | `roadgraph_builder/cli/main.py` | argparse dispatcher for every subcommand |
 | `roadgraph_builder/cli/doctor.py` | Install / asset self-check |
 | `docs/map.html` | Leaflet viewer with dataset dropdown + click-to-route |
-| `scripts/` | Fetch, refresh, build, demo, tune shell helpers |
+| `scripts/` | Fetch, refresh, build, demo, tune shell helpers (incl. `run_benchmarks.py` for `make bench` and `make_sample_lane_las.py` for the LiDAR lane-marking test fixtures) |
 | `.github/workflows/` | CI, release-on-tag, PyPI workflow_dispatch |
 
 ## Further reading
