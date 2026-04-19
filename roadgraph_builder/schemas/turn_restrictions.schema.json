@@ -11,6 +11,21 @@
       "type": "integer",
       "const": 1
     },
+    "attribution": {
+      "type": "string",
+      "description": "Human-readable attribution string. For OSM-derived files use '© OpenStreetMap contributors'.",
+      "minLength": 1
+    },
+    "license": {
+      "type": "string",
+      "description": "SPDX-style license identifier or common name (e.g. 'ODbL-1.0').",
+      "minLength": 1
+    },
+    "license_url": {
+      "type": "string",
+      "description": "URL where the license text can be found.",
+      "format": "uri"
+    },
     "turn_restrictions": {
       "type": "array",
       "items": {

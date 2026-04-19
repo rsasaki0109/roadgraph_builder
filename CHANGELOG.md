@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-(nothing yet)
+### Added
+
+- **Embedded attribution + license on OSM-derived assets** — `export_map_geojson`, `write_route_geojson` and `convert-osm-restrictions` now accept optional `attribution` / `license_name` / `license_url` parameters that get embedded in the output file's top-level `properties` (geojson) or as top-level siblings of `turn_restrictions` (TR JSON). `turn_restrictions.schema.json` gained three optional fields for the same trio. All six shipped OSM-derived assets (`map_osm.geojson`, `map_paris.geojson`, `route_paris.geojson`, `map_paris_grid.geojson`, `route_paris_grid.geojson`, `paris_grid_turn_restrictions.json`) are rebaked with `"© OpenStreetMap contributors"` + `"ODbL-1.0"` + the opendatacommons URL, so consumers who see only one file still know where it came from. `docs/assets/ATTRIBUTION.md` still ships as the canonical attribution manifest alongside. `tests/test_attribution.py` guards the pass-through on both exporters plus a shipped-asset regression so future re-bakes can't accidentally drop the fields.
 
 ## [0.4.0] — 2026-04-19
 

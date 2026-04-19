@@ -80,6 +80,9 @@ def main() -> None:
         origin_lat=olat,
         origin_lon=olon,
         dataset_name="osm",
+        attribution="© OpenStreetMap contributors",
+        license_name="ODbL-1.0",
+        license_url="https://opendatacommons.org/licenses/odbl/1-0/",
     )
 
     # OSM-highway-derived Paris grid + turn_restrictions demo
@@ -119,7 +122,17 @@ def main() -> None:
         conv = convert_osm_restrictions_to_graph(grid, tr_raw, max_snap_distance_m=15.0)
         cleaned = strip_private_fields(conv.restrictions)
         (ASSETS / "paris_grid_turn_restrictions.json").write_text(
-            json.dumps({"format_version": 1, "turn_restrictions": cleaned}, indent=2) + "\n",
+            json.dumps(
+                {
+                    "format_version": 1,
+                    "attribution": "© OpenStreetMap contributors",
+                    "license": "ODbL-1.0",
+                    "license_url": "https://opendatacommons.org/licenses/odbl/1-0/",
+                    "turn_restrictions": cleaned,
+                },
+                indent=2,
+            )
+            + "\n",
             encoding="utf-8",
         )
         grid_geo_tmp = ASSETS / "_map_paris_grid.tmp.geojson"
@@ -130,6 +143,9 @@ def main() -> None:
             origin_lat=lat0,
             origin_lon=lon0,
             dataset_name="paris_grid",
+            attribution="© OpenStreetMap contributors",
+            license_name="ODbL-1.0",
+            license_url="https://opendatacommons.org/licenses/odbl/1-0/",
         )
         raw = json.loads(grid_geo_tmp.read_text(encoding="utf-8"))
         for f in raw["features"]:
@@ -148,6 +164,9 @@ def main() -> None:
             route,
             origin_lat=lat0,
             origin_lon=lon0,
+            attribution="© OpenStreetMap contributors",
+            license_name="ODbL-1.0",
+            license_url="https://opendatacommons.org/licenses/odbl/1-0/",
         )
 
     # Viewer metadata (bounds hint optional)

@@ -40,6 +40,9 @@ def build_route_geojson(
     *,
     origin_lat: float,
     origin_lon: float,
+    attribution: str | None = None,
+    license_name: str | None = None,
+    license_url: str | None = None,
 ) -> dict[str, Any]:
     edges_by_id = _edges_by_id(graph)
     nodes_by_id = _nodes_by_id(graph)
@@ -109,17 +112,25 @@ def build_route_geojson(
         }
     )
 
+    props: dict[str, Any] = {
+        "origin_lat": origin_lat,
+        "origin_lon": origin_lon,
+        "from_node": route.from_node,
+        "to_node": route.to_node,
+        "total_length_m": route.total_length_m,
+        "edge_count": len(route.edge_sequence),
+    }
+    if attribution:
+        props["attribution"] = attribution
+    if license_name:
+        props["license"] = license_name
+    if license_url:
+        props["license_url"] = license_url
+
     return {
         "type": "FeatureCollection",
         "name": f"route_{route.from_node}_to_{route.to_node}",
-        "properties": {
-            "origin_lat": origin_lat,
-            "origin_lon": origin_lon,
-            "from_node": route.from_node,
-            "to_node": route.to_node,
-            "total_length_m": route.total_length_m,
-            "edge_count": len(route.edge_sequence),
-        },
+        "properties": props,
         "features": features,
     }
 
@@ -131,8 +142,19 @@ def write_route_geojson(
     *,
     origin_lat: float,
     origin_lon: float,
+    attribution: str | None = None,
+    license_name: str | None = None,
+    license_url: str | None = None,
 ) -> None:
-    doc = build_route_geojson(graph, route, origin_lat=origin_lat, origin_lon=origin_lon)
+    doc = build_route_geojson(
+        graph,
+        route,
+        origin_lat=origin_lat,
+        origin_lon=origin_lon,
+        attribution=attribution,
+        license_name=license_name,
+        license_url=license_url,
+    )
     Path(path).write_text(json.dumps(doc, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 

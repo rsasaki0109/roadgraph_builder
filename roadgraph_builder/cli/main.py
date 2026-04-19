@@ -1255,7 +1255,13 @@ def main(argv: list[str] | None = None) -> int:
             print(f"{e}", file=sys.stderr)
             return 1
         cleaned = strip_private_fields(result.restrictions)
-        doc = {"format_version": 1, "turn_restrictions": cleaned}
+        doc: dict[str, object] = {
+            "format_version": 1,
+            "attribution": "© OpenStreetMap contributors",
+            "license": "ODbL-1.0",
+            "license_url": "https://opendatacommons.org/licenses/odbl/1-0/",
+            "turn_restrictions": cleaned,
+        }
         Path(args.output_json).write_text(
             json.dumps(doc, indent=2) + "\n", encoding="utf-8"
         )

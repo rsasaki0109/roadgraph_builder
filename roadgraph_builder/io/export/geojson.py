@@ -87,8 +87,18 @@ def build_map_geojson(
     origin_lat: float,
     origin_lon: float,
     dataset_name: str,
+    attribution: str | None = None,
+    license_name: str | None = None,
+    license_url: str | None = None,
 ) -> dict[str, Any]:
-    """FeatureCollection: trajectory LineString, edge LineStrings, node Points."""
+    """FeatureCollection: trajectory LineString, edge LineStrings, node Points.
+
+    When ``attribution`` / ``license_name`` / ``license_url`` are provided they
+    are embedded in the FeatureCollection's top-level ``properties`` so the
+    file self-documents its source and license even when handed out alone.
+    Pass them for OSM-derived outputs (``© OpenStreetMap contributors`` /
+    ``ODbL-1.0`` / ``https://opendatacommons.org/licenses/odbl/1-0/``).
+    """
     features: list[dict[str, Any]] = []
 
     if traj_xy.shape[0] >= 2:
@@ -154,14 +164,22 @@ def build_map_geojson(
             }
         )
 
+    props: dict[str, Any] = {
+        "origin_lat": origin_lat,
+        "origin_lon": origin_lon,
+        "crs_note": "Local meters projected from this WGS84 origin; see utils/geo.py",
+    }
+    if attribution:
+        props["attribution"] = attribution
+    if license_name:
+        props["license"] = license_name
+    if license_url:
+        props["license_url"] = license_url
+
     return {
         "type": "FeatureCollection",
         "name": dataset_name,
-        "properties": {
-            "origin_lat": origin_lat,
-            "origin_lon": origin_lon,
-            "crs_note": "Local meters projected from this WGS84 origin; see utils/geo.py",
-        },
+        "properties": props,
         "features": features,
     }
 
@@ -174,7 +192,19 @@ def export_map_geojson(
     origin_lat: float,
     origin_lon: float,
     dataset_name: str,
+    attribution: str | None = None,
+    license_name: str | None = None,
+    license_url: str | None = None,
 ) -> None:
-    data = build_map_geojson(graph, traj_xy, origin_lat=origin_lat, origin_lon=origin_lon, dataset_name=dataset_name)
+    data = build_map_geojson(
+        graph,
+        traj_xy,
+        origin_lat=origin_lat,
+        origin_lon=origin_lon,
+        dataset_name=dataset_name,
+        attribution=attribution,
+        license_name=license_name,
+        license_url=license_url,
+    )
     path = Path(path)
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

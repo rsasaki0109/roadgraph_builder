@@ -1,5 +1,8 @@
 {
   "format_version": 1,
+  "attribution": "\u00a9 OpenStreetMap contributors",
+  "license": "ODbL-1.0",
+  "license_url": "https://opendatacommons.org/licenses/odbl/1-0/",
   "turn_restrictions": [
     {
       "id": "tr_osm_0000",
