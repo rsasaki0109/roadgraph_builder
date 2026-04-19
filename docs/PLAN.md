@@ -81,17 +81,39 @@ Codex / 次のセッション向け。**事実と意図を分けて**書く。
 - **E2E CLI 回帰テスト**: `tests/test_cli_end_to_end.py` が `build → export-bundle → validate-* → stats → route` を subprocess で通す。
 - **ARCHITECTURE.md**: Mermaid 6 枚（data flow / package graph / export-bundle sequence / schema graph / routing / CI）+ CLI → entry point 表 + モジュール索引。
 
-## 次バージョン v0.6.0 スコープ
+## 次バージョン v0.7.0 スコープ
 
-**2026-04-20 決定:** テーマ "HD-lite closes the loop"、下記 3 機能を v0.6.0 に入れる。Codex / Sonnet が着手できる実装仕様は [`docs/ROADMAP_0.6.md`](./ROADMAP_0.6.md) に分離した。
+**2026-04-20 決定:** テーマ "The Everything Release — production quality across perf / 3D / autonomy / real data"。
+0.4→0.5→0.6 で横方向の機能 catalog を広げたので、0.7.0 は **深さ方向** に 12 機能を積む。
+Sonnet / Codex 向け実装仕様は [`docs/ROADMAP_0.7.md`](./ROADMAP_0.7.md) に分離。
 
-| 機能 | 新 / 拡張 CLI | 主モジュール |
-| --- | --- | --- |
-| α. Lane-count inference + multi-lane HD | `infer-lane-count`（新）+ `export-lanelet2 --per-lane`（拡張） | `roadgraph_builder/hd/lane_inference.py` |
-| δ. Lanelet2 fidelity upgrade | `validate-lanelet2-tags`（新） | `roadgraph_builder/io/export/lanelet2.py`（拡張） |
-| ε. Uncertainty-aware routing | `route --prefer-observed` / `--min-confidence`（拡張） | `roadgraph_builder/routing/shortest_path.py`（拡張） |
+### 4 workstream × 3 機能
 
-α → (δ ⨯ ε) 並列可能。δ は α の per-lane 出力を優先消費するが α 未完でもフォールバック可。ε は α/δ 非依存。
+| # | ID | 機能 | 新 / 拡張 CLI |
+| --- | --- | --- | --- |
+| P1 | perf | X/T-junction split O(N²) → O(N log N) | — |
+| P2 | incremental | Incremental / streaming build | `update-graph` |
+| P3 | batch | Dataset-level batch CLI | `process-dataset` |
+| 3D1 | elevation | 3D / elevation throughout | `build --3d` / `route --uphill-penalty` |
+| 3D2 | camera-lane | Camera-only lane detection | `detect-lane-markings-camera` |
+| 3D3 | lidar-3d | LiDAR ground-plane fitting (true 3D fuse) | `fuse-lidar --ground-plane` |
+| A1 | reg-elems | Full traffic_light / right_of_way / stop_line regulatory_element wiring | `export-lanelet2 --camera-detections-json` |
+| A2 | autoware | Autoware `lanelet2_validation` round-trip | `validate-lanelet2` |
+| A3 | lane-change | Lane-change routing + Lanelet2 `lane_change` relation | `route --allow-lane-change` |
+| V1 | accuracy | Real-data α accuracy ground-truth campaign | `scripts/measure_lane_accuracy.py` |
+| V2 | city-scale | City-scale OSM regression tests | CI opt-in |
+| V3 | memory | Memory profile + optimization | `scripts/profile_memory.py` |
+
+**推奨グループ:**
+- **先着:** P1, 3D1, A1（土台）
+- **並列:** P2, 3D2, 3D3, A2, A3
+- **最後:** P3, V1, V2, V3
+
+各機能の dataclass skeleton / 受け入れ条件 / テスト / 非目標は ROADMAP_0.7.md 参照。v0.5 / v0.6 と同じ Sonnet agent pattern で順次消化できる粒度。
+
+## 前バージョン スコープ（履歴）
+
+- **v0.6.0:** `infer-lane-count`（α）, `validate-lanelet2-tags`（δ）, `route --prefer-observed` / `--min-confidence`（ε）。仕様: [`docs/ROADMAP_0.6.md`](./ROADMAP_0.6.md)。
 
 ## リリース履歴
 
