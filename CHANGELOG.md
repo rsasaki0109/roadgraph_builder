@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **P3: Dataset-level batch CLI (`process-dataset`)** — `roadgraph_builder/cli/dataset.py` adds `process_dataset()` which iterates CSV files in a directory, calls `export_map_bundle` on each, and aggregates results into `dataset_manifest.json`. Per-file errors are isolated by default (`--continue-on-error`); the manifest records `status=failed` + error message for any failed file. `--parallel N` distributes work across N worker processes via `ProcessPoolExecutor`. CLI: `roadgraph_builder process-dataset input_dir/ output_dir/ --origin-json ... --pattern "*.csv"`.
 - **P2: Incremental / streaming build (`update-graph` CLI)** — `roadgraph_builder/pipeline/incremental.py` adds `update_graph_from_trajectory` which merges a new trajectory into an existing graph without a full rebuild. New polylines that fall entirely within `absorb_tolerance_m` of an existing edge bump `trace_observation_count` rather than creating a new edge; unabsorbed polylines go through a restricted X/T split + endpoint union-find restricted to nearby edges. CLI: `roadgraph_builder update-graph existing.json new.csv --output merged.json`.
 
 ### Changed
