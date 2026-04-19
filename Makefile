@@ -1,11 +1,14 @@
 # Run from repository root.
-.PHONY: install test demo tune doctor release-bundle docs
+.PHONY: install test bench demo tune doctor release-bundle docs
 
 install:
 	python3 -m pip install -e ".[dev]"
 
 test:
 	PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest
+
+bench:
+	python scripts/run_benchmarks.py
 
 demo:
 	./scripts/run_demo_bundle.sh
