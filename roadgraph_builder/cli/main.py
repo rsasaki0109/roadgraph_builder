@@ -827,6 +827,96 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     vguid.add_argument("input_json", help="guidance.json produced by the guidance CLI.")
 
+    ug = sub.add_parser(
+        "update-graph",
+        help="Incrementally merge a new trajectory CSV into an existing graph JSON.",
+    )
+    ug.add_argument("existing_json", help="Existing road graph JSON (input; never modified).")
+    ug.add_argument("new_csv", help="New trajectory CSV (timestamp, x, y) to integrate.")
+    ug.add_argument(
+        "--output",
+        type=str,
+        required=True,
+        metavar="PATH",
+        help="Output path for the merged graph JSON (required).",
+    )
+    ug.add_argument(
+        "--max-step-m",
+        type=float,
+        default=25.0,
+        help="Gap threshold for trajectory segmentation (meters).",
+    )
+    ug.add_argument(
+        "--merge-endpoint-m",
+        type=float,
+        default=8.0,
+        help="Endpoint merge radius: new endpoints within this distance snap to existing nodes (meters).",
+    )
+    ug.add_argument(
+        "--absorb-tolerance-m",
+        type=float,
+        default=4.0,
+        help=(
+            "If all points of a new polyline are within this lateral distance of an existing "
+            "edge, the edge absorbs the trace (bumps trace_observation_count) instead of "
+            "creating a new edge (meters)."
+        ),
+    )
+
+    pd_cli = sub.add_parser(
+        "process-dataset",
+        help="Batch-process a directory of trajectory CSVs into per-file export-bundles.",
+    )
+    pd_cli.add_argument("input_dir", help="Directory containing trajectory CSV files.")
+    pd_cli.add_argument("output_dir", help="Output directory (created if absent).")
+    pd_cli.add_argument(
+        "--origin-json",
+        type=str,
+        default=None,
+        metavar="PATH",
+        help="JSON with lat0, lon0 (shared origin for all CSVs in the dataset).",
+    )
+    pd_cli.add_argument(
+        "--pattern",
+        type=str,
+        default="*.csv",
+        metavar="GLOB",
+        help="Glob pattern for trajectory files (default: '*.csv').",
+    )
+    pd_cli.add_argument(
+        "--parallel",
+        type=int,
+        default=1,
+        metavar="N",
+        help="Number of parallel worker processes (default: 1 = sequential).",
+    )
+    pd_cli.add_argument(
+        "--continue-on-error",
+        action="store_true",
+        default=True,
+        help="Continue processing other files if one fails (default: true).",
+    )
+    pd_cli.add_argument(
+        "--no-continue-on-error",
+        action="store_false",
+        dest="continue_on_error",
+        help="Abort on the first file error.",
+    )
+    pd_cli.add_argument(
+        "--lane-width-m",
+        type=float,
+        default=3.5,
+        metavar="M",
+        help="HD-lite lane width for each bundle (meters, default 3.5).",
+    )
+    pd_cli.add_argument(
+        "--dataset-name",
+        type=str,
+        default=None,
+        metavar="NAME",
+        help="Label prefix embedded in per-file GeoJSON/metadata (default: CSV stem).",
+    )
+
     return p
 
 
@@ -1739,6 +1829,69 @@ def main(argv: list[str] | None = None) -> int:
             _validation_error(args.input_json, e)
             return 1
         return 0
+    if args.command == "update-graph":
+        from roadgraph_builder.pipeline.incremental import update_graph_from_trajectory as _update_graph
+        existing_path = Path(args.existing_json)
+        if not existing_path.is_file():
+            print(f"File not found: {existing_path}", file=sys.stderr)
+            return 1
+        new_csv_path = Path(args.new_csv)
+        if not new_csv_path.is_file():
+            print(f"File not found: {new_csv_path}", file=sys.stderr)
+            return 1
+        try:
+            graph = load_graph_json(existing_path)
+        except (TypeError, ValueError) as e:
+            print(f"{existing_path}: {e}", file=sys.stderr)
+            return 1
+        try:
+            new_traj = load_trajectory_csv(new_csv_path)
+        except (FileNotFoundError, ValueError) as e:
+            print(f"{new_csv_path}: {e}", file=sys.stderr)
+            return 1
+        merged = _update_graph(
+            graph,
+            new_traj,
+            max_step_m=args.max_step_m,
+            merge_endpoint_m=args.merge_endpoint_m,
+            absorb_tolerance_m=args.absorb_tolerance_m,
+        )
+        export_graph_json(merged, args.output)
+        print(
+            json.dumps(
+                {
+                    "output": args.output,
+                    "nodes": len(merged.nodes),
+                    "edges": len(merged.edges),
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        return 0
+    if args.command == "process-dataset":
+        from roadgraph_builder.cli.dataset import process_dataset as _process_dataset
+        input_dir = Path(args.input_dir)
+        output_dir = Path(args.output_dir)
+        if not input_dir.is_dir():
+            print(f"Input directory not found: {input_dir}", file=sys.stderr)
+            return 1
+        origin_json = Path(args.origin_json) if args.origin_json else None
+        if origin_json is not None and not origin_json.is_file():
+            print(f"Origin JSON not found: {origin_json}", file=sys.stderr)
+            return 1
+        manifest = _process_dataset(
+            input_dir=input_dir,
+            output_dir=output_dir,
+            origin_json=origin_json,
+            pattern=args.pattern,
+            parallel=args.parallel,
+            continue_on_error=args.continue_on_error,
+            lane_width_m=args.lane_width_m,
+            dataset_name_prefix=args.dataset_name,
+        )
+        print(json.dumps(manifest, ensure_ascii=False, indent=2))
+        return 0 if manifest.get("failed_count", 0) == 0 else 1
     return 2
 
 

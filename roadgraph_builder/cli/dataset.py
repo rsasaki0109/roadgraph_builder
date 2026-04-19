@@ -1,0 +1,224 @@
+"""Dataset-level batch CLI back-end — ``process-dataset`` command.
+
+Iterates CSV files in a directory, calls ``export_map_bundle`` on each,
+and aggregates results into a ``dataset_manifest.json``.
+
+Per-file errors are isolated when ``continue_on_error=True`` (the default):
+the failing file is recorded with ``status=failed`` + error message in the
+manifest, and processing continues with the next file.  Exit code is 0 if
+all files succeed, 1 if any failed (even with continue_on_error).
+
+Output layout::
+
+    output_dir/
+        <stem_1>/    ← export-bundle output (nav/, sim/, lanelet/, manifest.json)
+        <stem_2>/
+        ...
+        dataset_manifest.json  ← aggregate manifest with per-file status
+
+``parallel > 1`` distributes work across ``parallel`` worker processes via
+``concurrent.futures.ProcessPoolExecutor``.
+"""
+
+from __future__ import annotations
+
+import json
+import traceback
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from pathlib import Path
+from typing import Any
+
+
+def _process_single_file(
+    csv_path: Path,
+    bundle_dir: Path,
+    *,
+    origin_json: Path | None,
+    lane_width_m: float,
+    dataset_name: str,
+) -> dict[str, Any]:
+    """Run export_map_bundle on one CSV; return a per-file status dict.
+
+    This function is designed to be called in a subprocess worker so it
+    imports lazily and does not rely on shared state.
+
+    Returns a dict with at minimum ``{"file": str, "status": "ok"|"failed"}``.
+    On success adds ``graph_stats`` from the bundle manifest.  On failure adds
+    ``"error": str``.
+    """
+    from roadgraph_builder.io.trajectory.loader import load_trajectory_csv
+    from roadgraph_builder.pipeline.build_graph import BuildParams, build_graph_from_trajectory
+    from roadgraph_builder.io.export.bundle import export_map_bundle
+    from roadgraph_builder.utils.geo import load_wgs84_origin_json
+
+    result: dict[str, Any] = {"file": str(csv_path), "status": "failed"}
+
+    try:
+        traj = load_trajectory_csv(csv_path)
+        params = BuildParams()
+        graph = build_graph_from_trajectory(traj, params)
+
+        lat0: float | None = None
+        lon0: float | None = None
+        if origin_json is not None:
+            lat0, lon0 = load_wgs84_origin_json(origin_json)
+
+        bundle_dir.mkdir(parents=True, exist_ok=True)
+        export_map_bundle(
+            graph,
+            traj.xy,
+            str(csv_path),
+            str(bundle_dir),
+            origin_lat=lat0 if lat0 is not None else 0.0,
+            origin_lon=lon0 if lon0 is not None else 0.0,
+            dataset_name=dataset_name,
+            lane_width_m=lane_width_m,
+        )
+
+        # Read graph_stats from the written manifest if available.
+        manifest_path = bundle_dir / "manifest.json"
+        graph_stats: dict[str, Any] = {}
+        if manifest_path.is_file():
+            try:
+                m = json.loads(manifest_path.read_text(encoding="utf-8"))
+                graph_stats = m.get("graph_stats", {})
+            except Exception:
+                pass
+
+        result["status"] = "ok"
+        result["bundle_dir"] = str(bundle_dir)
+        result["graph_stats"] = graph_stats
+    except Exception as exc:
+        result["error"] = f"{type(exc).__name__}: {exc}"
+        result["traceback"] = traceback.format_exc()
+
+    return result
+
+
+def process_dataset(
+    input_dir: Path,
+    output_dir: Path,
+    *,
+    origin_json: Path | None = None,
+    pattern: str = "*.csv",
+    parallel: int = 1,
+    continue_on_error: bool = True,
+    lane_width_m: float = 3.5,
+    dataset_name_prefix: str | None = None,
+) -> dict[str, Any]:
+    """Iterate CSV files, run export-bundle on each, aggregate stats.
+
+    Args:
+        input_dir: Directory containing trajectory CSV files.
+        output_dir: Root output directory.  Per-file bundles land in
+            ``output_dir/<csv_stem>/``.
+        origin_json: Optional shared WGS84 origin JSON (lat0, lon0).  When
+            ``None`` the origin defaults to (0, 0) and all coordinates are
+            treated as relative meter-frame offsets.
+        pattern: Glob pattern for CSV discovery (default ``"*.csv"``).
+        parallel: Number of parallel worker processes.  ``1`` = sequential
+            (safe for all platforms).  ``> 1`` uses
+            ``concurrent.futures.ProcessPoolExecutor``.
+        continue_on_error: When ``True`` (default), a failed file is logged
+            and processing continues.  When ``False``, the first failure
+            raises an exception and aborts.
+        lane_width_m: HD-lite lane width forwarded to each bundle.
+        dataset_name_prefix: Optional label prefix for each bundle's metadata.
+            Defaults to the CSV stem.
+
+    Returns:
+        Manifest dict with keys:
+        - ``total_count``: number of CSV files discovered.
+        - ``ok_count``: number that succeeded.
+        - ``failed_count``: number that failed.
+        - ``files``: list of per-file status dicts.
+    """
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    csv_files = sorted(input_dir.glob(pattern))
+    if not csv_files:
+        # Not an error — just an empty manifest.
+        manifest: dict[str, Any] = {
+            "total_count": 0,
+            "ok_count": 0,
+            "failed_count": 0,
+            "files": [],
+        }
+        _write_manifest(output_dir, manifest)
+        return manifest
+
+    tasks = []
+    for csv_path in csv_files:
+        stem = csv_path.stem
+        bundle_dir = output_dir / stem
+        name = f"{dataset_name_prefix}_{stem}" if dataset_name_prefix else stem
+        tasks.append((csv_path, bundle_dir, name))
+
+    file_results: list[dict[str, Any]] = []
+
+    if parallel > 1:
+        futures = {}
+        with ProcessPoolExecutor(max_workers=parallel) as executor:
+            for csv_path, bundle_dir, name in tasks:
+                fut = executor.submit(
+                    _process_single_file,
+                    csv_path,
+                    bundle_dir,
+                    origin_json=origin_json,
+                    lane_width_m=lane_width_m,
+                    dataset_name=name,
+                )
+                futures[fut] = csv_path
+            for fut in as_completed(futures):
+                csv_path = futures[fut]
+                try:
+                    res = fut.result()
+                except Exception as exc:
+                    res = {
+                        "file": str(csv_path),
+                        "status": "failed",
+                        "error": f"{type(exc).__name__}: {exc}",
+                    }
+                if res["status"] == "failed" and not continue_on_error:
+                    raise RuntimeError(
+                        f"process-dataset: failed on {csv_path}: {res.get('error', '?')}"
+                    )
+                file_results.append(res)
+    else:
+        for csv_path, bundle_dir, name in tasks:
+            res = _process_single_file(
+                csv_path,
+                bundle_dir,
+                origin_json=origin_json,
+                lane_width_m=lane_width_m,
+                dataset_name=name,
+            )
+            if res["status"] == "failed" and not continue_on_error:
+                raise RuntimeError(
+                    f"process-dataset: failed on {csv_path}: {res.get('error', '?')}"
+                )
+            file_results.append(res)
+
+    # Sort results to match input order.
+    file_order = {str(csv): i for i, (csv, _, _) in enumerate(tasks)}
+    file_results.sort(key=lambda r: file_order.get(r["file"], 9999))
+
+    ok = [r for r in file_results if r["status"] == "ok"]
+    failed = [r for r in file_results if r["status"] != "ok"]
+
+    manifest = {
+        "total_count": len(csv_files),
+        "ok_count": len(ok),
+        "failed_count": len(failed),
+        "files": file_results,
+    }
+    _write_manifest(output_dir, manifest)
+    return manifest
+
+
+def _write_manifest(output_dir: Path, manifest: dict[str, Any]) -> None:
+    """Write dataset_manifest.json to output_dir."""
+    manifest_path = output_dir / "dataset_manifest.json"
+    manifest_path.write_text(
+        json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )

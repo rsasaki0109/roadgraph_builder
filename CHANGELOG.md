@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **P2: Incremental / streaming build (`update-graph` CLI)** — `roadgraph_builder/pipeline/incremental.py` adds `update_graph_from_trajectory` which merges a new trajectory into an existing graph without a full rebuild. New polylines that fall entirely within `absorb_tolerance_m` of an existing edge bump `trace_observation_count` rather than creating a new edge; unabsorbed polylines go through a restricted X/T split + endpoint union-find restricted to nearby edges. CLI: `roadgraph_builder update-graph existing.json new.csv --output merged.json`.
+
 ### Changed
 
 - **P1: X/T-junction split O(N²) → O(N log N)** — new `roadgraph_builder/pipeline/crossing_splitters.py` module replaces the brute-force pair scan in `split_polylines_at_crossings` / `split_polylines_at_t_junctions` with a uniform grid hash. X-crossings index segments per cell; T-junctions use a polyline-bbox grid with inverted endpoint→polyline lookup. Result is numerically identical to the O(N²) path on all inputs including Paris real data. `scripts/run_benchmarks.py` benchmark `polylines_to_graph_10k_synth` restored to a 50×50 grid (~25 000 points); target ≤ 30 s on the fast path.
