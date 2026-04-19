@@ -124,6 +124,8 @@ def export_map_bundle(
     fuse_max_dist_m: float = 5.0,
     fuse_bins: int = 32,
     origin_json_path: str | Path | None = None,
+    lane_markings_json: str | Path | None = None,
+    camera_detections_refine_json: str | Path | None = None,
 ) -> None:
     """Write ``nav/``, ``sim/``, ``lanelet/`` under ``out_dir``.
 
@@ -140,7 +142,32 @@ def export_map_bundle(
     (out / "lanelet").mkdir(parents=True, exist_ok=True)
 
     if lane_width_m is not None and lane_width_m > 0:
-        enrich_sd_to_hd(graph, SDToHDConfig(lane_width_m=lane_width_m))
+        refinements = None
+        if lane_markings_json is not None or camera_detections_refine_json is not None:
+            from roadgraph_builder.hd.refinement import refine_hd_edges as _refine_hd_edges
+            lm_data: dict | None = None
+            cam_ref_data: dict | None = None
+            if lane_markings_json is not None:
+                lm_path = Path(lane_markings_json)
+                if lm_path.is_file():
+                    lm_data = json.loads(lm_path.read_text(encoding="utf-8"))
+            if camera_detections_refine_json is not None:
+                cam_ref_path = Path(camera_detections_refine_json)
+                if cam_ref_path.is_file():
+                    cam_ref_data = json.loads(cam_ref_path.read_text(encoding="utf-8"))
+            graph_dict = {
+                "edges": [
+                    {"id": e.id, "attributes": e.attributes}
+                    for e in graph.edges
+                ]
+            }
+            refinements = _refine_hd_edges(
+                graph_dict,
+                lane_markings=lm_data,
+                camera_detections=cam_ref_data,
+                base_lane_width_m=lane_width_m,
+            )
+        enrich_sd_to_hd(graph, SDToHDConfig(lane_width_m=lane_width_m), refinements=refinements)
 
     lidar_path = Path(lidar_points) if lidar_points else None
     lidar_point_count: int | None = None

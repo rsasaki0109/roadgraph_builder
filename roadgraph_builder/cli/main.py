@@ -191,6 +191,20 @@ def _build_parser() -> argparse.ArgumentParser:
         metavar="M",
         help="Lane width in meters: fill left/right boundaries by offsetting edge centerlines (HD-lite).",
     )
+    enr.add_argument(
+        "--lane-markings-json",
+        type=str,
+        default=None,
+        metavar="PATH",
+        help="Optional lane_markings.json from detect-lane-markings for per-edge width refinement.",
+    )
+    enr.add_argument(
+        "--camera-detections-json",
+        type=str,
+        default=None,
+        metavar="PATH",
+        help="Optional camera_detections.json for per-edge width refinement.",
+    )
 
     ilas = sub.add_parser(
         "inspect-lidar",
@@ -564,6 +578,20 @@ def _build_parser() -> argparse.ArgumentParser:
         metavar="PATH",
         help="Additional trajectory CSV to concatenate with the primary input (same meter origin). Repeatable.",
     )
+    bun.add_argument(
+        "--lane-markings-json",
+        type=str,
+        default=None,
+        metavar="PATH",
+        help="Optional lane_markings.json for per-edge HD width refinement.",
+    )
+    bun.add_argument(
+        "--camera-detections-refine-json",
+        type=str,
+        default=None,
+        metavar="PATH",
+        help="Optional camera_detections.json for per-edge HD width refinement (separate from --detections-json).",
+    )
     _add_build_params(bun)
 
     bog = sub.add_parser(
@@ -789,9 +817,28 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.command == "enrich":
         graph = _cli_load_graph(args.input_json)
+        refinements = None
+        if args.lane_markings_json or args.camera_detections_json:
+            from roadgraph_builder.hd.refinement import refine_hd_edges as _refine_hd_edges
+            lm_data = _load_json_for_cli(args.lane_markings_json) if args.lane_markings_json else None
+            cam_data = _load_json_for_cli(args.camera_detections_json) if args.camera_detections_json else None
+            if not isinstance(lm_data, dict) and lm_data is not None:
+                print("enrich: --lane-markings-json must be a JSON object.", file=sys.stderr)
+                return 1
+            if not isinstance(cam_data, dict) and cam_data is not None:
+                print("enrich: --camera-detections-json must be a JSON object.", file=sys.stderr)
+                return 1
+            _graph_json = json.loads(Path(args.input_json).read_text(encoding="utf-8"))
+            refinements = _refine_hd_edges(
+                _graph_json,
+                lane_markings=lm_data,
+                camera_detections=cam_data,
+                base_lane_width_m=args.lane_width_m or 3.5,
+            )
         enrich_sd_to_hd(
             graph,
             SDToHDConfig(lane_width_m=args.lane_width_m),
+            refinements=refinements,
         )
         export_graph_json(graph, args.output_json)
         return 0
@@ -1224,6 +1271,8 @@ def main(argv: list[str] | None = None) -> int:
             fuse_max_dist_m=args.fuse_max_dist_m,
             fuse_bins=args.fuse_bins,
             origin_json_path=oj,
+            lane_markings_json=args.lane_markings_json,
+            camera_detections_refine_json=args.camera_detections_refine_json,
         )
         return 0
     if args.command == "build-osm-graph":

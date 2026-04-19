@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`detect-lane-markings` CLI** — per-edge LiDAR intensity-peak extraction that recovers left/right/center lane marking candidates from a LAS point cloud without ML; writes `lane_markings.json` validated by `lane_markings.schema.json`.
 - **`guidance` CLI** — converts a route GeoJSON + sd_nav.json into a turn-by-turn GuidanceStep sequence (depart/arrive/straight/left/right/…) with signed heading-change angles; writes `guidance.json` validated by `guidance.schema.json`.
 - **`make bench` + `scripts/run_benchmarks.py`** — deterministic wall-clock benchmarks for graph build, synthetic grid, 100 shortest-path queries, and export-bundle; `--baseline` mode exits 1 on ≥ 3× regression; `docs/benchmarks.md` records v0.5.0 baseline numbers.
+- **HD-lite multi-source refinement (`enrich --lane-markings-json` / `--camera-detections-json`)** — `roadgraph_builder/hd/refinement.py` fuses lane-marking candidates, trace_stats, and camera observations into per-edge `hd_refinement` metadata with refined half-width and confidence; `enrich_sd_to_hd` accepts an optional `refinements=` list; `export-bundle` exposes `--lane-markings-json` / `--camera-detections-refine-json` flags.
 
 ## [0.4.0] — 2026-04-19
 

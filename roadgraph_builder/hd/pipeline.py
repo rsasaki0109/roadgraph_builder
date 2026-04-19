@@ -3,10 +3,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 from roadgraph_builder.core.graph.graph import Graph
 from roadgraph_builder.hd.boundaries import centerline_lane_boundaries, polyline_to_json_points
+
+if TYPE_CHECKING:
+    from roadgraph_builder.hd.refinement import EdgeHDRefinement
 
 EnrichStrategy = Literal["envelope"]
 
@@ -40,11 +43,21 @@ class SDToHDConfig:
     lane_width_m: float | None = None
 
 
-def enrich_sd_to_hd(graph: Graph, config: SDToHDConfig | None = None) -> Graph:
+def enrich_sd_to_hd(
+    graph: Graph,
+    config: SDToHDConfig | None = None,
+    *,
+    refinements: list[EdgeHDRefinement] | None = None,
+) -> Graph:
     """Add HD-oriented metadata and per-feature ``attributes.hd`` slots.
 
     With ``lane_width_m``, writes **centerline-offset** left/right polylines (HD-lite),
     not survey-grade boundaries. LiDAR/camera fusion can replace these later.
+
+    When ``refinements`` is provided (a list of ``EdgeHDRefinement``), the
+    per-edge refined half-width and centerline offset are applied on top of
+    the initial lane-boundary computation. Passing ``refinements=None``
+    preserves backward-compatible behaviour.
     """
     cfg = config or SDToHDConfig()
     if cfg.strategy != "envelope":
@@ -119,5 +132,14 @@ def enrich_sd_to_hd(graph: Graph, config: SDToHDConfig | None = None) -> Graph:
             merged = base
         attrs["hd"] = merged
         n.attributes = attrs
+
+    # Apply multi-source refinements when provided (backward-compatible: None = skip).
+    if refinements is not None:
+        from roadgraph_builder.hd.refinement import apply_refinements_to_graph
+        apply_refinements_to_graph(
+            graph,
+            refinements,
+            base_lane_width_m=cfg.lane_width_m or 3.5,
+        )
 
     return graph
