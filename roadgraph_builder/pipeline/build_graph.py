@@ -26,8 +26,10 @@ from roadgraph_builder.utils.geometry import (
     merge_endpoints_union_find,
     simplify_polyline_rdp,
     split_indices_by_step,
-    split_polylines_at_crossings,
-    split_polylines_at_t_junctions,
+)
+from roadgraph_builder.pipeline.crossing_splitters import (
+    split_polylines_at_crossings_fast as split_polylines_at_crossings,
+    split_polylines_at_t_junctions_fast as split_polylines_at_t_junctions,
 )
 
 

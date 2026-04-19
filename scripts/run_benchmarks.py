@@ -62,37 +62,40 @@ def build_paris_graph() -> object:
 
 
 def build_10k_synth() -> object:
-    """Build graph from a synthetic trajectory with ~1 000 points.
+    """Build graph from a synthetic trajectory with ~25 000 points.
 
-    Generates a grid of 10 horizontal + 10 vertical lines at 50 m spacing,
-    each sampled every 5 m. Total ~2 200 points (well within 60 s budget).
-    Name kept as 'polylines_to_graph_10k_synth' for baseline compatibility,
-    but the actual trajectory size is moderate to keep wall time < 10 s.
+    Generates a grid of 50 horizontal + 50 vertical lines at 10 m spacing,
+    each sampled every 5 m over 500 m.  Total ~25 100 points.
+    The O(N log N) fast crossing splitters (P1) make this feasible within the
+    60 s budget; the old O(N²) version took ~314 s on this size.
+
+    Grid: 50×50 = 2500 real junctions, exercising both the X-junction and
+    T-junction detection paths thoroughly.
     """
     import numpy as np
     from roadgraph_builder.pipeline.build_graph import BuildParams, build_graph_from_trajectory
     from roadgraph_builder.io.trajectory.loader import Trajectory
 
-    # 10 horizontal + 10 vertical lines at 50 m spacing, each 500 m long.
+    # 50 horizontal + 50 vertical lines at 10 m spacing, each 500 m long.
     rows: list[tuple[float, float, float]] = []
     t = 0.0
-    for row in range(10):
-        y = row * 50.0
+    for row in range(50):
+        y = row * 10.0
         for x in np.arange(0, 501, 5, dtype=float):
             rows.append((t, float(x), float(y)))
             t += 1.0
-        t += 50.0  # gap
-    for col in range(10):
-        x = col * 50.0
+        t += 100.0  # gap
+    for col in range(50):
+        x = col * 10.0
         for y in np.arange(0, 501, 5, dtype=float):
             rows.append((t, float(x), float(y)))
             t += 1.0
-        t += 50.0
+        t += 100.0
 
     xy = np.array([[r[1], r[2]] for r in rows], dtype=np.float64)
     timestamps = np.array([r[0] for r in rows], dtype=np.float64)
     traj = Trajectory(xy=xy, timestamps=timestamps)
-    params = BuildParams(max_step_m=60.0, merge_endpoint_m=8.0, centerline_bins=16)
+    params = BuildParams(max_step_m=200.0, merge_endpoint_m=8.0, centerline_bins=8)
     return build_graph_from_trajectory(traj, params)
 
 
