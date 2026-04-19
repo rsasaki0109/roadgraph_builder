@@ -673,6 +673,23 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     vlm.add_argument("input_json", help="lane_markings.json produced by detect-lane-markings.")
 
+    guid = sub.add_parser(
+        "guidance",
+        help="Build turn-by-turn navigation steps from a route GeoJSON + sd_nav.json.",
+    )
+    guid.add_argument("route_geojson", help="Route GeoJSON (from the route CLI --output).")
+    guid.add_argument("sd_nav_json", help="SD nav JSON (nav/sd_nav.json from export-bundle).")
+    guid.add_argument("--output", type=str, default="guidance.json", metavar="PATH", help="Output JSON path (default: guidance.json).")
+    guid.add_argument("--slight-deg", type=float, default=20.0, metavar="DEG", help="Angle threshold for slight turns (degrees).")
+    guid.add_argument("--sharp-deg", type=float, default=120.0, metavar="DEG", help="Angle threshold for sharp turns (degrees).")
+    guid.add_argument("--u-turn-deg", type=float, default=165.0, metavar="DEG", help="Angle threshold for U-turns (degrees).")
+
+    vguid = sub.add_parser(
+        "validate-guidance",
+        help="Validate a guidance.json against guidance.schema.json.",
+    )
+    vguid.add_argument("input_json", help="guidance.json produced by the guidance CLI.")
+
     return p
 
 
@@ -1401,6 +1418,55 @@ def main(argv: list[str] | None = None) -> int:
             return 1
         try:
             validate_lane_markings_document(data)
+        except ValidationError as e:
+            _validation_error(args.input_json, e)
+            return 1
+        return 0
+    if args.command == "guidance":
+        from roadgraph_builder.navigation.guidance import build_guidance as _build_guidance
+        route_data = _load_json_for_cli(args.route_geojson)
+        sd_nav_data = _load_json_for_cli(args.sd_nav_json)
+        if not isinstance(route_data, dict):
+            print("guidance: route GeoJSON root must be an object.", file=sys.stderr)
+            return 1
+        if not isinstance(sd_nav_data, dict):
+            print("guidance: sd_nav JSON root must be an object.", file=sys.stderr)
+            return 1
+        steps = _build_guidance(
+            route_data,
+            sd_nav_data,
+            slight_deg=args.slight_deg,
+            sharp_deg=args.sharp_deg,
+            u_turn_deg=args.u_turn_deg,
+        )
+        doc = {
+            "steps": [
+                {
+                    "step_index": s.step_index,
+                    "edge_id": s.edge_id,
+                    "start_distance_m": s.start_distance_m,
+                    "length_m": s.length_m,
+                    "maneuver_at_end": s.maneuver_at_end,
+                    "heading_change_deg": s.heading_change_deg,
+                    "junction_type_at_end": s.junction_type_at_end,
+                    "description": s.description,
+                    "sd_nav_edge_maneuvers": s.sd_nav_edge_maneuvers,
+                }
+                for s in steps
+            ]
+        }
+        out_path = Path(args.output)
+        out_path.write_text(json.dumps(doc, indent=2) + "\n", encoding="utf-8")
+        print(f"Wrote {out_path}: {len(steps)} steps.", file=sys.stderr)
+        return 0
+    if args.command == "validate-guidance":
+        from roadgraph_builder.validation import validate_guidance_document
+        data = _load_json_for_cli(args.input_json)
+        if not isinstance(data, dict):
+            print("JSON root must be an object", file=sys.stderr)
+            return 1
+        try:
+            validate_guidance_document(data)
         except ValidationError as e:
             _validation_error(args.input_json, e)
             return 1

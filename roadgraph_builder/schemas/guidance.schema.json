@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/rsasaki0109/roadgraph_builder/guidance.schema.json",
+  "title": "guidance.json",
+  "type": "object",
+  "required": ["steps"],
+  "properties": {
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "step_index",
+          "edge_id",
+          "start_distance_m",
+          "length_m",
+          "maneuver_at_end",
+          "heading_change_deg",
+          "description",
+          "sd_nav_edge_maneuvers"
+        ],
+        "properties": {
+          "step_index": {"type": "integer", "minimum": 0},
+          "edge_id": {"type": "string"},
+          "start_distance_m": {"type": "number", "minimum": 0},
+          "length_m": {"type": "number", "minimum": 0},
+          "maneuver_at_end": {
+            "enum": [
+              "depart", "arrive",
+              "straight", "continue",
+              "slight_left", "left", "sharp_left",
+              "slight_right", "right", "sharp_right",
+              "u_turn"
+            ]
+          },
+          "heading_change_deg": {"type": "number"},
+          "junction_type_at_end": {"type": ["string", "null"]},
+          "description": {"type": "string"},
+          "sd_nav_edge_maneuvers": {
+            "type": "array",
+            "items": {"type": "string"}
+          }
+        }
+      }
+    }
+  }
+}

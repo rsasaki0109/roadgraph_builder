@@ -31,6 +31,7 @@ _SCHEMA_FILES = (
     "manifest.schema.json",
     "turn_restrictions.schema.json",
     "lane_markings.schema.json",
+    "guidance.schema.json",
 )
 
 
