@@ -1,0 +1,269 @@
+{
+  "format_version": 1,
+  "_comment": "Synthetic but realistic demo: ground-truth world points forward-projected through a wide-angle camera with Brown-Conrady distortion. Each detection carries its _world_ground_truth_m so tests can verify project-camera recovers it. Regenerate with scripts/generate_camera_demo.py.",
+  "image_detections": [
+    {
+      "image_id": "demo_0001",
+      "pose": {
+        "translation_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation_rpy_rad": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "detections": [
+        {
+          "kind": "lane_marking",
+          "pixel": {
+            "u": 484.7,
+            "v": 533.2
+          },
+          "_world_ground_truth_m": [
+            10.0,
+            1.75,
+            0.0
+          ],
+          "value": "solid_white_left"
+        },
+        {
+          "kind": "lane_marking",
+          "pixel": {
+            "u": 795.3,
+            "v": 533.1
+          },
+          "_world_ground_truth_m": [
+            10.0,
+            -1.75,
+            0.0
+          ],
+          "value": "solid_white_right"
+        },
+        {
+          "kind": "stop_line",
+          "pixel": {
+            "u": 640.0,
+            "v": 474.9
+          },
+          "_world_ground_truth_m": [
+            18.0,
+            0.0,
+            0.0
+          ],
+          "value": "stop"
+        },
+        {
+          "kind": "speed_limit",
+          "pixel": {
+            "u": 484.0,
+            "v": 466.9
+          },
+          "_world_ground_truth_m": [
+            20.0,
+            3.5,
+            0.0
+          ],
+          "value_kmh": 50
+        },
+        {
+          "kind": "speed_limit",
+          "pixel": {
+            "u": 796.0,
+            "v": 466.9
+          },
+          "_world_ground_truth_m": [
+            20.0,
+            -3.5,
+            0.0
+          ],
+          "value_kmh": 50
+        }
+      ]
+    },
+    {
+      "image_id": "demo_0002",
+      "pose": {
+        "translation_m": [
+          5.0,
+          0.0,
+          0.0
+        ],
+        "rotation_rpy_rad": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "detections": [
+        {
+          "kind": "lane_marking",
+          "pixel": {
+            "u": 341.6,
+            "v": 655.8
+          },
+          "_world_ground_truth_m": [
+            10.0,
+            1.75,
+            0.0
+          ],
+          "value": "solid_white_left"
+        },
+        {
+          "kind": "lane_marking",
+          "pixel": {
+            "u": 938.1,
+            "v": 655.7
+          },
+          "_world_ground_truth_m": [
+            10.0,
+            -1.75,
+            0.0
+          ],
+          "value": "solid_white_right"
+        },
+        {
+          "kind": "stop_line",
+          "pixel": {
+            "u": 640.0,
+            "v": 503.5
+          },
+          "_world_ground_truth_m": [
+            18.0,
+            0.0,
+            0.0
+          ],
+          "value": "stop"
+        },
+        {
+          "kind": "speed_limit",
+          "pixel": {
+            "u": 433.5,
+            "v": 488.5
+          },
+          "_world_ground_truth_m": [
+            20.0,
+            3.5,
+            0.0
+          ],
+          "value_kmh": 50
+        },
+        {
+          "kind": "speed_limit",
+          "pixel": {
+            "u": 846.4,
+            "v": 488.5
+          },
+          "_world_ground_truth_m": [
+            20.0,
+            -3.5,
+            0.0
+          ],
+          "value_kmh": 50
+        }
+      ]
+    },
+    {
+      "image_id": "demo_0003",
+      "pose": {
+        "translation_m": [
+          10.0,
+          0.0,
+          0.0
+        ],
+        "rotation_rpy_rad": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "detections": [
+        {
+          "kind": "stop_line",
+          "pixel": {
+            "u": 640.0,
+            "v": 567.2
+          },
+          "_world_ground_truth_m": [
+            18.0,
+            0.0,
+            0.0
+          ],
+          "value": "stop"
+        },
+        {
+          "kind": "speed_limit",
+          "pixel": {
+            "u": 336.6,
+            "v": 530.1
+          },
+          "_world_ground_truth_m": [
+            20.0,
+            3.5,
+            0.0
+          ],
+          "value_kmh": 50
+        },
+        {
+          "kind": "speed_limit",
+          "pixel": {
+            "u": 943.2,
+            "v": 530.0
+          },
+          "_world_ground_truth_m": [
+            20.0,
+            -3.5,
+            0.0
+          ],
+          "value_kmh": 50
+        }
+      ]
+    },
+    {
+      "image_id": "demo_0004",
+      "pose": {
+        "translation_m": [
+          15.0,
+          0.0,
+          0.0
+        ],
+        "rotation_rpy_rad": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "detections": [
+        {
+          "kind": "speed_limit",
+          "pixel": {
+            "u": 91.4,
+            "v": 635.3
+          },
+          "_world_ground_truth_m": [
+            20.0,
+            3.5,
+            0.0
+          ],
+          "value_kmh": 50
+        },
+        {
+          "kind": "speed_limit",
+          "pixel": {
+            "u": 1187.7,
+            "v": 635.1
+          },
+          "_world_ground_truth_m": [
+            20.0,
+            -3.5,
+            0.0
+          ],
+          "value_kmh": 50
+        }
+      ]
+    }
+  ]
+}
