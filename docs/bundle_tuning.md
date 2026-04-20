@@ -193,6 +193,52 @@ bbox で同じ掃引を実行した（5 ページ fetch、重複除去後 **7478
   パリで見られた「T/X 接続検出でパラメータ感度が激増」現象は、トリップ間の重複走行が
   存在してはじめて効く。
 
+## 第三地域サンプル: Berlin Mitte（`bbox=13.3700,52.5100,13.4000,52.5250`）
+
+V1 accuracy report と同じ Berlin Mitte bbox で、公開 OSM GPS トレースに対する推奨値を確認した。
+5 ページ fetch、bbox 中心 `lat0=52.5175, lon0=13.3850` に再投影、重複除去後 **7500 点**。
+評価 scope は Paris / Tokyo と同じく `--max-step-m` と `--merge-endpoint-m` の sweep に絞り、
+`--centerline-bins=32`、`--simplify-tolerance` なしで固定した。評価指標は edge/node 数、
+median edge length、multi_branch 数、最大連結成分 (LCC) 比率、self-loop edge 数。
+
+再現手順:
+
+```bash
+mkdir -p /tmp/osm_tune_berlin
+for p in 0 1 2 3 4; do
+  python scripts/fetch_osm_trackpoints.py \
+    --bbox "13.3700,52.5100,13.4000,52.5250" --max-points 1500 --page $p \
+    -o /tmp/osm_tune_berlin/berlin_mitte_trackpoints_p${p}.csv
+done
+# ページごとの WGS84 CSV を bbox 中心 lat0=52.5175, lon0=13.3850 に再投影して
+# /tmp/osm_tune_berlin/berlin_mitte_trackpoints.csv と origin JSON を作る。
+```
+
+| `max-step-m` / `merge-endpoint-m` | nodes | edges | median length [m] | multi_branch | LCC nodes (%) | self-loop edges |
+| --- | --- | --- | --- | --- | --- | --- |
+| 25 / 8 *(default)* | 65 | 64 | 90.4 | 21 | 31 (48%) | 3 |
+| 30 / 8 | 65 | 64 | 85.8 | 21 | 31 (48%) | 3 |
+| 40 / 8 *(推奨)* | 58 | 57 | 89.3 | 18 | 30 (52%) | 3 |
+| 50 / 8 | 47 | 43 | 137.3 | 13 | 25 (53%) | 0 |
+| 25 / 3 | 72 | 73 | 82.4 | 26 | 33 (46%) | 4 |
+| 25 / 15 | 57 | 57 | 91.6 | 20 | 31 (54%) | 4 |
+| 40 / 15 | 49 | 50 | 89.0 | 17 | 28 (57%) | 4 |
+
+`40/8` の bundle 検証（`export-bundle` → `validate-manifest` / `validate-sd-nav` / `validate`）は通過。
+manifest の bbox は `13.37003,52.51000` → `13.39998,52.52499` で入力 bbox と整合する。
+
+観察:
+
+- Berlin Mitte は Tokyo より LCC が大きく、**46–57%** まで伸びる。公開トレースの重複走行が
+  Tokyo 丸の内〜日本橋よりあり、T/X 接続検出が効いている。
+- ただし `50/8` は self-loop edge が 0 になる一方、edges 43 / median 137 m まで粗くなり、
+  交差点の detail を落としすぎる。大域連結性だけを見て選ばない方がよい。
+- `25/3` は edge/node と multi_branch を増やすが LCC 比率は 46% に下がる。細かい endpoint を
+  残しすぎて dead fragment も増えるため、review 初期値としては強すぎる。
+- 既存の Paris / Tokyo と合わせると、**推奨値 `--max-step-m 40 --merge-endpoint-m 8` は
+  3 都市で破綻しない保守的な初期値**。Berlin では `25/8` も近い結果だが、`40/8` は
+  median length を現実的に保ったまま LCC 比率を少し上げ、branch 数も過剰に増やさない。
+
 ## 次の一歩
 
 - 手元の CSV を **同じ列名** `timestamp, x, y` にし、**原点 JSON** を自データ用に用意する。

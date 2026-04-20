@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Bundle tuning now includes a Berlin Mitte public-GPS sweep.**
+  `docs/bundle_tuning.md` adds a third real-data OSM public trackpoints
+  sample (`13.3700,52.5100,13.4000,52.5250`, 7500 points) with the same
+  `max-step-m` / `merge-endpoint-m` sweep used for Paris and Tokyo. The
+  result keeps `--max-step-m 40 --merge-endpoint-m 8` as the conservative
+  cross-city starting point, with bundle validation passing for the Berlin
+  `40/8` artefact.
+
 - **CLI completions now cover the v0.6/v0.7 command surface.**
   Bash and zsh completions include the lane-count, Lanelet2 validation,
   camera lane-detection, incremental update, and dataset batch commands added

@@ -6,7 +6,7 @@
 > このファイル → [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md)（Mermaid 6 枚 + CLI 対応表 +
 > モジュール索引）→ [`CHANGELOG.md`](../CHANGELOG.md) の順。
 
-*最終更新: 2026-04-21 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh が反映済み）。*
+*最終更新: 2026-04-21 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep が反映済み）。*
 
 ---
 
@@ -25,6 +25,7 @@
   4. 50×50 perf flake 対策（`@pytest.mark.slow` 分離 + budget 30s→60s、default run 56s→27s）
   5. PLAN / ARCHITECTURE / README を v0.6+v0.7 CLI 群に同期
   6. Bash / zsh completions を v0.6+v0.7 CLI 群に同期（parser-derived drift test 付き）
+  7. 実走 CSV tuning — Berlin Mitte OSM public GPS sweep 追加、`40/8` 推奨を 3 都市で確認
 - **未着手 (次の AI が触る候補):** ↓ §5 "Open tasks" 参照。
 
 - **コミュニケーション言語:** **日本語** 優先。ユーザーは短い JP/romaji プロンプトを好み
@@ -268,7 +269,8 @@
 - 退化 self-loop edge（endpoint merge で同一ノードに縮退・短ポリライン）は `pipeline.build_graph`
   で自動ドロップ。
 - **チューニング:** `docs/bundle_tuning.md`、`make tune` / `scripts/run_tuning_bundle.sh`。
-  Paris OSM トレース観察に基づく推奨値 `--max-step-m 40 --merge-endpoint-m 8`。
+  Paris / Tokyo / Berlin の OSM public GPS trace sweep に基づく推奨値
+  `--max-step-m 40 --merge-endpoint-m 8`。
 - **E2E CLI 回帰テスト:** `tests/test_cli_end_to_end.py` が `build → export-bundle → validate-* →
   stats → route` を subprocess で通す。
 
@@ -291,8 +293,8 @@
   centerline smoothing 等が入った節目。
 - **v0.2.0 / v0.1.0:** 初期。
 
-Unreleased は `CHANGELOG.md` の `[Unreleased]` 参照。2026-04-21 session の 3 commit
-（accuracy 実測 / warning fix / perf flake fix）と docs sync (docs commit) は `[Unreleased]` 下。
+Unreleased は `CHANGELOG.md` の `[Unreleased]` 参照。2026-04-21 session の accuracy 実測、
+warning fix、perf flake fix、docs sync、completions sync、Berlin tuning sweep は `[Unreleased]` 下。
 
 ---
 
@@ -300,19 +302,7 @@ Unreleased は `CHANGELOG.md` の `[Unreleased]` 参照。2026-04-21 session の
 
 優先度順。各タスクに **手をつける前のヒント** を付けてある。
 
-### 5a. 実走 CSV tuning（short／scope 定義フェーズ）
-
-- **出発点:** `docs/bundle_tuning.md` の Paris / Tokyo 丸の内〜日本橋 sweep。Tokyo は Paris より
-  OSM GPS トレースが疎で LCC 13–17% が上限、推奨値は `40/8`。**別地域 or 高密度な車載 CSV** では
-  未検証。
-- **やり方:** まず scope 定義 — (a) どのデータセット（別都市 OSM trackpoints? 車載 CSV?）、
-  (b) sweep したいパラメータ（`--max-step-m`, `--merge-endpoint-m`, `--centerline-bins`,
-  `--simplify-tolerance`）、(c) 評価指標（LCC%, edge count stability, graph_stats の bbox 妥当性）。
-- **run:** `make tune` → `/tmp/my_tune/manifest.json` で graph_stats を観察。
-- **成果物:** `docs/bundle_tuning.md` に新データセットの表追加、推奨値に根拠を書く。
-- **規模感:** 1 session 内で回収可能（scope 定義 1h + sweep 1-2h + 文章化 30min）。
-
-### 5b. V3 float32 trajectory 最適化（long／設計フェーズ先行）
+### 5a. V3 float32 trajectory 最適化（long／設計フェーズ先行）
 
 - **背景:** v0.7 で `export_lanelet2` DOM rewrite が peak RSS を -10% したが、trajectory 配列の
   float64→float32 変換はまだ。**byte-identity を破る** ので単純 swap 不可。

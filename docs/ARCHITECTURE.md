@@ -363,7 +363,7 @@ flowchart TD
 ## Further reading
 
 - [`docs/PLAN.md`](PLAN.md) — roadmap, facts vs. intent, handoff pointers.
-- [`docs/bundle_tuning.md`](bundle_tuning.md) — parameter sweep recipe (includes the Paris OSM observations).
+- [`docs/bundle_tuning.md`](bundle_tuning.md) — parameter sweep recipe (includes Paris / Tokyo / Berlin OSM observations).
 - [`docs/navigation_turn_restrictions.md`](navigation_turn_restrictions.md) — regulation-vs-geometry design + how to provide turn restrictions.
 - [`docs/handoff/turn_restrictions.md`](handoff/turn_restrictions.md), [`docs/handoff/release_distribution.md`](handoff/release_distribution.md) — Codex hand-off prompts, both marked DONE.
 - [`CHANGELOG.md`](../CHANGELOG.md) — dated feature log.
