@@ -59,9 +59,10 @@ testpaths = ["tests"]
 pythonpath = ["."]
 # If global pytest plugins (e.g. ROS launch_testing) break the venv, run:
 #   PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest
-# Exclude city_scale tests (fetch real OSM — heavy, flaky) from the default run.
-# To run them: pytest -m city_scale
-addopts = "-m 'not city_scale'"
+# Exclude city_scale (real OSM fetch) and slow (long wall-time perf) tests from
+# the default run. Opt-in via: pytest -m city_scale  /  pytest -m slow
+addopts = "-m 'not city_scale and not slow'"
 markers = [
     "city_scale: opt-in real-OSM regression tests (require live Overpass; run with -m city_scale)",
+    "slow: opt-in long wall-time perf / regression tests (run with -m slow)",
 ]
