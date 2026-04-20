@@ -10,10 +10,52 @@ from __future__ import annotations
 import xml.etree.ElementTree as ET
 from collections.abc import Callable
 from pathlib import Path
-from xml.dom import minidom
 
 from roadgraph_builder.core.graph.graph import Graph
 from roadgraph_builder.utils.geo import meters_to_lonlat
+
+
+def _et_to_pretty_bytes(root: ET.Element) -> bytes:
+    """Serialize an ElementTree to pretty-printed UTF-8 bytes.
+
+    Produces output byte-identical to ``minidom.toprettyxml(indent='  ',
+    encoding='utf-8')`` without the minidom round-trip parse (which allocated
+    ~900 KB of DOM objects for a Paris-scale graph).  The format rules are:
+    - XML declaration on line 1.
+    - Self-closing tags use ``/>`` (no space before slash, matching minidom).
+    - Text-only elements are inlined on one line.
+    - Child-bearing elements open, recurse indented, then close.
+    """
+    chunks: list[bytes] = [b'<?xml version="1.0" encoding="utf-8"?>\n']
+
+    def _attrs(el: ET.Element) -> bytes:
+        if not el.attrib:
+            return b""
+        return b" " + b" ".join(
+            f'{k}="{v}"'.encode("utf-8") for k, v in el.attrib.items()
+        )
+
+    def _write(el: ET.Element, depth: int) -> None:
+        prefix = b"  " * depth
+        tag = el.tag.encode("utf-8")
+        attrs = _attrs(el)
+        children = list(el)
+        text = (el.text or "").strip()
+
+        if not children and not text:
+            chunks.append(prefix + b"<" + tag + attrs + b"/>\n")
+        elif not children:
+            chunks.append(
+                prefix + b"<" + tag + attrs + b">" + text.encode("utf-8") + b"</" + tag + b">\n"
+            )
+        else:
+            chunks.append(prefix + b"<" + tag + attrs + b">\n")
+            for child in children:
+                _write(child, depth + 1)
+            chunks.append(prefix + b"</" + tag + b">\n")
+
+    _write(root, 0)
+    return b"".join(chunks)
 
 _REGULATORY_SUBTYPES = frozenset(
     {
@@ -497,10 +539,7 @@ def export_lanelet2_per_lane(
     for c in relation_children:
         root.append(c)
 
-    xml_bytes = ET.tostring(root, encoding="utf-8")
-    dom = minidom.parseString(xml_bytes)
-    pretty = dom.toprettyxml(indent="  ", encoding="utf-8")
-    path.write_bytes(pretty)
+    path.write_bytes(_et_to_pretty_bytes(root))
 
 
 def _build_stop_line_way(
@@ -836,7 +875,4 @@ def export_lanelet2(
     for c in relation_children:
         root.append(c)
 
-    xml_bytes = ET.tostring(root, encoding="utf-8")
-    dom = minidom.parseString(xml_bytes)
-    pretty = dom.toprettyxml(indent="  ", encoding="utf-8")
-    path.write_bytes(pretty)
+    path.write_bytes(_et_to_pretty_bytes(root))

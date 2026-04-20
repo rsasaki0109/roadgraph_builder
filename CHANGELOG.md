@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **V3: Memory profile + optimization** — `scripts/profile_memory.py` uses `tracemalloc` to snapshot allocations at four pipeline stages (imports / trajectory load / build / export-bundle) and writes `docs/memory_profile_v0.7.md` with top-20 allocator table and peak RSS per stage. Hotspot fix: `export_lanelet2` / `export_lanelet2_per_lane` replaced the `minidom.parseString → toprettyxml` round-trip with a direct `_et_to_pretty_bytes` recursive chunk-writer that produces byte-identical output while eliminating ~900 KB of DOM object allocation. Measured peak RSS on Paris trackpoints CSV: **61 028 KB → 54 944 KB (−10.0 %)**.
+
 - **P1: X/T-junction split O(N²) → O(N log N)** — new `roadgraph_builder/pipeline/crossing_splitters.py` module replaces the brute-force pair scan in `split_polylines_at_crossings` / `split_polylines_at_t_junctions` with a uniform grid hash. X-crossings index segments per cell; T-junctions use a polyline-bbox grid with inverted endpoint→polyline lookup. Result is numerically identical to the O(N²) path on all inputs including Paris real data. `scripts/run_benchmarks.py` benchmark `polylines_to_graph_10k_synth` restored to a 50×50 grid (~25 000 points); target ≤ 30 s on the fast path.
 
 ## [0.6.0] — 2026-04-20
