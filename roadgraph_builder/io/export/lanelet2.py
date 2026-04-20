@@ -486,6 +486,49 @@ def export_lanelet2_per_lane(
     path.write_bytes(pretty)
 
 
+def _build_stop_line_way(
+    stop_line_detection: dict,
+    new_node_fn,
+    new_way_fn,
+    origin_lat: float,
+    origin_lon: float,
+) -> int | None:
+    """Build a stop_line way from a camera detection dict.
+
+    Returns the new way id, or None if the detection lacks enough position data.
+    The stop line is represented as a ``type=line_thin, subtype=solid`` way.
+    """
+    from roadgraph_builder.utils.geo import meters_to_lonlat as _mtll
+
+    # Expect either a 'polyline_m' list of [x, y] points or a 'world_xy_m' single point.
+    polyline = stop_line_detection.get("polyline_m")
+    if polyline and isinstance(polyline, list) and len(polyline) >= 2:
+        pts: list[tuple[float, float]] = []
+        for pt in polyline:
+            if isinstance(pt, (list, tuple)) and len(pt) >= 2:
+                pts.append((float(pt[0]), float(pt[1])))
+        if len(pts) < 2:
+            return None
+    else:
+        # Fallback: single world_xy_m point is not enough for a way (need 2+).
+        return None
+
+    nds: list[int] = []
+    for x, y in pts:
+        lon, lat = _mtll(x, y, origin_lat, origin_lon)
+        nds.append(new_node_fn(lat, lon, None))
+
+    return new_way_fn(
+        nds,
+        [
+            ("type", "line_thin"),
+            ("subtype", "solid"),
+            ("roadgraph:source", "camera_detections"),
+            ("roadgraph:kind", "stop_line"),
+        ],
+    )
+
+
 def export_lanelet2(
     graph: Graph,
     path: str | Path,
@@ -495,6 +538,7 @@ def export_lanelet2(
     generator: str = "roadgraph_builder",
     speed_limit_tagging: str = "lanelet-attr",
     lane_markings: dict | None = None,
+    camera_detections: dict | None = None,
 ) -> None:
     """Write OSM XML with centerlines, optional lane boundary ways, and lanelet relations.
 
@@ -519,6 +563,12 @@ def export_lanelet2(
             get a ``subtype`` tag of ``solid`` or ``dashed`` based on intensity_median
             and point density heuristic.  Without this, all boundary ways get
             ``subtype=solid`` (0.5.0 behavior).
+        camera_detections: Optional camera_detections.json dict (``{observations: [...]}``)
+            from ``apply-camera`` or ``project-camera``. When supplied, detections with
+            ``kind=traffic_light`` produce a ``subtype=traffic_light`` regulatory_element
+            relation and detections with ``kind=stop_line`` produce a ``type=line_thin,
+            subtype=solid`` way. These are emitted after all lanelet relations. Without
+            this argument, output is byte-identical to the v0.6.0 δ baseline.
     """
     path = Path(path)
     root = ET.Element("osm", version="0.6", generator=generator)
@@ -691,6 +741,43 @@ def export_lanelet2(
                 ll_rid = new_relation(members, lanelet_tags)
                 lanelet_id_by_edge[e.id] = ll_rid
                 _emit_regulatory_elements_for_lanelet(hd_use.get("semantic_rules"), ll_rid, new_relation)
+
+    # A1: camera_detections wiring — emit regulatory_element relations for
+    # traffic_light detections and stop_line ways from the detections JSON.
+    if camera_detections is not None:
+        observations = camera_detections.get("observations", [])
+        if not isinstance(observations, list):
+            observations = []
+        for obs in observations:
+            if not isinstance(obs, dict):
+                continue
+            kind = obs.get("kind")
+            if kind == "traffic_light":
+                # Find the associated lanelet (by edge_id if present).
+                edge_id = obs.get("edge_id")
+                lanelet_rid: int | None = None
+                if edge_id is not None:
+                    lanelet_rid = lanelet_id_by_edge.get(str(edge_id))
+                if lanelet_rid is None and lanelet_id_by_edge:
+                    # Fall back to using any available lanelet.
+                    lanelet_rid = next(iter(lanelet_id_by_edge.values()))
+                if lanelet_rid is not None:
+                    _build_traffic_light_regulatory(
+                        obs,
+                        lanelet_rid,
+                        new_node,
+                        new_relation,
+                        origin_lat,
+                        origin_lon,
+                    )
+            elif kind == "stop_line":
+                _build_stop_line_way(
+                    obs,
+                    new_node,
+                    new_way,
+                    origin_lat,
+                    origin_lon,
+                )
 
     # Lane connectivity: for every graph node where ≥2 lanelets meet, emit one
     # `type=regulatory_element subtype=lane_connection` relation listing each

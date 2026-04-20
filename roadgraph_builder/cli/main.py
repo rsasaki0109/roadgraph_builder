@@ -648,6 +648,17 @@ def _build_parser() -> argparse.ArgumentParser:
         metavar="PATH",
         help="Optional lane_markings.json for solid/dashed boundary subtype classification.",
     )
+    exo.add_argument(
+        "--camera-detections-json",
+        type=str,
+        default=None,
+        metavar="PATH",
+        help=(
+            "Optional camera_detections.json (observations[]) to wire traffic_light and "
+            "stop_line detections into regulatory_element relations (A1). "
+            "Without this flag, output is byte-identical to v0.6.0 δ."
+        ),
+    )
 
     vlt = sub.add_parser(
         "validate-lanelet2-tags",
@@ -1592,6 +1603,13 @@ def main(argv: list[str] | None = None) -> int:
                 print("export-lanelet2: --lane-markings-json must be a JSON object.", file=sys.stderr)
                 return 1
             lm_data = raw_lm
+        cam_det_data = None
+        if getattr(args, "camera_detections_json", None):
+            raw_cam = _load_json_for_cli(args.camera_detections_json)
+            if not isinstance(raw_cam, dict):
+                print("export-lanelet2: --camera-detections-json must be a JSON object.", file=sys.stderr)
+                return 1
+            cam_det_data = raw_cam
         if getattr(args, "per_lane", False):
             from roadgraph_builder.io.export.lanelet2 import export_lanelet2_per_lane
             export_lanelet2_per_lane(graph, args.output_osm, origin_lat=lat0, origin_lon=lon0)
@@ -1603,6 +1621,7 @@ def main(argv: list[str] | None = None) -> int:
                 origin_lon=lon0,
                 speed_limit_tagging=getattr(args, "speed_limit_tagging", "lanelet-attr"),
                 lane_markings=lm_data,
+                camera_detections=cam_det_data,
             )
         return 0
     if args.command == "validate-lanelet2-tags":
