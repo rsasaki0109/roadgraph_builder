@@ -6,7 +6,7 @@
 > このファイル → [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md)（Mermaid 6 枚 + CLI 対応表 +
 > モジュール索引）→ [`CHANGELOG.md`](../CHANGELOG.md) の順。
 
-*最終更新: 2026-04-21 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync が反映済み）。*
+*最終更新: 2026-04-21 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh が反映済み）。*
 
 ---
 
@@ -19,7 +19,7 @@
 - **state:** **v0.7.0 shipped (2026-04-20)**。`main` 最新は clean、CI green、
   `pytest` = 477 passed / 32 skipped / 4 deselected（opt-in marker 除外）。
 - **直前の session (2026-04-21) で landed:**
-  1. V1 accuracy 実測 — Tokyo Ginza MAE 0.903、Berlin Mitte MAE 1.220（lane-count vs OSM `lanes=`）
+  1. V1 accuracy 実測 — Paris 20e MAE 0.938、Tokyo Ginza MAE 0.903、Berlin Mitte MAE 1.220（lane-count vs OSM `lanes=`、canonical 20 m）
   2. `scripts/measure_lane_accuracy.py` が meter-frame graph を正しく扱う bug fix（`map_origin` 自動検出）
   3. 3D2 camera `_rgb_to_hsv` の divide-by-zero `RuntimeWarning` 撲滅
   4. 50×50 perf flake 対策（`@pytest.mark.slow` 分離 + budget 30s→60s、default run 56s→27s）
@@ -214,7 +214,8 @@
   **2026-04-21 fix:** graph が meter-frame (`metadata.map_origin` あり) の場合は OSM lon/lat を
   自動で同じ ENU frame に変換（以前は黙って meter と degree を混在比較していた）。
   `docs/accuracy_report.md`:
-  - Paris 20e arr.（shipped CSV 由来、242 edges、default source）
+  - **Paris 20e arr.** (bbox `2.3900,48.8450,2.4120,48.8620`) → 997-edge graph、
+    193/997 matched @ 20 m、**MAE = 0.938 lanes**（2026-04-21 snapshot）
   - **Tokyo Ginza** (bbox `139.7600,35.6680,139.7750,35.6750`) → 598-edge graph、
     113/598 matched @ 20 m、**MAE = 0.903 lanes**（2026-04-20 snapshot）
   - **Berlin Mitte** (bbox `13.3700,52.5100,13.4000,52.5250`) → 1640-edge graph、
@@ -330,16 +331,6 @@ Unreleased は `CHANGELOG.md` の `[Unreleased]` 参照。2026-04-21 session の
   4. measure with `scripts/profile_memory.py`
   5. regression を広げる / 縮める
 - **規模感:** 2-3 session 使う可能性あり。fresh session で設計 memo から start するのが安全。
-
-### 5c. Paris 20e bbox を Tokyo Ginza / Berlin Mitte と同じ 2026-04-20 snapshot に揃える
-
-- `docs/accuracy_report.md` の Paris 20e section は現状 shipped CSV 由来の 242-edge graph に対する
-  近似結果。フル 20e-arr bbox (`2.3900,48.8450,2.4120,48.8620`) を Overpass から re-fetch して
-  Tokyo / Berlin と同じ canonical run に揃える余地あり。
-- **やり方:** Tokyo Ginza と同じレシピ（`scripts/fetch_osm_highways.py` → `build-osm-graph` →
-  `infer-lane-count` → `measure_lane_accuracy.py --matching-tolerance-m 20`）を走らせ、
-  `docs/accuracy_report.md` の Paris section を実数で差し替え。
-- **規模感:** 30 min。V1 実測の残件として small。
 
 ---
 

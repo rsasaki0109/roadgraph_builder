@@ -11,8 +11,8 @@ errors, so this is a **relative baseline** — not a surveyed truth.
 3. Infer lane counts: `roadgraph_builder infer-lane-count graph.json graph_lc.json`
 4. Run `scripts/measure_lane_accuracy.py --graph graph_lc.json --osm-lanes-json raw.json --output result.json`
 
-Matching criterion: edge centroid within **5 m** of OSM way centroid +
-tangent alignment cosine ≥ 0.7.
+Default script matching criterion: edge centroid within **5 m** of OSM way
+centroid + tangent alignment cosine ≥ 0.7.
 
 When the graph JSON contains `metadata.map_origin` (written by
 `build-osm-graph` with an origin), `measure_lane_accuracy.py` automatically
@@ -20,7 +20,7 @@ converts OSM node lon/lat into the same local meter frame before comparing.
 Raw OSM coords are treated as degrees only when no `map_origin` is present
 (e.g. synthetic test fixtures).
 
-Tokyo Ginza and Berlin Mitte below are canonical runs at
+Paris 20e, Tokyo Ginza, and Berlin Mitte below are canonical runs at
 `--matching-tolerance-m 20`: tight tolerances (≤ 10 m) under-match because
 `build-osm-graph` splits every OSM way at every junction, so a single way
 becomes N graph edges whose centroids drift away from the way-level
@@ -42,7 +42,7 @@ python scripts/fetch_osm_highways.py \
 
 roadgraph_builder build-osm-graph /tmp/paris_20e_raw.json \
     /tmp/paris_20e_graph.json \
-    --origin-json examples/osm_public_trackpoints_origin.json
+    --origin-lat 48.8535 --origin-lon 2.4010
 
 roadgraph_builder infer-lane-count \
     /tmp/paris_20e_graph.json /tmp/paris_20e_lc.json
@@ -50,29 +50,32 @@ roadgraph_builder infer-lane-count \
 python scripts/measure_lane_accuracy.py \
     --graph /tmp/paris_20e_lc.json \
     --osm-lanes-json /tmp/paris_20e_raw.json \
-    --matching-tolerance-m 5.0 \
+    --matching-tolerance-m 20.0 \
     --output /tmp/paris_20e_accuracy.json
 ```
 
 ### Results
 
-> **Note:** Numbers below come from the Paris OSM public GPS trackpoints graph
-> (`examples/osm_public_trackpoints.csv`, 242-edge graph).  Full 20e-arr bbox
-> fetch requires a live Overpass connection; run the recipe above to regenerate.
+Measured 2026-04-21 against Overpass snapshot for bbox
+`2.3900,48.8450,2.4120,48.8620` (794 ways, 3471 nodes; 245 ways carry
+`lanes=`). `build-osm-graph` produced a 795-node / 997-edge graph;
+`infer-lane-count` used the `default` source (no LiDAR markings, no
+`trace_stats`) so all 997 edges predict `lane_count = 1`.
 
-`infer-lane-count` uses the `default` source (no lane markings, no trace_stats
-perpendicular offsets in the public GPS trace), so all edges default to
-`lane_count = 1`.  OSM `lanes=` ranges from 1 to 4 on this bbox.
+At `--matching-tolerance-m 20`: **193 / 997 edges matched** (804
+unmatched), **MAE = 0.938 lanes**.
 
-| Actual (OSM) | Predicted 1 | Predicted 2 | Predicted 3+ |
-| ------------ | ----------- | ----------- | ------------ |
-| 1            | ✓           | —           | —            |
-| 2            | (FN)        | —           | —            |
-| 3            | (FN)        | —           | —            |
-| 4+           | (FN)        | —           | —            |
+| Actual (OSM) | Predicted 1 | Predicted 2+ |
+| ------------ | ----------- | ------------ |
+| 1            | 56          | —            |
+| 2            | 105         | —            |
+| 3            | 20          | —            |
+| 4            | 12          | —            |
 
-MAE with `default` source (no markings): **varies by bbox density**.
-With lane markings from LiDAR (`--lane-markings-json`): significantly lower.
+Tightening to 5 m matches 110 edges (MAE 1.136); 10 m matches 148 edges
+(MAE 1.020). Loosening to 50 m matches 318/997 edges (MAE 0.890).
+As in Tokyo and Berlin, this is the always-predict-1 baseline; lane
+markings or trajectory fan-out are needed for a real lane-count signal.
 
 ---
 

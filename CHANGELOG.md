@@ -17,6 +17,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   The completion smoke test now derives the expected subcommands from the
   argparse parser so future CLI additions cannot silently drift.
 
+- **V1 follow-up: Paris 20e now uses the same canonical 20 m accuracy run.**
+  `docs/accuracy_report.md` replaces the placeholder shipped-CSV note with a
+  live Overpass measurement for bbox `2.3900,48.8450,2.4120,48.8620`:
+  794 ways / 3471 nodes, 245 ways with `lanes=`, 997-edge graph,
+  193/997 matched at 20 m, **MAE = 0.938 lanes**.
+
 - **V1 follow-up: real-data α accuracy numbers for Tokyo Ginza + Berlin Mitte.**
   `docs/accuracy_report.md` replaces the `[not yet measured]` rows with
   Overpass-fetched numbers captured 2026-04-20: Tokyo Ginza (`139.7600,
