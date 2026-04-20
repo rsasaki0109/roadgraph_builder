@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **README / GitHub Pages now show a polished Paris route visualization.**
+  `docs/images/paris_grid_route.svg` is generated from the committed Paris
+  OSM-highway GeoJSON, TR-aware route overlay, and turn-restriction JSON.
+  README embeds the preview and links to the interactive Pages map; the Pages
+  diagram viewer adds a compact result card below the live SVG viewer.
+
 - **Bundle tuning now includes a Berlin Mitte public-GPS sweep.**
   `docs/bundle_tuning.md` adds a third real-data OSM public trackpoints
   sample (`13.3700,52.5100,13.4000,52.5250`, 7500 points) with the same

@@ -6,7 +6,7 @@
 > このファイル → [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md)（Mermaid 6 枚 + CLI 対応表 +
 > モジュール索引）→ [`CHANGELOG.md`](../CHANGELOG.md) の順。
 
-*最終更新: 2026-04-21 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep が反映済み）。*
+*最終更新: 2026-04-21 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+Pages visual preview が反映済み）。*
 
 ---
 
@@ -26,6 +26,7 @@
   5. PLAN / ARCHITECTURE / README を v0.6+v0.7 CLI 群に同期
   6. Bash / zsh completions を v0.6+v0.7 CLI 群に同期（parser-derived drift test 付き）
   7. 実走 CSV tuning — Berlin Mitte OSM public GPS sweep 追加、`40/8` 推奨を 3 都市で確認
+  8. README / GitHub Pages に Paris grid route の静的 visualization preview を追加
 - **未着手 (次の AI が触る候補):** ↓ §5 "Open tasks" 参照。
 
 - **コミュニケーション言語:** **日本語** 優先。ユーザーは短い JP/romaji プロンプトを好み
@@ -257,6 +258,10 @@
 
 - `docs/map.html` (Leaflet + OSM タイル): `paris_grid` (default) / `paris` / `osm` / `toy` の
   4 データセット切替。
+- `docs/images/paris_grid_route.svg`: README / Pages 用の静的 preview。`map_paris_grid.geojson` +
+  `route_paris_grid.geojson` + `paris_grid_turn_restrictions.json` から
+  `scripts/refresh_docs_assets.py` で再生成。OSM attribution を SVG 内と `docs/assets/ATTRIBUTION.md`
+  に保持。
 - **click-to-route UI:** ノード 2 つをクリックすると JS 側 directed-state binary-heap Dijkstra
   が `(node, incoming_edge, direction)` 状態で `no_*` / `only_*` 制限を honor。"Clear route"
   button + status 行。各 centerline feature は `start_node_id` / `end_node_id` / `length_m` 保持。

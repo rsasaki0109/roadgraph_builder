@@ -173,3 +173,12 @@ def test_shipped_paris_grid_turn_restrictions_carries_attribution():
     assert data.get("attribution"), "paris_grid_turn_restrictions.json: missing attribution"
     assert data.get("license"), "paris_grid_turn_restrictions.json: missing license"
     validate_turn_restrictions_document(data)
+
+
+def test_shipped_paris_grid_preview_credits_osm():
+    path = ROOT / "docs" / "images" / "paris_grid_route.svg"
+    if not path.is_file():
+        return
+    text = path.read_text(encoding="utf-8")
+    assert "OpenStreetMap contributors" in text
+    assert "ODbL-1.0" in text

@@ -14,6 +14,7 @@ from — and credits OpenStreetMap contributors.
 | `map_paris_grid.geojson` | Same Paris bbox, but built from OSM highway ways (Overpass `way["highway"~"^(motorway\|...\|service)$"]`) via `roadgraph_builder build-osm-graph`. 855 nodes / 1081 edges — the trajectory-agnostic topology used to map OSM turn restrictions onto real graph junctions. Written as compact (no-indent) JSON to keep the payload small. | **© OpenStreetMap contributors, ODbL 1.0** |
 | `paris_grid_turn_restrictions.json` | 10 of 11 OSM `type=restriction` relations in the Paris bbox, mapped onto `map_paris_grid.geojson` via `roadgraph_builder convert-osm-restrictions`. One way-classified cycleway drop means one relation (`9635734`) didn't map. Schema: `roadgraph_builder/schemas/turn_restrictions.schema.json`. Drawn as red dots in the viewer with from/to-edge popups. | **© OpenStreetMap contributors, ODbL 1.0** |
 | `route_paris_grid.geojson` | Shortest path `n312 → n191` through `map_paris_grid.geojson` **honouring** `paris_grid_turn_restrictions.json`: 11 edges / 909 m. Without the restrictions the same pair routes in 13 edges / 878 m — so the restriction forces a 31 m detour, which is what the viewer's yellow overlay shows by default on this dataset. | **© OpenStreetMap contributors, ODbL 1.0** |
+| `../images/paris_grid_route.svg` | Static README / Pages preview rendered from `map_paris_grid.geojson`, `route_paris_grid.geojson`, and `paris_grid_turn_restrictions.json` by `scripts/refresh_docs_assets.py`. | **© OpenStreetMap contributors, ODbL 1.0** |
 
 To refetch / regenerate:
 

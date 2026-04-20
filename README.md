@@ -27,6 +27,14 @@ Use the short description and topics listed in [`.github/ABOUT.md`](.github/ABOU
 | **Demo** | [Diagram viewer](https://rsasaki0109.github.io/roadgraph_builder/) · **[Map (OSM tiles)](https://rsasaki0109.github.io/roadgraph_builder/map.html)** (TR-aware click-to-route), static previews in [docs/images](docs/images/). |
 | **Samples** | [Toy CSV](examples/sample_trajectory.csv), [OSM GPS](examples/osm_public_trackpoints.csv) (ODbL), [camera calibration + pixel detections](examples/demo_camera_calibration.json), [Paris OSM-grid + turn_restrictions](docs/assets/map_paris_grid.geojson) (ODbL). |
 
+### Visualization results
+
+The GitHub Pages map ships a Paris OSM-highway graph with 10 mapped turn restrictions and a restriction-aware route overlay. This static preview is regenerated from the committed GeoJSON assets by `scripts/refresh_docs_assets.py`.
+
+[![Paris OSM-highway grid with a TR-aware route](docs/images/paris_grid_route.svg)](https://rsasaki0109.github.io/roadgraph_builder/map.html)
+
+Open the interactive version: **[Map (OSM tiles)](https://rsasaki0109.github.io/roadgraph_builder/map.html)**.
+
 ### Quick start
 
 ```bash

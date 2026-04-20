@@ -153,9 +153,65 @@ button:hover {
   border-radius: 50%;
 }
 
+.results {
+  padding: 18px 16px;
+  background: #111827;
+  border-top: 1px solid #334155;
+}
+
+.result-card {
+  display: grid;
+  grid-template-columns: minmax(240px, 520px) minmax(220px, 1fr);
+  gap: 18px;
+  align-items: center;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 12px;
+  color: var(--text);
+  text-decoration: none;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 8px;
+}
+
+.result-card:hover {
+  border-color: #38bdf8;
+}
+
+.result-card img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid #475569;
+  border-radius: 6px;
+  background: #f8fafc;
+}
+
+.result-copy {
+  display: grid;
+  gap: 8px;
+}
+
+.result-copy strong {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.result-copy span {
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
 .footer {
   padding: 0.6rem 1rem;
   font-size: 0.75rem;
   color: var(--muted);
   border-top: 1px solid #334155;
+}
+
+@media (max-width: 720px) {
+  .result-card {
+    grid-template-columns: 1fr;
+  }
 }
