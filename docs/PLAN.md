@@ -29,6 +29,36 @@
   8. README / GitHub Pages に Paris grid route の静的 visualization preview を追加
 - **未着手 (次の AI が触る候補):** ↓ §5 "Open tasks" 参照。
 
+- **Cursor handoff / 現在地 (2026-04-21 05:40 JST 時点):**
+  - branch は `main`。直近の作業は direct-to-main の小 commit で区切り済み。
+  - この PLAN handoff 更新の直前の最新実作業 commit は
+    `a72a4fb Add README and Pages visualization preview`。
+    PLAN 更新 commit が作られていれば、それがさらに上に乗っているはず。
+  - その直前に `3f35a5b Add Berlin Mitte bundle tuning sweep`、
+    `b36ad93 Refresh Paris 20e lane accuracy numbers`、
+    `962f6ab Sync CLI completions with v0.7 commands` が入っている。
+  - **まだ push していない**。`git push` は user が `push!` などで明示するまで実行しない。
+  - 作業ツリーは PLAN 更新前には clean だった。この PLAN 更新後は docs-only 差分になるはず。
+  - 最後に通した検証:
+    - full default `python3 -m pytest` → **476 passed / 32 skipped / 4 deselected**
+      （補完同期後。visual preview で attribution test が 1 本増えたので、現在の full count は
+      §10 baseline の 477 見込み）
+    - `python3 -m pytest tests/test_attribution.py tests/test_viewer_js_dijkstra.py` → **10 passed**
+    - `python3 -m pytest tests/test_bundle_export.py tests/test_validate_manifest.py` → **5 passed**
+    - `python3 -m pytest tests/test_accuracy_measure_synthetic.py` → **11 passed**
+    - `bash -n scripts/completions/roadgraph_builder.bash`
+    - `python3 -m py_compile scripts/refresh_docs_assets.py`
+    - `git diff --check`
+  - 直近で作った /tmp 派生物（commit 対象外）:
+    - `/tmp/paris_20e_raw.json`, `/tmp/paris_20e_graph.json`, `/tmp/paris_20e_lc.json`,
+      `/tmp/paris_20e_accuracy_20.json`
+    - `/tmp/osm_tune_berlin/berlin_mitte_trackpoints.csv`,
+      `/tmp/osm_tune_berlin/berlin_mitte_sweep.json`,
+      `/tmp/osm_tune_berlin/bundle_40_8/`
+    - `/tmp/paris_grid_route_preview.png`, `/tmp/roadgraph_pages_result.png`
+  - 次にやるなら **§5a V3 float32 trajectory optimization design memo**。実装ではなく、
+    先に `docs/handoff/` に設計メモを書いて user review を取るのが安全。
+
 - **コミュニケーション言語:** **日本語** 優先。ユーザーは短い JP/romaji プロンプトを好み
   （例: `osusumede` = 「おすすめで」= 委任）、ranked options + top pick の返しを期待。
 - **ユーザーは絶対マスター:** destructive / shared-state action は必ず明示 authorize を待つ。
@@ -262,6 +292,9 @@
   `route_paris_grid.geojson` + `paris_grid_turn_restrictions.json` から
   `scripts/refresh_docs_assets.py` で再生成。OSM attribution を SVG 内と `docs/assets/ATTRIBUTION.md`
   に保持。
+- `docs/index.html` は従来の SVG diagram viewer の下に `paris_grid_route.svg` の result card を表示。
+  README も同じ SVG を `Visualization results` として embed し、`docs/map.html` へリンクする。
+  Playwright で `http://127.0.0.1:18765/` を開き、card と画像ロードを確認済み。
 - **click-to-route UI:** ノード 2 つをクリックすると JS 側 directed-state binary-heap Dijkstra
   が `(node, incoming_edge, direction)` 状態で `no_*` / `only_*` 制限を honor。"Clear route"
   button + status 行。各 centerline feature は `start_node_id` / `end_node_id` / `length_m` 保持。
@@ -299,7 +332,8 @@
 - **v0.2.0 / v0.1.0:** 初期。
 
 Unreleased は `CHANGELOG.md` の `[Unreleased]` 参照。2026-04-21 session の accuracy 実測、
-warning fix、perf flake fix、docs sync、completions sync、Berlin tuning sweep は `[Unreleased]` 下。
+warning fix、perf flake fix、docs sync、completions sync、Berlin tuning sweep、
+README+Pages visualization preview は `[Unreleased]` 下。
 
 ---
 
@@ -448,7 +482,7 @@ python3 scripts/measure_lane_accuracy.py --graph /tmp/paris_lc.json \
 | CLI | `roadgraph_builder/cli/main.py`, `cli/doctor.py`, `cli/dataset.py` |
 | Schemas | `roadgraph_builder/schemas/*.schema.json` |
 | Validators | `roadgraph_builder/validation/*.py` |
-| Viewer | `docs/map.html`, `docs/assets/` |
+| Viewer | `docs/index.html`, `docs/map.html`, `docs/assets/`, `docs/images/` |
 | CI / Release / PyPI | `.github/workflows/*.yml` |
 | Scripts (fetch, tune, demo, benchmark, profile, accuracy) | `scripts/` |
 
@@ -491,7 +525,8 @@ feedback / project / reference の 4 種、`MEMORY.md` は index）。
 2. `CHANGELOG.md` の `[Unreleased]` — 直前に何が landed した / していないか。
 3. `docs/PLAN.md`（このファイル）§5 — open tasks。
 4. `docs/ARCHITECTURE.md` — 全体図（Mermaid 6 枚）。
-5. Memory `MEMORY.md` — user preference / past decisions。
+5. Cursor など Claude memory が読めない環境では、§0 の "Cursor handoff / 現在地" を先に読む。
+6. Memory `MEMORY.md` — user preference / past decisions（Claude Code 環境で読める場合）。
 
 ---
 
@@ -511,8 +546,8 @@ feedback / project / reference の 4 種、`MEMORY.md` は index）。
 
 ## 11. 一行で言うと
 
-> **v0.7.0 は全部シップ済み、コードは clean、次は「実走 CSV tuning の scope 定義」か
-> 「V3 float32 の design memo」から入るのがおすすめ。何を削って何を広げたかは
+> **v0.7.0 は全部シップ済み、直近 workstream（accuracy / completions / tuning / visual preview）も
+> commit 済み。次は「V3 float32 の design memo」から入るのがおすすめ。何を削って何を広げたかは
 > `CHANGELOG.md` と §3 の小節を見れば全部わかる。push / tag / AI マーカー / PyPI /
 > Mapillary は全部 user authorize か No 決定済みなので、勝手に提案しないこと。**
 
