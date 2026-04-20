@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] — 2026-04-20
+
 ### Added
 
 - **V2: City-scale OSM regression tests** — `tests/test_city_scale.py` (3 parametrised tests: Paris 20e arr., Tokyo Setagaya, Berlin Neukölln) fetches OSM highways via Overpass, builds a graph, exports a bundle to `/tmp/`, and asserts edge_count ≥ threshold + zero degenerate self-loops. Tests are tagged `@pytest.mark.city_scale`; `pyproject.toml` registers the marker and adds `addopts = "-m 'not city_scale'"` so plain `pytest` / `make test` skips them (3 deselected). Run with `pytest -m city_scale`. `.github/workflows/city-bench.yml` is a manual `workflow_dispatch` workflow (no `on: push` / `on: schedule`); stores bundle artefacts + console output as GitHub Actions artefacts.
