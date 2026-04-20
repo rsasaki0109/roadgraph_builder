@@ -187,9 +187,15 @@ thin argparse dispatcher in `roadgraph_builder/cli/main.py`.
 | `convert-osm-restrictions` | road_graph + Overpass JSON (restriction relations) | `turn_restrictions.json` (schema-valid) | `io.osm.turn_restrictions.convert_osm_restrictions_to_graph` |
 | `project-camera` | camera calibration + image detections + road_graph | `camera_detections.json` (edge-keyed) | `io.camera.pipeline.project_image_detections_to_graph_edges` |
 | `detect-lane-markings` | road_graph + LAS/LAZ points (with intensity) | `lane_markings.json` (per-edge left/right/center candidates) | `io.lidar.lane_marking.detect_lane_markings` |
+| `detect-lane-markings-camera` (0.7) | camera calibration + image RGB + road_graph + vehicle pose | lane-candidate JSON (image-space → world → nearest edge) | `io.camera.lane_detection.detect_lanes_from_image_rgb` + `project_camera_lanes_to_graph_edges` |
 | `validate-lane-markings` | a `lane_markings.json` | — (exit 0 / 1) | `validation.validate_lane_markings_document` |
 | `guidance` | route GeoJSON + sd_nav JSON | `guidance.json` (turn-by-turn step list) | `navigation.guidance.build_guidance` |
 | `validate-guidance` | a `guidance.json` | — (exit 0 / 1) | `validation.validate_guidance_document` |
+| `infer-lane-count` (0.6) | road_graph (+ optional `lane_markings.json`) | road_graph JSON with `attributes.hd.lane_count` + `hd.lanes[]` | `hd.lane_inference.infer_lane_count` |
+| `validate-lanelet2-tags` (0.6) | OSM XML (from `export-lanelet2`) | — (exit 1 on missing required tags; warnings for missing speed_limit) | `io.export.lanelet2_tags_validator` |
+| `validate-lanelet2` (0.7) | OSM XML + `lanelet2_validation` on PATH | structured JSON `{status, errors, warnings, ...}` | `io.export.lanelet2_validator_bridge` |
+| `update-graph` (0.7) | existing road_graph + new trajectory CSV | merged road_graph JSON (absorb or append) | `pipeline.incremental.update_graph_from_trajectory` |
+| `process-dataset` (0.7) | input dir of CSVs + origin | `dataset_manifest.json` + per-file export bundles | `cli.dataset.process_dataset` |
 
 ## `export-bundle` internals
 
@@ -318,24 +324,31 @@ flowchart TD
 | `roadgraph_builder/hd/pipeline.py`, `boundaries.py` | SD→HD envelope, centerline-offset lane boundaries; accepts optional `refinements=` list |
 | `roadgraph_builder/hd/lidar_fusion.py` | Per-edge proximity + binned median boundaries from XY point sets |
 | `roadgraph_builder/hd/refinement.py` | `refine_hd_edges` — multi-source per-edge half-width + confidence from lane_markings / trace_stats / camera observations |
+| `roadgraph_builder/hd/lane_inference.py` (0.6) | `infer_lane_count` — paint-marker 1-D agglomerative clustering (fallback to `trace_stats.perpendicular_offsets`) → `attributes.hd.lane_count` + `hd.lanes[]` |
+| `roadgraph_builder/pipeline/incremental.py` (0.7) | `update_graph_from_trajectory` — merges a new trajectory into an existing graph; absorbs polylines within `absorb_tolerance_m` of an existing edge, else runs a restricted X/T split + endpoint union-find |
+| `roadgraph_builder/cli/dataset.py` (0.7) | `process_dataset` — batch `export_map_bundle` over a directory of CSVs; `--parallel N` via `ProcessPoolExecutor`; `dataset_manifest.json` aggregates per-file status |
 | `roadgraph_builder/io/trajectory/loader.py` | Trajectory CSV reader (`timestamp,x,y`) |
 | `roadgraph_builder/io/camera/detections.py` | Load + apply precomputed edge-keyed camera detections (`semantic_rules` on edges) |
 | `roadgraph_builder/io/camera/calibration.py` | `CameraIntrinsic` (+ optional Brown-Conrady distortion, `undistort_pixel_to_normalized`), `RigidTransform`, `CameraCalibration` (+ JSON loader) |
 | `roadgraph_builder/io/camera/projection.py` | `pixel_to_ground` (pinhole ray → world ground plane), `project_image_detections` (apply to an image_detections document) |
 | `roadgraph_builder/io/camera/pipeline.py` | `project_image_detections_to_graph_edges` — image-space pixels → world XY → nearest graph edge → edge-keyed observations |
+| `roadgraph_builder/io/camera/lane_detection.py` (0.7) | Pure-NumPy HSV + 4-connected component labeling for white/yellow lane markings from RGB images; `project_camera_lanes_to_graph_edges` back-projects pixel centroids through `pixel_to_ground` and snaps to graph edges |
 | `roadgraph_builder/io/osm/graph_builder.py` | `build_graph_from_overpass_highways` — OSM highway ways → polylines → graph (every OSM junction becomes a graph node) |
 | `roadgraph_builder/io/osm/turn_restrictions.py` | `convert_osm_restrictions_to_graph` — OSM `type=restriction` relations snapped onto graph edges by via-node + tangent alignment |
 | `roadgraph_builder/io/lidar/points.py` | XY CSV loader |
 | `roadgraph_builder/io/lidar/las.py` | LAS 1.0–1.4 public-header reader + X/Y numpy loader; LAZ dispatch via `laspy` when the `[laz]` extra is installed |
 | `roadgraph_builder/io/lidar/lane_marking.py` | `detect_lane_markings` — per-edge intensity-peak extraction that recovers left/right/center lane marking polylines from LAS/LAZ point clouds |
+| `roadgraph_builder/hd/lidar_fusion.py` (0.7 update) | `fit_ground_plane_ransac` — RANSAC dominant plane from (N,3) points; `fuse_lane_boundaries_3d` filters by `height_band_m` above the ground plane before the 2D binned-median fuse |
 | `roadgraph_builder/io/export/geojson.py` | WGS84 `FeatureCollection` writer (trajectory, centerlines with `start_node_id`/`end_node_id`/`length_m`, HD boundaries, nodes); optional `attribution` / `license` / `license_url` fields for derivative datasets |
 | `roadgraph_builder/io/export/json_exporter.py`, `json_loader.py` | Round-trip road graph JSON |
-| `roadgraph_builder/io/export/lanelet2.py` | OSM XML 0.6 exporter with `roadgraph:*` tags and optional lanelet relations |
+| `roadgraph_builder/io/export/lanelet2.py` | OSM XML 0.6 exporter with `roadgraph:*` tags and optional lanelet relations; 0.6 adds `--speed-limit-tagging regulatory-element` + `--lane-markings-json` paint-based boundary `subtype`; 0.7 adds `export_lanelet2_per_lane` (1 lanelet per lane with `lane_change` relations) and `--camera-detections-json` for `traffic_light` / `stop_line` regulatory_elements. v0.7 V3 replaced the `minidom → toprettyxml` DOM round-trip with a direct `_et_to_pretty_bytes` writer (−10% peak RSS, byte-identical output) |
+| `roadgraph_builder/io/export/lanelet2_tags_validator.py` (0.6) | Parses an OSM file and flags missing required `subtype` / `location` tags on lanelets (error) and missing `speed_limit` (warning) |
+| `roadgraph_builder/io/export/lanelet2_validator_bridge.py` (0.7) | Wraps Autoware's `lanelet2_validation` CLI via subprocess; exit 0 on tool-absent (emits `{"status":"skipped"}`) |
 | `roadgraph_builder/io/export/bundle.py` | `export_map_bundle` — the three-way export + manifest |
 | `roadgraph_builder/navigation/sd_maneuvers.py` | Geometry-only `allowed_maneuvers(_reverse)` at each digitized end node |
 | `roadgraph_builder/navigation/turn_restrictions.py` | Loader + camera extraction + merge for `sd_nav.turn_restrictions` |
 | `roadgraph_builder/navigation/guidance.py` | `build_guidance` — turn-by-turn GuidanceStep list from route GeoJSON + sd_nav (depart / arrive / slight / left / right / sharp / u_turn / continue categories) |
-| `roadgraph_builder/routing/shortest_path.py` | Directed-state Dijkstra that honours `no_*` / `only_*` restrictions |
+| `roadgraph_builder/routing/shortest_path.py` | Directed-state Dijkstra that honours `no_*` / `only_*` restrictions; 0.6 adds `prefer_observed` / `min_confidence` cost hooks; 0.7 extends the state to `(node, incoming_edge, direction, lane_index)` for `allow_lane_change=True` with `lane_change_cost_m` swap penalty |
 | `roadgraph_builder/routing/nearest.py` | `nearest_node` (xy or lat/lon) |
 | `roadgraph_builder/routing/geojson_export.py` | Route → GeoJSON FeatureCollection |
 | `roadgraph_builder/schemas/*.schema.json` | JSON Schemas shipped as package resources |

@@ -16,14 +16,14 @@ Use the short description and topics listed in [`.github/ABOUT.md`](.github/ABOU
 
 | Area | What works today |
 | --- | --- |
-| **Input** | Trajectory CSV (`timestamp`, `x`, `y`) · OSM highway ways (Overpass JSON) · LAS 1.0-1.4 / LAZ point clouds · image-space pixel detections + camera calibration |
-| **Pipeline** | Gap-based segmentation → arc-length Gaussian centerline → X/T-split + union-find → duplicate / near-parallel merge → junction consolidation → post-simplify. Separate OSM-highway path via `build-osm-graph` for topology-honest grids. |
-| **Routing** | Directed-state Dijkstra honouring `no_*` / `only_*` turn restrictions. OSM `type=restriction` relations map onto graph edges via `convert-osm-restrictions`. Turn-by-turn guidance via **`guidance`**. |
-| **Perception** | Pixel detections + pinhole calibration (OpenCV 5-coef Brown-Conrady distortion) → world ground plane → nearest edge via `project-camera`. Edge-keyed camera observations merge into `attributes.hd.semantic_rules` via `apply-camera`, and feed HD-lite refinement via `enrich --camera-detections-json`. |
-| **LiDAR** | `fuse-lidar` accepts CSV / LAS / LAZ and fits per-edge binned median lane boundaries. `inspect-lidar` reports LAS public-header metadata. **`detect-lane-markings`** extracts painted-line candidates from intensity peaks. |
-| **HD-lite** | `enrich --lane-width-m` for envelope + offset boundaries. `enrich --lane-markings-json` / `--camera-detections-json` fuses LiDAR markings + `trace_stats` + camera observations into per-edge half-width + confidence (`metadata.hd_refinement`). |
+| **Input** | Trajectory CSV (`timestamp`, `x`, `y`, optional `z`) · OSM highway ways (Overpass JSON) · LAS 1.0-1.4 / LAZ point clouds (2D or 3D XYZ) · image-space pixel detections + camera calibration · raw RGB images for lane-marking detection |
+| **Pipeline** | Gap-based segmentation → arc-length Gaussian centerline → X/T-split + union-find → duplicate / near-parallel merge → junction consolidation → post-simplify. X/T-split uses an O(N log N) grid hash (v0.7). Separate OSM-highway path via `build-osm-graph` for topology-honest grids. 3D elevation propagates through edges (`polyline_z`, `slope_deg`) when `build --3d` reads a `z` column. Incremental `update-graph` merges new trajectories without a full rebuild. `process-dataset` runs the full bundle over a directory of CSVs in parallel. |
+| **Routing** | Directed-state Dijkstra honouring `no_*` / `only_*` turn restrictions. OSM `type=restriction` relations map onto graph edges via `convert-osm-restrictions`. Uncertainty-aware via `route --prefer-observed` / `--min-confidence` (v0.6). Slope-aware via `route --uphill-penalty` / `--downhill-bonus` (v0.7). Lane-level via `route --allow-lane-change` with a per-swap `--lane-change-cost-m` (v0.7). Turn-by-turn guidance via **`guidance`**. |
+| **Perception** | Pixel detections + pinhole calibration (OpenCV 5-coef Brown-Conrady distortion) → world ground plane → nearest edge via `project-camera`. Edge-keyed camera observations merge into `attributes.hd.semantic_rules` via `apply-camera`, and feed HD-lite refinement via `enrich --camera-detections-json`. **`detect-lane-markings-camera`** (v0.7) detects white/yellow lane markings from raw RGB with pure-NumPy HSV + connected components (no cv2/scipy) and back-projects to graph edges. |
+| **LiDAR** | `fuse-lidar` accepts CSV / LAS / LAZ and fits per-edge binned median lane boundaries. `--ground-plane` (v0.7) fits a RANSAC ground plane first and keeps only points within `height_band_m` (default 0–0.3 m) before fusing, so vegetation and overhead structures drop out. `inspect-lidar` reports LAS public-header metadata. **`detect-lane-markings`** extracts painted-line candidates from intensity peaks. |
+| **HD / Lanelet2** | `enrich --lane-width-m` for envelope + offset boundaries; `--lane-markings-json` / `--camera-detections-json` fuse sources into `metadata.hd_refinement`. **`infer-lane-count`** (v0.6) clusters paint-marker offsets into `attributes.hd.lane_count` + `hd.lanes[]` (fallback to `trace_stats.perpendicular_offsets`). `export-lanelet2` emits `roadgraph:*` ways + `lanelet` relations; `--per-lane` expands each multi-lane edge into one lanelet per lane with `lane_change` relations (v0.6); `--camera-detections-json` wires `traffic_light` / `stop_line` regulatory_elements (v0.7). **`validate-lanelet2-tags`** (v0.6) flags missing required Lanelet2 tags; **`validate-lanelet2`** (v0.7) bridges Autoware's `lanelet2_validation` CLI when on PATH. |
 | **Output** | JSON (+ schema), GeoJSON, OSM XML 0.6 (Lanelet2-compatible), SVG. **`export-bundle`** writes nav / sim / lanelet / manifest in one directory. |
-| **Benchmarks** | `make bench` runs a deterministic wall-clock suite (build / shortest path / export-bundle); `--baseline` compares against recorded numbers with a 3× regression gate. Baseline in [`docs/benchmarks.md`](docs/benchmarks.md). |
+| **Benchmarks** | `make bench` runs a deterministic wall-clock suite (build / shortest path / export-bundle); `--baseline` compares against recorded numbers with a 3× regression gate. Baseline in [`docs/benchmarks.md`](docs/benchmarks.md). Memory profile for v0.7 under [`docs/memory_profile_v0.7.md`](docs/memory_profile_v0.7.md) (Paris peak RSS 61→55 MB after the `export_lanelet2` DOM rewrite). Lane-count accuracy against OSM `lanes=` in [`docs/accuracy_report.md`](docs/accuracy_report.md). |
 | **Demo** | [Diagram viewer](https://rsasaki0109.github.io/roadgraph_builder/) · **[Map (OSM tiles)](https://rsasaki0109.github.io/roadgraph_builder/map.html)** (TR-aware click-to-route), static previews in [docs/images](docs/images/). |
 | **Samples** | [Toy CSV](examples/sample_trajectory.csv), [OSM GPS](examples/osm_public_trackpoints.csv) (ODbL), [camera calibration + pixel detections](examples/demo_camera_calibration.json), [Paris OSM-grid + turn_restrictions](docs/assets/map_paris_grid.geojson) (ODbL). |
 
@@ -38,6 +38,30 @@ python3 -m venv .venv && .venv/bin/pip install -e .
 ```
 
 From the repo root, **`make doctor`**, **`make demo`**, **`make tune`** (bundle + validate for parameter exploration), and **`make test`** are shortcuts (see `Makefile`). Tuning workflow: [docs/bundle_tuning.md](docs/bundle_tuning.md).
+
+### New in 0.6 / 0.7
+
+Short pointer — see [`CHANGELOG.md`](CHANGELOG.md) and [`docs/PLAN.md`](docs/PLAN.md) for the full story.
+
+```bash
+# v0.6 — per-edge lane count + per-lane Lanelet2 + uncertainty-aware routing
+roadgraph_builder infer-lane-count graph.json graph_lc.json --lane-markings-json lm.json
+roadgraph_builder export-lanelet2 graph_lc.json map.osm --per-lane --lane-markings-json lm.json
+roadgraph_builder validate-lanelet2-tags map.osm
+roadgraph_builder route graph.json n0 n9 --prefer-observed --min-confidence 0.3
+
+# v0.7 — 3D elevation + slope routing, camera lane detection, ground-plane LiDAR,
+# lane-change routing, Autoware validator bridge, incremental / batch build
+roadgraph_builder build trip.csv graph.json --3d
+roadgraph_builder route graph.json n0 n9 --uphill-penalty 1.5 --downhill-bonus 0.9
+roadgraph_builder detect-lane-markings-camera \
+    graph.json calib.json ./images_dir/ poses.json --output lane_cands.json
+roadgraph_builder fuse-lidar graph.json cloud.las fused.json --ground-plane
+roadgraph_builder route graph.json n0 n9 --allow-lane-change --lane-change-cost-m 50
+roadgraph_builder validate-lanelet2 map.osm              # uses Autoware's lanelet2_validation when on PATH
+roadgraph_builder update-graph base.json new_trip.csv --output merged.json
+roadgraph_builder process-dataset ./csvs/ ./bundles/ --origin-json origin.json --parallel 4
+```
 
 ### Multiple passes over the same area (`--extra-csv`)
 
@@ -525,9 +549,13 @@ public URL — this is for local reference only.
 ## Shell completion
 
 Hand-written bash and zsh completion scripts live under
-[`scripts/completions/`](scripts/completions/). They complete the 25
+[`scripts/completions/`](scripts/completions/). They complete the
 subcommands and the common `--turn-restrictions-json` / `--output` /
-`--origin-*` / `--lidar-points` style path arguments.
+`--origin-*` / `--lidar-points` style path arguments. Some v0.6 / v0.7
+additions (`infer-lane-count`, `validate-lanelet2`,
+`validate-lanelet2-tags`, `update-graph`, `process-dataset`,
+`detect-lane-markings-camera`) may not yet be in the completion lists —
+fall back to `--help` for those.
 
 ```bash
 # Bash (per-user)
