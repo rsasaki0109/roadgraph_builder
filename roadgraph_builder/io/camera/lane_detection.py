@@ -96,8 +96,11 @@ def _rgb_to_hsv(rgb: np.ndarray) -> np.ndarray:
     # Value
     v = cmax
 
-    # Saturation
-    s = np.where(cmax > 0, delta / cmax, 0.0).astype(np.float32)
+    # Saturation: avoid 0/0 at black pixels — np.where still evaluates the
+    # divide in both branches, so warn-suppress by computing in-place only
+    # where cmax > 0.
+    s = np.zeros_like(cmax, dtype=np.float32)
+    np.divide(delta, cmax, out=s, where=cmax > 0)
 
     # Hue
     h = np.zeros_like(r)

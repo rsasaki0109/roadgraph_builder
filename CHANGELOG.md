@@ -29,6 +29,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   haversine path. New unit test:
   `test_map_origin_converts_osm_to_meter_frame`.
 
+- **3D2: silence `RuntimeWarning: invalid value encountered in divide` from
+  `_rgb_to_hsv`.**  Line `delta / cmax` at `lane_detection.py:100` warned on
+  pure-black pixels (0/0) because `np.where` evaluates both branches before
+  selecting; rewritten to `np.divide(..., where=cmax > 0)` with a
+  zero-initialised out buffer.  Running the full suite under
+  `-W error::RuntimeWarning` now reports zero warnings (previously 6 tests
+  raised on this path).
+
 ## [0.7.0] — 2026-04-20
 
 ### Added
