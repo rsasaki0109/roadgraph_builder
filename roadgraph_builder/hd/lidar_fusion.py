@@ -1,4 +1,12 @@
-"""Fit ``attributes.hd.lane_boundaries`` from XY points near each edge centerline."""
+"""Fit ``attributes.hd.lane_boundaries`` from XY points near each edge centerline.
+
+3D3 additions: ``fit_ground_plane_ransac`` fits a plane to a point cloud using
+RANSAC, and ``fuse_lane_boundaries_3d`` filters the cloud to a height band
+above the fitted ground plane before running the standard 2D lane-boundary
+fusion.  The ``fuse-lidar --ground-plane`` CLI flag activates this path;
+omitting it falls back to the existing ``fuse_lane_boundaries_from_points``
+which is byte-identical to v0.6.0.
+"""
 
 from __future__ import annotations
 
@@ -166,6 +174,169 @@ def fuse_lane_boundaries_from_points(
         "max_dist_m": max_dist_m,
         "bins": bins,
         "edges_updated": n_edges_updated,
+    }
+    prev = graph.metadata.get("lidar")
+    if isinstance(prev, dict):
+        lidar_block = {**prev, **lidar_block}
+    graph.metadata = {**graph.metadata, "lidar": lidar_block}
+    return graph
+
+
+# ---------------------------------------------------------------------------
+# 3D3: ground-plane RANSAC + 3D-aware fuse
+# ---------------------------------------------------------------------------
+
+
+def fit_ground_plane_ransac(
+    points_xyz: np.ndarray,
+    *,
+    max_iter: int = 200,
+    distance_tolerance_m: float = 0.1,
+    seed: int = 0,
+) -> tuple[np.ndarray, float]:
+    """Fit a plane to a point cloud using RANSAC.
+
+    Samples 3 random points per iteration, fits the plane through them, counts
+    inliers (points within ``distance_tolerance_m`` of the plane), and keeps
+    the hypothesis with the most inliers.  Returns ``(normal_xyz, d)`` such
+    that ``normal · p + d ≈ 0`` for inlier points, with ``normal`` normalised.
+
+    Algorithm is seeded for reproducibility via ``seed``.  For ground-plane
+    extraction the normal is expected to point roughly upward (positive z).
+    The returned normal is flipped to ensure ``normal[2] ≥ 0`` so the caller
+    can rely on this convention.
+
+    Args:
+        points_xyz: (N, 3) float array of x, y, z coordinates.
+        max_iter: Number of RANSAC iterations.
+        distance_tolerance_m: Inlier threshold in metres.
+        seed: Random seed for reproducibility.
+
+    Returns:
+        (normal_xyz, d) — normalised plane normal and offset.
+
+    Raises:
+        ValueError: If the array is not (N, 3) with N ≥ 3.
+    """
+    if points_xyz.ndim != 2 or points_xyz.shape[1] != 3:
+        raise ValueError("points_xyz must be an (N, 3) array")
+    n = points_xyz.shape[0]
+    if n < 3:
+        raise ValueError("Need at least 3 points to fit a plane")
+
+    pts = np.asarray(points_xyz, dtype=np.float64)
+    rng = np.random.default_rng(seed)
+
+    best_normal = np.array([0.0, 0.0, 1.0])
+    best_d = 0.0
+    best_inliers = 0
+
+    for _ in range(max_iter):
+        # Sample 3 distinct points.
+        idx = rng.choice(n, 3, replace=False)
+        p0, p1, p2 = pts[idx[0]], pts[idx[1]], pts[idx[2]]
+        v1 = p1 - p0
+        v2 = p2 - p0
+        normal = np.cross(v1, v2)
+        norm_len = float(np.linalg.norm(normal))
+        if norm_len < 1e-12:
+            continue  # degenerate / collinear triple
+        normal = normal / norm_len
+        d = -float(normal @ p0)
+
+        # Count inliers.
+        dist = np.abs(pts @ normal + d)
+        n_inliers = int(np.sum(dist <= distance_tolerance_m))
+        if n_inliers > best_inliers:
+            best_inliers = n_inliers
+            best_normal = normal.copy()
+            best_d = d
+
+    # Ensure normal points upward (positive z component).
+    if best_normal[2] < 0:
+        best_normal = -best_normal
+        best_d = -best_d
+
+    return best_normal, best_d
+
+
+def fuse_lane_boundaries_3d(
+    graph: Graph,
+    points_xyz_i: np.ndarray,
+    *,
+    height_band_m: tuple[float, float] = (0.0, 0.3),
+    max_dist_m: float = 5.0,
+    bins: int = 32,
+    max_iter: int = 200,
+    distance_tolerance_m: float = 0.1,
+    seed: int = 0,
+) -> Graph:
+    """Ground-plane RANSAC filter followed by standard 2D lane-boundary fusion.
+
+    1. Fits a ground plane to ``points_xyz_i[:, :3]`` using RANSAC.
+    2. Keeps only points whose signed height above the ground plane falls
+       within ``height_band_m`` (default 0.0–0.3 m), discarding vegetation,
+       walls, and overhead structures.
+    3. Passes the filtered XY projection to ``fuse_lane_boundaries_from_points``
+       (unchanged 2D fusion path).
+
+    The ``metadata.lidar`` block is augmented with ground-plane parameters and
+    the number of points filtered.
+
+    Args:
+        graph: Road graph to update.
+        points_xyz_i: (N, 3) or (N, 4) array — columns are x, y, z[, intensity].
+            Intensity (column 3) is ignored during ground-plane fitting and
+            filtering but the caller may supply it for parity with the existing
+            ``load_points_xy_from_las`` output shape.
+        height_band_m: (lo, hi) height range above the ground plane to keep.
+        max_dist_m: Lateral distance threshold for lane-boundary snap.
+        bins: Bin count for the boundary polyline.
+        max_iter: RANSAC iterations.
+        distance_tolerance_m: RANSAC inlier threshold.
+        seed: RANSAC random seed.
+
+    Returns:
+        The mutated graph.
+    """
+    if points_xyz_i.ndim != 2 or points_xyz_i.shape[1] < 3:
+        raise ValueError("points_xyz_i must be an (N, 3) or (N, 4) array")
+
+    pts = np.asarray(points_xyz_i, dtype=np.float64)
+    xyz = pts[:, :3]  # drop intensity if present
+
+    # Step 1: fit ground plane.
+    normal, d = fit_ground_plane_ransac(
+        xyz,
+        max_iter=max_iter,
+        distance_tolerance_m=distance_tolerance_m,
+        seed=seed,
+    )
+
+    # Step 2: compute height above plane for each point.
+    heights = xyz @ normal + d  # signed: positive = above the plane
+
+    lo, hi = float(height_band_m[0]), float(height_band_m[1])
+    mask = (heights >= lo) & (heights <= hi)
+    filtered_xyz = xyz[mask]
+    n_filtered_out = int((~mask).sum())
+
+    # Step 3: project filtered points to XY and run standard 2D fusion.
+    points_xy = filtered_xyz[:, :2]
+    graph = fuse_lane_boundaries_from_points(
+        graph,
+        points_xy,
+        max_dist_m=max_dist_m,
+        bins=bins,
+    )
+
+    # Augment lidar metadata with ground-plane info.
+    lidar_block: dict[str, object] = {
+        "ground_plane_normal": normal.tolist(),
+        "ground_plane_d": float(d),
+        "ground_plane_height_band_m": list(height_band_m),
+        "ground_plane_filtered_out": n_filtered_out,
+        "ground_plane_kept": int(mask.sum()),
     }
     prev = graph.metadata.get("lidar")
     if isinstance(prev, dict):

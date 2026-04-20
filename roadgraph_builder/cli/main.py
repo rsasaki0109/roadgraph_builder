@@ -533,6 +533,31 @@ def _build_parser() -> argparse.ArgumentParser:
         default=32,
         help="Number of bins along each edge for median aggregation.",
     )
+    fuse.add_argument(
+        "--ground-plane",
+        action="store_true",
+        default=False,
+        help=(
+            "3D mode: fit a ground plane via RANSAC to z-coordinate data and keep only "
+            "points within --height-band-lo..--height-band-hi metres above the plane "
+            "before lane-boundary fusion. Requires the point file to have x, y, z columns. "
+            "Without this flag the behaviour is byte-identical to v0.6.0 (2D XY only)."
+        ),
+    )
+    fuse.add_argument(
+        "--height-band-lo",
+        type=float,
+        default=0.0,
+        metavar="M",
+        help="Lower bound of height band above ground plane (meters, default 0.0).",
+    )
+    fuse.add_argument(
+        "--height-band-hi",
+        type=float,
+        default=0.3,
+        metavar="M",
+        help="Upper bound of height band above ground plane (meters, default 0.3).",
+    )
 
     ilc = sub.add_parser(
         "infer-lane-count",
@@ -1416,28 +1441,56 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(header.to_summary(), ensure_ascii=False, indent=2))
         return 0
     if args.command == "fuse-lidar":
+        from roadgraph_builder.hd.lidar_fusion import fuse_lane_boundaries_3d
+        from roadgraph_builder.io.lidar.points import load_points_xyz_csv
+
         graph = _cli_load_graph(args.input_json)
         pts_path = Path(args.points_path)
         if not pts_path.is_file():
             print(f"File not found: {pts_path}", file=sys.stderr)
             return 1
+        use_ground_plane = getattr(args, "ground_plane", False)
         try:
             if pts_path.suffix.lower() in {".las", ".laz"}:
-                pts = load_points_xy_from_las(pts_path)
+                if use_ground_plane:
+                    # Load xyz (intensity optional) for ground-plane mode.
+                    from roadgraph_builder.io.lidar.las import load_points_xyz_from_las
+                    pts = load_points_xyz_from_las(pts_path)
+                else:
+                    pts = load_points_xy_from_las(pts_path)
             else:
-                pts = load_points_xy_csv(pts_path)
+                if use_ground_plane:
+                    pts = load_points_xyz_csv(pts_path)
+                else:
+                    pts = load_points_xy_csv(pts_path)
         except ValueError as e:
             print(f"{pts_path}: {e}", file=sys.stderr)
             return 1
         except ImportError as e:
             print(f"{pts_path}: {e}", file=sys.stderr)
             return 1
-        fuse_lane_boundaries_from_points(
-            graph,
-            pts,
-            max_dist_m=args.max_dist_m,
-            bins=args.bins,
-        )
+        if use_ground_plane:
+            if pts.ndim != 2 or pts.shape[1] < 3:
+                print(
+                    f"{pts_path}: --ground-plane requires x,y,z columns; "
+                    f"got shape {pts.shape}",
+                    file=sys.stderr,
+                )
+                return 1
+            fuse_lane_boundaries_3d(
+                graph,
+                pts,
+                height_band_m=(args.height_band_lo, args.height_band_hi),
+                max_dist_m=args.max_dist_m,
+                bins=args.bins,
+            )
+        else:
+            fuse_lane_boundaries_from_points(
+                graph,
+                pts,
+                max_dist_m=args.max_dist_m,
+                bins=args.bins,
+            )
         export_graph_json(graph, args.output_json)
         return 0
     if args.command == "infer-lane-count":

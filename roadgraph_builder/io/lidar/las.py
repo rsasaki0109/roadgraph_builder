@@ -207,4 +207,66 @@ def load_points_xy_from_las(path: str | Path) -> np.ndarray:
     return xy
 
 
-__all__ = ["LASHeader", "load_points_xy_from_las", "read_las_header"]
+def load_points_xyz_from_las(path: str | Path) -> np.ndarray:
+    """Return an ``(N, 3)`` float64 array of X/Y/Z in meters from a LAS file.
+
+    Like :func:`load_points_xy_from_las` but also reads the Z integer from the
+    12-byte ``(X_int, Y_int, Z_int)`` prefix that all point formats share, and
+    applies the per-axis scale/offset from the header.
+
+    LAZ is not supported in this function; only uncompressed ``.las`` files.
+    For ground-plane fitting from LAS data use a CSV with x,y,z columns or
+    rely on the caller to convert LAZ to LAS first.
+
+    Raises:
+        ValueError: Bad header, unsupported format, or truncated file.
+    """
+    p = Path(path)
+    if p.suffix.lower() == ".laz":
+        raise ValueError(
+            "load_points_xyz_from_las does not support LAZ. "
+            "Use a CSV with x,y,z columns or convert to LAS first."
+        )
+    header = read_las_header(path)
+    if header.point_data_format not in _SUPPORTED_POINT_FORMATS:
+        raise ValueError(
+            f"Unsupported LAS point data format {header.point_data_format} in {path}"
+        )
+
+    record_length = header.point_data_record_length
+    if record_length < 12:
+        raise ValueError(
+            f"LAS point_data_record_length {record_length} in {path} is too small to hold X/Y/Z"
+        )
+
+    scale_x, scale_y, scale_z = header.scale
+    offset_x, offset_y, offset_z = header.offset
+    point_count = header.point_count
+
+    with p.open("rb") as fh:
+        fh.seek(header.offset_to_point_data)
+        blob = fh.read(record_length * point_count)
+    if len(blob) < record_length * point_count:
+        raise ValueError(
+            f"LAS file {p} truncated: expected {record_length * point_count} point bytes, "
+            f"got {len(blob)}"
+        )
+
+    buf = np.frombuffer(blob, dtype=np.uint8).reshape(point_count, record_length)
+    xi = buf[:, 0:4].copy().view(np.int32).reshape(point_count)
+    yi = buf[:, 4:8].copy().view(np.int32).reshape(point_count)
+    zi = buf[:, 8:12].copy().view(np.int32).reshape(point_count)
+
+    xyz = np.empty((point_count, 3), dtype=np.float64)
+    xyz[:, 0] = xi.astype(np.float64) * scale_x + offset_x
+    xyz[:, 1] = yi.astype(np.float64) * scale_y + offset_y
+    xyz[:, 2] = zi.astype(np.float64) * scale_z + offset_z
+    return xyz
+
+
+__all__ = [
+    "LASHeader",
+    "load_points_xy_from_las",
+    "load_points_xyz_from_las",
+    "read_las_header",
+]
