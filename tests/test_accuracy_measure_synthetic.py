@@ -275,3 +275,40 @@ class TestMeasureLaneAccuracySynthetic:
         result = measure_lane_accuracy(graph, osm, matching_tolerance_m=5000.0)
         assert result["matched_count"] == 0
         assert result["unmatched_count"] == 1
+
+    def test_map_origin_converts_osm_to_meter_frame(self) -> None:
+        """When graph.metadata.map_origin is present, OSM lon/lat gets converted
+        to the same local meter frame; a 5 m tolerance then works against a
+        meter-frame graph polyline."""
+        # Edge polyline in meters, centered at (0, 0) running east.
+        edge = {
+            "id": "e0",
+            "start_node_id": "n0",
+            "end_node_id": "n1",
+            "polyline": [{"x": -50.0, "y": 0.0}, {"x": 50.0, "y": 0.0}],
+            "attributes": {"kind": "lane_centerline", "hd": {"lane_count": 2}},
+        }
+        graph = {
+            "schema_version": 1,
+            "nodes": [],
+            "edges": [edge],
+            "metadata": {"map_origin": {"lat0": 35.67, "lon0": 139.768}},
+        }
+        # OSM way centered exactly at origin (35.67, 139.768) going east.
+        # Offset by ~0.0009 deg ≈ 100 m east/west for the two endpoints.
+        n1 = {"id": 101, "type": "node", "lat": 35.67, "lon": 139.768 - 0.000449}
+        n2 = {"id": 102, "type": "node", "lat": 35.67, "lon": 139.768 + 0.000449}
+        way = {
+            "id": 1,
+            "type": "way",
+            "nodes": [101, 102],
+            "tags": {"highway": "secondary", "lanes": "2"},
+        }
+        osm = {"version": 0.6, "elements": [n1, n2, way]}
+
+        # 5 m tolerance works because both sides now live in meters.
+        result = measure_lane_accuracy(graph, osm, matching_tolerance_m=5.0)
+        assert result["matched_count"] == 1
+        assert result["pairs"][0]["predicted"] == 2
+        assert result["pairs"][0]["actual"] == 2
+        assert result["pairs"][0]["distance_m"] < 5.0

@@ -79,6 +79,17 @@ def _centroid_distance_m(
     return math.hypot(cx2 - cx1, cy2 - cy1)
 
 
+def _lonlat_to_meters(
+    lon_deg: float, lat_deg: float, lat0_deg: float, lon0_deg: float
+) -> tuple[float, float]:
+    """Local ENU from origin (lat0, lon0); matches roadgraph_builder.utils.geo."""
+    r = 6_371_000.0
+    lat_r = math.radians(lat0_deg)
+    x = r * math.radians(lon_deg - lon0_deg) * math.cos(lat_r)
+    y = r * math.radians(lat_deg - lat0_deg)
+    return x, y
+
+
 # ---------------------------------------------------------------------------
 # Core matching and accuracy logic
 # ---------------------------------------------------------------------------
@@ -122,6 +133,22 @@ def measure_lane_accuracy(
     osm_way_coords: dict[int, tuple[float, float]] = {}  # way_id → centroid (lon, lat)
     osm_way_tangents: dict[int, tuple[float, float]] = {}
 
+    # When build-osm-graph writes metadata.map_origin, graph polylines are in
+    # local meter frame — convert OSM node coords to the same frame so the
+    # distance check is apples-to-apples.
+    map_origin = None
+    metadata = graph_json.get("metadata") if isinstance(graph_json, dict) else None
+    if isinstance(metadata, dict):
+        origin_meta = metadata.get("map_origin")
+        if isinstance(origin_meta, dict) and "lat0" in origin_meta and "lon0" in origin_meta:
+            try:
+                map_origin = (float(origin_meta["lat0"]), float(origin_meta["lon0"]))
+            except (TypeError, ValueError):
+                map_origin = None
+    if map_origin is not None:
+        # Graph is in meters; override haversine flag to avoid mixed-frame compare.
+        use_haversine = False
+
     if isinstance(osm_lanes_json, dict) and "elements" in osm_lanes_json:
         elements = osm_lanes_json["elements"]
     elif isinstance(osm_lanes_json, dict) and all(
@@ -146,7 +173,14 @@ def measure_lane_accuracy(
             lat = el.get("lat")
             lon = el.get("lon")
             if nid is not None and lat is not None and lon is not None:
-                node_coords[int(nid)] = (float(lon), float(lat))
+                lon_f = float(lon)
+                lat_f = float(lat)
+                if map_origin is not None:
+                    node_coords[int(nid)] = _lonlat_to_meters(
+                        lon_f, lat_f, map_origin[0], map_origin[1]
+                    )
+                else:
+                    node_coords[int(nid)] = (lon_f, lat_f)
 
     for el in elements:
         if not isinstance(el, dict) or el.get("type") != "way":

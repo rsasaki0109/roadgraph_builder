@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **V1 follow-up: real-data α accuracy numbers for Tokyo Ginza + Berlin Mitte.**
+  `docs/accuracy_report.md` replaces the `[not yet measured]` rows with
+  Overpass-fetched numbers captured 2026-04-20: Tokyo Ginza (`139.7600,
+  35.6680,139.7750,35.6750`, 415 ways / 1891 nodes) → 598-edge graph,
+  113/598 matched at 20 m, **MAE = 0.903 lanes**; Berlin Mitte (`13.3700,
+  52.5100,13.4000,52.5250`, 1659 ways / 4748 nodes) → 1640-edge graph,
+  531/1640 matched at 20 m, **MAE = 1.220 lanes**. Both are `source=default`
+  baselines (no LiDAR markings / trace_stats) and document the 20 m canonical
+  tolerance vs the original 5 m recipe.
+
+### Fixed
+
+- **V1: `measure_lane_accuracy.py` now handles meter-frame graphs.** When the
+  graph JSON carries `metadata.map_origin` (written by `build-osm-graph` with
+  an origin), OSM node lon/lat are converted to the same local ENU frame
+  before the centroid-distance check, instead of silently comparing meters to
+  degrees. Synthetic fixtures without `map_origin` keep the original
+  haversine path. New unit test:
+  `test_map_origin_converts_osm_to_meter_frame`.
+
 ## [0.7.0] — 2026-04-20
 
 ### Added
