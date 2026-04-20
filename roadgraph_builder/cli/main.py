@@ -361,6 +361,23 @@ def _build_parser() -> argparse.ArgumentParser:
             "Values <1.0 favour descents. Only active when the graph has elevation data."
         ),
     )
+    rt.add_argument(
+        "--allow-lane-change",
+        action="store_true",
+        default=False,
+        help=(
+            "A3: enable lane-level routing over (node, edge, direction, lane_index) state. "
+            "Lane swaps within the same edge cost --lane-change-cost-m. "
+            "Without this flag, routing is edge-level (byte-identical to v0.6.0)."
+        ),
+    )
+    rt.add_argument(
+        "--lane-change-cost-m",
+        type=float,
+        default=50.0,
+        metavar="M",
+        help="Cost in meters for a within-edge lane swap when --allow-lane-change is set (default 50).",
+    )
 
     rtp = sub.add_parser(
         "reconstruct-trips",
@@ -1413,6 +1430,8 @@ def main(argv: list[str] | None = None) -> int:
                 unobserved_penalty=getattr(args, "unobserved_penalty", 2.0),
                 uphill_penalty=getattr(args, "uphill_penalty", None),
                 downhill_bonus=getattr(args, "downhill_bonus", None),
+                allow_lane_change=getattr(args, "allow_lane_change", False),
+                lane_change_cost_m=getattr(args, "lane_change_cost_m", 50.0),
             )
         except KeyError as e:
             print(f"{args.input_json}: {e.args[0]}", file=sys.stderr)
@@ -1439,24 +1458,21 @@ def main(argv: list[str] | None = None) -> int:
                     return 1
             write_route_geojson(args.output, graph, route, origin_lat=lat0, origin_lon=lon0)
 
-        print(
-            json.dumps(
-                {
-                    "from_node": route.from_node,
-                    "to_node": route.to_node,
-                    "snapped_from": from_snap,
-                    "snapped_to": to_snap,
-                    "total_length_m": route.total_length_m,
-                    "edge_sequence": route.edge_sequence,
-                    "edge_directions": route.edge_directions,
-                    "node_sequence": route.node_sequence,
-                    "applied_restrictions": len(restrictions),
-                    "output": args.output if args.output else None,
-                },
-                ensure_ascii=False,
-                indent=2,
-            )
-        )
+        route_doc: dict = {
+            "from_node": route.from_node,
+            "to_node": route.to_node,
+            "snapped_from": from_snap,
+            "snapped_to": to_snap,
+            "total_length_m": route.total_length_m,
+            "edge_sequence": route.edge_sequence,
+            "edge_directions": route.edge_directions,
+            "node_sequence": route.node_sequence,
+            "applied_restrictions": len(restrictions),
+            "output": args.output if args.output else None,
+        }
+        if route.lane_sequence is not None:
+            route_doc["lane_sequence"] = route.lane_sequence
+        print(json.dumps(route_doc, ensure_ascii=False, indent=2))
         return 0
     if args.command == "inspect-lidar":
         p = Path(args.input_las)

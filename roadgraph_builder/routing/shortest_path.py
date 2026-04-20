@@ -46,6 +46,8 @@ class Route:
             digitization, ``reverse`` goes end → start). Same length as
             ``edge_sequence``.
         total_length_m: Sum of ``polyline`` arc lengths for the traversed edges.
+        lane_sequence: Optional list of lane indices when ``allow_lane_change`` routing
+            is used (A3). None when routing without lane-level detail.
     """
 
     from_node: str
@@ -54,6 +56,7 @@ class Route:
     edge_sequence: list[str]
     edge_directions: list[str]
     total_length_m: float
+    lane_sequence: list[int | None] | None = None
 
 
 def _edge_length_m(edge) -> float:  # type: ignore[no-untyped-def]
@@ -151,6 +154,20 @@ def _slope_deg(edge, direction: str) -> float:  # type: ignore[no-untyped-def]
     return s if direction == "forward" else -s
 
 
+def _lane_count_for_edge(edge) -> int:  # type: ignore[no-untyped-def]
+    """Return hd.lane_count from edge.attributes, or 1 as fallback."""
+    attrs = edge.attributes if isinstance(edge.attributes, dict) else {}
+    hd = attrs.get("hd")
+    if isinstance(hd, dict):
+        lc = hd.get("lane_count")
+        if lc is not None:
+            try:
+                return max(1, int(lc))
+            except (TypeError, ValueError):
+                pass
+    return 1
+
+
 def shortest_path(
     graph: "Graph",
     from_node: str,
@@ -165,6 +182,9 @@ def shortest_path(
     # 3D1 optional elevation cost hooks
     uphill_penalty: float | None = None,
     downhill_bonus: float | None = None,
+    # A3 lane-change routing
+    allow_lane_change: bool = False,
+    lane_change_cost_m: float = 50.0,
 ) -> Route:
     """Return the shortest :class:`Route` between two node ids.
 
@@ -185,6 +205,13 @@ def shortest_path(
       (applied when ``slope_deg < 0``; ``<1.0`` favours descents).
       Factor is applied relative to the absolute slope magnitude; only active
       when the edge has elevation data.
+
+    A3 lane-level routing:
+    - ``allow_lane_change=True``: extend the state space to
+      ``(node, incoming_edge, direction, lane_index)``. Transitions within the
+      same edge (lane swap) cost ``lane_change_cost_m`` (default 50 m).
+      The returned ``Route.lane_sequence`` carries the per-step lane index.
+      Without this flag behaviour is identical to 0.6.0 / 3D1.
 
     When all hooks are None/False, behavior is identical to 0.5.0.
 
@@ -257,6 +284,116 @@ def shortest_path(
             edge_directions=[],
             total_length_m=0.0,
         )
+
+    # -----------------------------------------------------------------------
+    # A3: lane-level Dijkstra (allow_lane_change=True).
+    # State = (node, incoming_edge_id or None, incoming_direction or None,
+    #          lane_index or None).
+    # Within the same edge, lane swaps are possible by adding lane_change_cost_m.
+    # -----------------------------------------------------------------------
+    if allow_lane_change:
+        # Build per-edge lane count.
+        edge_by_id = {e.id: e for e in graph.edges}
+        edge_lane_count: dict[str, int] = {e.id: _lane_count_for_edge(e) for e in graph.edges}
+
+        # Lane state = (node, inc_edge, inc_dir, lane_idx).
+        LState = tuple[str, str | None, str | None, int | None]
+        l_start: LState = (from_node, None, None, None)
+        l_dist: dict[LState, float] = {l_start: 0.0}
+        l_prev: dict[LState, LState] = {}
+        l_queue: list[tuple[float, str, str | None, str | None, int | None]] = [
+            (0.0, from_node, None, None, None)
+        ]
+
+        while l_queue:
+            d, u, inc_edge, inc_dir, inc_lane = heapq.heappop(l_queue)
+            l_state: LState = (u, inc_edge, inc_dir, inc_lane)
+            if d > l_dist.get(l_state, math.inf):
+                continue
+
+            allowed_outs: set[tuple[str, str]] | None = None
+            if inc_edge is not None:
+                allowed_outs = mandatory.get((u, inc_edge, inc_dir))
+
+            # Expand cross-edge transitions (same as standard routing).
+            for out_edge_id, out_dir, neighbor, w in adj.get(u, []):
+                if inc_edge is not None:
+                    if (u, inc_edge, inc_dir, out_edge_id, out_dir) in forbidden:
+                        continue
+                    if allowed_outs is not None and (out_edge_id, out_dir) not in allowed_outs:
+                        continue
+                out_lane_count = edge_lane_count.get(out_edge_id, 1)
+                # Enter each lane of the outgoing edge.
+                for out_lane in range(out_lane_count):
+                    nd = d + w
+                    # If incoming lane is defined and the outgoing edge has multiple
+                    # lanes, add a lane-change cost for misaligned lanes.
+                    if inc_lane is not None and out_lane_count > 1 and out_lane != inc_lane:
+                        nd += lane_change_cost_m
+                    new_l_state: LState = (neighbor, out_edge_id, out_dir, out_lane)
+                    if nd < l_dist.get(new_l_state, math.inf):
+                        l_dist[new_l_state] = nd
+                        l_prev[new_l_state] = l_state
+                        heapq.heappush(l_queue, (nd, neighbor, out_edge_id, out_dir, out_lane))
+
+            # Expand intra-edge lane swaps: stay at the same node, same edge.
+            if inc_edge is not None and inc_lane is not None:
+                lc = edge_lane_count.get(inc_edge, 1)
+                for swap_lane in range(lc):
+                    if swap_lane == inc_lane:
+                        continue
+                    nd = d + lane_change_cost_m
+                    swap_state: LState = (u, inc_edge, inc_dir, swap_lane)
+                    if nd < l_dist.get(swap_state, math.inf):
+                        l_dist[swap_state] = nd
+                        l_prev[swap_state] = l_state
+                        heapq.heappush(l_queue, (nd, u, inc_edge, inc_dir, swap_lane))
+
+        # Pick the cheapest terminal state at to_node.
+        best_l_state: LState | None = None
+        best_cost = math.inf
+        for l_state, cost in l_dist.items():
+            if l_state[0] == to_node and cost < best_cost:
+                best_cost = cost
+                best_l_state = l_state
+
+        if best_l_state is None or best_cost == math.inf:
+            raise ValueError(f"no path from {from_node!r} to {to_node!r} (lane-level search)")
+
+        # Reconstruct path.
+        l_nodes: list[str] = [to_node]
+        l_edges: list[str] = []
+        l_dirs: list[str] = []
+        l_lanes: list[int | None] = []
+        l_cur = best_l_state
+        while l_cur[1] is not None:
+            l_edges.append(l_cur[1])
+            l_dirs.append(l_cur[2])  # type: ignore[arg-type]
+            l_lanes.append(l_cur[3])
+            l_cur = l_prev[l_cur]
+            l_nodes.append(l_cur[0])
+        l_nodes.reverse()
+        l_edges.reverse()
+        l_dirs.reverse()
+        l_lanes.reverse()
+
+        actual_length = sum(
+            _edge_length_m(edge_by_id[eid]) for eid in l_edges if eid in edge_by_id
+        )
+        return Route(
+            from_node=from_node,
+            to_node=to_node,
+            node_sequence=l_nodes,
+            edge_sequence=l_edges,
+            edge_directions=l_dirs,
+            total_length_m=actual_length,
+            lane_sequence=l_lanes,
+        )
+
+    # -----------------------------------------------------------------------
+    # Standard edge-level Dijkstra (allow_lane_change=False, default).
+    # State = (node, incoming_edge_id or None, incoming_direction or None).
+    # -----------------------------------------------------------------------
 
     # State = (node, incoming_edge_id or None, incoming_direction or None).
     State = tuple[str, str | None, str | None]

@@ -264,6 +264,7 @@ def export_lanelet2_per_lane(
     origin_lat: float,
     origin_lon: float,
     generator: str = "roadgraph_builder",
+    lane_markings: dict | None = None,
 ) -> None:
     """Write per-lane Lanelet2 OSM XML using ``attributes.hd.lanes`` inferred by lane_inference.
 
@@ -273,7 +274,12 @@ def export_lanelet2_per_lane(
     :func:`export_lanelet2`.
 
     Adjacent lanelets on the same edge are linked with a ``type=regulatory_element,
-    subtype=lane_change`` relation (one per pair).
+    subtype=lane_change`` relation (one per pair). When ``lane_markings`` is provided,
+    the boundary subtype (solid/dashed) between adjacent lanes is used to set a
+    ``sign`` tag on the relation: ``sign=solid`` for solid boundaries (prohibited) and
+    ``sign=dashed`` for dashed boundaries (allowed). Without ``lane_markings`` the sign
+    defaults to ``sign=dashed`` (A3 — FOLLOWUP: per-boundary sign would require
+    per-lane-pair boundary classification, currently defaulted).
     """
     path = Path(path)
     root = ET.Element("osm", version="0.6", generator=generator)
@@ -401,7 +407,17 @@ def export_lanelet2_per_lane(
                 )
                 edge_lanelet_ids.append(ll_id)
 
-            # Emit lane_change relations for adjacent lanes.
+            # Emit lane_change relations for adjacent lanes (A3).
+            # Determine sign from lane_markings boundary subtype if available.
+            # When lane_markings is not provided, default to "dashed" (permitted).
+            if lane_markings is None:
+                sign = "dashed"
+            else:
+                lm_candidates_for_edge = [
+                    c for c in lane_markings.get("candidates", [])
+                    if isinstance(c, dict) and c.get("edge_id") == e.id
+                ]
+                sign = "solid" if _lane_marking_subtype(lm_candidates_for_edge) == "solid" else "dashed"
             for i in range(len(edge_lanelet_ids) - 1):
                 new_relation(
                     [
@@ -411,6 +427,7 @@ def export_lanelet2_per_lane(
                     [
                         ("type", "regulatory_element"),
                         ("subtype", "lane_change"),
+                        ("sign", sign),
                         ("roadgraph:edge_id", str(e.id)),
                     ],
                 )
