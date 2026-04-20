@@ -130,6 +130,27 @@ def _hd_confidence(edge) -> float | None:  # type: ignore[no-untyped-def]
     return None
 
 
+def _slope_deg(edge, direction: str) -> float:  # type: ignore[no-untyped-def]
+    """Return slope in degrees for the edge in the given traversal direction.
+
+    Positive = uphill in that direction.  Returns 0.0 when no elevation data.
+    ``direction`` is 'forward' (start→end) or 'reverse' (end→start).
+    """
+    attrs = edge.attributes if isinstance(edge.attributes, dict) else {}
+    sd = attrs.get("slope_deg")
+    if sd is None:
+        hd = attrs.get("hd")
+        if isinstance(hd, dict):
+            sd = hd.get("slope_deg")
+    if sd is None:
+        return 0.0
+    try:
+        s = float(sd)  # type: ignore[arg-type]
+    except (TypeError, ValueError):
+        return 0.0
+    return s if direction == "forward" else -s
+
+
 def shortest_path(
     graph: "Graph",
     from_node: str,
@@ -141,6 +162,9 @@ def shortest_path(
     min_confidence: float | None = None,
     observed_bonus: float = 0.5,
     unobserved_penalty: float = 2.0,
+    # 3D1 optional elevation cost hooks
+    uphill_penalty: float | None = None,
+    downhill_bonus: float | None = None,
 ) -> Route:
     """Return the shortest :class:`Route` between two node ids.
 
@@ -153,6 +177,14 @@ def shortest_path(
       ``trace_observation_count > 0`` else by ``unobserved_penalty``.
     - ``min_confidence=X``: exclude edges whose ``hd_refinement.confidence < X``
       from the search (they are skipped during expansion).
+
+    3D1 elevation cost hooks (both default to None = disabled):
+    - ``uphill_penalty``: multiply cost of uphill edges by this factor
+      (applied when ``slope_deg > 0``; ``>1.0`` discourages climbs).
+    - ``downhill_bonus``: multiply cost of downhill edges by this factor
+      (applied when ``slope_deg < 0``; ``<1.0`` favours descents).
+      Factor is applied relative to the absolute slope magnitude; only active
+      when the edge has elevation data.
 
     When all hooks are None/False, behavior is identical to 0.5.0.
 
@@ -174,6 +206,7 @@ def shortest_path(
         edge_conf[e.id] = _hd_confidence(e)
 
     # Directed adjacency: node -> list of (edge_id, direction, neighbor_node_id, base_length_m).
+    use_slope_cost = uphill_penalty is not None or downhill_bonus is not None
     adj: dict[str, list[tuple[str, str, str, float]]] = {nid: [] for nid in node_ids}
     for e in graph.edges:
         # Skip edges below min_confidence threshold.
@@ -182,20 +215,35 @@ def shortest_path(
             if conf is not None and conf < min_confidence:
                 continue
 
-        length_m = _edge_length_m(e)
+        base_length_m = _edge_length_m(e)
 
         # Apply prefer_observed cost multiplier.
+        length_fwd = base_length_m
         if prefer_observed:
             obs = edge_obs.get(e.id, 0)
             multiplier = observed_bonus if obs > 0 else unobserved_penalty
-            length_m = length_m * multiplier
+            length_fwd = length_fwd * multiplier
+        length_rev = length_fwd
+
+        # Apply elevation cost multipliers (direction-sensitive).
+        if use_slope_cost:
+            s_fwd = _slope_deg(e, "forward")
+            s_rev = -s_fwd  # reverse is opposite slope
+            if s_fwd > 0 and uphill_penalty is not None:
+                length_fwd = length_fwd * uphill_penalty
+            elif s_fwd < 0 and downhill_bonus is not None:
+                length_fwd = length_fwd * downhill_bonus
+            if s_rev > 0 and uphill_penalty is not None:
+                length_rev = length_rev * uphill_penalty
+            elif s_rev < 0 and downhill_bonus is not None:
+                length_rev = length_rev * downhill_bonus
 
         adj.setdefault(e.start_node_id, []).append(
-            (e.id, "forward", e.end_node_id, length_m)
+            (e.id, "forward", e.end_node_id, length_fwd)
         )
         if e.start_node_id != e.end_node_id:
             adj.setdefault(e.end_node_id, []).append(
-                (e.id, "reverse", e.start_node_id, length_m)
+                (e.id, "reverse", e.start_node_id, length_rev)
             )
 
     forbidden, mandatory = _parse_restrictions(turn_restrictions)

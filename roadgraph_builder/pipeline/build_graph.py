@@ -49,6 +49,11 @@ class BuildParams:
     #: ``centerline_bins`` resample while keeping the geometry intact.
     #: ``None`` disables the post pass; set to 0 for an explicit no-op.
     post_simplify_tolerance_m: float | None = 0.3
+    #: When True, propagate z-coordinate through the graph.  Requires the
+    #: source Trajectory to carry a non-None ``z`` array.  When False (the
+    #: default), z data is ignored and the output is byte-identical to
+    #: pre-3D1 builds.
+    use_3d: bool = False
 
 
 def _orient_polyline_to_trajectory(
@@ -84,6 +89,58 @@ def trajectory_to_polylines(traj: Trajectory, params: BuildParams) -> list[list[
         if len(poly) >= 2:
             polylines.append(poly)
     return polylines
+
+
+def _interpolate_z_for_polyline(
+    poly_xy: list[tuple[float, float]],
+    seg_xy: np.ndarray,
+    seg_z: np.ndarray,
+) -> list[float]:
+    """Interpolate z values from the raw segment onto a resampled polyline.
+
+    For each polyline vertex, find the nearest raw sample in XY and assign
+    its z.  Simple nearest-neighbour — adequate for smooth GPS traces.
+    """
+    if seg_z is None or seg_z.shape[0] == 0:
+        return [0.0] * len(poly_xy)
+    result: list[float] = []
+    for px, py in poly_xy:
+        # Vectorised nearest-neighbour
+        dxs = seg_xy[:, 0] - px
+        dys = seg_xy[:, 1] - py
+        idx = int(np.argmin(dxs * dxs + dys * dys))
+        result.append(float(seg_z[idx]))
+    return result
+
+
+def trajectory_to_polylines_3d(
+    traj: Trajectory,
+    params: BuildParams,
+) -> tuple[list[list[tuple[float, float]]], list[list[float]]]:
+    """Like ``trajectory_to_polylines`` but also returns per-vertex z lists.
+
+    Returns a pair ``(polylines, z_lists)`` where ``z_lists[i]`` has the same
+    length as ``polylines[i]``.  Only called when ``params.use_3d`` is True and
+    ``traj.z`` is not None.
+    """
+    xy = traj.xy
+    z = traj.z  # guaranteed non-None by caller
+    assert z is not None
+    ranges = split_indices_by_step(xy, params.max_step_m)
+    polylines: list[list[tuple[float, float]]] = []
+    z_lists: list[list[float]] = []
+    for lo, hi in ranges:
+        seg = xy[lo:hi]
+        seg_z = z[lo:hi]
+        if seg.shape[0] == 0:
+            continue
+        poly = centerline_from_points(seg, num_bins=params.centerline_bins)
+        poly = _orient_polyline_to_trajectory(poly, seg)
+        if len(poly) >= 2:
+            pz = _interpolate_z_for_polyline(poly, seg, seg_z)
+            polylines.append(poly)
+            z_lists.append(pz)
+    return polylines, z_lists
 
 
 def annotate_node_degrees(graph: Graph) -> None:
@@ -583,8 +640,61 @@ def polylines_to_graph(polylines: list[list[tuple[float, float]]], params: Build
     return graph
 
 
+def _annotate_3d_attributes(graph: Graph, traj: Trajectory) -> None:
+    """Propagate elevation into edge ``polyline_z`` and node ``elevation_m``.
+
+    Called only in 3D mode.  Looks up the nearest trajectory XY sample for
+    each polyline vertex and each node position to assign z.  Also computes
+    ``attributes.slope_deg`` per edge (signed, positive = uphill in forward
+    direction).
+    """
+    if traj.z is None or traj.z.shape[0] == 0:
+        return
+    xy_all = traj.xy  # (N, 2)
+    z_all = traj.z    # (N,)
+
+    def _nearest_z(px: float, py: float) -> float:
+        dxs = xy_all[:, 0] - px
+        dys = xy_all[:, 1] - py
+        idx = int(np.argmin(dxs * dxs + dys * dys))
+        return float(z_all[idx])
+
+    # Annotate nodes with elevation_m.
+    for n in graph.nodes:
+        nz = _nearest_z(n.position[0], n.position[1])
+        attrs = dict(n.attributes)
+        attrs["elevation_m"] = nz
+        n.attributes = attrs
+
+    # Annotate edges with polyline_z and slope_deg.
+    for e in graph.edges:
+        pz = [_nearest_z(x, y) for x, y in e.polyline]
+        # Arc length in 2D for slope calculation.
+        total_arc = 0.0
+        for i in range(len(e.polyline) - 1):
+            dx = e.polyline[i + 1][0] - e.polyline[i][0]
+            dy = e.polyline[i + 1][1] - e.polyline[i][1]
+            total_arc += math.hypot(dx, dy)
+        # slope_deg: signed angle, positive = uphill in polyline direction.
+        if total_arc > 1e-6 and len(pz) >= 2:
+            dz = pz[-1] - pz[0]
+            slope_deg = math.degrees(math.atan2(dz, total_arc))
+        else:
+            slope_deg = 0.0
+        attrs = dict(e.attributes)
+        attrs["polyline_z"] = pz
+        attrs["slope_deg"] = slope_deg
+        e.attributes = attrs
+
+
 def build_graph_from_trajectory(traj: Trajectory, params: BuildParams | None = None) -> Graph:
-    """Build a road graph from an in-memory trajectory."""
+    """Build a road graph from an in-memory trajectory.
+
+    When ``params.use_3d`` is True and ``traj.z`` is not None, elevation data
+    is propagated into ``edge.attributes.polyline_z``, ``edge.attributes.slope_deg``,
+    and ``node.attributes.elevation_m``.  The 2D build path is unchanged when
+    ``use_3d`` is False.
+    """
     p = params or BuildParams()
     polylines = trajectory_to_polylines(traj, p)
     graph = polylines_to_graph(polylines, p)
@@ -595,10 +705,18 @@ def build_graph_from_trajectory(traj: Trajectory, params: BuildParams | None = N
             "Try adding more points, lowering --max-step-m if gaps split the path too much, "
             "or check for collapsed/duplicate coordinates."
         )
+    # 3D mode: annotate elevation and slope after graph is assembled.
+    if p.use_3d and traj.z is not None:
+        _annotate_3d_attributes(graph, traj)
     return graph
 
 
 def build_graph_from_csv(path: str, params: BuildParams | None = None) -> Graph:
-    """Load CSV trajectory and build a road graph."""
-    traj = load_trajectory_csv(path)
-    return build_graph_from_trajectory(traj, params)
+    """Load CSV trajectory and build a road graph.
+
+    When ``params.use_3d`` is True, the CSV is expected to have a ``z`` column
+    (silently ignored when absent) and elevation data is propagated into the graph.
+    """
+    p = params or BuildParams()
+    traj = load_trajectory_csv(path, load_z=p.use_3d)
+    return build_graph_from_trajectory(traj, p)

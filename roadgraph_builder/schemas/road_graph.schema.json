@@ -35,6 +35,17 @@
         "y": { "type": "number" }
       }
     },
+    "point2or3": {
+      "description": "2-D or 3-D polyline vertex. z is present only in 3D builds.",
+      "type": "object",
+      "required": ["x", "y"],
+      "additionalProperties": false,
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "z": { "type": "number" }
+      }
+    },
     "semantic_rule": {
       "type": "object",
       "additionalProperties": true,
@@ -109,7 +120,11 @@
           "items": { "$ref": "#/$defs/semantic_rule" }
         },
         "vertical_model": { "type": "string" },
-        "elevation_m": { "type": ["number", "null"] }
+        "elevation_m": { "type": ["number", "null"] },
+        "slope_deg": {
+          "type": "number",
+          "description": "Edge slope in degrees: positive = uphill in forward direction (3D1)."
+        }
       }
     },
     "node": {
@@ -124,7 +139,11 @@
           "additionalProperties": true,
           "description": "e.g. degree, junction_hint, hd",
           "properties": {
-            "hd": { "$ref": "#/$defs/hd_block" }
+            "hd": { "$ref": "#/$defs/hd_block" },
+            "elevation_m": {
+              "type": "number",
+              "description": "Node elevation in metres (3D1)."
+            }
           }
         }
       }
@@ -139,13 +158,22 @@
         "end_node_id": { "type": "string" },
         "polyline": {
           "type": "array",
-          "items": { "$ref": "#/$defs/point2" }
+          "items": { "$ref": "#/$defs/point2or3" }
         },
         "attributes": {
           "type": "object",
           "additionalProperties": true,
           "properties": {
-            "hd": { "$ref": "#/$defs/hd_block" }
+            "hd": { "$ref": "#/$defs/hd_block" },
+            "slope_deg": {
+              "type": "number",
+              "description": "Edge slope in degrees (3D1, positive = uphill in forward dir)."
+            },
+            "polyline_z": {
+              "type": "array",
+              "items": { "type": "number" },
+              "description": "Per-vertex elevation values (3D1), one per polyline point."
+            }
           }
         }
       }

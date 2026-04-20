@@ -7,7 +7,12 @@ from dataclasses import dataclass, field
 
 @dataclass
 class Node:
-    """A node in the road graph (intersection, branch, or connectivity point)."""
+    """A node in the road graph (intersection, branch, or connectivity point).
+
+    ``position`` is always a 2-tuple ``(x, y)`` in meters.  Elevation is
+    stored separately in ``attributes["elevation_m"]`` when 3D data is
+    available so the 2D code paths remain byte-identical.
+    """
 
     id: str
     position: tuple[float, float]

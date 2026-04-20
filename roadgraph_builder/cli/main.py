@@ -76,11 +76,13 @@ def _add_build_params(p: argparse.ArgumentParser) -> None:
 
 
 def _build_params_from_args(args: argparse.Namespace) -> BuildParams:
+    use_3d = getattr(args, "use_3d", False)
     return BuildParams(
         max_step_m=args.max_step_m,
         merge_endpoint_m=args.merge_endpoint_m,
         centerline_bins=args.centerline_bins,
         simplify_tolerance_m=args.simplify_tolerance,
+        use_3d=use_3d,
     )
 
 
@@ -123,7 +125,7 @@ def _build_parser() -> argparse.ArgumentParser:
     sub.add_parser("doctor", help="Print version, Python, and whether example files exist (cwd = repo root).")
 
     b = sub.add_parser("build", help="Build graph from trajectory CSV and write JSON.")
-    b.add_argument("input_csv", help="Input CSV with columns timestamp, x, y")
+    b.add_argument("input_csv", help="Input CSV with columns timestamp, x, y (and optional z for 3D builds)")
     b.add_argument("output_json", help="Output JSON path")
     b.add_argument(
         "--extra-csv",
@@ -131,6 +133,17 @@ def _build_parser() -> argparse.ArgumentParser:
         default=[],
         metavar="PATH",
         help="Additional trajectory CSV to concatenate with the primary input (same meter origin). Repeatable.",
+    )
+    b.add_argument(
+        "--3d",
+        dest="use_3d",
+        action="store_true",
+        default=False,
+        help=(
+            "Enable 3D mode: read z column from CSV and propagate elevation into the graph. "
+            "Adds polyline_z, slope_deg, elevation_m attributes. "
+            "Without this flag the output is byte-identical to v0.6.0."
+        ),
     )
     _add_build_params(b)
 
@@ -327,6 +340,26 @@ def _build_parser() -> argparse.ArgumentParser:
         default=2.0,
         metavar="FLOAT",
         help="Cost multiplier for unobserved edges when --prefer-observed is set (default 2.0).",
+    )
+    rt.add_argument(
+        "--uphill-penalty",
+        type=float,
+        default=None,
+        metavar="FLOAT",
+        help=(
+            "3D cost multiplier for uphill edges (slope_deg > 0). "
+            "Values >1.0 discourage ascents. Only active when the graph has elevation data."
+        ),
+    )
+    rt.add_argument(
+        "--downhill-bonus",
+        type=float,
+        default=None,
+        metavar="FLOAT",
+        help=(
+            "3D cost multiplier for downhill edges (slope_deg < 0). "
+            "Values <1.0 favour descents. Only active when the graph has elevation data."
+        ),
     )
 
     rtp = sub.add_parser(
@@ -928,7 +961,9 @@ def main(argv: list[str] | None = None) -> int:
         params = _build_params_from_args(args)
         try:
             if args.extra_csv:
-                traj = load_multi_trajectory_csvs([args.input_csv, *args.extra_csv])
+                traj = load_multi_trajectory_csvs(
+                    [args.input_csv, *args.extra_csv], load_z=params.use_3d
+                )
                 graph = build_graph_from_trajectory(traj, params)
             else:
                 graph = build_graph_from_csv(args.input_csv, params)
@@ -1321,6 +1356,8 @@ def main(argv: list[str] | None = None) -> int:
                 min_confidence=getattr(args, "min_confidence", None),
                 observed_bonus=getattr(args, "observed_bonus", 0.5),
                 unobserved_penalty=getattr(args, "unobserved_penalty", 2.0),
+                uphill_penalty=getattr(args, "uphill_penalty", None),
+                downhill_bonus=getattr(args, "downhill_bonus", None),
             )
         except KeyError as e:
             print(f"{args.input_json}: {e.args[0]}", file=sys.stderr)

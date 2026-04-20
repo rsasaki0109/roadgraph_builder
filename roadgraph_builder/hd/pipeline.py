@@ -34,6 +34,39 @@ def _default_node_hd() -> dict[str, object]:
     }
 
 
+def _compute_slope_deg_from_edge(edge) -> float | None:  # type: ignore[no-untyped-def]
+    """Compute slope (degrees) from edge attributes if 3D data is available.
+
+    Uses ``attributes.slope_deg`` when already annotated by the 3D build path,
+    otherwise falls back to ``attributes.polyline_z`` if present.
+    Returns ``None`` when no elevation data is available.
+    """
+    import math
+
+    attrs = edge.attributes if isinstance(edge.attributes, dict) else {}
+    # Already computed by 3D build path.
+    sd = attrs.get("slope_deg")
+    if sd is not None:
+        try:
+            return float(sd)
+        except (TypeError, ValueError):
+            pass
+    # Fallback: compute from polyline_z.
+    pz = attrs.get("polyline_z")
+    if not isinstance(pz, list) or len(pz) < 2:
+        return None
+    pl = edge.polyline
+    total_arc = 0.0
+    for i in range(len(pl) - 1):
+        dx = pl[i + 1][0] - pl[i][0]
+        dy = pl[i + 1][1] - pl[i][1]
+        total_arc += math.hypot(dx, dy)
+    if total_arc < 1e-6:
+        return 0.0
+    dz = float(pz[-1]) - float(pz[0])
+    return math.degrees(math.atan2(dz, total_arc))
+
+
 @dataclass(frozen=True)
 class SDToHDConfig:
     """Controls SD→HD enrichment."""
@@ -105,6 +138,10 @@ def enrich_sd_to_hd(
             merged: dict[str, object] = {**base, **prev_hd}
         else:
             merged = dict(base)
+        # 3D: propagate slope into hd block when elevation data is present.
+        slope = _compute_slope_deg_from_edge(e)
+        if slope is not None:
+            merged["slope_deg"] = slope
         if has_ribbon:
             assert cfg.lane_width_m is not None
             left, right = centerline_lane_boundaries(e.polyline, cfg.lane_width_m)
@@ -127,10 +164,17 @@ def enrich_sd_to_hd(
         prev_hd = attrs.get("hd")
         base = _default_node_hd()
         if isinstance(prev_hd, dict):
-            merged = {**base, **prev_hd}
+            merged_n: dict[str, object] = {**base, **prev_hd}
         else:
-            merged = base
-        attrs["hd"] = merged
+            merged_n = dict(base)
+        # 3D: pick up elevation_m from node attributes when available.
+        elev = attrs.get("elevation_m")
+        if elev is not None:
+            try:
+                merged_n["elevation_m"] = float(elev)  # type: ignore[arg-type]
+            except (TypeError, ValueError):
+                pass
+        attrs["hd"] = merged_n
         n.attributes = attrs
 
     # Apply multi-source refinements when provided (backward-compatible: None = skip).

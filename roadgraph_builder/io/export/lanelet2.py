@@ -565,14 +565,27 @@ def export_lanelet2(
 
     for n in graph.nodes:
         lon, lat = meters_to_lonlat(float(n.position[0]), float(n.position[1]), origin_lat, origin_lon)
-        new_node(
-            lat,
-            lon,
-            {
-                "roadgraph": "graph_node",
-                "roadgraph:node_id": str(n.id),
-            },
-        )
+        n_tags: dict[str, str] = {
+            "roadgraph": "graph_node",
+            "roadgraph:node_id": str(n.id),
+        }
+        # 3D: emit ele tag when elevation data is available on the node.
+        _elev = None
+        n_attrs = n.attributes if isinstance(n.attributes, dict) else {}
+        # Check direct attribute first (from 3D build), then hd block.
+        _raw_elev = n_attrs.get("elevation_m")
+        if _raw_elev is None:
+            _hd_n = n_attrs.get("hd")
+            if isinstance(_hd_n, dict):
+                _raw_elev = _hd_n.get("elevation_m")
+        if _raw_elev is not None:
+            try:
+                _elev = float(_raw_elev)  # type: ignore[arg-type]
+            except (TypeError, ValueError):
+                pass
+        if _elev is not None:
+            n_tags["ele"] = f"{_elev:.3f}"
+        new_node(lat, lon, n_tags)
 
     # Track edge_id → lanelet relation id so the post-pass can wire junction
     # connectivity between consecutive lanelets.
