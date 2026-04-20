@@ -677,6 +677,24 @@ def _build_parser() -> argparse.ArgumentParser:
         ),
     )
 
+    vl2 = sub.add_parser(
+        "validate-lanelet2",
+        help=(
+            "Run the upstream Autoware lanelet2_validation tool on an OSM file (A2). "
+            "Exits 0 when the tool is not installed (skip) or when errors=0. "
+            "Exits 1 when the tool reports ≥1 error. "
+            "Distinct from validate-lanelet2-tags (which only checks tag completeness)."
+        ),
+    )
+    vl2.add_argument("input_osm", help="OSM XML file produced by export-lanelet2 or export-bundle.")
+    vl2.add_argument(
+        "--timeout",
+        type=int,
+        default=30,
+        metavar="SECONDS",
+        help="Hard timeout for the lanelet2_validation subprocess (default 30 s).",
+    )
+
     vlt = sub.add_parser(
         "validate-lanelet2-tags",
         help="Check required Lanelet2 tags (subtype, location) on all lanelet relations in an OSM file.",
@@ -1639,6 +1657,32 @@ def main(argv: list[str] | None = None) -> int:
                 lane_markings=lm_data,
                 camera_detections=cam_det_data,
             )
+        return 0
+    if args.command == "validate-lanelet2":
+        from roadgraph_builder.io.export.lanelet2_validator_bridge import run_autoware_validator
+        osm_path = Path(args.input_osm)
+        if not osm_path.is_file():
+            print(f"File not found: {osm_path}", file=sys.stderr)
+            return 1
+        result = run_autoware_validator(osm_path, timeout_s=getattr(args, "timeout", 30))
+        # Always print the structured result as JSON on stdout.
+        import json as _json
+        print(_json.dumps(result, indent=2))
+        if result["status"] == "skipped":
+            # Graceful skip: exit 0 with a warning on stderr.
+            print(
+                f"validate-lanelet2: SKIPPED — {result['reason']}",
+                file=sys.stderr,
+            )
+            return 0
+        if result["status"] == "failed":
+            for err in result.get("error_lines", []):
+                print(f"ERROR: {err}", file=sys.stderr)
+            print(
+                f"validate-lanelet2: {result['errors']} error(s) found.",
+                file=sys.stderr,
+            )
+            return 1
         return 0
     if args.command == "validate-lanelet2-tags":
         from roadgraph_builder.io.export.lanelet2 import validate_lanelet2_tags
