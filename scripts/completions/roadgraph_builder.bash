@@ -21,8 +21,10 @@ _roadgraph_builder_completions() {
 validate-sd-nav validate-manifest validate-turn-restrictions enrich \
 inspect-lidar nearest-node route stats match-trajectory infer-road-class \
 infer-signalized-junctions fuse-traces reconstruct-trips fuse-lidar \
-export-lanelet2 apply-camera export-bundle build-osm-graph \
-convert-osm-restrictions project-camera"
+infer-lane-count export-lanelet2 validate-lanelet2 validate-lanelet2-tags \
+apply-camera export-bundle build-osm-graph convert-osm-restrictions \
+project-camera detect-lane-markings detect-lane-markings-camera \
+validate-lane-markings guidance validate-guidance update-graph process-dataset"
 
     # Top-level position: either a flag or a subcommand.
     if ((cword == 1)); then
@@ -39,6 +41,8 @@ convert-osm-restrictions project-camera"
     # Flag-value pairs that always want a file path.
     case "$prev" in
         --origin-json | --detections-json | --turn-restrictions-json | \
+        --lane-markings-json | --camera-detections-json | \
+        --camera-detections-refine-json | --skipped-json | \
         --lidar-points | --points-path | --output | --input_json | --input_las | \
         --input_csv | --output_json | --output_svg | --output_osm | --output_dir | \
         --points_csv | --points_path | --extra-csv)
@@ -50,21 +54,38 @@ convert-osm-restrictions project-camera"
     # Sub-command specific: show common flags when the user types `-`.
     if [[ $cur == -* ]]; then
         case "$sub" in
-            build|visualize|export-bundle)
+            build)
+                COMPREPLY=($(compgen -W "\
+--max-step-m --merge-endpoint-m --centerline-bins --simplify-tolerance \
+--extra-csv --3d" -- "$cur"))
+                ;;
+            visualize)
+                COMPREPLY=($(compgen -W "\
+--max-step-m --merge-endpoint-m --centerline-bins --simplify-tolerance \
+--width --height" -- "$cur"))
+                ;;
+            export-bundle)
                 COMPREPLY=($(compgen -W "\
 --max-step-m --merge-endpoint-m --centerline-bins --simplify-tolerance \
 --lane-width-m --dataset-name --origin-json --origin-lat --origin-lon \
 --detections-json --turn-restrictions-json --lidar-points --fuse-max-dist-m \
---fuse-bins --width --height --extra-csv" -- "$cur"))
+--fuse-bins --lane-markings-json --camera-detections-refine-json \
+--extra-csv" -- "$cur"))
                 ;;
             enrich)
-                COMPREPLY=($(compgen -W "--lane-width-m" -- "$cur"))
+                COMPREPLY=($(compgen -W "--lane-width-m --lane-markings-json --camera-detections-json" -- "$cur"))
                 ;;
             fuse-lidar)
-                COMPREPLY=($(compgen -W "--max-dist-m --bins" -- "$cur"))
+                COMPREPLY=($(compgen -W "--max-dist-m --bins --ground-plane --height-band-lo --height-band-hi" -- "$cur"))
+                ;;
+            infer-lane-count)
+                COMPREPLY=($(compgen -W "--lane-markings-json --base-lane-width-m --split-gap-m --min-lanes --max-lanes" -- "$cur"))
                 ;;
             export-lanelet2)
-                COMPREPLY=($(compgen -W "--origin-lat --origin-lon" -- "$cur"))
+                COMPREPLY=($(compgen -W "--origin-lat --origin-lon --per-lane --speed-limit-tagging --lane-markings-json --camera-detections-json" -- "$cur"))
+                ;;
+            validate-lanelet2)
+                COMPREPLY=($(compgen -W "--timeout" -- "$cur"))
                 ;;
             nearest-node)
                 COMPREPLY=($(compgen -W "--latlon --xy --origin-lat --origin-lon" -- "$cur"))
@@ -72,7 +93,9 @@ convert-osm-restrictions project-camera"
             route)
                 COMPREPLY=($(compgen -W "\
 --turn-restrictions-json --output --origin-lat --origin-lon \
---from-latlon --to-latlon" -- "$cur"))
+--from-latlon --to-latlon --prefer-observed --min-confidence \
+--observed-bonus --unobserved-penalty --uphill-penalty --downhill-bonus \
+--allow-lane-change --lane-change-cost-m" -- "$cur"))
                 ;;
             match-trajectory)
                 COMPREPLY=($(compgen -W "--max-distance-m --output --hmm --gps-sigma-m --transition-limit-m" -- "$cur"))
@@ -91,6 +114,34 @@ convert-osm-restrictions project-camera"
                 ;;
             stats)
                 COMPREPLY=($(compgen -W "--origin-lat --origin-lon" -- "$cur"))
+                ;;
+            build-osm-graph)
+                COMPREPLY=($(compgen -W "\
+--origin-json --origin-lat --origin-lon --highway-classes \
+--max-step-m --merge-endpoint-m --centerline-bins --simplify-tolerance" -- "$cur"))
+                ;;
+            convert-osm-restrictions)
+                COMPREPLY=($(compgen -W "--max-snap-m --min-alignment --id-prefix --skipped-json" -- "$cur"))
+                ;;
+            project-camera)
+                COMPREPLY=($(compgen -W "--ground-z-m --max-edge-distance-m" -- "$cur"))
+                ;;
+            detect-lane-markings)
+                COMPREPLY=($(compgen -W "--output --max-lateral-m --intensity-percentile --bin-m --min-points-per-bin" -- "$cur"))
+                ;;
+            detect-lane-markings-camera)
+                COMPREPLY=($(compgen -W "\
+--output --white-threshold --yellow-hue-lo --yellow-hue-hi \
+--saturation-min --min-line-length-px --max-edge-distance-m" -- "$cur"))
+                ;;
+            guidance)
+                COMPREPLY=($(compgen -W "--output --slight-deg --sharp-deg --u-turn-deg" -- "$cur"))
+                ;;
+            update-graph)
+                COMPREPLY=($(compgen -W "--output --max-step-m --merge-endpoint-m --absorb-tolerance-m" -- "$cur"))
+                ;;
+            process-dataset)
+                COMPREPLY=($(compgen -W "--origin-json --pattern --parallel --continue-on-error --no-continue-on-error --lane-width-m --dataset-name" -- "$cur"))
                 ;;
             *)
                 COMPREPLY=($(compgen -W "-h --help" -- "$cur"))

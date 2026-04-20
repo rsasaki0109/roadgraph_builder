@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **CLI completions now cover the v0.6/v0.7 command surface.**
+  Bash and zsh completions include the lane-count, Lanelet2 validation,
+  camera lane-detection, incremental update, and dataset batch commands added
+  after v0.5, with common new flags such as `--per-lane`,
+  `--allow-lane-change`, `--ground-plane`, and `--lane-markings-json`.
+  The completion smoke test now derives the expected subcommands from the
+  argparse parser so future CLI additions cannot silently drift.
+
 - **V1 follow-up: real-data α accuracy numbers for Tokyo Ginza + Berlin Mitte.**
   `docs/accuracy_report.md` replaces the `[not yet measured]` rows with
   Overpass-fetched numbers captured 2026-04-20: Tokyo Ginza (`139.7600,

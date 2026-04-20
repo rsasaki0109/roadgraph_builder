@@ -6,7 +6,7 @@
 > このファイル → [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md)（Mermaid 6 枚 + CLI 対応表 +
 > モジュール索引）→ [`CHANGELOG.md`](../CHANGELOG.md) の順。
 
-*最終更新: 2026-04-21 session（V1 実測 / camera warning fix / perf flake fix / docs sync が反映済み）。*
+*最終更新: 2026-04-21 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync が反映済み）。*
 
 ---
 
@@ -24,6 +24,7 @@
   3. 3D2 camera `_rgb_to_hsv` の divide-by-zero `RuntimeWarning` 撲滅
   4. 50×50 perf flake 対策（`@pytest.mark.slow` 分離 + budget 30s→60s、default run 56s→27s）
   5. PLAN / ARCHITECTURE / README を v0.6+v0.7 CLI 群に同期
+  6. Bash / zsh completions を v0.6+v0.7 CLI 群に同期（parser-derived drift test 付き）
 - **未着手 (次の AI が触る候補):** ↓ §5 "Open tasks" 参照。
 
 - **コミュニケーション言語:** **日本語** 優先。ユーザーは短い JP/romaji プロンプトを好み
@@ -339,14 +340,6 @@ Unreleased は `CHANGELOG.md` の `[Unreleased]` 参照。2026-04-21 session の
   `infer-lane-count` → `measure_lane_accuracy.py --matching-tolerance-m 20`）を走らせ、
   `docs/accuracy_report.md` の Paris section を実数で差し替え。
 - **規模感:** 30 min。V1 実測の残件として small。
-
-### 5d. Completions に v0.6 / v0.7 CLI 追加
-
-- `scripts/completions/{roadgraph_builder.bash,_roadgraph_builder}` が v0.5 時点で止まっている。
-- 追加対象: `infer-lane-count`, `validate-lanelet2-tags`, `validate-lanelet2`, `update-graph`,
-  `process-dataset`, `detect-lane-markings-camera`（6 個）。
-- README に既に caveat は入れた（§docs sync commit）。
-- **規模感:** 30 min。low-risk。
 
 ---
 

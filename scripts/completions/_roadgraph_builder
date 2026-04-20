@@ -32,12 +32,22 @@ _roadgraph_builder() {
         'infer-signalized-junctions:Flag nodes as signalized candidates from repeated stops'
         'fuse-traces:Overlay multiple trajectories; record per-edge coverage stats'
         'fuse-lidar:Fit lane boundaries from CSV / LAS / LAZ points'
+        'infer-lane-count:Infer per-edge lane count and lane geometries'
         'export-lanelet2:Write OSM XML 0.6 (Lanelet2 / JOSM)'
+        'validate-lanelet2:Run Autoware lanelet2_validation when available'
+        'validate-lanelet2-tags:Check required Lanelet2 tags in OSM XML'
         'apply-camera:Merge camera detections into attributes.hd.semantic_rules'
         'export-bundle:Write nav/sim/lanelet outputs in one directory'
         'build-osm-graph:Build road graph from Overpass highway ways'
         'convert-osm-restrictions:Map OSM type=restriction onto graph turn_restrictions'
         'project-camera:Project image pixels through a pinhole camera onto graph edges'
+        'detect-lane-markings:Detect lane markings from LiDAR intensity peaks'
+        'detect-lane-markings-camera:Detect lane markings from camera images'
+        'validate-lane-markings:Validate lane_markings JSON'
+        'guidance:Build turn-by-turn guidance from route GeoJSON + sd_nav'
+        'validate-guidance:Validate guidance JSON'
+        'update-graph:Incrementally merge a new trajectory CSV into an existing graph'
+        'process-dataset:Batch-process a directory of trajectory CSVs'
     )
 
     _arguments -C \
@@ -58,6 +68,14 @@ _roadgraph_builder() {
                         '--output[Route GeoJSON output path]:file:_files' \
                         '--origin-lat[WGS84 origin latitude]:float:' \
                         '--origin-lon[WGS84 origin longitude]:float:' \
+                        '--prefer-observed[Prefer edges with trace observations]' \
+                        '--min-confidence[Minimum hd_refinement confidence]:float:' \
+                        '--observed-bonus[Observed-edge cost multiplier]:float:' \
+                        '--unobserved-penalty[Unobserved-edge cost multiplier]:float:' \
+                        '--uphill-penalty[Uphill cost multiplier]:float:' \
+                        '--downhill-bonus[Downhill cost multiplier]:float:' \
+                        '--allow-lane-change[Enable lane-level routing]' \
+                        '--lane-change-cost-m[Within-edge lane-change cost]:float:' \
                         '--from-latlon[Source lat/lon]:float float:' \
                         '--to-latlon[Destination lat/lon]:float float:' \
                         '*:file:_files'
@@ -82,10 +100,109 @@ _roadgraph_builder() {
                         '--lidar-points[LiDAR points CSV/LAS/LAZ]:file:_files' \
                         '--fuse-max-dist-m[LiDAR fuse max distance (m)]:float:' \
                         '--fuse-bins[LiDAR fuse along-edge bins]:int:' \
+                        '--lane-markings-json[Lane markings JSON for HD refinement]:file:_files' \
+                        '--camera-detections-refine-json[Camera detections JSON for HD refinement]:file:_files' \
                         '--max-step-m[Trajectory split gap (m)]:float:' \
                         '--merge-endpoint-m[Endpoint merge radius (m)]:float:' \
                         '--centerline-bins[PCA bin count]:int:' \
                         '--simplify-tolerance[Douglas–Peucker tolerance (m)]:float:' \
+                        '*:file:_files'
+                    ;;
+                infer-lane-count)
+                    _arguments \
+                        '--lane-markings-json[Lane markings JSON]:file:_files' \
+                        '--base-lane-width-m[Assumed single-lane width (m)]:float:' \
+                        '--split-gap-m[Clustering gap threshold (m)]:float:' \
+                        '--min-lanes[Minimum lane count]:int:' \
+                        '--max-lanes[Maximum lane count]:int:' \
+                        '*:file:_files'
+                    ;;
+                export-lanelet2)
+                    _arguments \
+                        '--origin-lat[WGS84 origin latitude]:float:' \
+                        '--origin-lon[WGS84 origin longitude]:float:' \
+                        '--per-lane[Expand edges into per-lane lanelets]' \
+                        '--speed-limit-tagging[Speed-limit tagging style]:(lanelet-attr regulatory-element)' \
+                        '--lane-markings-json[Lane markings JSON]:file:_files' \
+                        '--camera-detections-json[Camera detections JSON]:file:_files' \
+                        '*:file:_files'
+                    ;;
+                validate-lanelet2)
+                    _arguments \
+                        '--timeout[Validation subprocess timeout seconds]:int:' \
+                        '*:file:_files'
+                    ;;
+                build-osm-graph)
+                    _arguments \
+                        '--origin-json[Origin JSON path]:file:_files' \
+                        '--origin-lat[WGS84 origin latitude]:float:' \
+                        '--origin-lon[WGS84 origin longitude]:float:' \
+                        '--highway-classes[Comma-separated highway classes]:string:' \
+                        '--max-step-m[Trajectory split gap (m)]:float:' \
+                        '--merge-endpoint-m[Endpoint merge radius (m)]:float:' \
+                        '--centerline-bins[PCA bin count]:int:' \
+                        '--simplify-tolerance[Douglas–Peucker tolerance (m)]:float:' \
+                        '*:file:_files'
+                    ;;
+                convert-osm-restrictions)
+                    _arguments \
+                        '--max-snap-m[Max via-node snap distance (m)]:float:' \
+                        '--min-alignment[Minimum tangent alignment cosine]:float:' \
+                        '--id-prefix[Generated restriction id prefix]:string:' \
+                        '--skipped-json[Skipped relation report path]:file:_files' \
+                        '*:file:_files'
+                    ;;
+                project-camera)
+                    _arguments \
+                        '--ground-z-m[World-frame ground plane height (m)]:float:' \
+                        '--max-edge-distance-m[Max projection-to-edge distance (m)]:float:' \
+                        '*:file:_files'
+                    ;;
+                detect-lane-markings)
+                    _arguments \
+                        '--output[Lane markings JSON output path]:file:_files' \
+                        '--max-lateral-m[Max lateral distance (m)]:float:' \
+                        '--intensity-percentile[Intensity percentile threshold]:float:' \
+                        '--bin-m[Along-edge bin size (m)]:float:' \
+                        '--min-points-per-bin[Min points per bin]:int:' \
+                        '*:file:_files'
+                    ;;
+                detect-lane-markings-camera)
+                    _arguments \
+                        '--output[Camera lanes JSON output path]:file:_files' \
+                        '--white-threshold[White value threshold]:int:' \
+                        '--yellow-hue-lo[Yellow hue lower bound]:int:' \
+                        '--yellow-hue-hi[Yellow hue upper bound]:int:' \
+                        '--saturation-min[Yellow saturation minimum]:int:' \
+                        '--min-line-length-px[Minimum lane length in pixels]:int:' \
+                        '--max-edge-distance-m[Max edge snap distance (m)]:float:' \
+                        '*:file:_files'
+                    ;;
+                guidance)
+                    _arguments \
+                        '--output[Guidance JSON output path]:file:_files' \
+                        '--slight-deg[Slight-turn threshold degrees]:float:' \
+                        '--sharp-deg[Sharp-turn threshold degrees]:float:' \
+                        '--u-turn-deg[U-turn threshold degrees]:float:' \
+                        '*:file:_files'
+                    ;;
+                update-graph)
+                    _arguments \
+                        '--output[Merged graph JSON output path]:file:_files' \
+                        '--max-step-m[Trajectory split gap (m)]:float:' \
+                        '--merge-endpoint-m[Endpoint merge radius (m)]:float:' \
+                        '--absorb-tolerance-m[Existing-edge absorb tolerance (m)]:float:' \
+                        '*:file:_files'
+                    ;;
+                process-dataset)
+                    _arguments \
+                        '--origin-json[Shared origin JSON path]:file:_files' \
+                        '--pattern[Input CSV glob pattern]:string:' \
+                        '--parallel[Worker process count]:int:' \
+                        '--continue-on-error[Continue processing after per-file errors]' \
+                        '--no-continue-on-error[Abort on first file error]' \
+                        '--lane-width-m[HD-lite lane width (m)]:float:' \
+                        '--dataset-name[Dataset label prefix]:string:' \
                         '*:file:_files'
                     ;;
                 *)
