@@ -22,11 +22,122 @@ Output layout::
 
 from __future__ import annotations
 
+import argparse
 import json
+import sys
 import traceback
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable, TextIO
+
+
+def add_process_dataset_parser(
+    sub,  # type: ignore[no-untyped-def]
+    *,
+    trajectory_dtype_choices: tuple[str, ...],
+) -> None:
+    """Register the ``process-dataset`` subcommand."""
+
+    pd_cli = sub.add_parser(
+        "process-dataset",
+        help="Batch-process a directory of trajectory CSVs into per-file export-bundles.",
+    )
+    pd_cli.add_argument("input_dir", help="Directory containing trajectory CSV files.")
+    pd_cli.add_argument("output_dir", help="Output directory (created if absent).")
+    pd_cli.add_argument(
+        "--origin-json",
+        type=str,
+        default=None,
+        metavar="PATH",
+        help="JSON with lat0, lon0 (shared origin for all CSVs in the dataset).",
+    )
+    pd_cli.add_argument(
+        "--pattern",
+        type=str,
+        default="*.csv",
+        metavar="GLOB",
+        help="Glob pattern for trajectory files (default: '*.csv').",
+    )
+    pd_cli.add_argument(
+        "--parallel",
+        type=int,
+        default=1,
+        metavar="N",
+        help="Number of parallel worker processes (default: 1 = sequential).",
+    )
+    pd_cli.add_argument(
+        "--continue-on-error",
+        action="store_true",
+        default=True,
+        help="Continue processing other files if one fails (default: true).",
+    )
+    pd_cli.add_argument(
+        "--no-continue-on-error",
+        action="store_false",
+        dest="continue_on_error",
+        help="Abort on the first file error.",
+    )
+    pd_cli.add_argument(
+        "--lane-width-m",
+        type=float,
+        default=3.5,
+        metavar="M",
+        help="HD-lite lane width for each bundle (meters, default 3.5).",
+    )
+    pd_cli.add_argument(
+        "--dataset-name",
+        type=str,
+        default=None,
+        metavar="NAME",
+        help="Label prefix embedded in per-file GeoJSON/metadata (default: CSV stem).",
+    )
+    pd_cli.add_argument(
+        "--trajectory-dtype",
+        choices=trajectory_dtype_choices,
+        default="float64",
+        help=(
+            "XY array dtype for trajectory loading (default float64). "
+            "float32 is opt-in and may change exported coordinates slightly."
+        ),
+    )
+
+
+def run_process_dataset(
+    args: argparse.Namespace,
+    *,
+    process_dataset_func: Callable[..., dict[str, Any]] | None = None,
+    stdout: TextIO | None = None,
+    stderr: TextIO | None = None,
+) -> int:
+    """Execute ``process-dataset`` from parsed args."""
+
+    if process_dataset_func is None:
+        process_dataset_func = process_dataset
+
+    out = stdout if stdout is not None else sys.stdout
+    err = stderr if stderr is not None else sys.stderr
+    input_dir = Path(args.input_dir)
+    output_dir = Path(args.output_dir)
+    if not input_dir.is_dir():
+        print(f"Input directory not found: {input_dir}", file=err)
+        return 1
+    origin_json = Path(args.origin_json) if args.origin_json else None
+    if origin_json is not None and not origin_json.is_file():
+        print(f"Origin JSON not found: {origin_json}", file=err)
+        return 1
+    manifest = process_dataset_func(
+        input_dir=input_dir,
+        output_dir=output_dir,
+        origin_json=origin_json,
+        pattern=args.pattern,
+        parallel=args.parallel,
+        continue_on_error=args.continue_on_error,
+        lane_width_m=args.lane_width_m,
+        dataset_name_prefix=args.dataset_name,
+        trajectory_xy_dtype=args.trajectory_dtype,
+    )
+    print(json.dumps(manifest, ensure_ascii=False, indent=2), file=out)
+    return 0 if manifest.get("failed_count", 0) == 0 else 1
 
 
 def _process_single_file(
