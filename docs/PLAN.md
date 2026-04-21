@@ -6,7 +6,7 @@
 > このファイル → [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md)（Mermaid 6 枚 + CLI 対応表 +
 > モジュール索引）→ [`CHANGELOG.md`](../CHANGELOG.md) の順。
 
-*最終更新: 2026-04-21 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards polish + README measured-results compacting / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate + manifest policy docs polish / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理 / v0.7.1 release + asset verification / packaging metadata smoke）を反映済み。*
+*最終更新: 2026-04-21 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards polish + README measured-results compacting / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate + manifest policy docs polish / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理 / v0.7.1 release + asset verification / packaging metadata smoke / 0.7.2.dev0 reopen）を反映済み。*
 
 ---
 
@@ -16,7 +16,7 @@
 - **目的:** 軌跡 CSV / OSM highway ways / LiDAR / camera 入力から **道路グラフ** を構築し、
   ナビ SD / simulation / Lanelet2 を一括エクスポートする graph-first ライブラリ。HD は
   survey-grade ではなく「HD-lite」帯まで。
-- **state:** **v0.7.1 shipped (2026-04-21)**。tag `v0.7.1` は `8282f7c`。
+- **state:** **v0.7.2.dev0 open on main** after **v0.7.1 shipped (2026-04-21)**。tag `v0.7.1` は `8282f7c`。
   main CI run `24721558719` と Release workflow run `24721632168` は green。
   GitHub Release assets (`roadgraph_sample_bundle.tar.gz` / `.sha256`) は download + checksum +
   `validate-manifest` / `validate-sd-nav` / `validate` 済み。`v0.7.0` は shipped (2026-04-20)。
@@ -106,6 +106,8 @@
       legacy license classifier を削除。
   32. Python 3.10 CI で Paris splitter golden の aggregate length だけ 3.49 m drift。
       topology / IDs は守られているため、length tolerance を 5 m に拡大して runtime / NumPy 差を吸収。
+  33. `v0.7.1` tag 後の `main` を `0.7.2.dev0` に reopen。
+      post-release metadata/test hygiene commits が shipped `0.7.1` version を再利用しないようにする。
 - **push 方針:** `git push` は user が `push!` などで明示するまで実行しない。
 - **未着手 (次の AI が触る候補):** ↓ §5 "Open tasks" 参照。
 
@@ -646,7 +648,7 @@ feedback / project / reference の 4 種、`MEMORY.md` は index）。
 
 ## 11. 一行で言うと
 
-> **v0.7.1 shipped 済み。v0.7.0 は全部シップ済み、直近 workstream（accuracy / completions / tuning / visual preview /
+> **v0.7.1 shipped 済み、main は 0.7.2.dev0 で reopen 済み。v0.7.0 は全部シップ済み、直近 workstream（accuracy / completions / tuning / visual preview /
 > CLI boundary split / release surface docs / float32 drift compare script / 1M synthetic memory
 > profile / OSM public-trace replay profile / release bundle byte + normalized-manifest gate +
 > manifest policy docs polish / README measured-results compacting）も 0.7.1 に切り出し済み。

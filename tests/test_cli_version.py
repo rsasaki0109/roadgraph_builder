@@ -21,7 +21,7 @@ def test_cli_version_short_flag(capsys):
         main(["-V"])
     assert exc.value.code == 0
     out = capsys.readouterr().out
-    assert re.fullmatch(r"roadgraph_builder \d+\.\d+\.\d+\n", out)
+    assert re.fullmatch(r"roadgraph_builder \d+\.\d+\.\d+(?:\.dev\d+)?\n", out)
 
 
 def test_cli_completions_match_subparsers():

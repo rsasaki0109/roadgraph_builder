@@ -14,6 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the legacy license classifier was removed so modern setuptools builds no
   longer warn about deprecated license metadata.
 
+- **Main is reopened for 0.7.2 development.**
+  Package metadata and `roadgraph_builder.__version__` now report
+  `0.7.2.dev0` after the `v0.7.1` tag, avoiding new post-release artifacts
+  that reuse the shipped `0.7.1` version.
+
 ### Fixed
 
 - **Paris splitter golden length check now tolerates Python/Numpy drift.**
