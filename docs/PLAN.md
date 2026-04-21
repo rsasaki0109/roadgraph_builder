@@ -6,7 +6,7 @@
 > このファイル → [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md)（Mermaid 6 枚 + CLI 対応表 +
 > モジュール索引）→ [`CHANGELOG.md`](../CHANGELOG.md) の順。
 
-*最終更新: 2026-04-21 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards polish + README measured-results compacting / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate + manifest policy docs polish / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理 / v0.7.1 release + asset verification / packaging metadata smoke / 0.7.2.dev0 reopen / Actions Node24 update）を反映済み。*
+*最終更新: 2026-04-21 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards polish + README measured-results compacting / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate + manifest policy docs polish / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理 / v0.7.1 release + asset verification / packaging metadata smoke / 0.7.2.dev0 reopen / Actions Node24 update / release+PyPI dry-run）を反映済み。*
 
 ---
 
@@ -17,7 +17,7 @@
   ナビ SD / simulation / Lanelet2 を一括エクスポートする graph-first ライブラリ。HD は
   survey-grade ではなく「HD-lite」帯まで。
 - **state:** **v0.7.2.dev0 open on main** after **v0.7.1 shipped (2026-04-21)**。tag `v0.7.1` は `8282f7c`。
-  main CI run `24721558719` と Release workflow run `24721632168` は green。
+  最新 main CI run `24722916735` と Release workflow run `24721632168` は green。
   GitHub Release assets (`roadgraph_sample_bundle.tar.gz` / `.sha256`) は download + checksum +
   `validate-manifest` / `validate-sd-nav` / `validate` 済み。`v0.7.0` は shipped (2026-04-20)。
   最新 full local `pytest` = **553 passed / 33 skipped / 4 deselected**（opt-in marker 除外）。
@@ -111,6 +111,9 @@
   34. GitHub Actions の Node 20 deprecation warning 対策。
       CI / release / benchmark / city-scale / PyPI workflow を `node24` 実行の action major へ更新し、
       `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24` flag 依存を削除。
+  35. Release / PyPI workflow の local dry-run。
+      `/tmp` に `HEAD` を archive 展開し、release bundle build + checksum + extracted manifest/sd_nav/road_graph
+      validation と、PyPI build job 相当の `python -m build` + `twine check dist/*` を確認。
 - **push 方針:** `git push` は user が `push!` などで明示するまで実行しない。
 - **未着手 (次の AI が触る候補):** ↓ §5 "Open tasks" 参照。
 
