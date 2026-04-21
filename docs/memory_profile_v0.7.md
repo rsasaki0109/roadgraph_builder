@@ -71,10 +71,14 @@ proportionally with edge count.
 - **`crossing_splitters.py:288` — grid cell tuples** (`(c, r)` tuple per cell,
   ~70 KB for Paris): switching the grid dict key to a packed integer
   `c * MAX_R + r` would halve the tuple overhead.  Safe but deferred.
-- **`trajectory xy float64 → float32`**: saves ~50 % on coordinate arrays
-  (~6 KB for Paris, ~104 KB for a 6 634-point real run).  Would change
-  polyline coordinates at float32 precision — needs a canonicalization
-  pass to stay byte-identical with existing tests.  Deferred to v0.8.0.
+- **`trajectory xy float64 → float32`**: now available as an opt-in prototype
+  through `load_trajectory_csv(..., xy_dtype="float32")`,
+  `BuildParams(trajectory_xy_dtype="float32")`, CLI `--trajectory-dtype
+  float32`, and `scripts/profile_memory.py --trajectory-dtype float32`.
+  First measurements are in [`float32_drift_report.md`](./float32_drift_report.md):
+  Berlin 7,500 rows saved 60,000 B in the loader allocation and kept topology
+  unchanged with <1 mm coordinate drift, but process-level RSS did not improve
+  enough to justify a default flip.  Default remains float64.
 - **Polyline list-of-tuples → NumPy array**: saves ~80 % on Python object
   overhead for large graphs (1 000 polylines × 20 pts: 1 336 KB → 312 KB).
   Requires updating all consumers of `edge.polyline`; complex refactor.

@@ -53,7 +53,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `BuildParams(trajectory_xy_dtype="float32")`, CLI `--trajectory-dtype
   float32`, and `scripts/profile_memory.py --trajectory-dtype float32` now
   allow explicit coordinate-array memory experiments while default trajectory
-  loading remains float64.
+  loading remains float64. `docs/float32_drift_report.md` records the first
+  float64/float32 comparison: topology unchanged on Paris and Berlin samples,
+  <1 mm max coordinate drift, but no process-level RSS win large enough to
+  justify a default change.
 
 ### Fixed
 

@@ -2,8 +2,8 @@
 
 Date: 2026-04-21
 
-Status: design complete and opt-in prototype landed.  The next step is
-measurement and drift reporting, not a default dtype change.
+Status: design complete, opt-in prototype landed, and first measurement
+recorded in `docs/float32_drift_report.md`.  The default remains float64.
 
 ## Goal
 
@@ -172,13 +172,17 @@ Phase 1 is complete: option B landed as opt-in only:
 
 Phase 2 should measure and document drift:
 
-- Run `scripts/profile_memory.py` on Paris and at least one city-scale CSV with
-  float64 and float32.
-- Compare `road_graph.json`, `map.geojson`, `lanelet/map.osm`, and
-  `nav/sd_nav.json`.
-- Add tolerance-based assertions for opt-in float32 output, not byte identity.
-- Record coordinate max error, edge-length total delta, node/edge count delta,
-  and route-length delta on a fixed sample route.
+Phase 2 is partially complete:
+
+- `docs/float32_drift_report.md` records Paris 800-row and Berlin 7,500-row
+  float64/float32 comparisons.
+- Topology was unchanged on both samples.
+- Max observed graph / GeoJSON / Lanelet coordinate drift was below 1 mm.
+- `Trajectory.xy` allocation dropped as expected, but process RSS did not show
+  a reliable win at this input size.
+
+Still open: add reusable tolerance-based regression helpers if float32 becomes
+a release gate.
 
 Phase 3 should decide whether float32 can become default:
 

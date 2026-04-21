@@ -341,7 +341,7 @@ README+Pages visualization preview は `[Unreleased]` 下。
 
 優先度順。各タスクに **手をつける前のヒント** を付けてある。
 
-### 5a. V3 float32 trajectory 最適化（prototype landed／default flip は未定）
+### 5a. V3 float32 trajectory 最適化（measurement done／default float64 維持）
 
 - **背景:** v0.7 で `export_lanelet2` DOM rewrite が peak RSS を -10% したが、trajectory 配列の
   float64→float32 変換はまだ。**byte-identity を破る** ので単純 swap 不可。
@@ -351,6 +351,10 @@ README+Pages visualization preview は `[Unreleased]` 下。
 - **prototype:** `load_trajectory_csv(..., xy_dtype="float32")`、`BuildParams(trajectory_xy_dtype=...)`、
   trajectory CSV 系 CLI の `--trajectory-dtype {float64,float32}`、`scripts/profile_memory.py
   --trajectory-dtype` を追加。default は `float64` のまま。
+- **実測:** [`docs/float32_drift_report.md`](./float32_drift_report.md) 作成済み。Paris 800-row で
+  tracemalloc -6 KB / max graph drift 0.00014 m、Berlin 7,500-row で loader allocation -60,000 B /
+  max graph drift 0.00072 m。RSS は import high-water noise が勝つ規模なので default flip の根拠には
+  しない。
 - **設計の勘所:**
   - どこで float64 が伸びるか: `io.trajectory.loader::Trajectory.xy`, `pipeline.build_graph` 内の
     numpy 配列、`routing.shortest_path` の内部距離計算など。
@@ -363,10 +367,10 @@ README+Pages visualization preview は `[Unreleased]` 下。
 - **やり方:**
   1. ~~design memo を `docs/handoff/` に書く~~（完了）
   2. ~~opt-in prototype（loader + `BuildParams` + CLI/profile flag）~~（完了）
-  3. `scripts/profile_memory.py` を float64/float32 両方で実測
+  3. ~~`scripts/profile_memory.py` を float64/float32 両方で実測~~（完了）
   4. default path は byte-identical、opt-in path は coordinate / length tolerance で regression を拡張
-  5. default を float32 にするかは実測後に判断（現時点では未定）
-- **規模感:** まだ 1-2 session。次は実測 + drift report。
+  5. より大きい city-scale workload で RSS に効くかを見る。現時点で default は `float64` のまま。
+- **規模感:** 次は recurring drift script / larger workload があれば 1 session。
 
 ---
 
