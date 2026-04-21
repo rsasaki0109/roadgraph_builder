@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """Performance benchmarks for roadgraph_builder.
 
-Measures wall-clock time for six scenarios:
+Measures wall-clock time for seven scenarios:
   polylines_to_graph_paris       — build from OSM public trackpoints CSV
-  polylines_to_graph_10k_synth   — build from 10 000-point synthetic grid
+  polylines_to_graph_10k_synth   — build from 50×50 synthetic grid (~25 000 pts)
   shortest_path_paris            — 100 Dijkstra queries on the Paris graph
   shortest_path_grid_120         — 120 Dijkstra queries on a 55×55 grid graph
   nearest_node_grid_2000         — 2000 nearest-node queries on a 300×300 grid
+  export_geojson_grid_120_compact — compact GeoJSON export on a 120×120 grid
   export_bundle_end_to_end       — full export-bundle pipeline (sample CSV)
 
 Usage:
@@ -234,12 +235,68 @@ def export_bundle_paris() -> None:
         )
 
 
+def export_geojson_grid_120_compact() -> None:
+    """Write compact GeoJSON for a synthetic 120×120 grid graph."""
+    import tempfile
+    import numpy as np
+    from roadgraph_builder.core.graph.edge import Edge
+    from roadgraph_builder.core.graph.graph import Graph
+    from roadgraph_builder.core.graph.node import Node
+    from roadgraph_builder.io.export.geojson import export_map_geojson
+
+    size = 120
+    spacing = 5.0
+    nodes = [
+        Node(f"n{x}_{y}", (x * spacing, y * spacing))
+        for y in range(size)
+        for x in range(size)
+    ]
+    edges: list[Edge] = []
+    edge_id = 0
+    for y in range(size):
+        for x in range(size):
+            if x + 1 < size:
+                edges.append(
+                    Edge(
+                        f"e{edge_id}",
+                        f"n{x}_{y}",
+                        f"n{x + 1}_{y}",
+                        [(x * spacing, y * spacing), ((x + 1) * spacing, y * spacing)],
+                    )
+                )
+                edge_id += 1
+            if y + 1 < size:
+                edges.append(
+                    Edge(
+                        f"e{edge_id}",
+                        f"n{x}_{y}",
+                        f"n{x}_{y + 1}",
+                        [(x * spacing, y * spacing), (x * spacing, (y + 1) * spacing)],
+                    )
+                )
+                edge_id += 1
+
+    graph = Graph(nodes, edges)
+    traj = np.zeros((0, 2), dtype=np.float64)
+    with tempfile.TemporaryDirectory() as tmp:
+        export_map_geojson(
+            graph,
+            traj,
+            Path(tmp) / "map.geojson",
+            origin_lat=35.0,
+            origin_lon=139.0,
+            dataset_name="bench",
+            compact=True,
+        )
+
+
 BENCHMARKS: dict[str, tuple] = {
     "polylines_to_graph_paris": (build_paris_graph, 1),
     "polylines_to_graph_10k_synth": (build_10k_synth, 1),
     "shortest_path_paris": (run_paris_routes_100, 1),
     "shortest_path_grid_120": (run_grid_routes_120, 1),
     "nearest_node_grid_2000": (run_nearest_grid_2000, 1),
+    "export_geojson_grid_120_compact": (export_geojson_grid_120_compact, 1),
     "export_bundle_end_to_end": (export_bundle_paris, 1),
 }
 

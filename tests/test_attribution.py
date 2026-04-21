@@ -93,6 +93,28 @@ def test_export_map_geojson_writes_attribution(tmp_path: Path):
     assert data["properties"]["license"] == "ODbL-1.0"
 
 
+def test_export_map_geojson_compact_keeps_document_semantics(tmp_path: Path):
+    pretty = tmp_path / "pretty.geojson"
+    compact = tmp_path / "compact.geojson"
+    graph = _tiny_graph()
+    traj = np.asarray([[0.0, 0.0], [10.0, 0.0]], dtype=np.float64)
+
+    kwargs = {
+        "origin_lat": 0.0,
+        "origin_lon": 0.0,
+        "dataset_name": "tiny",
+        "attribution": "© OpenStreetMap contributors",
+        "license_name": "ODbL-1.0",
+    }
+    export_map_geojson(graph, traj, pretty, **kwargs)
+    export_map_geojson(graph, traj, compact, compact=True, **kwargs)
+
+    assert json.loads(compact.read_text(encoding="utf-8")) == json.loads(
+        pretty.read_text(encoding="utf-8")
+    )
+    assert compact.stat().st_size < pretty.stat().st_size
+
+
 def test_build_route_geojson_embeds_attribution():
     graph = _tiny_graph()
     route = shortest_path(graph, "n0", "n1")

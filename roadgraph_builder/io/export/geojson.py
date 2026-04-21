@@ -3,13 +3,13 @@
 from __future__ import annotations
 
 import json
+import math
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 import numpy as np
 
 from roadgraph_builder.core.graph.graph import Graph
-from roadgraph_builder.utils.geo import meters_to_lonlat
 
 
 def _meter_polyline_from_json(pts: object) -> list[tuple[float, float]] | None:
@@ -46,13 +46,25 @@ def _semantic_summary_from_hd(hd: object) -> str | None:
     return "; ".join(parts) if parts else None
 
 
+def _meters_to_lonlat_converter(origin_lat: float, origin_lon: float) -> Callable[[float, float], tuple[float, float]]:
+    r = 6371000.0
+    lat_r = math.radians(origin_lat)
+    lon_denominator = r * math.cos(lat_r)
+
+    def convert(x_m: float, y_m: float) -> tuple[float, float]:
+        lon_deg = origin_lon + math.degrees(x_m / lon_denominator)
+        lat_deg = origin_lat + math.degrees(y_m / r)
+        return lon_deg, lat_deg
+
+    return convert
+
+
 def _append_hd_lane_boundary_features(
     features: list[dict[str, Any]],
     edge_id: str,
     dataset_name: str,
     hd: dict[str, Any],
-    origin_lat: float,
-    origin_lon: float,
+    to_lonlat: Callable[[float, float], tuple[float, float]],
 ) -> None:
     lb = hd.get("lane_boundaries")
     if not isinstance(lb, dict):
@@ -64,7 +76,7 @@ def _append_hd_lane_boundary_features(
             continue
         coords: list[list[float]] = []
         for x, y in mp:
-            lon, lat = meters_to_lonlat(float(x), float(y), origin_lat, origin_lon)
+            lon, lat = to_lonlat(float(x), float(y))
             coords.append([lon, lat])
         features.append(
             {
@@ -100,11 +112,12 @@ def build_map_geojson(
     ``ODbL-1.0`` / ``https://opendatacommons.org/licenses/odbl/1-0/``).
     """
     features: list[dict[str, Any]] = []
+    to_lonlat = _meters_to_lonlat_converter(origin_lat, origin_lon)
 
     if traj_xy.shape[0] >= 2:
         traj_coords: list[list[float]] = []
         for i in range(traj_xy.shape[0]):
-            lon, lat = meters_to_lonlat(float(traj_xy[i, 0]), float(traj_xy[i, 1]), origin_lat, origin_lon)
+            lon, lat = to_lonlat(float(traj_xy[i, 0]), float(traj_xy[i, 1]))
             traj_coords.append([lon, lat])
         features.append(
             {
@@ -119,7 +132,7 @@ def build_map_geojson(
             continue
         coords = []
         for x, y in e.polyline:
-            lon, lat = meters_to_lonlat(float(x), float(y), origin_lat, origin_lon)
+            lon, lat = to_lonlat(float(x), float(y))
             coords.append([lon, lat])
         length_m = 0.0
         pl = e.polyline
@@ -151,10 +164,10 @@ def build_map_geojson(
         )
 
         if isinstance(hd, dict):
-            _append_hd_lane_boundary_features(features, e.id, dataset_name, hd, origin_lat, origin_lon)
+            _append_hd_lane_boundary_features(features, e.id, dataset_name, hd, to_lonlat)
 
     for n in graph.nodes:
-        lon, lat = meters_to_lonlat(float(n.position[0]), float(n.position[1]), origin_lat, origin_lon)
+        lon, lat = to_lonlat(float(n.position[0]), float(n.position[1]))
         props = {"kind": "node", "dataset": dataset_name, "node_id": n.id, **dict(n.attributes)}
         features.append(
             {
@@ -195,7 +208,14 @@ def export_map_geojson(
     attribution: str | None = None,
     license_name: str | None = None,
     license_url: str | None = None,
+    compact: bool = False,
 ) -> None:
+    """Write map GeoJSON.
+
+    The default output stays pretty-printed for stable human diffs and frozen
+    release-bundle byte gates. Set ``compact`` for large maps when file size and
+    write speed matter more than indentation.
+    """
     data = build_map_geojson(
         graph,
         traj_xy,
@@ -207,4 +227,8 @@ def export_map_geojson(
         license_url=license_url,
     )
     path = Path(path)
-    path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    if compact:
+        payload = json.dumps(data, ensure_ascii=False, separators=(",", ":"))
+    else:
+        payload = json.dumps(data, ensure_ascii=False, indent=2)
+    path.write_text(payload + "\n", encoding="utf-8")

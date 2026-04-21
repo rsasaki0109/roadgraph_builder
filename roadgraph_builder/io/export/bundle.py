@@ -126,6 +126,7 @@ def export_map_bundle(
     origin_json_path: str | Path | None = None,
     lane_markings_json: str | Path | None = None,
     camera_detections_refine_json: str | Path | None = None,
+    compact_geojson: bool = False,
 ) -> None:
     """Write ``nav/``, ``sim/``, ``lanelet/`` under ``out_dir``.
 
@@ -134,7 +135,8 @@ def export_map_bundle(
     - **lanelet/map.osm** — OSM XML for Lanelet2 / JOSM.
 
     Optionally runs HD-lite ``enrich``, LiDAR point fusion, and
-    ``apply-camera`` before exporting.
+    ``apply-camera`` before exporting. Set ``compact_geojson`` only when large
+    sim maps need smaller/faster GeoJSON; the default remains pretty-printed.
     """
     out = Path(out_dir)
     (out / "nav").mkdir(parents=True, exist_ok=True)
@@ -249,6 +251,7 @@ def export_map_bundle(
         origin_lat=origin_lat,
         origin_lon=origin_lon,
         dataset_name=dataset_name,
+        compact=compact_geojson,
     )
     shutil.copy2(Path(input_csv_path), out / "sim" / "trajectory.csv")
 

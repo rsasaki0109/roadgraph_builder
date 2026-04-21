@@ -6,11 +6,8 @@ without asserting on wall time (time assertions are inherently flaky in CI).
 
 from __future__ import annotations
 
-import json
 import sys
 from pathlib import Path
-
-import pytest
 
 ROOT = Path(__file__).resolve().parent.parent
 SCRIPT = ROOT / "scripts" / "run_benchmarks.py"
@@ -43,6 +40,7 @@ class TestBenchmarkScript:
             "shortest_path_paris",
             "shortest_path_grid_120",
             "nearest_node_grid_2000",
+            "export_geojson_grid_120_compact",
             "export_bundle_end_to_end",
         }
 

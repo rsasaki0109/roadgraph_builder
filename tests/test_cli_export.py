@@ -9,6 +9,7 @@ import pytest
 
 from roadgraph_builder.cli.export import (
     CliExportError,
+    add_export_bundle_parser,
     optional_json_object,
     resolve_bundle_origin,
     resolve_graph_origin,
@@ -114,6 +115,35 @@ def test_optional_json_object_requires_object_root():
             command="export-lanelet2",
             option="--lane-markings-json",
         )
+
+
+def test_export_bundle_parser_accepts_compact_geojson_flag():
+    parser = argparse.ArgumentParser()
+    sub = parser.add_subparsers(dest="command", required=True)
+
+    def add_build_params(p: argparse.ArgumentParser) -> None:
+        p.add_argument("--dummy-build-param", action="store_true")
+
+    add_export_bundle_parser(sub, add_build_params=add_build_params)
+
+    args = parser.parse_args(
+        ["export-bundle", "in.csv", "out", "--origin-lat", "1", "--origin-lon", "2"]
+    )
+    assert args.compact_geojson is False
+
+    compact_args = parser.parse_args(
+        [
+            "export-bundle",
+            "in.csv",
+            "out",
+            "--origin-lat",
+            "1",
+            "--origin-lon",
+            "2",
+            "--compact-geojson",
+        ]
+    )
+    assert compact_args.compact_geojson is True
 
 
 def test_run_export_lanelet2_injects_io_and_exporter():

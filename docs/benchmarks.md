@@ -103,6 +103,35 @@ After these changes, `python scripts/run_benchmarks.py --no-warmup` measured:
 | `nearest_node_grid_2000` | 0.390 | 2000 snaps on a 300x300 node grid |
 | `export_bundle_end_to_end` | 0.018 | Full export-bundle pipeline on sample trajectory |
 
+## v0.7.2-dev GeoJSON export compact path (2026-04-22)
+
+Large `map.geojson` writes were dominated by repeated meter-to-WGS84 conversion
+setup and pretty JSON serialization. The exporter now precomputes conversion
+constants once per map, and adds an opt-in compact writer for large bundle
+exports. Default output stays pretty-printed and is still covered by the frozen
+release bundle byte gate.
+
+One-off 180x180 grid, 32,400 nodes, 64,440 edges, 96,840 GeoJSON features:
+
+| Export path | Before | After | Output size | Notes |
+|---|---:|---:|---:|---|
+| `build_map_geojson` | 1.417 s | 0.695 s | n/a | Coordinate conversion constants reused per map |
+| default pretty `export_map_geojson` | 7.030 s | 3.052 s | 42.8 MB | Same parsed document and pretty output semantics |
+| compact `export_map_geojson(compact=True)` | n/a | 1.760 s | 23.6 MB | Same parsed document without indentation |
+
+The benchmark suite now includes `export_geojson_grid_120_compact`. On this
+workstation, `python scripts/run_benchmarks.py --no-warmup` measured:
+
+| Benchmark | elapsed (s) | Notes |
+|---|---:|---|
+| `polylines_to_graph_paris` | 0.183 | OSM public-trackpoints CSV, small local fixture |
+| `polylines_to_graph_10k_synth` | 0.776 | 50x50 grid, ~25 000 pts |
+| `shortest_path_paris` | 0.031 | Existing small-graph routing smoke |
+| `shortest_path_grid_120` | 2.774 | 120 routes on a 55x55 synthetic graph |
+| `nearest_node_grid_2000` | 0.665 | 2000 snaps on a 300x300 node grid |
+| `export_geojson_grid_120_compact` | 0.891 | Compact GeoJSON export on a 120x120 grid |
+| `export_bundle_end_to_end` | 0.006 | Full export-bundle pipeline on sample trajectory |
+
 ## Regression policy
 
 CI comparison mode (`--baseline baseline.json`) fails with exit code 1 if any

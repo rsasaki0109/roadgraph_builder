@@ -69,6 +69,44 @@ def test_export_map_bundle_writes_nav_sim_lanelet(tmp_path: Path):
     assert gs["bbox_wgs84_deg"]["sw_lon"] <= gs["bbox_wgs84_deg"]["ne_lon"]
 
 
+def test_export_map_bundle_can_write_compact_geojson(tmp_path: Path):
+    csv_path = ROOT / "examples" / "sample_trajectory.csv"
+    traj = load_trajectory_csv(csv_path)
+
+    pretty_dir = tmp_path / "pretty"
+    compact_dir = tmp_path / "compact"
+    g_pretty = build_graph_from_trajectory(traj, BuildParams())
+    export_map_bundle(
+        g_pretty,
+        traj.xy,
+        csv_path,
+        pretty_dir,
+        origin_lat=52.52,
+        origin_lon=13.405,
+        dataset_name="test_bundle",
+        lane_width_m=0,
+    )
+    g_compact = build_graph_from_trajectory(traj, BuildParams())
+    export_map_bundle(
+        g_compact,
+        traj.xy,
+        csv_path,
+        compact_dir,
+        origin_lat=52.52,
+        origin_lon=13.405,
+        dataset_name="test_bundle",
+        lane_width_m=0,
+        compact_geojson=True,
+    )
+
+    pretty = pretty_dir / "sim" / "map.geojson"
+    compact = compact_dir / "sim" / "map.geojson"
+    assert json.loads(compact.read_text(encoding="utf-8")) == json.loads(
+        pretty.read_text(encoding="utf-8")
+    )
+    assert compact.stat().st_size < pretty.stat().st_size
+
+
 def test_export_map_bundle_fuses_lidar_from_las(tmp_path: Path):
     from roadgraph_builder.io.export.json_loader import load_graph_json
 

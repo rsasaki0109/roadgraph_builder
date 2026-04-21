@@ -214,6 +214,12 @@ def add_export_bundle_parser(
         metavar="PATH",
         help="Optional camera_detections.json for per-edge HD width refinement (separate from --detections-json).",
     )
+    bun.add_argument(
+        "--compact-geojson",
+        action="store_true",
+        default=False,
+        help="Write sim/map.geojson without pretty indentation for smaller, faster large bundle exports.",
+    )
     add_build_params(bun)
 
 
@@ -464,5 +470,6 @@ def run_export_bundle(
         origin_json_path=args.origin_json,
         lane_markings_json=args.lane_markings_json,
         camera_detections_refine_json=args.camera_detections_refine_json,
+        compact_geojson=args.compact_geojson,
     )
     return 0

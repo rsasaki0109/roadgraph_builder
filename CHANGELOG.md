@@ -73,6 +73,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   candidates and endpoint-pair set construction in the hot loop. A local
   benchmark run measured `polylines_to_graph_10k_synth` at 0.471 s.
 
+- **Large GeoJSON exports do less repeated coordinate math and can be compact.**
+  `export_map_geojson` now precomputes the WGS84 conversion constants once per
+  map, preserving default pretty output while reducing large-map feature build
+  time. `export_map_geojson(compact=True)`, `export_map_bundle(...,
+  compact_geojson=True)`, and `export-bundle --compact-geojson` write
+  `sim/map.geojson` without indentation for faster, smaller large bundle
+  exports. On a local 180x180 synthetic grid, GeoJSON document build dropped
+  from about 1.42 s to 0.70 s, default pretty export from about 7.03 s to
+  3.05 s, and compact export wrote the same parsed document in about 1.76 s
+  while shrinking output from about 42.8 MB to 23.6 MB.
+
 ### Fixed
 
 - **Paris splitter golden length check now tolerates Python/Numpy drift.**
