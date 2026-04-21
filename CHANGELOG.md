@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `0.7.2.dev0` after the `v0.7.1` tag, avoiding new post-release artifacts
   that reuse the shipped `0.7.1` version.
 
+- **GitHub Actions workflows now use Node 24 action majors.**
+  CI, release, benchmark, city-scale, and PyPI workflows were moved to
+  `actions/*` / release action tags whose `action.yml` declares `node24`,
+  so they no longer need the temporary
+  `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24` environment flag.
+
 ### Fixed
 
 - **Paris splitter golden length check now tolerates Python/Numpy drift.**

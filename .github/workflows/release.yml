@@ -8,10 +8,6 @@ on:
     tags:
       - "v*"
 
-# Opt into Node.js 24 for JavaScript actions ahead of the 2026-06-02 switch.
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
-
 permissions:
   contents: write
 
@@ -20,10 +16,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
           cache: pip
@@ -38,7 +34,7 @@ jobs:
 
       - name: Create release with artifacts
         # Pinned to a concrete release tag, not @main.
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: |
             dist/roadgraph_sample_bundle.tar.gz
