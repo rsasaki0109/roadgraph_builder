@@ -52,6 +52,22 @@ def test_cli_build_and_validate(tmp_path: Path):
     assert r2.returncode == 0, r2.stderr
 
 
+def test_cli_build_float32_opt_in(tmp_path: Path):
+    graph_json = tmp_path / "graph_float32.json"
+    r = _run(
+        "build",
+        str(ROOT / "examples" / "sample_trajectory.csv"),
+        str(graph_json),
+        "--trajectory-dtype",
+        "float32",
+    )
+
+    assert r.returncode == 0, r.stderr
+    assert graph_json.is_file()
+    doc = json.loads(graph_json.read_text(encoding="utf-8"))
+    assert len(doc["edges"]) >= 1
+
+
 def test_cli_export_bundle_full_pipeline_then_stats_route(tmp_path: Path):
     out_dir = tmp_path / "bundle"
     r = _run(

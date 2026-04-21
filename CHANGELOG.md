@@ -47,12 +47,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   baselines (no LiDAR markings / trace_stats) and document the 20 m canonical
   tolerance vs the original 5 m recipe.
 
-- **V3 follow-up: float32 trajectory optimization now has a handoff memo.**
-  `docs/handoff/float32_trajectory.md` records the current dtype flow,
-  byte-identity impact matrix, and recommended opt-in prototype path:
-  keep default `Trajectory.xy` as float64, measure float32 as an explicit
-  coordinate-array optimization, and add drift/tolerance tests before any
-  default-output change.
+- **V3 follow-up: float32 trajectory optimization now has an opt-in prototype.**
+  `docs/handoff/float32_trajectory.md` records the dtype flow and
+  byte-identity impact matrix. `load_trajectory_csv(..., xy_dtype="float32")`,
+  `BuildParams(trajectory_xy_dtype="float32")`, CLI `--trajectory-dtype
+  float32`, and `scripts/profile_memory.py --trajectory-dtype float32` now
+  allow explicit coordinate-array memory experiments while default trajectory
+  loading remains float64.
 
 ### Fixed
 

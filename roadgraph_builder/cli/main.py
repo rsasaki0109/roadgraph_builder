@@ -48,7 +48,10 @@ from roadgraph_builder.semantics.trace_fusion import coverage_buckets, fuse_trac
 from roadgraph_builder.viz.svg_export import write_trajectory_graph_svg
 
 
-def _add_build_params(p: argparse.ArgumentParser) -> None:
+_TRAJECTORY_DTYPE_CHOICES = ("float64", "float32")
+
+
+def _add_build_params(p: argparse.ArgumentParser, *, include_trajectory_dtype: bool = False) -> None:
     p.add_argument(
         "--max-step-m",
         type=float,
@@ -73,6 +76,16 @@ def _add_build_params(p: argparse.ArgumentParser) -> None:
         default=None,
         help="Douglas–Peucker tolerance (meters) for edge polylines; omit to skip.",
     )
+    if include_trajectory_dtype:
+        p.add_argument(
+            "--trajectory-dtype",
+            choices=_TRAJECTORY_DTYPE_CHOICES,
+            default="float64",
+            help=(
+                "XY array dtype for trajectory loading (default float64). "
+                "float32 is opt-in and may change exported coordinates slightly."
+            ),
+        )
 
 
 def _build_params_from_args(args: argparse.Namespace) -> BuildParams:
@@ -83,6 +96,7 @@ def _build_params_from_args(args: argparse.Namespace) -> BuildParams:
         centerline_bins=args.centerline_bins,
         simplify_tolerance_m=args.simplify_tolerance,
         use_3d=use_3d,
+        trajectory_xy_dtype=getattr(args, "trajectory_dtype", "float64"),
     )
 
 
@@ -145,12 +159,12 @@ def _build_parser() -> argparse.ArgumentParser:
             "Without this flag the output is byte-identical to v0.6.0."
         ),
     )
-    _add_build_params(b)
+    _add_build_params(b, include_trajectory_dtype=True)
 
     v = sub.add_parser("visualize", help="Build graph from CSV and write trajectory+graph SVG.")
     v.add_argument("input_csv", help="Input CSV with columns timestamp, x, y")
     v.add_argument("output_svg", help="Output SVG path")
-    _add_build_params(v)
+    _add_build_params(v, include_trajectory_dtype=True)
     v.add_argument(
         "--width",
         type=float,
@@ -805,7 +819,7 @@ def _build_parser() -> argparse.ArgumentParser:
         metavar="PATH",
         help="Optional camera_detections.json for per-edge HD width refinement (separate from --detections-json).",
     )
-    _add_build_params(bun)
+    _add_build_params(bun, include_trajectory_dtype=True)
 
     bog = sub.add_parser(
         "build-osm-graph",
@@ -985,6 +999,15 @@ def _build_parser() -> argparse.ArgumentParser:
             "creating a new edge (meters)."
         ),
     )
+    ug.add_argument(
+        "--trajectory-dtype",
+        choices=_TRAJECTORY_DTYPE_CHOICES,
+        default="float64",
+        help=(
+            "XY array dtype for loading new_csv (default float64). "
+            "float32 is opt-in and may change merged geometry slightly."
+        ),
+    )
 
     pd_cli = sub.add_parser(
         "process-dataset",
@@ -1039,6 +1062,15 @@ def _build_parser() -> argparse.ArgumentParser:
         metavar="NAME",
         help="Label prefix embedded in per-file GeoJSON/metadata (default: CSV stem).",
     )
+    pd_cli.add_argument(
+        "--trajectory-dtype",
+        choices=_TRAJECTORY_DTYPE_CHOICES,
+        default="float64",
+        help=(
+            "XY array dtype for trajectory loading (default float64). "
+            "float32 is opt-in and may change exported coordinates slightly."
+        ),
+    )
 
     return p
 
@@ -1052,7 +1084,9 @@ def main(argv: list[str] | None = None) -> int:
         try:
             if args.extra_csv:
                 traj = load_multi_trajectory_csvs(
-                    [args.input_csv, *args.extra_csv], load_z=params.use_3d
+                    [args.input_csv, *args.extra_csv],
+                    load_z=params.use_3d,
+                    xy_dtype=params.trajectory_xy_dtype,
                 )
                 graph = build_graph_from_trajectory(traj, params)
             else:
@@ -1068,7 +1102,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "visualize":
         params = _build_params_from_args(args)
         try:
-            traj = load_trajectory_csv(args.input_csv)
+            traj = load_trajectory_csv(args.input_csv, xy_dtype=params.trajectory_xy_dtype)
             graph = build_graph_from_trajectory(traj, params)
         except FileNotFoundError as e:
             print(f"File not found: {e.filename}", file=sys.stderr)
@@ -1727,9 +1761,17 @@ def main(argv: list[str] | None = None) -> int:
         params = _build_params_from_args(args)
         try:
             if args.extra_csv:
-                traj = load_multi_trajectory_csvs([args.input_csv, *args.extra_csv])
+                traj = load_multi_trajectory_csvs(
+                    [args.input_csv, *args.extra_csv],
+                    load_z=params.use_3d,
+                    xy_dtype=params.trajectory_xy_dtype,
+                )
             else:
-                traj = load_trajectory_csv(args.input_csv)
+                traj = load_trajectory_csv(
+                    args.input_csv,
+                    load_z=params.use_3d,
+                    xy_dtype=params.trajectory_xy_dtype,
+                )
             graph = build_graph_from_trajectory(traj, params)
         except FileNotFoundError as e:
             print(f"File not found: {e.filename}", file=sys.stderr)
@@ -2170,7 +2212,7 @@ def main(argv: list[str] | None = None) -> int:
             print(f"{existing_path}: {e}", file=sys.stderr)
             return 1
         try:
-            new_traj = load_trajectory_csv(new_csv_path)
+            new_traj = load_trajectory_csv(new_csv_path, xy_dtype=args.trajectory_dtype)
         except (FileNotFoundError, ValueError) as e:
             print(f"{new_csv_path}: {e}", file=sys.stderr)
             return 1
@@ -2214,6 +2256,7 @@ def main(argv: list[str] | None = None) -> int:
             continue_on_error=args.continue_on_error,
             lane_width_m=args.lane_width_m,
             dataset_name_prefix=args.dataset_name,
+            trajectory_xy_dtype=args.trajectory_dtype,
         )
         print(json.dumps(manifest, ensure_ascii=False, indent=2))
         return 0 if manifest.get("failed_count", 0) == 0 else 1

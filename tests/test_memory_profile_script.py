@@ -47,6 +47,7 @@ def test_profile_returns_expected_keys(paris_csv: Path, tmp_path: Path) -> None:
     assert "top_allocations" in result
     assert "csv_path" in result
     assert "out_dir" in result
+    assert result["trajectory_dtype"] == "float64"
 
     rss = result["rss_kb"]
     for key in ("after_imports", "after_trajectory_load", "after_build", "after_export_bundle"):
@@ -76,6 +77,27 @@ def test_profile_top_allocations_structure(paris_csv: Path, tmp_path: Path) -> N
         assert "size_bytes" in entry
         assert "size_diff_bytes" in entry
         assert "count" in entry
+
+
+def test_profile_accepts_float32_trajectory_dtype(paris_csv: Path, tmp_path: Path) -> None:
+    """The profiler can run the opt-in float32 path for comparison reports."""
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("profile_memory", _SCRIPT)
+    assert spec is not None
+    mod = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(mod)  # type: ignore[attr-defined]
+
+    result = mod.profile_build_and_bundle(
+        paris_csv,
+        tmp_path / "bundle_float32",
+        trajectory_dtype="float32",
+        top_n=1,
+    )
+
+    assert result["trajectory_dtype"] == "float32"
+    assert (tmp_path / "bundle_float32" / "sim" / "road_graph.json").is_file()
 
 
 def test_profile_writes_markdown(paris_csv: Path, tmp_path: Path) -> None:

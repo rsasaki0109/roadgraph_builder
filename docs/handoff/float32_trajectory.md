@@ -2,9 +2,8 @@
 
 Date: 2026-04-21
 
-Status: design complete, implementation intentionally deferred.  The next
-step should be a small opt-in prototype plus measurement, not a default dtype
-change.
+Status: design complete and opt-in prototype landed.  The next step is
+measurement and drift reporting, not a default dtype change.
 
 ## Goal
 
@@ -161,12 +160,13 @@ contract even for float64.  Treat it as a separate compatibility proposal.
 
 Phase 0 is complete with this memo.
 
-Phase 1 should implement option B as opt-in only:
+Phase 1 is complete: option B landed as opt-in only:
 
 - Add `xy_dtype` support to trajectory loading, defaulting to float64.
 - Add `BuildParams.trajectory_xy_dtype = "float64"` or equivalent.
-- Add CLI `--trajectory-dtype {float64,float32}` only if the user wants the
-  optimization visible before v0.8.
+- Add CLI `--trajectory-dtype {float64,float32}` for trajectory CSV commands.
+- Add `scripts/profile_memory.py --trajectory-dtype {float64,float32}` for
+  side-by-side memory reports.
 - Keep timestamps and z float64.
 - Preserve all current default outputs.
 

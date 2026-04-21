@@ -33,6 +33,18 @@ def test_load_multi_trajectory_csvs_concatenates(tmp_path: Path):
     assert combined.xy[-1, 0] == 40.0
 
 
+def test_load_multi_trajectory_csvs_preserves_xy_dtype(tmp_path: Path):
+    a = tmp_path / "a.csv"
+    b = tmp_path / "b.csv"
+    _write_csv(a, 0.0, [0.0, 10.0], [0.0, 0.0])
+    _write_csv(b, 100.0, [20.0, 30.0], [0.0, 0.0])
+
+    combined = load_multi_trajectory_csvs([a, b], xy_dtype=np.float32)
+
+    assert combined.xy.dtype == np.float32
+    assert combined.timestamps.dtype == np.float64
+
+
 def test_load_multi_trajectory_csvs_single_path_equivalent(tmp_path: Path):
     a = tmp_path / "a.csv"
     _write_csv(a, 0.0, [0.0, 1.0, 2.0], [0.0, 0.0, 0.0])
@@ -57,6 +69,8 @@ def test_build_cli_accepts_extra_csv(tmp_path: Path):
             str(out),
             "--extra-csv",
             str(b),
+            "--trajectory-dtype",
+            "float32",
         ]
     )
     assert rc == 0

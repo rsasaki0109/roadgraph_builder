@@ -36,6 +36,7 @@ def _process_single_file(
     origin_json: Path | None,
     lane_width_m: float,
     dataset_name: str,
+    trajectory_xy_dtype: str = "float64",
 ) -> dict[str, Any]:
     """Run export_map_bundle on one CSV; return a per-file status dict.
 
@@ -54,8 +55,8 @@ def _process_single_file(
     result: dict[str, Any] = {"file": str(csv_path), "status": "failed"}
 
     try:
-        traj = load_trajectory_csv(csv_path)
-        params = BuildParams()
+        traj = load_trajectory_csv(csv_path, xy_dtype=trajectory_xy_dtype)
+        params = BuildParams(trajectory_xy_dtype=trajectory_xy_dtype)
         graph = build_graph_from_trajectory(traj, params)
 
         lat0: float | None = None
@@ -105,6 +106,7 @@ def process_dataset(
     continue_on_error: bool = True,
     lane_width_m: float = 3.5,
     dataset_name_prefix: str | None = None,
+    trajectory_xy_dtype: str = "float64",
 ) -> dict[str, Any]:
     """Iterate CSV files, run export-bundle on each, aggregate stats.
 
@@ -125,6 +127,8 @@ def process_dataset(
         lane_width_m: HD-lite lane width forwarded to each bundle.
         dataset_name_prefix: Optional label prefix for each bundle's metadata.
             Defaults to the CSV stem.
+        trajectory_xy_dtype: XY dtype forwarded to trajectory loading
+            (``"float64"`` default; ``"float32"`` opt-in).
 
     Returns:
         Manifest dict with keys:
@@ -167,6 +171,7 @@ def process_dataset(
                     origin_json=origin_json,
                     lane_width_m=lane_width_m,
                     dataset_name=name,
+                    trajectory_xy_dtype=trajectory_xy_dtype,
                 )
                 futures[fut] = csv_path
             for fut in as_completed(futures):
@@ -192,6 +197,7 @@ def process_dataset(
                 origin_json=origin_json,
                 lane_width_m=lane_width_m,
                 dataset_name=name,
+                trajectory_xy_dtype=trajectory_xy_dtype,
             )
             if res["status"] == "failed" and not continue_on_error:
                 raise RuntimeError(

@@ -19,7 +19,11 @@ import numpy as np
 from roadgraph_builder.core.graph.edge import Edge
 from roadgraph_builder.core.graph.graph import Graph
 from roadgraph_builder.core.graph.node import Node
-from roadgraph_builder.io.trajectory.loader import Trajectory, load_trajectory_csv
+from roadgraph_builder.io.trajectory.loader import (
+    Trajectory,
+    load_trajectory_csv,
+    normalize_trajectory_xy_dtype,
+)
 from roadgraph_builder.pipeline.junction_topology import annotate_junction_types
 from roadgraph_builder.utils.geometry import (
     centerline_from_points,
@@ -54,6 +58,10 @@ class BuildParams:
     #: default), z data is ignored and the output is byte-identical to
     #: pre-3D1 builds.
     use_3d: bool = False
+    #: XY dtype used by ``build_graph_from_csv`` when loading trajectory CSVs.
+    #: Defaults to ``float64`` for byte-identical output; ``float32`` is an
+    #: opt-in memory profiling / experimentation path.
+    trajectory_xy_dtype: str = "float64"
 
 
 def _orient_polyline_to_trajectory(
@@ -718,5 +726,6 @@ def build_graph_from_csv(path: str, params: BuildParams | None = None) -> Graph:
     (silently ignored when absent) and elevation data is propagated into the graph.
     """
     p = params or BuildParams()
-    traj = load_trajectory_csv(path, load_z=p.use_3d)
+    xy_dtype = normalize_trajectory_xy_dtype(p.trajectory_xy_dtype)
+    traj = load_trajectory_csv(path, load_z=p.use_3d, xy_dtype=xy_dtype)
     return build_graph_from_trajectory(traj, p)

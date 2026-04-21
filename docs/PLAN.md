@@ -341,13 +341,16 @@ README+Pages visualization preview は `[Unreleased]` 下。
 
 優先度順。各タスクに **手をつける前のヒント** を付けてある。
 
-### 5a. V3 float32 trajectory 最適化（long／prototype は user review 後）
+### 5a. V3 float32 trajectory 最適化（prototype landed／default flip は未定）
 
 - **背景:** v0.7 で `export_lanelet2` DOM rewrite が peak RSS を -10% したが、trajectory 配列の
   float64→float32 変換はまだ。**byte-identity を破る** ので単純 swap 不可。
 - **設計メモ:** [`docs/handoff/float32_trajectory.md`](./handoff/float32_trajectory.md) 作成済み。
   結論は「default float64 維持 + opt-in float32 prototype + drift 計測」。`Trajectory.timestamps`
   と `Trajectory.z` は float64 のまま、まず `Trajectory.xy` のみを候補にする。
+- **prototype:** `load_trajectory_csv(..., xy_dtype="float32")`、`BuildParams(trajectory_xy_dtype=...)`、
+  trajectory CSV 系 CLI の `--trajectory-dtype {float64,float32}`、`scripts/profile_memory.py
+  --trajectory-dtype` を追加。default は `float64` のまま。
 - **設計の勘所:**
   - どこで float64 が伸びるか: `io.trajectory.loader::Trajectory.xy`, `pipeline.build_graph` 内の
     numpy 配列、`routing.shortest_path` の内部距離計算など。
@@ -359,11 +362,11 @@ README+Pages visualization preview は `[Unreleased]` 下。
     prototype 時に追加する。
 - **やり方:**
   1. ~~design memo を `docs/handoff/` に書く~~（完了）
-  2. user review → GO サイン
-  3. opt-in prototype（`load_trajectory_csv(..., xy_dtype=...)` + `BuildParams` / CLI flag は要判断）
-  4. `scripts/profile_memory.py` を float64/float32 両方で実測
-  5. default path は byte-identical、opt-in path は coordinate / length tolerance で regression
-- **規模感:** 2-3 session 使う可能性あり。fresh session で設計 memo から start するのが安全。
+  2. ~~opt-in prototype（loader + `BuildParams` + CLI/profile flag）~~（完了）
+  3. `scripts/profile_memory.py` を float64/float32 両方で実測
+  4. default path は byte-identical、opt-in path は coordinate / length tolerance で regression を拡張
+  5. default を float32 にするかは実測後に判断（現時点では未定）
+- **規模感:** まだ 1-2 session。次は実測 + drift report。
 
 ---
 

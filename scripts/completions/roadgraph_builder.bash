@@ -40,6 +40,10 @@ validate-lane-markings guidance validate-guidance update-graph process-dataset"
 
     # Flag-value pairs that always want a file path.
     case "$prev" in
+        --trajectory-dtype)
+            COMPREPLY=($(compgen -W "float64 float32" -- "$cur"))
+            return 0
+            ;;
         --origin-json | --detections-json | --turn-restrictions-json | \
         --lane-markings-json | --camera-detections-json | \
         --camera-detections-refine-json | --skipped-json | \
@@ -57,16 +61,17 @@ validate-lane-markings guidance validate-guidance update-graph process-dataset"
             build)
                 COMPREPLY=($(compgen -W "\
 --max-step-m --merge-endpoint-m --centerline-bins --simplify-tolerance \
---extra-csv --3d" -- "$cur"))
+--trajectory-dtype --extra-csv --3d" -- "$cur"))
                 ;;
             visualize)
                 COMPREPLY=($(compgen -W "\
 --max-step-m --merge-endpoint-m --centerline-bins --simplify-tolerance \
---width --height" -- "$cur"))
+--trajectory-dtype --width --height" -- "$cur"))
                 ;;
             export-bundle)
                 COMPREPLY=($(compgen -W "\
 --max-step-m --merge-endpoint-m --centerline-bins --simplify-tolerance \
+--trajectory-dtype \
 --lane-width-m --dataset-name --origin-json --origin-lat --origin-lon \
 --detections-json --turn-restrictions-json --lidar-points --fuse-max-dist-m \
 --fuse-bins --lane-markings-json --camera-detections-refine-json \
@@ -138,10 +143,10 @@ validate-lane-markings guidance validate-guidance update-graph process-dataset"
                 COMPREPLY=($(compgen -W "--output --slight-deg --sharp-deg --u-turn-deg" -- "$cur"))
                 ;;
             update-graph)
-                COMPREPLY=($(compgen -W "--output --max-step-m --merge-endpoint-m --absorb-tolerance-m" -- "$cur"))
+                COMPREPLY=($(compgen -W "--output --max-step-m --merge-endpoint-m --absorb-tolerance-m --trajectory-dtype" -- "$cur"))
                 ;;
             process-dataset)
-                COMPREPLY=($(compgen -W "--origin-json --pattern --parallel --continue-on-error --no-continue-on-error --lane-width-m --dataset-name" -- "$cur"))
+                COMPREPLY=($(compgen -W "--origin-json --pattern --parallel --continue-on-error --no-continue-on-error --lane-width-m --dataset-name --trajectory-dtype" -- "$cur"))
                 ;;
             *)
                 COMPREPLY=($(compgen -W "-h --help" -- "$cur"))

@@ -42,3 +42,6 @@ def test_cli_completions_match_subparsers():
     for name in expected_subcommands:
         assert name in bash_script, f"bash completion missing: {name}"
         assert name in zsh_script, f"zsh completion missing: {name}"
+
+    assert "--trajectory-dtype" in bash_script
+    assert "--trajectory-dtype" in zsh_script

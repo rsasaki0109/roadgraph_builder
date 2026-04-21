@@ -7,6 +7,23 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
+from numpy.typing import DTypeLike
+
+
+_SUPPORTED_XY_DTYPES = (np.dtype(np.float64), np.dtype(np.float32))
+
+
+def normalize_trajectory_xy_dtype(value: DTypeLike) -> np.dtype:
+    """Return a supported trajectory XY dtype.
+
+    Only float64 and float32 are accepted.  The default remains float64 so
+    existing outputs keep their current coordinate text unless callers
+    explicitly opt in to float32.
+    """
+    dtype = np.dtype(value)
+    if dtype not in _SUPPORTED_XY_DTYPES:
+        raise ValueError("trajectory xy dtype must be float64 or float32")
+    return dtype
 
 
 @dataclass
@@ -26,15 +43,25 @@ class Trajectory:
         return int(self.xy.shape[0])
 
 
-def load_trajectory_csv(path: str | Path, *, load_z: bool = False) -> Trajectory:
+def load_trajectory_csv(
+    path: str | Path,
+    *,
+    load_z: bool = False,
+    xy_dtype: DTypeLike = np.float64,
+) -> Trajectory:
     """Load CSV with columns timestamp, x, y (and optional z when load_z=True).
 
     When ``load_z=True`` and the CSV has a ``z`` column, the returned
     :class:`Trajectory` carries a non-None ``z`` array.  When ``load_z=False``
     (the default) or the column is absent, ``z`` is ``None`` and output is
     byte-identical to pre-3D1 behaviour.
+
+    ``xy_dtype`` is an explicit memory/precision knob for the XY coordinate
+    array.  It defaults to float64; float32 is supported for opt-in profiling
+    and experiments.  Timestamps and z stay float64.
     """
     path = Path(path)
+    xy_dtype_norm = normalize_trajectory_xy_dtype(xy_dtype)
     rows_ts: list[float] = []
     rows_xy: list[tuple[float, float]] = []
     rows_z: list[float] = []
@@ -67,7 +94,7 @@ def load_trajectory_csv(path: str | Path, *, load_z: bool = False) -> Trajectory
         raise ValueError(f"No data rows in {path}")
 
     timestamps = np.asarray(rows_ts, dtype=np.float64)
-    xy = np.asarray(rows_xy, dtype=np.float64)
+    xy = np.asarray(rows_xy, dtype=xy_dtype_norm)
     order = np.argsort(timestamps)
 
     z_arr: np.ndarray | None = None
@@ -77,7 +104,12 @@ def load_trajectory_csv(path: str | Path, *, load_z: bool = False) -> Trajectory
     return Trajectory(timestamps=timestamps[order], xy=xy[order], z=z_arr)
 
 
-def load_multi_trajectory_csvs(paths, *, load_z: bool = False) -> Trajectory:
+def load_multi_trajectory_csvs(
+    paths,
+    *,
+    load_z: bool = False,
+    xy_dtype: DTypeLike = np.float64,
+) -> Trajectory:
     """Concatenate several trajectory CSVs assumed to share the same meter origin.
 
     Takes an iterable of file paths (primary first); returns a single
@@ -90,7 +122,8 @@ def load_multi_trajectory_csvs(paths, *, load_z: bool = False) -> Trajectory:
 
     When ``load_z=True``, elevation data is concatenated when available.
     """
-    trajectories = [load_trajectory_csv(p, load_z=load_z) for p in paths]
+    xy_dtype_norm = normalize_trajectory_xy_dtype(xy_dtype)
+    trajectories = [load_trajectory_csv(p, load_z=load_z, xy_dtype=xy_dtype_norm) for p in paths]
     if not trajectories:
         raise ValueError("load_multi_trajectory_csvs requires at least one path")
     if len(trajectories) == 1:

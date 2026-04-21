@@ -39,6 +39,7 @@ def profile_build_and_bundle(
     *,
     origin_lat: float = 48.86,
     origin_lon: float = 2.34,
+    trajectory_dtype: str = "float64",
     top_n: int = 20,
 ) -> dict:
     """Profile memory usage across the full build + export-bundle pipeline.
@@ -57,6 +58,8 @@ def profile_build_and_bundle(
         out_dir: Directory to write the bundle artefacts (created if absent).
         origin_lat: WGS84 latitude of the meter-frame origin.
         origin_lon: WGS84 longitude of the meter-frame origin.
+        trajectory_dtype: XY dtype for trajectory loading (``float64`` or
+            opt-in ``float32``).
         top_n: Number of top allocations to report.
     """
     out_dir = Path(out_dir)
@@ -69,19 +72,19 @@ def profile_build_and_bundle(
     snap_0 = tracemalloc.take_snapshot()
 
     from roadgraph_builder.io.trajectory.loader import load_trajectory_csv
-    from roadgraph_builder.pipeline.build_graph import build_graph_from_csv, BuildParams
+    from roadgraph_builder.pipeline.build_graph import BuildParams, build_graph_from_trajectory
     from roadgraph_builder.io.export.bundle import export_map_bundle
 
     rss_imports = _rss_kb()
 
     # ---- Stage 1: load trajectory ----------------------------------------
-    traj = load_trajectory_csv(str(csv_path))
+    traj = load_trajectory_csv(str(csv_path), xy_dtype=trajectory_dtype)
     snap_1 = tracemalloc.take_snapshot()
     rss_1 = _rss_kb()
 
     # ---- Stage 2: build graph -------------------------------------------
-    params = BuildParams()
-    graph = build_graph_from_csv(str(csv_path), params)
+    params = BuildParams(trajectory_xy_dtype=trajectory_dtype)
+    graph = build_graph_from_trajectory(traj, params)
     snap_2 = tracemalloc.take_snapshot()
     rss_2 = _rss_kb()
 
@@ -120,6 +123,7 @@ def profile_build_and_bundle(
     return {
         "csv_path": str(csv_path),
         "out_dir": str(out_dir),
+        "trajectory_dtype": trajectory_dtype,
         "rss_kb": {
             "after_imports": rss_imports,
             "after_trajectory_load": rss_1,
@@ -138,6 +142,7 @@ def _render_markdown(result: dict) -> str:
         "# Memory profile — roadgraph_builder v0.7.0",
         "",
         f"Input: `{result['csv_path']}`",
+        f"Trajectory XY dtype: `{result.get('trajectory_dtype', 'float64')}`",
         "",
         "## Peak RSS per pipeline stage",
         "",
@@ -173,6 +178,12 @@ def main() -> int:
     parser.add_argument("out_dir", type=Path, help="Bundle output directory.")
     parser.add_argument("--origin-lat", type=float, default=48.86, help="Origin latitude.")
     parser.add_argument("--origin-lon", type=float, default=2.34, help="Origin longitude.")
+    parser.add_argument(
+        "--trajectory-dtype",
+        choices=("float64", "float32"),
+        default="float64",
+        help="XY array dtype for trajectory loading (default float64).",
+    )
     parser.add_argument("--top", type=int, default=20, help="Top-N allocations to report.")
     parser.add_argument(
         "--output-json", type=Path, default=None, help="Write JSON result to this file."
@@ -195,6 +206,7 @@ def main() -> int:
         args.out_dir,
         origin_lat=args.origin_lat,
         origin_lon=args.origin_lon,
+        trajectory_dtype=args.trajectory_dtype,
         top_n=args.top,
     )
 
