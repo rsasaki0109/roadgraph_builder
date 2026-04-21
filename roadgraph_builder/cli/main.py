@@ -5,12 +5,19 @@ from __future__ import annotations
 import argparse
 import sys
 
-from jsonschema import ValidationError
-
 import json
 from pathlib import Path
 
 from roadgraph_builder.hd.pipeline import SDToHDConfig, enrich_sd_to_hd
+from roadgraph_builder.cli.build import (
+    _TRAJECTORY_DTYPE_CHOICES,
+    _add_build_params,
+    _build_params_from_args,
+    add_build_parser,
+    add_visualize_parser,
+    run_build,
+    run_visualize,
+)
 from roadgraph_builder.cli.camera import (
     add_apply_camera_parser,
     add_detect_lane_markings_camera_parser,
@@ -47,7 +54,7 @@ from roadgraph_builder.cli.export import (
 )
 from roadgraph_builder.io.export.json_exporter import export_graph_json
 from roadgraph_builder.io.export.json_loader import load_graph_json
-from roadgraph_builder.io.trajectory.loader import load_multi_trajectory_csvs, load_trajectory_csv
+from roadgraph_builder.io.trajectory.loader import load_trajectory_csv
 from roadgraph_builder.cli.doctor import run_doctor
 from roadgraph_builder.cli.routing import (
     add_nearest_node_parser,
@@ -55,20 +62,13 @@ from roadgraph_builder.cli.routing import (
     run_nearest_node,
     run_route,
 )
+from roadgraph_builder.cli.validate import (
+    VALIDATION_COMMANDS,
+    add_validation_parsers,
+    print_validation_error,
+    run_validate_document,
+)
 from roadgraph_builder.utils.geo import load_wgs84_origin_json
-from roadgraph_builder.validation import (
-    validate_camera_detections_document,
-    validate_lane_markings_document,
-    validate_manifest_document,
-    validate_road_graph_document,
-    validate_sd_nav_document,
-    validate_turn_restrictions_document,
-)
-from roadgraph_builder.pipeline.build_graph import (
-    BuildParams,
-    build_graph_from_csv,
-    build_graph_from_trajectory,
-)
 from roadgraph_builder.core.graph.stats import graph_stats, junction_stats
 from roadgraph_builder.routing.hmm_match import hmm_match_trajectory
 from roadgraph_builder.routing.map_match import coverage_stats, snap_trajectory_to_graph
@@ -76,59 +76,6 @@ from roadgraph_builder.routing.trip_reconstruction import reconstruct_trips, tri
 from roadgraph_builder.semantics.road_class import RoadClassThresholds, infer_road_class
 from roadgraph_builder.semantics.signals import infer_signalized_junctions
 from roadgraph_builder.semantics.trace_fusion import coverage_buckets, fuse_traces_into_graph
-from roadgraph_builder.viz.svg_export import write_trajectory_graph_svg
-
-
-_TRAJECTORY_DTYPE_CHOICES = ("float64", "float32")
-
-
-def _add_build_params(p: argparse.ArgumentParser, *, include_trajectory_dtype: bool = False) -> None:
-    p.add_argument(
-        "--max-step-m",
-        type=float,
-        default=25.0,
-        help="Split trajectory when consecutive points exceed this gap (meters).",
-    )
-    p.add_argument(
-        "--merge-endpoint-m",
-        type=float,
-        default=8.0,
-        help="Merge graph endpoints closer than this distance (meters).",
-    )
-    p.add_argument(
-        "--centerline-bins",
-        type=int,
-        default=32,
-        help="PCA bin count along each segment for centerline smoothing.",
-    )
-    p.add_argument(
-        "--simplify-tolerance",
-        type=float,
-        default=None,
-        help="Douglas–Peucker tolerance (meters) for edge polylines; omit to skip.",
-    )
-    if include_trajectory_dtype:
-        p.add_argument(
-            "--trajectory-dtype",
-            choices=_TRAJECTORY_DTYPE_CHOICES,
-            default="float64",
-            help=(
-                "XY array dtype for trajectory loading (default float64). "
-                "float32 is opt-in and may change exported coordinates slightly."
-            ),
-        )
-
-
-def _build_params_from_args(args: argparse.Namespace) -> BuildParams:
-    use_3d = getattr(args, "use_3d", False)
-    return BuildParams(
-        max_step_m=args.max_step_m,
-        merge_endpoint_m=args.merge_endpoint_m,
-        centerline_bins=args.centerline_bins,
-        simplify_tolerance_m=args.simplify_tolerance,
-        use_3d=use_3d,
-        trajectory_xy_dtype=getattr(args, "trajectory_dtype", "float64"),
-    )
 
 
 def _load_json_for_cli(path_str: str) -> object:
@@ -139,10 +86,6 @@ def _load_json_for_cli(path_str: str) -> object:
     except FileNotFoundError:
         print(f"File not found: {path}", file=sys.stderr)
         raise SystemExit(1) from None
-
-
-def _validation_error(path_str: str, err: ValidationError) -> None:
-    print(f"{path_str}: {err.message}", file=sys.stderr)
 
 
 def _cli_load_graph(path_str: str):
@@ -169,72 +112,9 @@ def _build_parser() -> argparse.ArgumentParser:
 
     sub.add_parser("doctor", help="Print version, Python, and whether example files exist (cwd = repo root).")
 
-    b = sub.add_parser("build", help="Build graph from trajectory CSV and write JSON.")
-    b.add_argument("input_csv", help="Input CSV with columns timestamp, x, y (and optional z for 3D builds)")
-    b.add_argument("output_json", help="Output JSON path")
-    b.add_argument(
-        "--extra-csv",
-        action="append",
-        default=[],
-        metavar="PATH",
-        help="Additional trajectory CSV to concatenate with the primary input (same meter origin). Repeatable.",
-    )
-    b.add_argument(
-        "--3d",
-        dest="use_3d",
-        action="store_true",
-        default=False,
-        help=(
-            "Enable 3D mode: read z column from CSV and propagate elevation into the graph. "
-            "Adds polyline_z, slope_deg, elevation_m attributes. "
-            "Without this flag the output is byte-identical to v0.6.0."
-        ),
-    )
-    _add_build_params(b, include_trajectory_dtype=True)
-
-    v = sub.add_parser("visualize", help="Build graph from CSV and write trajectory+graph SVG.")
-    v.add_argument("input_csv", help="Input CSV with columns timestamp, x, y")
-    v.add_argument("output_svg", help="Output SVG path")
-    _add_build_params(v, include_trajectory_dtype=True)
-    v.add_argument(
-        "--width",
-        type=float,
-        default=900,
-        help="SVG width in pixels.",
-    )
-    v.add_argument(
-        "--height",
-        type=float,
-        default=700,
-        help="SVG height in pixels.",
-    )
-
-    val = sub.add_parser("validate", help="Validate a road graph JSON file against the schema.")
-    val.add_argument("input_json", help="JSON file produced by `build`")
-
-    vd = sub.add_parser(
-        "validate-detections",
-        help="Validate camera/perception detections JSON (camera_detections.schema.json).",
-    )
-    vd.add_argument("input_json", help="detections.json with observations[]")
-
-    vsd = sub.add_parser(
-        "validate-sd-nav",
-        help="Validate navigation SD seed JSON (sd_nav.schema.json, e.g. export-bundle nav/sd_nav.json).",
-    )
-    vsd.add_argument("input_json", help="sd_nav.json")
-
-    vm = sub.add_parser(
-        "validate-manifest",
-        help="Validate export-bundle manifest.json (manifest.schema.json).",
-    )
-    vm.add_argument("input_json", help="manifest.json")
-
-    vtr = sub.add_parser(
-        "validate-turn-restrictions",
-        help="Validate a turn-restrictions JSON (turn_restrictions.schema.json).",
-    )
-    vtr.add_argument("input_json", help="turn_restrictions.json")
+    add_build_parser(sub)
+    add_visualize_parser(sub)
+    add_validation_parsers(sub)
 
     enr = sub.add_parser(
         "enrich",
@@ -478,12 +358,6 @@ def _build_parser() -> argparse.ArgumentParser:
 
     add_detect_lane_markings_camera_parser(sub)
 
-    vlm = sub.add_parser(
-        "validate-lane-markings",
-        help="Validate a lane_markings.json against lane_markings.schema.json.",
-    )
-    vlm.add_argument("input_json", help="lane_markings.json produced by detect-lane-markings.")
-
     add_guidance_parsers(sub)
 
     ug = sub.add_parser(
@@ -602,99 +476,19 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "doctor":
         return run_doctor()
     if args.command == "build":
-        params = _build_params_from_args(args)
-        try:
-            if args.extra_csv:
-                traj = load_multi_trajectory_csvs(
-                    [args.input_csv, *args.extra_csv],
-                    load_z=params.use_3d,
-                    xy_dtype=params.trajectory_xy_dtype,
-                )
-                graph = build_graph_from_trajectory(traj, params)
-            else:
-                graph = build_graph_from_csv(args.input_csv, params)
-        except FileNotFoundError as e:
-            print(f"File not found: {e.filename}", file=sys.stderr)
-            return 1
-        except ValueError as e:
-            print(str(e), file=sys.stderr)
-            return 1
-        export_graph_json(graph, args.output_json)
-        return 0
-    if args.command == "visualize":
-        params = _build_params_from_args(args)
-        try:
-            traj = load_trajectory_csv(args.input_csv, xy_dtype=params.trajectory_xy_dtype)
-            graph = build_graph_from_trajectory(traj, params)
-        except FileNotFoundError as e:
-            print(f"File not found: {e.filename}", file=sys.stderr)
-            return 1
-        except ValueError as e:
-            print(str(e), file=sys.stderr)
-            return 1
-        write_trajectory_graph_svg(
-            traj,
-            graph,
-            args.output_svg,
-            width=args.width,
-            height=args.height,
+        return run_build(
+            args,
+            build_params_from_args=_build_params_from_args,
+            export_graph_json_func=export_graph_json,
         )
-        return 0
-    if args.command == "validate":
-        data = _load_json_for_cli(args.input_json)
-        if not isinstance(data, dict):
-            print("JSON root must be an object", file=sys.stderr)
-            return 1
-        try:
-            validate_road_graph_document(data)
-        except ValidationError as e:
-            _validation_error(args.input_json, e)
-            return 1
-        return 0
-    if args.command == "validate-detections":
-        data = _load_json_for_cli(args.input_json)
-        if not isinstance(data, dict):
-            print("JSON root must be an object", file=sys.stderr)
-            return 1
-        try:
-            validate_camera_detections_document(data)
-        except ValidationError as e:
-            _validation_error(args.input_json, e)
-            return 1
-        return 0
-    if args.command == "validate-sd-nav":
-        data = _load_json_for_cli(args.input_json)
-        if not isinstance(data, dict):
-            print("JSON root must be an object", file=sys.stderr)
-            return 1
-        try:
-            validate_sd_nav_document(data)
-        except ValidationError as e:
-            _validation_error(args.input_json, e)
-            return 1
-        return 0
-    if args.command == "validate-manifest":
-        data = _load_json_for_cli(args.input_json)
-        if not isinstance(data, dict):
-            print("JSON root must be an object", file=sys.stderr)
-            return 1
-        try:
-            validate_manifest_document(data)
-        except ValidationError as e:
-            _validation_error(args.input_json, e)
-            return 1
-        return 0
-    if args.command == "validate-turn-restrictions":
-        data = _load_json_for_cli(args.input_json)
-        if not isinstance(data, dict):
-            print("JSON root must be an object", file=sys.stderr)
-            return 1
-        try:
-            validate_turn_restrictions_document(data)
-        except ValidationError as e:
-            _validation_error(args.input_json, e)
-            return 1
-        return 0
+    if args.command == "visualize":
+        return run_visualize(args, build_params_from_args=_build_params_from_args)
+    if args.command in VALIDATION_COMMANDS:
+        return run_validate_document(
+            args,
+            load_json=_load_json_for_cli,
+            validation_error_func=print_validation_error,
+        )
     if args.command == "enrich":
         graph = _cli_load_graph(args.input_json)
         refinements = None
@@ -1025,24 +819,13 @@ def main(argv: list[str] | None = None) -> int:
             load_graph=_cli_load_graph,
             load_json=_load_json_for_cli,
         )
-    if args.command == "validate-lane-markings":
-        data = _load_json_for_cli(args.input_json)
-        if not isinstance(data, dict):
-            print("JSON root must be an object", file=sys.stderr)
-            return 1
-        try:
-            validate_lane_markings_document(data)
-        except ValidationError as e:
-            _validation_error(args.input_json, e)
-            return 1
-        return 0
     if args.command == "guidance":
         return run_guidance(args, load_json=_load_json_for_cli)
     if args.command == "validate-guidance":
         return run_validate_guidance(
             args,
             load_json=_load_json_for_cli,
-            validation_error_func=_validation_error,
+            validation_error_func=print_validation_error,
         )
     if args.command == "update-graph":
         from roadgraph_builder.pipeline.incremental import update_graph_from_trajectory as _update_graph
