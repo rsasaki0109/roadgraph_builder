@@ -10,7 +10,7 @@ This project builds a **graph-first** intermediate representation: **nodes** (ju
 
 ### Measured results
 
-Current `main` has post-v0.7.0 validation results tracked in `[Unreleased]`.
+v0.7.1 packages the post-v0.7.0 validation results below.
 
 | Signal | Current result | Source |
 | --- | --- | --- |
@@ -40,9 +40,9 @@ Use the short description and topics listed in [`.github/ABOUT.md`](.github/ABOU
 
 ### Current release surface
 
-The latest shipped tag is **v0.7.0**. It includes the full v0.6/v0.7 command surface shown below: lane-count inference, per-lane Lanelet2 export, uncertainty-aware routing, 3D elevation, slope and lane-change routing, camera lane detection, ground-plane LiDAR, Autoware validator bridging, incremental updates, and dataset batch export.
+The latest release target is **v0.7.1**. It keeps the full v0.6/v0.7 command surface shown below: lane-count inference, per-lane Lanelet2 export, uncertainty-aware routing, 3D elevation, slope and lane-change routing, camera lane detection, ground-plane LiDAR, Autoware validator bridging, incremental updates, and dataset batch export.
 
-Current `main` is ahead of v0.7.0 with post-release validation and documentation work: canonical lane-count accuracy numbers for Paris / Tokyo / Berlin, cross-city bundle tuning, the Paris TR-aware visualization preview, opt-in float32 drift measurements, private-repo docs preview notes, and a CLI boundary refactor. See [CHANGELOG.md](CHANGELOG.md) `[Unreleased]` for the exact delta.
+v0.7.1 adds post-v0.7.0 validation and release-hardening work: canonical lane-count accuracy numbers for Paris / Tokyo / Berlin, cross-city bundle tuning, the Paris TR-aware visualization preview, opt-in float32 drift measurements, private-repo docs preview notes, release-bundle byte gates, and a CLI boundary refactor. See [CHANGELOG.md](CHANGELOG.md) `0.7.1` for the exact delta.
 
 ### Visualization results
 

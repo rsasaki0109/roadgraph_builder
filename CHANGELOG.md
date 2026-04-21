@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.1] — 2026-04-21
+
 ### Changed
 
 - **README measured results are more compact.**
@@ -59,10 +61,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   float64.
 
 - **README release surface is now explicit about shipped vs post-release work.**
-  The README separates the v0.7.0 shipped command surface from current-main
+  The README separates the v0.7.0 shipped command surface from v0.7.1
   measured results, so validation numbers, docs preview status, and float32
-  drift measurements read as `[Unreleased]` follow-up work rather than a
-  second release. It also removes stale "trajectory CSV only" and shell
+  drift measurements read as patch-release follow-up work rather than part of
+  the original v0.7.0 tag. It also removes stale "trajectory CSV only" and shell
   completion caveats.
 
 - **CLI command boundaries are now split by domain.**
@@ -348,6 +350,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tests and CI (Python 3.10 / 3.12).
 - Stubs: LiDAR, camera, Lanelet2 export.
 
+[0.7.1]: https://github.com/rsasaki0109/roadgraph_builder/releases/tag/v0.7.1
+[0.7.0]: https://github.com/rsasaki0109/roadgraph_builder/releases/tag/v0.7.0
+[0.6.0]: https://github.com/rsasaki0109/roadgraph_builder/releases/tag/v0.6.0
+[0.5.0]: https://github.com/rsasaki0109/roadgraph_builder/releases/tag/v0.5.0
+[0.4.0]: https://github.com/rsasaki0109/roadgraph_builder/releases/tag/v0.4.0
 [0.3.0]: https://github.com/rsasaki0109/roadgraph_builder/releases/tag/v0.3.0
 [0.2.0]: https://github.com/rsasaki0109/roadgraph_builder/releases/tag/v0.2.0
 [0.1.0]: https://github.com/rsasaki0109/roadgraph_builder/releases/tag/v0.1.0
