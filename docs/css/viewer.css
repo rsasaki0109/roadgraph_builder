@@ -159,13 +159,18 @@ button:hover {
   border-top: 1px solid #334155;
 }
 
+.results-inner {
+  display: grid;
+  gap: 14px;
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
 .result-card {
   display: grid;
   grid-template-columns: minmax(240px, 520px) minmax(220px, 1fr);
   gap: 18px;
   align-items: center;
-  max-width: 1120px;
-  margin: 0 auto;
   padding: 12px;
   color: var(--text);
   text-decoration: none;
@@ -203,6 +208,56 @@ button:hover {
   line-height: 1.45;
 }
 
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.metric-card {
+  display: grid;
+  gap: 6px;
+  min-height: 104px;
+  padding: 12px;
+  color: var(--text);
+  text-decoration: none;
+  background: #172033;
+  border: 1px solid #334155;
+  border-top-width: 3px;
+  border-radius: 8px;
+}
+
+.metric-card:hover {
+  border-color: #eab308;
+}
+
+.metric-card strong {
+  font-size: 1.05rem;
+  line-height: 1.2;
+}
+
+.metric-card span {
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.metric-card.route {
+  border-top-color: #eab308;
+}
+
+.metric-card.accuracy {
+  border-top-color: #22c55e;
+}
+
+.metric-card.tuning {
+  border-top-color: #f97316;
+}
+
+.metric-card.memory {
+  border-top-color: #38bdf8;
+}
+
 .footer {
   padding: 0.6rem 1rem;
   font-size: 0.75rem;
@@ -212,6 +267,10 @@ button:hover {
 
 @media (max-width: 720px) {
   .result-card {
+    grid-template-columns: 1fr;
+  }
+
+  .metric-grid {
     grid-template-columns: 1fr;
   }
 }

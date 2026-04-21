@@ -35,6 +35,15 @@ The GitHub Pages map ships a Paris OSM-highway graph with 10 mapped turn restric
 
 Open the interactive version: **[Map (OSM tiles)](https://rsasaki0109.github.io/roadgraph_builder/map.html)**.
 
+### Measured results
+
+| Track | Latest result | Details |
+| --- | --- | --- |
+| **Paris grid visualization** | 855 nodes / 1081 edges, 10 mapped OSM turn restrictions, TR-aware route **909 m** vs unrestricted **878 m** | [Interactive map](https://rsasaki0109.github.io/roadgraph_builder/map.html), [asset attribution](docs/assets/ATTRIBUTION.md) |
+| **Lane-count baseline** | OSM `lanes=` MAE at canonical 20 m matching: Paris 20e **0.938**, Tokyo Ginza **0.903**, Berlin Mitte **1.220** | [accuracy report](docs/accuracy_report.md) |
+| **Bundle tuning** | Conservative starting point remains `--max-step-m 40 --merge-endpoint-m 8` across Paris / Tokyo / Berlin; Berlin 40/8 validates at 58 nodes / 57 edges / 52% LCC | [tuning guide](docs/bundle_tuning.md) |
+| **Memory / dtype** | Opt-in `--trajectory-dtype float32` keeps topology unchanged on Paris + Berlin; max observed drift **0.00072 m**, default remains float64 | [float32 drift report](docs/float32_drift_report.md) |
+
 ### Quick start
 
 ```bash

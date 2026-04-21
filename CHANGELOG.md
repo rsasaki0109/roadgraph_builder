@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **README / GitHub Pages now surface measured results.**
+  README adds a compact measured-results table for the Paris TR-aware route,
+  lane-count accuracy baselines, cross-city bundle tuning, and float32 drift
+  report. The GitHub Pages diagram viewer adds matching metric cards below the
+  Paris route preview so the live docs show both the visualization and the
+  latest validation numbers.
+
 - **README / GitHub Pages now show a polished Paris route visualization.**
   `docs/images/paris_grid_route.svg` is generated from the committed Paris
   OSM-highway GeoJSON, TR-aware route overlay, and turn-restriction JSON.

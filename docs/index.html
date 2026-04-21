@@ -63,16 +63,37 @@
       </div>
 
       <section class="results" aria-label="Visualization results">
-        <a class="result-card" href="map.html">
-          <img
-            src="images/paris_grid_route.svg"
-            alt="Paris road graph with a highlighted route and turn-restriction junctions"
-          />
-          <span class="result-copy">
-            <strong>Paris grid route</strong>
-            <span>OSM-highway graph · 10 mapped turn restrictions · TR-aware route overlay</span>
-          </span>
-        </a>
+        <div class="results-inner">
+          <a class="result-card" href="map.html">
+            <img
+              src="images/paris_grid_route.svg"
+              alt="Paris road graph with a highlighted route and turn-restriction junctions"
+            />
+            <span class="result-copy">
+              <strong>Paris grid route</strong>
+              <span>OSM-highway graph · 10 mapped turn restrictions · TR-aware route overlay</span>
+            </span>
+          </a>
+
+          <div class="metric-grid" aria-label="Measured results">
+            <a class="metric-card route" href="map.html">
+              <strong>909 m</strong>
+              <span>Paris TR-aware route; unrestricted baseline is 878 m</span>
+            </a>
+            <a class="metric-card accuracy" href="accuracy_report.md">
+              <strong>0.938 MAE</strong>
+              <span>Paris 20e lane-count baseline at 20 m matching</span>
+            </a>
+            <a class="metric-card tuning" href="bundle_tuning.md">
+              <strong>40 / 8</strong>
+              <span>Conservative max-step / merge-endpoint start across 3 cities</span>
+            </a>
+            <a class="metric-card memory" href="float32_drift_report.md">
+              <strong>&lt;1 mm</strong>
+              <span>Opt-in float32 geometry drift; default remains float64</span>
+            </a>
+          </div>
+        </div>
       </section>
 
       <footer class="footer">
