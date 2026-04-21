@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **README measured results are more compact.**
+  The current-main validation numbers now sit near the top of `README.md` in a
+  compact routing / accuracy / tuning / memory table, with the longer duplicate
+  post-release table removed so the docs preview and quick-start sections are
+  easier to scan.
+
 - **Docs viewer result cards are easier to scan.**
   `docs/index.html` now has a clearer post-release results section with
   structured metric labels and updated float32 messaging. `docs/css/viewer.css`

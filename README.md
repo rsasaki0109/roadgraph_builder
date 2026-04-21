@@ -8,6 +8,17 @@
 
 This project builds a **graph-first** intermediate representation: **nodes** (junctions/endpoints) and **edges** (lane/road segments) with **centerline polylines** and optional **attributes**. Output is **JSON** (`schema_version`) with optional **SVG** previews and a small static viewer in **`docs/`** (local preview, or GitHub Pages when the repository/plan supports it).
 
+### Measured results
+
+Current `main` has post-v0.7.0 validation results tracked in `[Unreleased]`.
+
+| Signal | Current result | Source |
+| --- | --- | --- |
+| **Routing** | Paris TR-aware route **909 m** vs unrestricted **878 m** | [map](docs/map.html) |
+| **Accuracy** | Lane-count MAE @ 20 m: Paris **0.938** / Tokyo **0.903** / Berlin **1.220** | [accuracy report](docs/accuracy_report.md) |
+| **Tuning** | Conservative cross-city start: `--max-step-m 40 --merge-endpoint-m 8` | [tuning guide](docs/bundle_tuning.md) |
+| **Memory** | Default remains **float64**; float32 is opt-in after replay showed small RSS wins and ID drift | [float32 report](docs/float32_drift_report.md) |
+
 ### GitHub “About” text (copy-paste)
 
 Use the short description and topics listed in [`.github/ABOUT.md`](.github/ABOUT.md), or run `gh repo edit` (see below).
@@ -40,17 +51,6 @@ The docs map ships a Paris OSM-highway graph with 10 mapped turn restrictions an
 [![Paris OSM-highway grid with a TR-aware route](docs/images/paris_grid_route.svg)](docs/map.html)
 
 Open the interactive version locally: `cd docs && python3 -m http.server 8765`, then visit **`http://127.0.0.1:8765/map.html`**.
-
-### Post-release measured results
-
-These numbers describe the current `main` validation surface. They are tracked in `[Unreleased]` because they were measured after the v0.7.0 tag.
-
-| Track | Latest result | Details |
-| --- | --- | --- |
-| **Paris grid visualization** | 855 nodes / 1081 edges, 10 mapped OSM turn restrictions, TR-aware route **909 m** vs unrestricted **878 m** | [local map](docs/map.html), [asset attribution](docs/assets/ATTRIBUTION.md) |
-| **Lane-count baseline** | OSM `lanes=` MAE at canonical 20 m matching: Paris 20e **0.938**, Tokyo Ginza **0.903**, Berlin Mitte **1.220** | [accuracy report](docs/accuracy_report.md) |
-| **Bundle tuning** | Conservative starting point remains `--max-step-m 40 --merge-endpoint-m 8` across Paris / Tokyo / Berlin; Berlin 40/8 validates at 58 nodes / 57 edges / 52% LCC | [tuning guide](docs/bundle_tuning.md) |
-| **Memory / dtype** | Opt-in `--trajectory-dtype float32` keeps topology unchanged on Paris + Berlin; max observed drift **0.00072 m**. Larger synthetic / real-trace replay runs show the direct XY allocation win, but full export RSS drops only a few MB and real-trace replay exposes ID drift. Default remains float64 | [float32 drift report](docs/float32_drift_report.md) |
 
 ### Quick start
 
