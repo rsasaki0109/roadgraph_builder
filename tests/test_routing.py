@@ -107,6 +107,35 @@ def test_shortest_path_cached_index_tracks_replaced_polyline():
     assert math.isclose(r.total_length_m, 10.0)
 
 
+def test_shortest_path_cached_index_tracks_in_place_polyline_mutation():
+    g = Graph(
+        nodes=[
+            Node(id="a", position=(0.0, 0.0)),
+            Node(id="c", position=(60.0, 0.0)),
+        ],
+        edges=[
+            Edge(
+                id="short",
+                start_node_id="a",
+                end_node_id="c",
+                polyline=[(0.0, 0.0), (30.0, 0.0), (60.0, 0.0)],
+            ),
+            Edge(
+                id="long",
+                start_node_id="a",
+                end_node_id="c",
+                polyline=[(0.0, 0.0), (100.0, 0.0)],
+            ),
+        ],
+    )
+    assert shortest_path(g, "a", "c").edge_sequence == ["short"]
+
+    g.edges[0].polyline[1] = (300.0, 0.0)
+    r = shortest_path(g, "a", "c")
+    assert r.edge_sequence == ["long"]
+    assert math.isclose(r.total_length_m, 100.0)
+
+
 def test_shortest_path_disjoint_raises():
     g = _manual_graph()
     g = Graph(

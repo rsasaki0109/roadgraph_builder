@@ -74,9 +74,8 @@ def _routing_signature(graph: "Graph") -> tuple[object, ...]:
     """Return a cheap mutation signature for graph topology and edge geometry.
 
     ``Graph`` is intentionally mutable, so the cache is invalidated when the
-    node/edge lists change shape, edge endpoints change, or an edge replaces
-    its polyline object. In-place edits to polyline coordinates are outside the
-    normal routing path and should rebuild or replace the graph before routing.
+    node/edge lists change shape, edge endpoints change, an edge replaces its
+    polyline object, or polyline coordinate values change in place.
     """
     return (
         id(graph.nodes),
@@ -84,10 +83,25 @@ def _routing_signature(graph: "Graph") -> tuple[object, ...]:
         tuple(n.id for n in graph.nodes),
         id(graph.edges),
         len(graph.edges),
-        tuple(
-            (e.id, e.start_node_id, e.end_node_id, id(e.polyline), len(e.polyline))
-            for e in graph.edges
-        ),
+        tuple(_edge_cache_signature(e) for e in graph.edges),
+    )
+
+
+def _polyline_cache_signature(polyline) -> tuple[int, int, int]:  # type: ignore[no-untyped-def]
+    acc = 1469598103934665603
+    for x_raw, y_raw in polyline:
+        point_hash = hash((float(x_raw), float(y_raw)))
+        acc ^= point_hash & 0xFFFFFFFFFFFFFFFF
+        acc = (acc * 1099511628211) & 0xFFFFFFFFFFFFFFFF
+    return (id(polyline), len(polyline), acc)
+
+
+def _edge_cache_signature(edge) -> tuple[object, ...]:  # type: ignore[no-untyped-def]
+    return (
+        edge.id,
+        edge.start_node_id,
+        edge.end_node_id,
+        _polyline_cache_signature(edge.polyline),
     )
 
 

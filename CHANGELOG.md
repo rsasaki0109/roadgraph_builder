@@ -44,6 +44,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   0.63 s / 0.57 s / 0.59 s locally, and `scripts/run_benchmarks.py` now
   includes `nearest_node_grid_2000`.
 
+- **Routing caches now detect more graph mutations.**
+  `nearest_node` cache signatures now cover every node on small/medium graphs
+  and evenly sampled node positions on very large graphs, so middle-node
+  position replacement no longer reuses a stale spatial index. `shortest_path`
+  routing signatures now include a polyline coordinate checksum, so in-place
+  geometry edits invalidate cached edge lengths.
+
 ### Fixed
 
 - **Paris splitter golden length check now tolerates Python/Numpy drift.**

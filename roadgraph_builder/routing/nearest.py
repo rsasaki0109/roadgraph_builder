@@ -7,13 +7,16 @@ distance in meters.
 
 from __future__ import annotations
 
-import math
 import heapq
+import math
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from roadgraph_builder.core.graph.graph import Graph
+
+_FULL_SIGNATURE_NODE_LIMIT = 4096
+_SIGNATURE_SAMPLE_COUNT = 65
 
 
 @dataclass(frozen=True)
@@ -51,22 +54,36 @@ def _nearest_signature(graph: "Graph") -> tuple[object, ...]:
     """Return a cheap mutation signature for the graph node list.
 
     ``Graph`` is mutable, but nearest-node lookups normally operate on a built
-    graph whose node list is stable. The cache is invalidated when the node
-    list object, node count, endpoint ids, or endpoint position objects change;
-    appending nodes and replacing the graph's node list are therefore covered
-    without adding an O(N) signature check to every query.
+    graph whose node list is stable. Small/medium graphs use an exact node
+    signature. Very large graphs use evenly spaced samples so repeated snap
+    queries do not fall back to an O(N) cache check before the spatial lookup.
     """
-    if not graph.nodes:
+    node_count = len(graph.nodes)
+    if node_count == 0:
         return (id(graph.nodes), 0)
-    first = graph.nodes[0]
-    last = graph.nodes[-1]
+    if node_count <= _FULL_SIGNATURE_NODE_LIMIT:
+        indices = range(node_count)
+        mode = "full"
+    else:
+        sample_count = min(_SIGNATURE_SAMPLE_COUNT, node_count)
+        indices = sorted({round(i * (node_count - 1) / (sample_count - 1)) for i in range(sample_count)})
+        mode = "sample"
+
+    sampled_nodes = tuple(
+        (
+            idx,
+            graph.nodes[idx].id,
+            id(graph.nodes[idx].position),
+            float(graph.nodes[idx].position[0]),
+            float(graph.nodes[idx].position[1]),
+        )
+        for idx in indices
+    )
     return (
         id(graph.nodes),
-        len(graph.nodes),
-        first.id,
-        id(first.position),
-        last.id,
-        id(last.position),
+        node_count,
+        mode,
+        sampled_nodes,
     )
 
 

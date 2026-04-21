@@ -52,6 +52,16 @@ def test_nearest_node_cached_index_tracks_endpoint_position_replacement():
     assert r.distance_m == 0.0
 
 
+def test_nearest_node_cached_index_tracks_middle_position_replacement():
+    g = _three_node_graph()
+    assert nearest_node(g, x_m=100.0, y_m=0.0).node_id == "c"
+
+    g.nodes[1].position = (100.0, 0.0)
+    r = nearest_node(g, x_m=100.0, y_m=0.0)
+    assert r.node_id == "b"
+    assert r.distance_m == 0.0
+
+
 def test_nearest_node_matches_bruteforce_on_scattered_points():
     nodes = [
         Node(id=f"n{i}", position=(float((i * 37) % 113), float((i * 19) % 89)))
