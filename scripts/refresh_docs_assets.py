@@ -19,6 +19,8 @@ if str(ROOT) not in sys.path:
 
 DEFAULT_REPO_URL = "https://github.com/rsasaki0109/roadgraph_builder"
 DEFAULT_PAGES_URL = "https://rsasaki0109.github.io/roadgraph_builder/"
+PARIS_GRID_REACHABLE_START_NODE = "n312"
+PARIS_GRID_REACHABLE_MAX_COST_M = 500.0
 
 
 def _load_origin(path: Path) -> tuple[float, float]:
@@ -26,33 +28,270 @@ def _load_origin(path: Path) -> tuple[float, float]:
     return float(d["lat0"]), float(d["lon0"])
 
 
+def _coords(line: object) -> list[tuple[float, float]]:
+    if not isinstance(line, list):
+        return []
+    out: list[tuple[float, float]] = []
+    for pt in line:
+        if isinstance(pt, list) and len(pt) >= 2:
+            out.append((float(pt[0]), float(pt[1])))
+    return out
+
+
+def _clip_line_fraction(
+    line: list[tuple[float, float]],
+    fraction: float,
+) -> list[tuple[float, float]]:
+    """Return the prefix of a lon/lat LineString by geometric fraction."""
+
+    if not line:
+        return []
+    if fraction >= 1.0:
+        return list(line)
+    if fraction <= 0.0:
+        return [line[0]]
+
+    total = 0.0
+    for i in range(len(line) - 1):
+        x0, y0 = line[i]
+        x1, y1 = line[i + 1]
+        total += ((x1 - x0) ** 2 + (y1 - y0) ** 2) ** 0.5
+    if total <= 0.0:
+        return list(line)
+
+    target = total * fraction
+    walked = 0.0
+    out = [line[0]]
+    for i in range(len(line) - 1):
+        x0, y0 = line[i]
+        x1, y1 = line[i + 1]
+        segment = ((x1 - x0) ** 2 + (y1 - y0) ** 2) ** 0.5
+        if segment <= 0.0:
+            continue
+        if walked + segment >= target:
+            t = (target - walked) / segment
+            out.append((x0 + (x1 - x0) * t, y0 + (y1 - y0) * t))
+            return out
+        out.append(line[i + 1])
+        walked += segment
+    return out
+
+
+def _write_paris_grid_reachability_asset() -> None:
+    """Build a committed service-area overlay from the Paris grid GeoJSON."""
+
+    import heapq
+    import itertools
+    import math
+
+    map_path = ASSETS / "map_paris_grid.geojson"
+    restrictions_path = ASSETS / "paris_grid_turn_restrictions.json"
+    if not (map_path.is_file() and restrictions_path.is_file()):
+        return
+
+    map_doc = json.loads(map_path.read_text(encoding="utf-8"))
+    restrictions_doc = json.loads(restrictions_path.read_text(encoding="utf-8"))
+    nodes: dict[str, tuple[float, float]] = {}
+    edges: dict[str, dict[str, object]] = {}
+    adj: dict[str, list[tuple[str, str, str, float]]] = {}
+
+    for feature in map_doc.get("features", []):
+        if not isinstance(feature, dict):
+            continue
+        props = feature.get("properties", {})
+        geom = feature.get("geometry", {})
+        if not isinstance(props, dict) or not isinstance(geom, dict):
+            continue
+        if props.get("kind") == "node":
+            coords = geom.get("coordinates")
+            node_id = props.get("node_id")
+            if isinstance(coords, list) and len(coords) >= 2 and isinstance(node_id, str):
+                nodes[node_id] = (float(coords[0]), float(coords[1]))
+            continue
+        if props.get("kind") not in {"centerline", "lane_centerline"}:
+            continue
+        edge_id = props.get("edge_id")
+        start = props.get("start_node_id")
+        end = props.get("end_node_id")
+        length = props.get("length_m")
+        if not (
+            isinstance(edge_id, str)
+            and isinstance(start, str)
+            and isinstance(end, str)
+            and isinstance(length, (int, float))
+            and geom.get("type") == "LineString"
+        ):
+            continue
+        line = _coords(geom.get("coordinates"))
+        if len(line) < 2:
+            continue
+        length_m = float(length)
+        edges[edge_id] = {"coords": line, "start": start, "end": end, "length_m": length_m}
+        adj.setdefault(start, []).append((edge_id, "forward", end, length_m))
+        if start != end:
+            adj.setdefault(end, []).append((edge_id, "reverse", start, length_m))
+
+    start_node = PARIS_GRID_REACHABLE_START_NODE
+    budget = PARIS_GRID_REACHABLE_MAX_COST_M
+    if start_node not in nodes:
+        return
+
+    no_turns: dict[tuple[str, str, str], set[tuple[str, str]]] = {}
+    only_turns: dict[tuple[str, str, str], tuple[str, str]] = {}
+    restrictions = restrictions_doc.get("turn_restrictions", [])
+    if not isinstance(restrictions, list):
+        restrictions = []
+    for restriction in restrictions:
+        if not isinstance(restriction, dict):
+            continue
+        junction = restriction.get("junction_node_id")
+        from_edge = restriction.get("from_edge_id")
+        to_edge = restriction.get("to_edge_id")
+        if not (isinstance(junction, str) and isinstance(from_edge, str) and isinstance(to_edge, str)):
+            continue
+        from_dir = str(restriction.get("from_direction", "forward"))
+        to_dir = str(restriction.get("to_direction", "forward"))
+        key = (junction, from_edge, from_dir)
+        target = (to_edge, to_dir)
+        kind = str(restriction.get("restriction", ""))
+        if kind.startswith("only_"):
+            only_turns[key] = target
+        elif kind.startswith("no_"):
+            no_turns.setdefault(key, set()).add(target)
+
+    State = tuple[str, str | None, str | None]
+    start_state: State = (start_node, None, None)
+    dist: dict[State, float] = {start_state: 0.0}
+    best_node_cost: dict[str, float] = {start_node: 0.0}
+    spans: dict[tuple[str, str], dict[str, object]] = {}
+    counter = itertools.count()
+    heap: list[tuple[float, int, State]] = [(0.0, next(counter), start_state)]
+
+    while heap:
+        cost, _, state = heapq.heappop(heap)
+        if cost > dist.get(state, math.inf) or cost > budget:
+            continue
+        node_id, incoming_edge, incoming_dir = state
+        for edge_id, direction, neighbor, edge_cost in adj.get(node_id, []):
+            if incoming_edge is not None:
+                from_key = (node_id, incoming_edge, str(incoming_dir))
+                to_key = (edge_id, direction)
+                if from_key in only_turns and only_turns[from_key] != to_key:
+                    continue
+                if to_key in no_turns.get(from_key, set()):
+                    continue
+            remaining = budget - cost
+            if remaining > 0.0:
+                fraction = 1.0 if edge_cost <= 0.0 else max(0.0, min(1.0, remaining / edge_cost))
+                span_key = (edge_id, direction)
+                current = spans.get(span_key)
+                if (
+                    current is None
+                    or fraction > float(current["reachable_fraction"]) + 1e-12
+                    or (
+                        math.isclose(fraction, float(current["reachable_fraction"]))
+                        and cost < float(current["start_cost_m"])
+                    )
+                ):
+                    complete = cost + edge_cost <= budget
+                    spans[span_key] = {
+                        "edge_id": edge_id,
+                        "direction": direction,
+                        "from_node": node_id,
+                        "to_node": neighbor,
+                        "start_cost_m": cost,
+                        "end_cost_m": cost + edge_cost if complete else None,
+                        "reachable_cost_m": min(edge_cost, remaining),
+                        "reachable_fraction": fraction,
+                        "complete": complete,
+                    }
+            next_cost = cost + edge_cost
+            if next_cost > budget:
+                continue
+            next_state: State = (neighbor, edge_id, direction)
+            if next_cost < dist.get(next_state, math.inf):
+                dist[next_state] = next_cost
+                best_node_cost[neighbor] = min(best_node_cost.get(neighbor, math.inf), next_cost)
+                heapq.heappush(heap, (next_cost, next(counter), next_state))
+
+    features: list[dict[str, object]] = []
+    for span in sorted(spans.values(), key=lambda s: (float(s["start_cost_m"]), str(s["edge_id"]), str(s["direction"]))):
+        edge = edges[str(span["edge_id"])]
+        line = list(edge["coords"])  # type: ignore[arg-type]
+        if span["direction"] == "reverse":
+            line.reverse()
+        clipped = _clip_line_fraction(line, float(span["reachable_fraction"]))
+        if len(clipped) < 2:
+            continue
+        features.append(
+            {
+                "type": "Feature",
+                "properties": {"kind": "reachable_edge", **span},
+                "geometry": {"type": "LineString", "coordinates": clipped},
+            }
+        )
+    for node_id, cost in sorted(best_node_cost.items(), key=lambda item: (item[1], item[0])):
+        features.append(
+            {
+                "type": "Feature",
+                "properties": {
+                    "kind": "reachability_start" if node_id == start_node else "reachable_node",
+                    "node_id": node_id,
+                    "cost_m": cost,
+                },
+                "geometry": {"type": "Point", "coordinates": nodes[node_id]},
+            }
+        )
+
+    doc = {
+        "type": "FeatureCollection",
+        "name": f"reachable_paris_grid_{start_node}_{budget:g}m",
+        "properties": {
+            "attribution": "© OpenStreetMap contributors",
+            "license": "ODbL-1.0",
+            "license_url": "https://opendatacommons.org/licenses/odbl/1-0/",
+            "source_map": "map_paris_grid.geojson",
+            "turn_restrictions": "paris_grid_turn_restrictions.json",
+            "start_node": start_node,
+            "max_cost_m": budget,
+            "node_count": len(best_node_cost),
+            "edge_count": len(spans),
+            "complete_edge_count": sum(1 for span in spans.values() if span["complete"]),
+        },
+        "features": features,
+    }
+    (ASSETS / "reachable_paris_grid.geojson").write_text(
+        json.dumps(doc, separators=(",", ":")) + "\n",
+        encoding="utf-8",
+    )
+
+
 def _render_paris_grid_route_preview() -> None:
     """Render a static SVG preview for README / GitHub Pages."""
     map_path = ASSETS / "map_paris_grid.geojson"
     route_path = ASSETS / "route_paris_grid.geojson"
+    reachable_path = ASSETS / "reachable_paris_grid.geojson"
     restrictions_path = ASSETS / "paris_grid_turn_restrictions.json"
     if not (map_path.is_file() and route_path.is_file() and restrictions_path.is_file()):
         return
 
     map_doc = json.loads(map_path.read_text(encoding="utf-8"))
     route_doc = json.loads(route_path.read_text(encoding="utf-8"))
+    reachable_doc = (
+        json.loads(reachable_path.read_text(encoding="utf-8"))
+        if reachable_path.is_file()
+        else {"features": [], "properties": {}}
+    )
     restrictions_doc = json.loads(restrictions_path.read_text(encoding="utf-8"))
 
     centerlines: list[list[tuple[float, float]]] = []
     nodes: dict[str, tuple[float, float]] = {}
+    reachable_lines: list[tuple[list[tuple[float, float]], bool]] = []
+    reachable_start: tuple[float, float] | None = None
     route_lines: list[list[tuple[float, float]]] = []
     route_main: list[tuple[float, float]] = []
     start_pt: tuple[float, float] | None = None
     end_pt: tuple[float, float] | None = None
-
-    def _coords(line: object) -> list[tuple[float, float]]:
-        if not isinstance(line, list):
-            return []
-        out: list[tuple[float, float]] = []
-        for pt in line:
-            if isinstance(pt, list) and len(pt) >= 2:
-                out.append((float(pt[0]), float(pt[1])))
-        return out
 
     for feature in map_doc.get("features", []):
         if not isinstance(feature, dict):
@@ -71,6 +310,23 @@ def _render_paris_grid_route_preview() -> None:
             node_id = props.get("node_id")
             if isinstance(coords, list) and len(coords) >= 2 and isinstance(node_id, str):
                 nodes[node_id] = (float(coords[0]), float(coords[1]))
+
+    for feature in reachable_doc.get("features", []):
+        if not isinstance(feature, dict):
+            continue
+        props = feature.get("properties", {})
+        geom = feature.get("geometry", {})
+        if not isinstance(props, dict) or not isinstance(geom, dict):
+            continue
+        kind = props.get("kind")
+        if kind == "reachable_edge" and geom.get("type") == "LineString":
+            line = _coords(geom.get("coordinates"))
+            if len(line) >= 2:
+                reachable_lines.append((line, bool(props.get("complete"))))
+        elif kind == "reachability_start" and geom.get("type") == "Point":
+            coords = geom.get("coordinates")
+            if isinstance(coords, list) and len(coords) >= 2:
+                reachable_start = (float(coords[0]), float(coords[1]))
 
     for feature in route_doc.get("features", []):
         if not isinstance(feature, dict):
@@ -143,15 +399,21 @@ def _render_paris_grid_route_preview() -> None:
                 break
     total_length = float(route_props.get("total_length_m", 0.0) or 0.0)
     edge_count = int(route_props.get("edge_count", len(route_lines)) or len(route_lines))
+    reachable_props = reachable_doc.get("properties", {})
+    if not isinstance(reachable_props, dict):
+        reachable_props = {}
+    reachable_budget = float(reachable_props.get("max_cost_m", 0.0) or 0.0)
+    reachable_nodes = int(reachable_props.get("node_count", 0) or 0)
+    reachable_edges = int(reachable_props.get("edge_count", len(reachable_lines)) or len(reachable_lines))
 
     svg: list[str] = []
     svg.append(
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {int(width)} {int(height)}" '
         'role="img" aria-labelledby="title desc">'
     )
-    svg.append("<title id=\"title\">Paris OSM-highway grid route preview</title>")
+    svg.append("<title id=\"title\">Paris OSM-highway grid route and reachability preview</title>")
     svg.append(
-        "<desc id=\"desc\">Static preview of a route across a Paris road graph "
+        "<desc id=\"desc\">Static preview of a route and reachable service area across a Paris road graph "
         "with turn-restriction junctions highlighted.</desc>"
     )
     svg.append("<rect width=\"1200\" height=\"720\" fill=\"#f8fafc\"/>")
@@ -170,6 +432,15 @@ def _render_paris_grid_route_preview() -> None:
         svg.append(
             f'<path d="{path_d(line)}" stroke="#94a3b8" stroke-width="1.55" '
             'opacity="0.58"/>'
+        )
+    svg.append("</g>")
+    svg.append("<g fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\">")
+    for line, complete in reachable_lines:
+        dash = "" if complete else ' stroke-dasharray="7 7"'
+        opacity = "0.42" if complete else "0.50"
+        svg.append(
+            f'<path d="{path_d(line)}" stroke="#0f766e" stroke-width="6.0" '
+            f'opacity="{opacity}"{dash}/>'
         )
     svg.append("</g>")
     svg.append("<g fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\">")
@@ -193,6 +464,12 @@ def _render_paris_grid_route_preview() -> None:
             f'stroke="#ffffff" stroke-width="1.6"><title>{label}</title></circle>'
         )
     svg.append("</g>")
+    if reachable_start is not None:
+        x, y = project(reachable_start)
+        svg.append(
+            f'<circle cx="{x:.1f}" cy="{y:.1f}" r="10.0" fill="#0f766e" '
+            f'stroke="#ffffff" stroke-width="2.3"><title>reachable start</title></circle>'
+        )
     for cls, pt, fill in (("Start", start_pt, "#16a34a"), ("End", end_pt, "#ef4444")):
         if pt is None:
             continue
@@ -206,7 +483,7 @@ def _render_paris_grid_route_preview() -> None:
     svg.append(f'<g transform="translate({panel_x} {panel_y})">')
     svg.append(
         '<text x="0" y="0" font-family="Inter, ui-sans-serif, system-ui, sans-serif" '
-        'font-size="16" font-weight="700" fill="#0f172a">Paris grid route</text>'
+        'font-size="16" font-weight="700" fill="#0f172a">Paris route + reachability</text>'
     )
     svg.append(
         '<text x="0" y="26" font-family="Inter, ui-sans-serif, system-ui, sans-serif" '
@@ -216,6 +493,9 @@ def _render_paris_grid_route_preview() -> None:
         ("graph edges", str(len(centerlines))),
         ("graph nodes", str(len(nodes))),
         ("OSM restrictions", str(len(restriction_nodes))),
+        ("reachable budget", f"{reachable_budget:.0f} m"),
+        ("reachable nodes", str(reachable_nodes)),
+        ("reachable spans", str(reachable_edges)),
         ("route length", f"{total_length:.0f} m"),
         ("route edges", str(edge_count)),
     ]
@@ -233,7 +513,7 @@ def _render_paris_grid_route_preview() -> None:
         svg.append(f'<path d="M 0 {y + 12} L 170 {y + 12}" stroke="#e2e8f0" stroke-width="1"/>')
         y += 42
     svg.append(
-        '<g transform="translate(0 308)" '
+        '<g transform="translate(0 430)" '
         'font-family="Inter, ui-sans-serif, system-ui, sans-serif" '
         'font-size="12" fill="#475569">'
     )
@@ -246,9 +526,14 @@ def _render_paris_grid_route_preview() -> None:
         'stroke-linecap="round"/><text x="50" y="28">selected route</text>'
     )
     svg.append(
-        '<path d="M 0 54 L 38 54" stroke="#94a3b8" stroke-width="2" '
+        '<path d="M 0 54 L 38 54" stroke="#0f766e" stroke-width="5" '
+        'stroke-linecap="round" opacity="0.55"/>'
+        '<text x="50" y="58">500 m reachable span</text>'
+    )
+    svg.append(
+        '<path d="M 0 84 L 38 84" stroke="#94a3b8" stroke-width="2" '
         'stroke-linecap="round" opacity="0.7"/>'
-        '<text x="50" y="58">road graph centerline</text>'
+        '<text x="50" y="88">road graph centerline</text>'
     )
     svg.append("</g>")
     svg.append("</g>")
@@ -408,6 +693,8 @@ def main() -> None:
             license_name="ODbL-1.0",
             license_url="https://opendatacommons.org/licenses/odbl/1-0/",
         )
+
+    _write_paris_grid_reachability_asset()
 
     # Viewer metadata (bounds hint optional)
     meta = {

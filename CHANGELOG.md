@@ -16,6 +16,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   optional turn restrictions, the existing observed/confidence/slope cost
   hooks, JSON output, and clipped GeoJSON via `--output`.
 
+- **The docs map now ships a Paris reachability overlay.**
+  `scripts/refresh_docs_assets.py` writes `docs/assets/reachable_paris_grid.geojson`
+  from the committed Paris grid map and turn restrictions, and the Leaflet map
+  plus static README/Site preview render the 500 m service-area spans alongside
+  the TR-aware route.
+
 ### Changed
 
 - **Packaging metadata now uses a SPDX license expression.**

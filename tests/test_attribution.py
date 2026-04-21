@@ -168,6 +168,7 @@ _OSM_DERIVED_GEOJSON = [
     "map_osm.geojson",
     "map_paris.geojson",
     "map_paris_grid.geojson",
+    "reachable_paris_grid.geojson",
     "route_paris.geojson",
     "route_paris_grid.geojson",
 ]
@@ -204,3 +205,21 @@ def test_shipped_paris_grid_preview_credits_osm():
     text = path.read_text(encoding="utf-8")
     assert "OpenStreetMap contributors" in text
     assert "ODbL-1.0" in text
+
+
+def test_shipped_paris_grid_reachability_asset_shape():
+    path = ROOT / "docs" / "assets" / "reachable_paris_grid.geojson"
+    if not path.is_file():
+        return
+    data = json.loads(path.read_text(encoding="utf-8"))
+    props = data.get("properties") or {}
+    assert props.get("start_node") == "n312"
+    assert props.get("max_cost_m") == 500.0
+    kinds = [feature.get("properties", {}).get("kind") for feature in data.get("features", [])]
+    assert "reachability_start" in kinds
+    assert "reachable_edge" in kinds
+    assert any(
+        feature.get("properties", {}).get("kind") == "reachable_edge"
+        and feature.get("properties", {}).get("complete") is False
+        for feature in data.get("features", [])
+    )

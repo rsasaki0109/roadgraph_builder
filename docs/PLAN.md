@@ -6,7 +6,7 @@
 > このファイル → [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md)（Mermaid 6 枚 + CLI 対応表 +
 > モジュール索引）→ [`CHANGELOG.md`](../CHANGELOG.md) の順。
 
-*最終更新: 2026-04-22 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards polish + README measured-results compacting / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate + manifest policy docs polish / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理 / v0.7.1 release + asset verification / packaging metadata smoke / 0.7.2.dev0 reopen / Actions Node24 update / release+PyPI dry-run / routing hot-path perf / nearest spatial index / cache invalidation hardening / build graph spatial merge perf / T-junction segment index perf / lean near-parallel merge loop / GeoJSON export compact path / compact bundle JSON writer / README quick-start smoke / release readiness dry-run refresh / reachable service-area CLI）を反映済み。*
+*最終更新: 2026-04-22 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards polish + README measured-results compacting / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate + manifest policy docs polish / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理 / v0.7.1 release + asset verification / packaging metadata smoke / 0.7.2.dev0 reopen / Actions Node24 update / release+PyPI dry-run / routing hot-path perf / nearest spatial index / cache invalidation hardening / build graph spatial merge perf / T-junction segment index perf / lean near-parallel merge loop / GeoJSON export compact path / compact bundle JSON writer / README quick-start smoke / release readiness dry-run refresh / reachable service-area CLI / reachable docs overlay）を反映済み。*
 
 ---
 
@@ -170,6 +170,11 @@
       directed edge span（partial edge は `reachable_fraction` 付き）を返す。CLI は node id / `--start-latlon`、
       `--turn-restrictions-json`、既存の observed / confidence / slope cost hooks、JSON summary、
       `--output` clipped GeoJSON に対応。`routing.geojson_export.write_reachability_geojson` で可視化できる。
+  47. reachable docs overlay。
+      `scripts/refresh_docs_assets.py` が committed Paris grid map + turn restrictions から
+      `docs/assets/reachable_paris_grid.geojson`（start `n312`, budget 500 m）を生成する。
+      `docs/map.html` は到達圏 edge spans / reachable nodes を route overlay とは別レイヤで表示し、
+      `docs/images/paris_grid_route.svg` と README / `docs/index.html` の static preview にも反映。
 - **push 方針:** `git push` は user が `push!` などで明示するまで実行しない。
 - **未着手 (次の AI が触る候補):** ↓ §5 "Open tasks" 参照。
 
@@ -724,7 +729,7 @@ feedback / project / reference の 4 種、`MEMORY.md` は index）。
 > manifest policy docs polish / README measured-results compacting）も 0.7.1 に切り出し済み。
 > Release assets は download/checksum/validate 済み。packaging metadata は SPDX license 表記へ更新済み。
 > GeoJSON large export compact path と compact bundle JSON writer も landing 済み。`reachable` service-area
-> CLI も追加済み。code commit `342f61f` の release bundle / package build dry-run は PASS
+> CLI と Paris docs overlay も追加済み。code commit `342f61f` の release bundle / package build dry-run は PASS
 >（`twine>=6` で確認、PyPI 公開は skip）。次は raw large trace が来た時の true large benchmark。
 > 何を削って何を広げたかは
 > `CHANGELOG.md` と §3 の小節を見れば全部わかる。push / tag / AI マーカー / PyPI /

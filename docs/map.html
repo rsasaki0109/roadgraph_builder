@@ -86,7 +86,7 @@
   <body>
     <div class="bar">
       <strong>roadgraph_builder</strong>
-      <span style="opacity: 0.85">Trajectory + centerlines + HD-lite lane boundaries on OSM (WGS84)</span>
+      <span style="opacity: 0.85">Trajectory + centerlines + reachability + HD-lite lane boundaries on OSM (WGS84)</span>
       <label>
         Layer
         <select id="dataset">
@@ -111,6 +111,7 @@
       }).addTo(map);
 
       const baseLayer = L.layerGroup().addTo(map);
+      const reachabilityOverlayLayer = L.layerGroup().addTo(map);
       const routeOverlayLayer = L.layerGroup().addTo(map);
       const restrictionsOverlayLayer = L.layerGroup().addTo(map);
 
@@ -123,8 +124,10 @@
           '<div class="lg"><span class="sw" style="background:#ea580c"></span> Centerline</div>' +
           '<div class="lg"><span class="sw" style="background:#16a34a"></span> Lane boundary (L)</div>' +
           '<div class="lg"><span class="sw" style="background:#9333ea"></span> Lane boundary (R)</div>' +
+          '<div class="lg"><span class="sw" style="background:#0f766e"></span> Reachable span</div>' +
           '<div class="lg"><span class="sw" style="background:#facc15"></span> Route (Dijkstra)</div>' +
           '<div class="lg"><span class="sw dot" style="background:#b91c1c;border:2px solid #fff;box-sizing:border-box"></span> Graph node</div>' +
+          '<div class="lg"><span class="sw dot" style="background:#0f766e;border:2px solid #fff;box-sizing:border-box"></span> Reachability start</div>' +
           '<div class="lg"><span class="sw dot" style="background:#10b981;border:2px solid #fff;box-sizing:border-box"></span> Route start</div>' +
           '<div class="lg"><span class="sw dot" style="background:#ef4444;border:2px solid #fff;box-sizing:border-box"></span> Route end</div>' +
           '<div class="lg"><span class="sw dot" style="background:#dc2626;border:2px solid #fff;box-sizing:border-box"></span> Turn restriction (OSM)</div>';
@@ -154,11 +157,40 @@
           // Per-edge features are hidden (merged route carries geometry).
           return { color: "#facc15", weight: 0, opacity: 0 };
         }
+        if (k === "reachable_edge") {
+          const complete = f.properties && f.properties.complete;
+          return {
+            color: "#0f766e",
+            weight: complete ? 5 : 4,
+            opacity: complete ? 0.58 : 0.68,
+            dashArray: complete ? null : "8 7",
+          };
+        }
         return { color: "#64748b", weight: 2 };
       }
 
       function pointLayer(f, latlng) {
         const k = f.properties && f.properties.kind;
+        if (k === "reachability_start") {
+          return L.circleMarker(latlng, {
+            radius: 8,
+            fillColor: "#0f766e",
+            color: "#fff",
+            weight: 3,
+            opacity: 1,
+            fillOpacity: 1,
+          });
+        }
+        if (k === "reachable_node") {
+          return L.circleMarker(latlng, {
+            radius: 3,
+            fillColor: "#0f766e",
+            color: "#fff",
+            weight: 1,
+            opacity: 0.75,
+            fillOpacity: 0.72,
+          });
+        }
         if (k === "route_start" || k === "route_end") {
           return L.circleMarker(latlng, {
             radius: 8,
@@ -199,6 +231,9 @@
       const ROUTE_URLS = {
         paris: "assets/route_paris.geojson",
         paris_grid: "assets/route_paris_grid.geojson",
+      };
+      const REACHABLE_URLS = {
+        paris_grid: "assets/reachable_paris_grid.geojson",
       };
       // Optional turn_restrictions JSON overlay (drawn as markers).
       const RESTRICTIONS_URLS = {
@@ -253,6 +288,24 @@
           layer.bindPopup(
             (p.kind === "route_start" ? "start: " : "end: ") + String(p.node_id)
           );
+        } else if (p.kind === "reachable_edge") {
+          let txt = "reachable " + String(p.edge_id) + " (" + String(p.direction) + ")";
+          if (p.reachable_fraction != null) {
+            txt += "<br>" + (Number(p.reachable_fraction) * 100).toFixed(0) + "% of edge";
+          }
+          if (p.start_cost_m != null) {
+            txt += "<br>from " + Number(p.start_cost_m).toFixed(1) + " m";
+          }
+          if (p.complete) {
+            txt += "<br>complete";
+          }
+          layer.bindPopup(txt);
+        } else if (p.kind === "reachability_start" || p.kind === "reachable_node") {
+          let txt =
+            (p.kind === "reachability_start" ? "reachability start: " : "reachable node: ") +
+            String(p.node_id);
+          if (p.cost_m != null) txt += "<br>" + Number(p.cost_m).toFixed(1) + " m";
+          layer.bindPopup(txt);
         }
       }
 
@@ -570,6 +623,7 @@
 
       async function show(which) {
         baseLayer.clearLayers();
+        reachabilityOverlayLayer.clearLayers();
         restrictionsOverlayLayer.clearLayers();
         clearRoute();
         const url = DATASET_URLS[which] || DATASET_URLS.osm;
@@ -592,6 +646,21 @@
             drawRestrictionsOverlay(graphCache[which], list);
           } catch (err) {
             console.warn("restrictions overlay failed:", err);
+          }
+        }
+
+        const reachableUrl = REACHABLE_URLS[which];
+        if (reachableUrl) {
+          try {
+            const reachableData = await loadGeo(reachableUrl);
+            const rj = L.geoJSON(reachableData, {
+              style: styleLine,
+              pointToLayer: pointLayer,
+              onEachFeature: bindCommonPopups,
+            });
+            reachabilityOverlayLayer.addLayer(rj);
+          } catch (err) {
+            console.warn("reachability overlay failed:", err);
           }
         }
 

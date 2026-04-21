@@ -47,9 +47,9 @@ v0.7.1 adds post-v0.7.0 validation and release-hardening work: canonical lane-co
 
 ### Visualization results
 
-The docs map ships a Paris OSM-highway graph with 10 mapped turn restrictions and a restriction-aware route overlay. This static preview is regenerated from the committed GeoJSON assets by `scripts/refresh_docs_assets.py`.
+The docs map ships a Paris OSM-highway graph with 10 mapped turn restrictions, a restriction-aware route overlay, and a 500 m reachability overlay from the same start node. This static preview is regenerated from the committed GeoJSON assets by `scripts/refresh_docs_assets.py`.
 
-[![Paris OSM-highway grid with a TR-aware route](docs/images/paris_grid_route.svg)](docs/map.html)
+[![Paris OSM-highway grid with a TR-aware route and 500 m reachability overlay](docs/images/paris_grid_route.svg)](docs/map.html)
 
 Open the interactive version locally: `cd docs && python3 -m http.server 8765`, then visit **`http://127.0.0.1:8765/map.html`**.
 
@@ -228,7 +228,7 @@ When Pages is available (public repo, Pages-capable private repo plan, or a sepa
 2. After a minute, open the Pages URL shown by GitHub:
    - site root — diagram viewer (SVG-style pan/zoom)
    - `map.html` — **real basemap** (OSM tiles + GeoJSON: trajectory, centerlines, nodes, **HD-lite lane boundaries** when `attributes.hd` is filled — bundled assets use `enrich --lane-width-m 3.5` via `scripts/refresh_docs_assets.py`). Click any two nodes to route between them; the JS Dijkstra is **directed-state and TR-aware** when the dataset ships a restrictions overlay. The dropdown selects between four datasets:
-     - **Paris grid** (default, 855 nodes / 1081 edges — derived from OSM highway ways, ships with 10 OSM turn restrictions as red-dot markers. ODbL.)
+     - **Paris grid** (default, 855 nodes / 1081 edges — derived from OSM highway ways, ships with 10 OSM turn restrictions as red-dot markers and a 500 m `reachable` overlay. ODbL.)
      - **Paris** (older, trajectory-derived, 123 edges / 223 nodes; from OSM public GPS, ODbL.)
      - **OSM Berlin sample** (4 edges, smaller).
      - **Toy** (synthetic trajectory from `examples/sample_trajectory.csv`).
