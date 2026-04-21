@@ -10,7 +10,6 @@ from jsonschema import ValidationError
 import json
 from pathlib import Path
 
-from roadgraph_builder.hd.lidar_fusion import fuse_lane_boundaries_from_points
 from roadgraph_builder.hd.pipeline import SDToHDConfig, enrich_sd_to_hd
 from roadgraph_builder.cli.camera import (
     add_apply_camera_parser,
@@ -19,6 +18,14 @@ from roadgraph_builder.cli.camera import (
     run_apply_camera,
     run_detect_lane_markings_camera,
     run_project_camera,
+)
+from roadgraph_builder.cli.lidar import (
+    add_detect_lane_markings_parser,
+    add_fuse_lidar_parser,
+    add_inspect_lidar_parser,
+    run_detect_lane_markings,
+    run_fuse_lidar,
+    run_inspect_lidar,
 )
 from roadgraph_builder.cli.export import (
     add_export_bundle_parser,
@@ -30,8 +37,6 @@ from roadgraph_builder.cli.export import (
 )
 from roadgraph_builder.io.export.json_exporter import export_graph_json
 from roadgraph_builder.io.export.json_loader import load_graph_json
-from roadgraph_builder.io.lidar.las import load_points_xy_from_las, read_las_header
-from roadgraph_builder.io.lidar.points import load_points_xy_csv
 from roadgraph_builder.io.trajectory.loader import load_multi_trajectory_csvs, load_trajectory_csv
 from roadgraph_builder.cli.doctor import run_doctor
 from roadgraph_builder.cli.routing import (
@@ -249,11 +254,7 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Optional camera_detections.json for per-edge width refinement.",
     )
 
-    ilas = sub.add_parser(
-        "inspect-lidar",
-        help="Print LAS public-header summary (version, point count, bbox, scale) as JSON.",
-    )
-    ilas.add_argument("input_las", help="Path to a .las file (public header is read; point records untouched).")
+    add_inspect_lidar_parser(sub)
 
     add_nearest_node_parser(sub)
     add_route_parser(sub)
@@ -406,54 +407,7 @@ def _build_parser() -> argparse.ArgumentParser:
         help="WGS84 origin longitude. Omit to read metadata.map_origin, or skip bbox_wgs84_deg.",
     )
 
-    fuse = sub.add_parser(
-        "fuse-lidar",
-        help="Fit lane boundaries from a meter-frame point set (CSV or LAS) via per-edge proximity + binned median.",
-    )
-    fuse.add_argument("input_json", help="Road graph JSON")
-    fuse.add_argument(
-        "points_path",
-        help="Point set in graph meters: CSV with x,y columns, LAS 1.0–1.4 (.las), or LAZ (.laz, requires 'laz' extra).",
-    )
-    fuse.add_argument("output_json", help="Output JSON path")
-    fuse.add_argument(
-        "--max-dist-m",
-        type=float,
-        default=5.0,
-        metavar="M",
-        help="Max perpendicular distance from a point to an edge centerline (meters).",
-    )
-    fuse.add_argument(
-        "--bins",
-        type=int,
-        default=32,
-        help="Number of bins along each edge for median aggregation.",
-    )
-    fuse.add_argument(
-        "--ground-plane",
-        action="store_true",
-        default=False,
-        help=(
-            "3D mode: fit a ground plane via RANSAC to z-coordinate data and keep only "
-            "points within --height-band-lo..--height-band-hi metres above the plane "
-            "before lane-boundary fusion. Requires the point file to have x, y, z columns. "
-            "Without this flag the behaviour is byte-identical to v0.6.0 (2D XY only)."
-        ),
-    )
-    fuse.add_argument(
-        "--height-band-lo",
-        type=float,
-        default=0.0,
-        metavar="M",
-        help="Lower bound of height band above ground plane (meters, default 0.0).",
-    )
-    fuse.add_argument(
-        "--height-band-hi",
-        type=float,
-        default=0.3,
-        metavar="M",
-        help="Upper bound of height band above ground plane (meters, default 0.3).",
-    )
+    add_fuse_lidar_parser(sub)
 
     ilc = sub.add_parser(
         "infer-lane-count",
@@ -570,17 +524,7 @@ def _build_parser() -> argparse.ArgumentParser:
 
     add_project_camera_parser(sub)
 
-    dlm = sub.add_parser(
-        "detect-lane-markings",
-        help="Detect lane markings from LiDAR intensity peaks; write lane_markings.json.",
-    )
-    dlm.add_argument("graph_json", help="Road graph JSON.")
-    dlm.add_argument("points_las", help="LAS/LAZ point cloud with intensity column (meter frame).")
-    dlm.add_argument("--output", type=str, default="lane_markings.json", metavar="PATH", help="Output JSON path (default: lane_markings.json).")
-    dlm.add_argument("--max-lateral-m", type=float, default=2.5, metavar="M", help="Max lateral distance from edge centerline to consider (m).")
-    dlm.add_argument("--intensity-percentile", type=float, default=85.0, metavar="PCT", help="Percentile threshold for intensity peaks.")
-    dlm.add_argument("--bin-m", type=float, default=1.0, metavar="M", help="Along-edge bin size (m).")
-    dlm.add_argument("--min-points-per-bin", type=int, default=3, metavar="N", help="Min points per bin to form a cluster.")
+    add_detect_lane_markings_parser(sub)
 
     add_detect_lane_markings_camera_parser(sub)
 
@@ -1046,70 +990,13 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "route":
         return run_route(args, load_graph=_cli_load_graph, load_json=_load_json_for_cli)
     if args.command == "inspect-lidar":
-        p = Path(args.input_las)
-        if not p.is_file():
-            print(f"File not found: {p}", file=sys.stderr)
-            return 1
-        try:
-            header = read_las_header(p)
-        except ValueError as e:
-            print(f"{p}: {e}", file=sys.stderr)
-            return 1
-        print(json.dumps(header.to_summary(), ensure_ascii=False, indent=2))
-        return 0
+        return run_inspect_lidar(args)
     if args.command == "fuse-lidar":
-        from roadgraph_builder.hd.lidar_fusion import fuse_lane_boundaries_3d
-        from roadgraph_builder.io.lidar.points import load_points_xyz_csv
-
-        graph = _cli_load_graph(args.input_json)
-        pts_path = Path(args.points_path)
-        if not pts_path.is_file():
-            print(f"File not found: {pts_path}", file=sys.stderr)
-            return 1
-        use_ground_plane = getattr(args, "ground_plane", False)
-        try:
-            if pts_path.suffix.lower() in {".las", ".laz"}:
-                if use_ground_plane:
-                    # Load xyz (intensity optional) for ground-plane mode.
-                    from roadgraph_builder.io.lidar.las import load_points_xyz_from_las
-                    pts = load_points_xyz_from_las(pts_path)
-                else:
-                    pts = load_points_xy_from_las(pts_path)
-            else:
-                if use_ground_plane:
-                    pts = load_points_xyz_csv(pts_path)
-                else:
-                    pts = load_points_xy_csv(pts_path)
-        except ValueError as e:
-            print(f"{pts_path}: {e}", file=sys.stderr)
-            return 1
-        except ImportError as e:
-            print(f"{pts_path}: {e}", file=sys.stderr)
-            return 1
-        if use_ground_plane:
-            if pts.ndim != 2 or pts.shape[1] < 3:
-                print(
-                    f"{pts_path}: --ground-plane requires x,y,z columns; "
-                    f"got shape {pts.shape}",
-                    file=sys.stderr,
-                )
-                return 1
-            fuse_lane_boundaries_3d(
-                graph,
-                pts,
-                height_band_m=(args.height_band_lo, args.height_band_hi),
-                max_dist_m=args.max_dist_m,
-                bins=args.bins,
-            )
-        else:
-            fuse_lane_boundaries_from_points(
-                graph,
-                pts,
-                max_dist_m=args.max_dist_m,
-                bins=args.bins,
-            )
-        export_graph_json(graph, args.output_json)
-        return 0
+        return run_fuse_lidar(
+            args,
+            load_graph=_cli_load_graph,
+            export_graph_json_func=export_graph_json,
+        )
     if args.command == "infer-lane-count":
         from roadgraph_builder.hd.lane_inference import infer_lane_counts as _infer_lane_counts
         graph = _cli_load_graph(args.input_json)
@@ -1272,70 +1159,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "project-camera":
         return run_project_camera(args, load_graph=_cli_load_graph)
     if args.command == "detect-lane-markings":
-        import numpy as _dlm_np
-        from roadgraph_builder.io.lidar.lane_marking import detect_lane_markings as _detect_lane_markings
-        from roadgraph_builder.io.lidar.las import read_las_header as _read_las_header_dlm
-        graph_data = _load_json_for_cli(args.graph_json)
-        if not isinstance(graph_data, dict):
-            print("detect-lane-markings: graph JSON root must be an object.", file=sys.stderr)
-            return 1
-        pts_path = Path(args.points_las)
-        if not pts_path.is_file():
-            print(f"File not found: {pts_path}", file=sys.stderr)
-            return 1
-        try:
-            if pts_path.suffix.lower() in {".las", ".laz"}:
-                _hdr = _read_las_header_dlm(pts_path)
-                record_length = _hdr.point_data_record_length
-                point_count = _hdr.point_count
-                with pts_path.open("rb") as _fh:
-                    _fh.seek(_hdr.offset_to_point_data)
-                    blob = _fh.read(record_length * point_count)
-                _buf = _dlm_np.frombuffer(blob, dtype=_dlm_np.uint8).reshape(point_count, record_length)
-                _xi = _buf[:, 0:4].copy().view(_dlm_np.int32).reshape(point_count)
-                _yi = _buf[:, 4:8].copy().view(_dlm_np.int32).reshape(point_count)
-                _zi = _buf[:, 8:12].copy().view(_dlm_np.int32).reshape(point_count)
-                _ii = _buf[:, 12:14].copy().view(_dlm_np.uint16).reshape(point_count)
-                _sx, _sy, _sz = _hdr.scale
-                _ox, _oy, _oz = _hdr.offset
-                pts_xyzi = _dlm_np.empty((point_count, 4), dtype=_dlm_np.float64)
-                pts_xyzi[:, 0] = _xi.astype(_dlm_np.float64) * _sx + _ox
-                pts_xyzi[:, 1] = _yi.astype(_dlm_np.float64) * _sy + _oy
-                pts_xyzi[:, 2] = _zi.astype(_dlm_np.float64) * _sz + _oz
-                pts_xyzi[:, 3] = _ii.astype(_dlm_np.float64)
-            else:
-                print(f"detect-lane-markings: only LAS/LAZ files are supported, got {pts_path.suffix}", file=sys.stderr)
-                return 1
-        except ValueError as e:
-            print(f"{pts_path}: {e}", file=sys.stderr)
-            return 1
-        candidates = _detect_lane_markings(
-            graph_data,
-            pts_xyzi,
-            max_lateral_m=args.max_lateral_m,
-            intensity_percentile=args.intensity_percentile,
-            along_edge_bin_m=args.bin_m,
-            min_points_per_bin=args.min_points_per_bin,
-        )
-        doc = {
-            "candidates": [
-                {
-                    "edge_id": c.edge_id,
-                    "side": c.side,
-                    "polyline_m": [list(pt) for pt in c.polyline_m],
-                    "intensity_median": c.intensity_median,
-                    "point_count": c.point_count,
-                }
-                for c in candidates
-            ]
-        }
-        out_path = Path(args.output)
-        out_path.write_text(json.dumps(doc, indent=2) + "\n", encoding="utf-8")
-        print(
-            f"Wrote {out_path}: {len(candidates)} candidates.",
-            file=sys.stderr,
-        )
-        return 0
+        return run_detect_lane_markings(args, load_json=_load_json_for_cli)
     if args.command == "detect-lane-markings-camera":
         return run_detect_lane_markings_camera(
             args,

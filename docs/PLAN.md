@@ -6,7 +6,7 @@
 > このファイル → [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md)（Mermaid 6 枚 + CLI 対応表 +
 > モジュール索引）→ [`CHANGELOG.md`](../CHANGELOG.md) の順。
 
-*最終更新: 2026-04-21 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards / float32 opt-in + drift report / private repo Pages blocked note / routing + export + camera CLI boundary split が反映済み）。*
+*最終更新: 2026-04-21 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards / float32 opt-in + drift report / private repo Pages blocked note / routing + export + camera + lidar CLI boundary split が反映済み）。*
 
 ---
 
@@ -44,6 +44,9 @@
   14. `apply-camera` / `project-camera` / `detect-lane-markings-camera` CLI を
       `roadgraph_builder/cli/camera.py` に分離。projection/camera-lane serializer、image lookup、
       command handler の tests を `tests/test_cli_camera.py` に追加。
+  15. `inspect-lidar` / `fuse-lidar` / `detect-lane-markings` CLI を
+      `roadgraph_builder/cli/lidar.py` に分離。LAS/CSV point loading、ground-plane shape validation、
+      lane-marking serializer を局所化し、`tests/test_cli_lidar.py` を追加。
 - **push 方針:** `git push` は user が `push!` などで明示するまで実行しない。
 - **未着手 (次の AI が触る候補):** ↓ §5 "Open tasks" 参照。
 
@@ -368,8 +371,8 @@ cards は `[Unreleased]` 下。
 
 今すぐ必要な blocker は無し。次に触るなら以下の順が現実的。
 
-1. **CLI boundary split 継続** — `cli/routing.py` / `cli/export.py` / `cli/camera.py` と同じ形で、
-   次は lidar CLI、その次に OSM / guidance CLI を domain module へ移す。方針は §6.6。
+1. **CLI boundary split 継続** — `cli/routing.py` / `cli/export.py` / `cli/camera.py` / `cli/lidar.py`
+   と同じ形で、次は OSM / guidance CLI を domain module へ移す。方針は §6.6。
    巨大 dispatcher を増やさないのが目的。
 2. **Release surface 整理** — README の “New in 0.6 / 0.7” と “Measured results” の関係を
    少し整理し、Unreleased の見え方を release 前提で読みやすくする。docs-only、低リスク。
