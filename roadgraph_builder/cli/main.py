@@ -27,6 +27,16 @@ from roadgraph_builder.cli.lidar import (
     run_fuse_lidar,
     run_inspect_lidar,
 )
+from roadgraph_builder.cli.osm import (
+    add_osm_parsers,
+    run_build_osm_graph,
+    run_convert_osm_restrictions,
+)
+from roadgraph_builder.cli.guidance import (
+    add_guidance_parsers,
+    run_guidance,
+    run_validate_guidance,
+)
 from roadgraph_builder.cli.export import (
     add_export_bundle_parser,
     add_lanelet2_parsers,
@@ -460,67 +470,7 @@ def _build_parser() -> argparse.ArgumentParser:
         add_build_params=lambda parser: _add_build_params(parser, include_trajectory_dtype=True),
     )
 
-    bog = sub.add_parser(
-        "build-osm-graph",
-        help="Build road graph JSON from an Overpass highway-ways dump (e.g. scripts/fetch_osm_highways.py output).",
-    )
-    bog.add_argument("input_json", help="Raw Overpass JSON (ways + nodes).")
-    bog.add_argument("output_json", help="Output road graph JSON path.")
-    bog.add_argument(
-        "--origin-json",
-        type=str,
-        default=None,
-        metavar="PATH",
-        help="JSON with lat0, lon0. Alternative to --origin-lat/--origin-lon.",
-    )
-    bog.add_argument("--origin-lat", type=float, default=None, metavar="DEG")
-    bog.add_argument("--origin-lon", type=float, default=None, metavar="DEG")
-    bog.add_argument(
-        "--highway-classes",
-        type=str,
-        default=None,
-        metavar="LIST",
-        help="Comma-separated highway= values to include (default: drivable set).",
-    )
-    _add_build_params(bog)
-
-    cor = sub.add_parser(
-        "convert-osm-restrictions",
-        help=(
-            "Map OSM type=restriction relations onto an existing road graph. "
-            "Writes a turn_restrictions JSON that export-bundle --turn-restrictions-json consumes."
-        ),
-    )
-    cor.add_argument("graph_json", help="Road graph JSON (with metadata.map_origin).")
-    cor.add_argument("restrictions_json", help="Raw Overpass JSON with restriction relations.")
-    cor.add_argument("output_json", help="Output turn_restrictions JSON path.")
-    cor.add_argument(
-        "--max-snap-m",
-        type=float,
-        default=15.0,
-        metavar="M",
-        help="Max distance from projected OSM via node to nearest graph node.",
-    )
-    cor.add_argument(
-        "--min-alignment",
-        type=float,
-        default=0.3,
-        metavar="COS",
-        help="Min cos(angle) between incident edge tangent and OSM way direction.",
-    )
-    cor.add_argument(
-        "--id-prefix",
-        type=str,
-        default="tr_osm_",
-        help="Prefix for generated turn_restrictions.id entries.",
-    )
-    cor.add_argument(
-        "--skipped-json",
-        type=str,
-        default=None,
-        metavar="PATH",
-        help="Optional path to write per-relation skip reasons.",
-    )
+    add_osm_parsers(sub, add_build_params=_add_build_params)
 
     add_project_camera_parser(sub)
 
@@ -534,22 +484,7 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     vlm.add_argument("input_json", help="lane_markings.json produced by detect-lane-markings.")
 
-    guid = sub.add_parser(
-        "guidance",
-        help="Build turn-by-turn navigation steps from a route GeoJSON + sd_nav.json.",
-    )
-    guid.add_argument("route_geojson", help="Route GeoJSON (from the route CLI --output).")
-    guid.add_argument("sd_nav_json", help="SD nav JSON (nav/sd_nav.json from export-bundle).")
-    guid.add_argument("--output", type=str, default="guidance.json", metavar="PATH", help="Output JSON path (default: guidance.json).")
-    guid.add_argument("--slight-deg", type=float, default=20.0, metavar="DEG", help="Angle threshold for slight turns (degrees).")
-    guid.add_argument("--sharp-deg", type=float, default=120.0, metavar="DEG", help="Angle threshold for sharp turns (degrees).")
-    guid.add_argument("--u-turn-deg", type=float, default=165.0, metavar="DEG", help="Angle threshold for U-turns (degrees).")
-
-    vguid = sub.add_parser(
-        "validate-guidance",
-        help="Validate a guidance.json against guidance.schema.json.",
-    )
-    vguid.add_argument("input_json", help="guidance.json produced by the guidance CLI.")
+    add_guidance_parsers(sub)
 
     ug = sub.add_parser(
         "update-graph",
@@ -1072,90 +1007,14 @@ def main(argv: list[str] | None = None) -> int:
             load_origin=load_wgs84_origin_json,
         )
     if args.command == "build-osm-graph":
-        from roadgraph_builder.io.osm import build_graph_from_overpass_highways
-        params = _build_params_from_args(args)
-        try:
-            raw = json.loads(Path(args.input_json).read_text(encoding="utf-8"))
-        except FileNotFoundError as e:
-            print(f"File not found: {e.filename}", file=sys.stderr)
-            return 1
-        if not isinstance(raw, dict):
-            print("build-osm-graph: input JSON root must be an object.", file=sys.stderr)
-            return 1
-        oj = args.origin_json
-        if oj:
-            try:
-                lat0, lon0 = load_wgs84_origin_json(oj)
-            except FileNotFoundError as e:
-                print(f"File not found: {e.filename}", file=sys.stderr)
-                return 1
-        elif args.origin_lat is not None and args.origin_lon is not None:
-            lat0, lon0 = args.origin_lat, args.origin_lon
-        else:
-            print(
-                "build-osm-graph: pass --origin-json PATH or both --origin-lat and --origin-lon.",
-                file=sys.stderr,
-            )
-            return 1
-        hw_filter = None
-        if args.highway_classes:
-            hw_filter = {c.strip() for c in args.highway_classes.split(",") if c.strip()}
-        graph = build_graph_from_overpass_highways(
-            raw, origin_lat=lat0, origin_lon=lon0, params=params, highway_filter=hw_filter
+        return run_build_osm_graph(
+            args,
+            build_params_from_args=_build_params_from_args,
+            load_origin=load_wgs84_origin_json,
+            export_graph_json_func=export_graph_json,
         )
-        export_graph_json(graph, args.output_json)
-        print(
-            f"Wrote {args.output_json}: {len(graph.nodes)} nodes, {len(graph.edges)} edges.",
-            file=sys.stderr,
-        )
-        return 0
     if args.command == "convert-osm-restrictions":
-        from roadgraph_builder.io.osm import (
-            convert_osm_restrictions_to_graph,
-            load_overpass_json,
-        )
-        from roadgraph_builder.io.osm.turn_restrictions import strip_private_fields
-        try:
-            graph = _cli_load_graph(args.graph_json)
-            overpass = load_overpass_json(args.restrictions_json)
-        except FileNotFoundError as e:
-            print(f"File not found: {e.filename}", file=sys.stderr)
-            return 1
-        except KeyError as e:
-            print(f"{e}", file=sys.stderr)
-            return 1
-        try:
-            result = convert_osm_restrictions_to_graph(
-                graph,
-                overpass,
-                max_snap_distance_m=args.max_snap_m,
-                min_edge_tangent_alignment=args.min_alignment,
-                id_prefix=args.id_prefix,
-            )
-        except KeyError as e:
-            print(f"{e}", file=sys.stderr)
-            return 1
-        cleaned = strip_private_fields(result.restrictions)
-        doc: dict[str, object] = {
-            "format_version": 1,
-            "attribution": "© OpenStreetMap contributors",
-            "license": "ODbL-1.0",
-            "license_url": "https://opendatacommons.org/licenses/odbl/1-0/",
-            "turn_restrictions": cleaned,
-        }
-        Path(args.output_json).write_text(
-            json.dumps(doc, indent=2) + "\n", encoding="utf-8"
-        )
-        print(
-            f"Wrote {args.output_json}: {len(cleaned)} restrictions "
-            f"({len(result.skipped)} skipped).",
-            file=sys.stderr,
-        )
-        if args.skipped_json:
-            Path(args.skipped_json).write_text(
-                json.dumps(result.skipped, indent=2) + "\n", encoding="utf-8"
-            )
-        return 0
+        return run_convert_osm_restrictions(args, load_graph=_cli_load_graph)
     if args.command == "project-camera":
         return run_project_camera(args, load_graph=_cli_load_graph)
     if args.command == "detect-lane-markings":
@@ -1178,54 +1037,13 @@ def main(argv: list[str] | None = None) -> int:
             return 1
         return 0
     if args.command == "guidance":
-        from roadgraph_builder.navigation.guidance import build_guidance as _build_guidance
-        route_data = _load_json_for_cli(args.route_geojson)
-        sd_nav_data = _load_json_for_cli(args.sd_nav_json)
-        if not isinstance(route_data, dict):
-            print("guidance: route GeoJSON root must be an object.", file=sys.stderr)
-            return 1
-        if not isinstance(sd_nav_data, dict):
-            print("guidance: sd_nav JSON root must be an object.", file=sys.stderr)
-            return 1
-        steps = _build_guidance(
-            route_data,
-            sd_nav_data,
-            slight_deg=args.slight_deg,
-            sharp_deg=args.sharp_deg,
-            u_turn_deg=args.u_turn_deg,
-        )
-        doc = {
-            "steps": [
-                {
-                    "step_index": s.step_index,
-                    "edge_id": s.edge_id,
-                    "start_distance_m": s.start_distance_m,
-                    "length_m": s.length_m,
-                    "maneuver_at_end": s.maneuver_at_end,
-                    "heading_change_deg": s.heading_change_deg,
-                    "junction_type_at_end": s.junction_type_at_end,
-                    "description": s.description,
-                    "sd_nav_edge_maneuvers": s.sd_nav_edge_maneuvers,
-                }
-                for s in steps
-            ]
-        }
-        out_path = Path(args.output)
-        out_path.write_text(json.dumps(doc, indent=2) + "\n", encoding="utf-8")
-        print(f"Wrote {out_path}: {len(steps)} steps.", file=sys.stderr)
-        return 0
+        return run_guidance(args, load_json=_load_json_for_cli)
     if args.command == "validate-guidance":
-        from roadgraph_builder.validation import validate_guidance_document
-        data = _load_json_for_cli(args.input_json)
-        if not isinstance(data, dict):
-            print("JSON root must be an object", file=sys.stderr)
-            return 1
-        try:
-            validate_guidance_document(data)
-        except ValidationError as e:
-            _validation_error(args.input_json, e)
-            return 1
-        return 0
+        return run_validate_guidance(
+            args,
+            load_json=_load_json_for_cli,
+            validation_error_func=_validation_error,
+        )
     if args.command == "update-graph":
         from roadgraph_builder.pipeline.incremental import update_graph_from_trajectory as _update_graph
         existing_path = Path(args.existing_json)
