@@ -12,6 +12,7 @@ Separation note:
 from __future__ import annotations
 
 import math
+from collections import defaultdict
 from dataclasses import dataclass
 
 import numpy as np
@@ -423,6 +424,57 @@ def consolidate_clustered_junctions(
     return absorbed
 
 
+def _nearby_node_ids_by_id(
+    node_pos: dict[str, tuple[float, float]],
+    *,
+    radius_m: float,
+) -> dict[str, set[str]]:
+    """Return node ids within ``radius_m`` of each node using a uniform grid."""
+    if radius_m <= 0:
+        return {nid: {nid} for nid in node_pos}
+
+    cell_size = radius_m
+    grid: dict[tuple[int, int], list[str]] = defaultdict(list)
+
+    def _cell_id(x: float, y: float) -> tuple[int, int]:
+        return (math.floor(x / cell_size), math.floor(y / cell_size))
+
+    for nid, (x, y) in node_pos.items():
+        grid[_cell_id(x, y)].append(nid)
+
+    radius_sq = radius_m * radius_m
+    nearby: dict[str, set[str]] = {}
+    for nid, (x, y) in node_pos.items():
+        cx, cy = _cell_id(x, y)
+        matches: set[str] = set()
+        for gx in range(cx - 1, cx + 2):
+            for gy in range(cy - 1, cy + 2):
+                for other in grid.get((gx, gy), ()):
+                    ox, oy = node_pos[other]
+                    dx = x - ox
+                    dy = y - oy
+                    if dx * dx + dy * dy <= radius_sq:
+                        matches.add(other)
+        nearby[nid] = matches
+    return nearby
+
+
+def _edge_indices_from_start_to_end_neighborhoods(
+    start_nodes: set[str],
+    end_nodes: set[str],
+    *,
+    start_to_edges: dict[str, list[int]],
+    edge_end_ids: list[str],
+) -> set[int]:
+    """Return edge indices whose start/end ids fall in the given neighborhoods."""
+    matches: set[int] = set()
+    for start_node in start_nodes:
+        for edge_idx in start_to_edges.get(start_node, ()):
+            if edge_end_ids[edge_idx] in end_nodes:
+                matches.add(edge_idx)
+    return matches
+
+
 def merge_near_parallel_edges(
     graph: Graph, *, tolerance_m: float, resample_bins: int = 32
 ) -> int:
@@ -469,10 +521,34 @@ def merge_near_parallel_edges(
 
     edges = list(graph.edges)
     threshold_total = 2.0 * tolerance_m
+    nearby_nodes = _nearby_node_ids_by_id(node_pos, radius_m=threshold_total)
+    start_to_edges: dict[str, list[int]] = defaultdict(list)
+    edge_end_ids: list[str] = []
+    for edge_idx, edge in enumerate(edges):
+        edge_end_ids.append(edge.end_node_id)
+        start_to_edges[edge.start_node_id].append(edge_idx)
 
     for i in range(len(edges)):
         ea = edges[i]
-        for j in range(i + 1, len(edges)):
+        near_start = nearby_nodes[ea.start_node_id]
+        near_end = nearby_nodes[ea.end_node_id]
+        candidate_indices = _edge_indices_from_start_to_end_neighborhoods(
+            near_start,
+            near_end,
+            start_to_edges=start_to_edges,
+            edge_end_ids=edge_end_ids,
+        )
+        candidate_indices.update(
+            _edge_indices_from_start_to_end_neighborhoods(
+                near_end,
+                near_start,
+                start_to_edges=start_to_edges,
+                edge_end_ids=edge_end_ids,
+            )
+        )
+        for j in sorted(candidate_indices):
+            if j <= i:
+                continue
             eb = edges[j]
             # Already identical endpoint sets — handled by merge_duplicate_edges.
             same_pair = {ea.start_node_id, ea.end_node_id} == {eb.start_node_id, eb.end_node_id}

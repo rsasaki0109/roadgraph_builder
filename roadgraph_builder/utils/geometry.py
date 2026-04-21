@@ -6,6 +6,9 @@ TODO: camera — projection/calibration is out of scope for MVP geometry.
 
 from __future__ import annotations
 
+import math
+from collections import defaultdict
+
 import numpy as np
 
 # Future extension notes (repository-wide):
@@ -469,12 +472,30 @@ def merge_endpoints_union_find(
             parent[rb] = ra
 
     md2 = merge_dist * merge_dist
-    for i in range(n):
-        for j in range(i + 1, n):
-            dx = points[i][0] - points[j][0]
-            dy = points[i][1] - points[j][1]
-            if dx * dx + dy * dy <= md2:
-                union(i, j)
+    if md2 == 0.0:
+        exact_points: dict[tuple[float, float], int] = {}
+        for i, pt in enumerate(points):
+            if pt in exact_points:
+                union(exact_points[pt], i)
+            else:
+                exact_points[pt] = i
+    else:
+        cell_size = abs(merge_dist)
+        grid: dict[tuple[int, int], list[int]] = defaultdict(list)
+
+        def cell_id(x: float, y: float) -> tuple[int, int]:
+            return (math.floor(x / cell_size), math.floor(y / cell_size))
+
+        for i, (x, y) in enumerate(points):
+            cx, cy = cell_id(x, y)
+            for gx in range(cx - 1, cx + 2):
+                for gy in range(cy - 1, cy + 2):
+                    for j in grid.get((gx, gy), ()):
+                        dx = points[j][0] - x
+                        dy = points[j][1] - y
+                        if dx * dx + dy * dy <= md2:
+                            union(j, i)
+            grid[(cx, cy)].append(i)
 
     groups: dict[int, list[int]] = {}
     for i in range(n):

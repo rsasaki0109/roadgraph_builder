@@ -6,7 +6,7 @@
 > このファイル → [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md)（Mermaid 6 枚 + CLI 対応表 +
 > モジュール索引）→ [`CHANGELOG.md`](../CHANGELOG.md) の順。
 
-*最終更新: 2026-04-22 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards polish + README measured-results compacting / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate + manifest policy docs polish / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理 / v0.7.1 release + asset verification / packaging metadata smoke / 0.7.2.dev0 reopen / Actions Node24 update / release+PyPI dry-run / routing hot-path perf / nearest spatial index / cache invalidation hardening）を反映済み。*
+*最終更新: 2026-04-22 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards polish + README measured-results compacting / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate + manifest policy docs polish / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理 / v0.7.1 release + asset verification / packaging metadata smoke / 0.7.2.dev0 reopen / Actions Node24 update / release+PyPI dry-run / routing hot-path perf / nearest spatial index / cache invalidation hardening / build graph spatial merge perf）を反映済み。*
 
 ---
 
@@ -20,7 +20,7 @@
   最新 main CI run `24722916735` と Release workflow run `24721632168` は green。
   GitHub Release assets (`roadgraph_sample_bundle.tar.gz` / `.sha256`) は download + checksum +
   `validate-manifest` / `validate-sd-nav` / `validate` 済み。`v0.7.0` は shipped (2026-04-20)。
-  最新 full local `pytest` = **553 passed / 33 skipped / 4 deselected**（opt-in marker 除外）。
+  最新 full local `pytest` = **565 passed / 33 skipped / 4 deselected**（opt-in marker 除外）。
 - **直前の session (2026-04-21) で landed:**
   1. V1 accuracy 実測 — Paris 20e MAE 0.938、Tokyo Ginza MAE 0.903、Berlin Mitte MAE 1.220（lane-count vs OSM `lanes=`、canonical 20 m）
   2. `scripts/measure_lane_accuracy.py` が meter-frame graph を正しく扱う bug fix（`map_origin` 自動検出）
@@ -127,6 +127,11 @@
       `nearest_node` は small/medium graph で全 node signature、大規模 graph で均等 sample signature を持ち、
       middle node の position replacement を検出。`shortest_path` は polyline coordinate checksum を
       routing signature に含め、in-place polyline mutation でも cached edge length を捨てる。
+  39. build graph spatial merge performance。
+      `merge_endpoints_union_find` を uniform grid 近傍探索に変更し、endpoint 全ペア scan を回避。
+      `merge_near_parallel_edges` も endpoint neighborhood index で候補 edge pair だけを既存の
+      distance-sum predicate に通す形に変更。50x50 synthetic grid build は local one-off で
+      約 42-46s → 1.2-1.7s、benchmark suite の `polylines_to_graph_10k_synth` は約 1.0-1.4s。
 - **push 方針:** `git push` は user が `push!` などで明示するまで実行しない。
 - **未着手 (次の AI が触る候補):** ↓ §5 "Open tasks" 参照。
 

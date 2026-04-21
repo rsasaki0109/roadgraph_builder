@@ -74,6 +74,32 @@ One-off 300×300 node grid, 2000 xy queries:
 | vector-cache prototype | 2.596 s | 0.931 s | 0.924 s | Cached arrays but still O(N) per query |
 | spatial index | 0.626 s | 0.566 s | 0.594 s | Cached spatial cells with exact local distance checks |
 
+## v0.7.2-dev build graph spatial merge indexes (2026-04-22)
+
+The large synthetic graph build was still dominated by two quadratic passes:
+endpoint union-find scanned every endpoint pair, and near-parallel edge merging
+scanned every edge pair before applying its endpoint distance-sum rule. Both
+passes now use uniform spatial grids to keep candidate checks local while
+preserving the exact old merge predicates.
+
+One-off 50x50 grid, ~25 000 trajectory points:
+
+| Version | Pass 1 | Pass 2 | Pass 3 | Notes |
+|---|---:|---:|---:|---|
+| before | 42.476 s | 46.185 s | 46.087 s | Endpoint union-find + near-parallel edge pair scans were quadratic |
+| after | 1.723 s | 1.318 s | 1.255 s | Endpoint and near-parallel scans use spatial candidate indexes |
+
+After this change, `python scripts/run_benchmarks.py --no-warmup` measured:
+
+| Benchmark | elapsed (s) | Notes |
+|---|---:|---|
+| `polylines_to_graph_paris` | 0.137 | OSM public-trackpoints CSV, small local fixture |
+| `polylines_to_graph_10k_synth` | 0.984 | 50x50 grid, ~25 000 pts |
+| `shortest_path_paris` | 0.023 | Existing small-graph routing smoke |
+| `shortest_path_grid_120` | 2.297 | 120 routes on a 55x55 synthetic graph |
+| `nearest_node_grid_2000` | 0.623 | 2000 snaps on a 300x300 node grid |
+| `export_bundle_end_to_end` | 0.022 | Full export-bundle pipeline on sample trajectory |
+
 ## Regression policy
 
 CI comparison mode (`--baseline baseline.json`) fails with exit code 1 if any

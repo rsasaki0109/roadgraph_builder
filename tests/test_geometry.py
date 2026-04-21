@@ -24,6 +24,21 @@ def test_merge_endpoints():
     assert len(pos) == 2
 
 
+def test_merge_endpoints_transitive_across_spatial_cells():
+    pts = [(0.0, 0.0), (0.9, 0.0), (1.8, 0.0)]
+    pos, idx = merge_endpoints_union_find(pts, merge_dist=1.0)
+    assert idx[0] == idx[1] == idx[2]
+    assert len(pos) == 1
+
+
+def test_merge_endpoints_zero_distance_merges_exact_duplicates_only():
+    pts = [(0.0, 0.0), (0.0, 0.0), (0.0, 1e-12)]
+    pos, idx = merge_endpoints_union_find(pts, merge_dist=0.0)
+    assert idx[0] == idx[1]
+    assert idx[2] != idx[0]
+    assert len(pos) == 2
+
+
 def test_simplify_polyline_rdp():
     pts = [(0.0, 0.0), (1.0, 5.0), (2.0, 0.0), (10.0, 0.0)]
     s = simplify_polyline_rdp(pts, epsilon=0.5)

@@ -51,6 +51,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   routing signatures now include a polyline coordinate checksum, so in-place
   geometry edits invalidate cached edge lengths.
 
+- **Large synthetic graph builds avoid quadratic endpoint scans.**
+  Endpoint union-find now uses a uniform spatial grid instead of checking every
+  endpoint pair, and near-parallel edge merging now evaluates only edge pairs
+  whose endpoint neighborhoods can satisfy the existing distance-sum rule. The
+  50x50 synthetic grid build dropped from about 42-46 s local passes to about
+  1.2-1.7 s, with local `python scripts/run_benchmarks.py --no-warmup`
+  runs measuring `polylines_to_graph_10k_synth` around 1.0-1.4 s.
+
 ### Fixed
 
 - **Paris splitter golden length check now tolerates Python/Numpy drift.**

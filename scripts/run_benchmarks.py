@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Performance benchmarks for roadgraph_builder.
 
-Measures wall-clock time for five scenarios:
+Measures wall-clock time for six scenarios:
   polylines_to_graph_paris       — build from OSM public trackpoints CSV
   polylines_to_graph_10k_synth   — build from 10 000-point synthetic grid
   shortest_path_paris            — 100 Dijkstra queries on the Paris graph
@@ -214,7 +214,7 @@ def export_bundle_paris() -> None:
         return
     from roadgraph_builder.utils.geo import load_wgs84_origin_json
     lat0, lon0 = load_wgs84_origin_json(origin_json)
-    from roadgraph_builder.pipeline.build_graph import BuildParams, build_graph_from_csv
+    from roadgraph_builder.pipeline.build_graph import BuildParams
     from roadgraph_builder.io.export.bundle import export_map_bundle
     from roadgraph_builder.io.trajectory.loader import load_trajectory_csv
     params = BuildParams()
