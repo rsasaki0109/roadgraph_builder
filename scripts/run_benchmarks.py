@@ -6,6 +6,7 @@ Measures wall-clock time for five scenarios:
   polylines_to_graph_10k_synth   — build from 10 000-point synthetic grid
   shortest_path_paris            — 100 Dijkstra queries on the Paris graph
   shortest_path_grid_120         — 120 Dijkstra queries on a 55×55 grid graph
+  nearest_node_grid_2000         — 2000 nearest-node queries on a 300×300 grid
   export_bundle_end_to_end       — full export-bundle pipeline (sample CSV)
 
 Usage:
@@ -177,6 +178,31 @@ def run_grid_routes_120() -> int:
     return count
 
 
+def run_nearest_grid_2000() -> int:
+    """Run 2000 nearest-node queries on a synthetic 300×300 node grid."""
+    from roadgraph_builder.core.graph.graph import Graph
+    from roadgraph_builder.core.graph.node import Node
+    from roadgraph_builder.routing.nearest import nearest_node
+
+    size = 300
+    spacing = 5.0
+    graph = Graph(
+        nodes=[
+            Node(f"n{x}_{y}", (x * spacing, y * spacing))
+            for y in range(size)
+            for x in range(size)
+        ],
+        edges=[],
+    )
+    count = 0
+    for i in range(2000):
+        x = float((i * 17) % int(size * spacing)) + 0.7
+        y = float((i * 31) % int(size * spacing)) + 0.3
+        nearest_node(graph, x_m=x, y_m=y)
+        count += 1
+    return count
+
+
 def export_bundle_paris() -> None:
     """Run the full export-bundle pipeline on the sample trajectory."""
     import tempfile
@@ -213,6 +239,7 @@ BENCHMARKS: dict[str, tuple] = {
     "polylines_to_graph_10k_synth": (build_10k_synth, 1),
     "shortest_path_paris": (run_paris_routes_100, 1),
     "shortest_path_grid_120": (run_grid_routes_120, 1),
+    "nearest_node_grid_2000": (run_nearest_grid_2000, 1),
     "export_bundle_end_to_end": (export_bundle_paris, 1),
 }
 

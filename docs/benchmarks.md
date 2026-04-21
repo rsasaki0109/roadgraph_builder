@@ -54,11 +54,25 @@ The benchmark suite now includes `shortest_path_grid_120`. On this workstation,
 
 | Benchmark | elapsed (s) | Notes |
 |---|---:|---|
-| `polylines_to_graph_paris` | 0.181 | OSM public-trackpoints CSV, small local fixture |
-| `polylines_to_graph_10k_synth` | 42.656 | 50×50 grid, ~25 000 pts |
-| `shortest_path_paris` | 0.030 | Existing small-graph routing smoke |
-| `shortest_path_grid_120` | 1.320 | 120 routes on a 55×55 synthetic graph |
-| `export_bundle_end_to_end` | 0.024 | Full export-bundle pipeline on sample trajectory |
+| `polylines_to_graph_paris` | 0.150 | OSM public-trackpoints CSV, small local fixture |
+| `polylines_to_graph_10k_synth` | 56.071 | 50×50 grid, ~25 000 pts |
+| `shortest_path_paris` | 0.031 | Existing small-graph routing smoke |
+| `shortest_path_grid_120` | 1.940 | 120 routes on a 55×55 synthetic graph |
+| `nearest_node_grid_2000` | 0.547 | 2000 snaps on a 300×300 node grid |
+| `export_bundle_end_to_end` | 0.021 | Full export-bundle pipeline on sample trajectory |
+
+## v0.7.2-dev nearest-node spatial index (2026-04-21)
+
+`nearest_node` now caches graph nodes into spatial hash cells. Queries check
+nearby cells exactly and use cell-boundary lower bounds for far-out queries.
+
+One-off 300×300 node grid, 2000 xy queries:
+
+| Version | Pass 1 | Pass 2 | Pass 3 | Notes |
+|---|---:|---:|---:|---|
+| before | 59.317 s | 53.563 s | n/a | Python full scan over all 90 000 nodes per query |
+| vector-cache prototype | 2.596 s | 0.931 s | 0.924 s | Cached arrays but still O(N) per query |
+| spatial index | 0.626 s | 0.566 s | 0.594 s | Cached spatial cells with exact local distance checks |
 
 ## Regression policy
 

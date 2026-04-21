@@ -32,6 +32,49 @@ def test_nearest_node_by_xy_picks_closest():
     assert r.distance_m < 3.0
 
 
+def test_nearest_node_cached_index_tracks_appended_nodes():
+    g = _three_node_graph()
+    assert nearest_node(g, x_m=100.0, y_m=0.0).node_id == "c"
+
+    g.nodes.append(Node(id="d", position=(100.0, 0.0)))
+    r = nearest_node(g, x_m=100.0, y_m=0.0)
+    assert r.node_id == "d"
+    assert r.distance_m == 0.0
+
+
+def test_nearest_node_cached_index_tracks_endpoint_position_replacement():
+    g = _three_node_graph()
+    assert nearest_node(g, x_m=-20.0, y_m=0.0).node_id == "a"
+
+    g.nodes[0].position = (-20.0, 0.0)
+    r = nearest_node(g, x_m=-20.0, y_m=0.0)
+    assert r.node_id == "a"
+    assert r.distance_m == 0.0
+
+
+def test_nearest_node_matches_bruteforce_on_scattered_points():
+    nodes = [
+        Node(id=f"n{i}", position=(float((i * 37) % 113), float((i * 19) % 89)))
+        for i in range(30)
+    ]
+    g = Graph(nodes=nodes, edges=[])
+    for i in range(50):
+        x = float((i * 11) % 130) - 8.25
+        y = float((i * 17) % 100) - 5.75
+        r = nearest_node(g, x_m=x, y_m=y)
+        expected = min(
+            nodes,
+            key=lambda n: (float(n.position[0] - x) ** 2 + float(n.position[1] - y) ** 2),
+        )
+        assert r.node_id == expected.id
+
+
+def test_nearest_node_far_outside_graph_extent():
+    g = _three_node_graph()
+    r = nearest_node(g, x_m=10_000.0, y_m=0.0)
+    assert r.node_id == "c"
+
+
 def test_nearest_node_by_latlon_uses_metadata_origin():
     g = _three_node_graph()
     g.metadata["map_origin"] = {"lat0": 52.52, "lon0": 13.405}

@@ -500,7 +500,7 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 .venv/bin/pytest
 
 ### Benchmarks (0.5.0+)
 
-`make bench` (or `python scripts/run_benchmarks.py`) runs a fixed set of deterministic wall-clock timings: `polylines_to_graph_paris` / `polylines_to_graph_10k_synth` (50×50 synthetic grid) / `shortest_path_paris` (100 small-graph queries) / `shortest_path_grid_120` (120 routes on a 55×55 routing grid) / `export_bundle_end_to_end`. Finishes under a minute on a laptop CPU. Pass `--baseline baseline.json` to compare and exit non-zero when any metric is ≥ 3× slower than the baseline — use this as a regression gate before a release. Latest numbers live in [`docs/benchmarks.md`](docs/benchmarks.md).
+`make bench` (or `python scripts/run_benchmarks.py`) runs a fixed set of deterministic wall-clock timings: `polylines_to_graph_paris` / `polylines_to_graph_10k_synth` (50×50 synthetic grid) / `shortest_path_paris` (100 small-graph queries) / `shortest_path_grid_120` (120 routes on a 55×55 routing grid) / `nearest_node_grid_2000` (2000 snaps on a 300×300 node grid) / `export_bundle_end_to_end`. Finishes under a minute on a laptop CPU. Pass `--baseline baseline.json` to compare and exit non-zero when any metric is ≥ 3× slower than the baseline — use this as a regression gate before a release. Latest numbers live in [`docs/benchmarks.md`](docs/benchmarks.md).
 
 ### CI
 

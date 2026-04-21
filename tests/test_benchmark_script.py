@@ -42,6 +42,7 @@ class TestBenchmarkScript:
             "polylines_to_graph_10k_synth",
             "shortest_path_paris",
             "shortest_path_grid_120",
+            "nearest_node_grid_2000",
             "export_bundle_end_to_end",
         }
 

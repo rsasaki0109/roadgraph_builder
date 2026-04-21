@@ -36,6 +36,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `scripts/run_benchmarks.py` now includes `shortest_path_grid_120` to keep
   this route-heavy workload visible.
 
+- **Repeated nearest-node queries now use a spatial hash index.**
+  `nearest_node` caches graph nodes into per-Graph spatial cells and searches
+  nearby cells with exact distance checks, falling back to cell-boundary
+  lower bounds for far-out queries. A 300x300 node grid with 2000 queries
+  dropped from about 59.3 s / 53.6 s with the old Python full scan to about
+  0.63 s / 0.57 s / 0.59 s locally, and `scripts/run_benchmarks.py` now
+  includes `nearest_node_grid_2000`.
+
 ### Fixed
 
 - **Paris splitter golden length check now tolerates Python/Numpy drift.**
