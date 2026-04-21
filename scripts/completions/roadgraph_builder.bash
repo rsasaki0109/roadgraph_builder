@@ -75,7 +75,7 @@ validate-lane-markings guidance validate-guidance update-graph process-dataset"
 --lane-width-m --dataset-name --origin-json --origin-lat --origin-lon \
 --detections-json --turn-restrictions-json --lidar-points --fuse-max-dist-m \
 --fuse-bins --lane-markings-json --camera-detections-refine-json \
---compact-geojson --extra-csv" -- "$cur"))
+--compact-geojson --compact-bundle-json --extra-csv" -- "$cur"))
                 ;;
             enrich)
                 COMPREPLY=($(compgen -W "--lane-width-m --lane-markings-json --camera-detections-json" -- "$cur"))

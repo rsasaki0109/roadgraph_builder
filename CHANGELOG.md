@@ -84,6 +84,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   3.05 s, and compact export wrote the same parsed document in about 1.76 s
   while shrinking output from about 42.8 MB to 23.6 MB.
 
+- **Large bundle JSON outputs can be compact without changing defaults.**
+  JSON serialization now goes through a shared writer that keeps pretty output
+  by default and supports compact separators when requested. `export_graph_json`
+  accepts `compact=True`, and `export_map_bundle(..., compact_bundle_json=True)`
+  / `export-bundle --compact-bundle-json` compact `nav/sd_nav.json`,
+  `sim/road_graph.json`, and `manifest.json` while leaving GeoJSON under the
+  separate `--compact-geojson` flag. On a local 180x180 synthetic grid,
+  `road_graph.json` export dropped from about 1.59 s / 21.3 MB to 0.43 s /
+  10.5 MB, and an `sd_nav`-shaped document dropped from about 0.65 s /
+  17.0 MB to 0.15 s / 11.6 MB.
+
 ### Fixed
 
 - **Paris splitter golden length check now tolerates Python/Numpy drift.**

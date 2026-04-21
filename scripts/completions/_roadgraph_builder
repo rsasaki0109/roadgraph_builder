@@ -125,6 +125,7 @@ _roadgraph_builder() {
                         '--lane-markings-json[Lane markings JSON for HD refinement]:file:_files' \
                         '--camera-detections-refine-json[Camera detections JSON for HD refinement]:file:_files' \
                         '--compact-geojson[Write sim/map.geojson without pretty indentation]' \
+                        '--compact-bundle-json[Write bundle JSON files without pretty indentation]' \
                         '--max-step-m[Trajectory split gap (m)]:float:' \
                         '--merge-endpoint-m[Endpoint merge radius (m)]:float:' \
                         '--centerline-bins[PCA bin count]:int:' \

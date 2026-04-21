@@ -130,6 +130,7 @@ def test_export_bundle_parser_accepts_compact_geojson_flag():
         ["export-bundle", "in.csv", "out", "--origin-lat", "1", "--origin-lon", "2"]
     )
     assert args.compact_geojson is False
+    assert args.compact_bundle_json is False
 
     compact_args = parser.parse_args(
         [
@@ -141,9 +142,11 @@ def test_export_bundle_parser_accepts_compact_geojson_flag():
             "--origin-lon",
             "2",
             "--compact-geojson",
+            "--compact-bundle-json",
         ]
     )
     assert compact_args.compact_geojson is True
+    assert compact_args.compact_bundle_json is True
 
 
 def test_run_export_lanelet2_injects_io_and_exporter():

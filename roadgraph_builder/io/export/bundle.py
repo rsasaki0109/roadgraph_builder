@@ -18,7 +18,7 @@ from roadgraph_builder.core.graph.stats import graph_stats as _graph_stats_impl,
 from roadgraph_builder.hd.pipeline import SDToHDConfig, enrich_sd_to_hd
 from roadgraph_builder.io.camera.detections import apply_camera_detections_to_graph, load_camera_detections_json
 from roadgraph_builder.io.export.geojson import export_map_geojson
-from roadgraph_builder.io.export.json_exporter import export_graph_json
+from roadgraph_builder.io.export.json_exporter import export_graph_json, write_json_document
 from roadgraph_builder.io.export.lanelet2 import export_lanelet2
 from roadgraph_builder.navigation.sd_maneuvers import allowed_maneuvers_for_edge, allowed_maneuvers_for_edge_reverse
 from roadgraph_builder.navigation.turn_restrictions import (
@@ -127,6 +127,7 @@ def export_map_bundle(
     lane_markings_json: str | Path | None = None,
     camera_detections_refine_json: str | Path | None = None,
     compact_geojson: bool = False,
+    compact_bundle_json: bool = False,
 ) -> None:
     """Write ``nav/``, ``sim/``, ``lanelet/`` under ``out_dir``.
 
@@ -136,7 +137,9 @@ def export_map_bundle(
 
     Optionally runs HD-lite ``enrich``, LiDAR point fusion, and
     ``apply-camera`` before exporting. Set ``compact_geojson`` only when large
-    sim maps need smaller/faster GeoJSON; the default remains pretty-printed.
+    sim maps need smaller/faster GeoJSON. Set ``compact_bundle_json`` to compact
+    ``sd_nav.json``, ``road_graph.json``, and ``manifest.json``. Defaults remain
+    pretty-printed.
     """
     out = Path(out_dir)
     (out / "nav").mkdir(parents=True, exist_ok=True)
@@ -238,12 +241,9 @@ def export_map_bundle(
     }
 
     nav_doc = build_sd_nav_document(graph, turn_restrictions=merged_restrictions)
-    (out / "nav" / "sd_nav.json").write_text(
-        json.dumps(nav_doc, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-    )
+    write_json_document(nav_doc, out / "nav" / "sd_nav.json", compact=compact_bundle_json)
 
-    export_graph_json(graph, out / "sim" / "road_graph.json")
+    export_graph_json(graph, out / "sim" / "road_graph.json", compact=compact_bundle_json)
     export_map_geojson(
         graph,
         traj_xy,
@@ -286,10 +286,7 @@ def export_map_bundle(
             "lanelet_osm": "lanelet/map.osm",
         },
     }
-    (out / "manifest.json").write_text(
-        json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-    )
+    write_json_document(manifest, out / "manifest.json", compact=compact_bundle_json)
 
     (out / "sim" / "README.txt").write_text(
         "sim/: full road_graph.json (schema_version), map.geojson (WGS84), trajectory.csv copy — "

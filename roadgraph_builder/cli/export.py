@@ -220,6 +220,12 @@ def add_export_bundle_parser(
         default=False,
         help="Write sim/map.geojson without pretty indentation for smaller, faster large bundle exports.",
     )
+    bun.add_argument(
+        "--compact-bundle-json",
+        action="store_true",
+        default=False,
+        help="Write nav/sd_nav.json, sim/road_graph.json, and manifest.json without pretty indentation.",
+    )
     add_build_params(bun)
 
 
@@ -470,6 +476,7 @@ def run_export_bundle(
         origin_json_path=args.origin_json,
         lane_markings_json=args.lane_markings_json,
         camera_detections_refine_json=args.camera_detections_refine_json,
-        compact_geojson=args.compact_geojson,
+        compact_geojson=getattr(args, "compact_geojson", False),
+        compact_bundle_json=getattr(args, "compact_bundle_json", False),
     )
     return 0

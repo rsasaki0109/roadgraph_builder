@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """Performance benchmarks for roadgraph_builder.
 
-Measures wall-clock time for seven scenarios:
+Measures wall-clock time for eight scenarios:
   polylines_to_graph_paris       — build from OSM public trackpoints CSV
   polylines_to_graph_10k_synth   — build from 50×50 synthetic grid (~25 000 pts)
   shortest_path_paris            — 100 Dijkstra queries on the Paris graph
   shortest_path_grid_120         — 120 Dijkstra queries on a 55×55 grid graph
   nearest_node_grid_2000         — 2000 nearest-node queries on a 300×300 grid
   export_geojson_grid_120_compact — compact GeoJSON export on a 120×120 grid
+  export_bundle_json_grid_120_compact — compact road_graph/sd_nav/manifest JSON on a 120×120 grid
   export_bundle_end_to_end       — full export-bundle pipeline (sample CSV)
 
 Usage:
@@ -235,17 +236,11 @@ def export_bundle_paris() -> None:
         )
 
 
-def export_geojson_grid_120_compact() -> None:
-    """Write compact GeoJSON for a synthetic 120×120 grid graph."""
-    import tempfile
-    import numpy as np
+def _grid_graph(size: int, spacing: float):
     from roadgraph_builder.core.graph.edge import Edge
     from roadgraph_builder.core.graph.graph import Graph
     from roadgraph_builder.core.graph.node import Node
-    from roadgraph_builder.io.export.geojson import export_map_geojson
 
-    size = 120
-    spacing = 5.0
     nodes = [
         Node(f"n{x}_{y}", (x * spacing, y * spacing))
         for y in range(size)
@@ -275,8 +270,18 @@ def export_geojson_grid_120_compact() -> None:
                     )
                 )
                 edge_id += 1
+    return Graph(nodes, edges)
 
-    graph = Graph(nodes, edges)
+
+def export_geojson_grid_120_compact() -> None:
+    """Write compact GeoJSON for a synthetic 120×120 grid graph."""
+    import tempfile
+    import numpy as np
+    from roadgraph_builder.io.export.geojson import export_map_geojson
+
+    size = 120
+    spacing = 5.0
+    graph = _grid_graph(size, spacing)
     traj = np.zeros((0, 2), dtype=np.float64)
     with tempfile.TemporaryDirectory() as tmp:
         export_map_geojson(
@@ -290,6 +295,56 @@ def export_geojson_grid_120_compact() -> None:
         )
 
 
+def export_bundle_json_grid_120_compact() -> None:
+    """Write compact road_graph, sd_nav, and manifest JSON for a 120×120 grid."""
+    import tempfile
+    from roadgraph_builder.io.export.json_exporter import export_graph_json, write_json_document
+
+    graph = _grid_graph(size=120, spacing=5.0)
+    nav_doc = {
+        "role": "navigation_sd_seed",
+        "schema_version": 1,
+        "description": "Benchmark topology and centerline lengths in the graph meter frame.",
+        "nodes": [
+            {"id": node.id, "x_m": float(node.position[0]), "y_m": float(node.position[1])}
+            for node in graph.nodes
+        ],
+        "edges": [
+            {
+                "id": edge.id,
+                "start_node_id": edge.start_node_id,
+                "end_node_id": edge.end_node_id,
+                "length_m": 5.0,
+                "polyline_vertex_count": len(edge.polyline),
+                "allowed_maneuvers": [],
+                "allowed_maneuvers_reverse": [],
+            }
+            for edge in graph.edges
+        ],
+    }
+    with tempfile.TemporaryDirectory() as tmp:
+        out = Path(tmp)
+        export_graph_json(graph, out / "road_graph.json", compact=True)
+        write_json_document(nav_doc, out / "sd_nav.json", compact=True)
+        write_json_document(
+            {
+                "manifest_version": 1,
+                "generator": "roadgraph_builder",
+                "graph_stats": {"node_count": len(graph.nodes), "edge_count": len(graph.edges)},
+                "junctions": {"total_nodes": len(graph.nodes)},
+                "outputs": {
+                    "nav_sd_nav": "nav/sd_nav.json",
+                    "sim_road_graph": "sim/road_graph.json",
+                    "sim_map_geojson": "sim/map.geojson",
+                    "sim_trajectory_csv": "sim/trajectory.csv",
+                    "lanelet_osm": "lanelet/map.osm",
+                },
+            },
+            out / "manifest.json",
+            compact=True,
+        )
+
+
 BENCHMARKS: dict[str, tuple] = {
     "polylines_to_graph_paris": (build_paris_graph, 1),
     "polylines_to_graph_10k_synth": (build_10k_synth, 1),
@@ -297,6 +352,7 @@ BENCHMARKS: dict[str, tuple] = {
     "shortest_path_grid_120": (run_grid_routes_120, 1),
     "nearest_node_grid_2000": (run_nearest_grid_2000, 1),
     "export_geojson_grid_120_compact": (export_geojson_grid_120_compact, 1),
+    "export_bundle_json_grid_120_compact": (export_bundle_json_grid_120_compact, 1),
     "export_bundle_end_to_end": (export_bundle_paris, 1),
 }
 

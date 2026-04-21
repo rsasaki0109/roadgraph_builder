@@ -15,6 +15,12 @@ from roadgraph_builder.validation import (
 ROOT = Path(__file__).resolve().parent.parent
 
 
+def _manifest_with_dynamic_generated_at(path: Path) -> dict:
+    manifest = json.loads(path.read_text(encoding="utf-8"))
+    manifest["generated_at_utc"] = "<dynamic-generated-at>"
+    return manifest
+
+
 def test_build_sd_nav_document():
     traj = load_trajectory_csv(ROOT / "examples" / "sample_trajectory.csv")
     g = build_graph_from_trajectory(traj, BuildParams())
@@ -105,6 +111,57 @@ def test_export_map_bundle_can_write_compact_geojson(tmp_path: Path):
         pretty.read_text(encoding="utf-8")
     )
     assert compact.stat().st_size < pretty.stat().st_size
+
+
+def test_export_map_bundle_can_write_compact_bundle_json(tmp_path: Path):
+    csv_path = ROOT / "examples" / "sample_trajectory.csv"
+    traj = load_trajectory_csv(csv_path)
+
+    pretty_dir = tmp_path / "pretty"
+    compact_dir = tmp_path / "compact"
+    g_pretty = build_graph_from_trajectory(traj, BuildParams())
+    export_map_bundle(
+        g_pretty,
+        traj.xy,
+        csv_path,
+        pretty_dir,
+        origin_lat=52.52,
+        origin_lon=13.405,
+        dataset_name="test_bundle",
+        lane_width_m=0,
+    )
+    g_compact = build_graph_from_trajectory(traj, BuildParams())
+    export_map_bundle(
+        g_compact,
+        traj.xy,
+        csv_path,
+        compact_dir,
+        origin_lat=52.52,
+        origin_lon=13.405,
+        dataset_name="test_bundle",
+        lane_width_m=0,
+        compact_bundle_json=True,
+    )
+
+    comparable_json_files = [
+        "nav/sd_nav.json",
+        "sim/road_graph.json",
+    ]
+    for rel in comparable_json_files:
+        pretty = pretty_dir / rel
+        compact = compact_dir / rel
+        assert json.loads(compact.read_text(encoding="utf-8")) == json.loads(pretty.read_text(encoding="utf-8"))
+        assert compact.stat().st_size < pretty.stat().st_size
+
+    validate_sd_nav_document(json.loads((compact_dir / "nav" / "sd_nav.json").read_text(encoding="utf-8")))
+    validate_road_graph_document(
+        json.loads((compact_dir / "sim" / "road_graph.json").read_text(encoding="utf-8"))
+    )
+    validate_manifest_document(json.loads((compact_dir / "manifest.json").read_text(encoding="utf-8")))
+    assert _manifest_with_dynamic_generated_at(compact_dir / "manifest.json") == _manifest_with_dynamic_generated_at(
+        pretty_dir / "manifest.json"
+    )
+    assert (compact_dir / "manifest.json").stat().st_size < (pretty_dir / "manifest.json").stat().st_size
 
 
 def test_export_map_bundle_fuses_lidar_from_las(tmp_path: Path):
