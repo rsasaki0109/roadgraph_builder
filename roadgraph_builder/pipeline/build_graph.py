@@ -459,22 +459,6 @@ def _nearby_node_ids_by_id(
     return nearby
 
 
-def _edge_indices_from_start_to_end_neighborhoods(
-    start_nodes: set[str],
-    end_nodes: set[str],
-    *,
-    start_to_edges: dict[str, list[int]],
-    edge_end_ids: list[str],
-) -> set[int]:
-    """Return edge indices whose start/end ids fall in the given neighborhoods."""
-    matches: set[int] = set()
-    for start_node in start_nodes:
-        for edge_idx in start_to_edges.get(start_node, ()):
-            if edge_end_ids[edge_idx] in end_nodes:
-                matches.add(edge_idx)
-    return matches
-
-
 def merge_near_parallel_edges(
     graph: Graph, *, tolerance_m: float, resample_bins: int = 32
 ) -> int:
@@ -514,56 +498,67 @@ def merge_near_parallel_edges(
         if ra != rb:
             parent[ra] = rb
 
-    def _dist(a: str, b: str) -> float:
-        ax, ay = node_pos[a]
-        bx, by = node_pos[b]
-        return math.hypot(ax - bx, ay - by)
-
     edges = list(graph.edges)
     threshold_total = 2.0 * tolerance_m
     nearby_nodes = _nearby_node_ids_by_id(node_pos, radius_m=threshold_total)
     start_to_edges: dict[str, list[int]] = defaultdict(list)
+    edge_start_ids: list[str] = []
     edge_end_ids: list[str] = []
     for edge_idx, edge in enumerate(edges):
+        edge_start_ids.append(edge.start_node_id)
         edge_end_ids.append(edge.end_node_id)
         start_to_edges[edge.start_node_id].append(edge_idx)
 
-    for i in range(len(edges)):
-        ea = edges[i]
-        near_start = nearby_nodes[ea.start_node_id]
-        near_end = nearby_nodes[ea.end_node_id]
-        candidate_indices = _edge_indices_from_start_to_end_neighborhoods(
-            near_start,
-            near_end,
-            start_to_edges=start_to_edges,
-            edge_end_ids=edge_end_ids,
-        )
-        candidate_indices.update(
-            _edge_indices_from_start_to_end_neighborhoods(
-                near_end,
-                near_start,
-                start_to_edges=start_to_edges,
-                edge_end_ids=edge_end_ids,
-            )
-        )
-        for j in sorted(candidate_indices):
+    hypot = math.hypot
+    for i, (ea_start, ea_end) in enumerate(zip(edge_start_ids, edge_end_ids)):
+        near_start = nearby_nodes[ea_start]
+        near_end = nearby_nodes[ea_end]
+        candidate_indices: set[int] = set()
+        for start_node in near_start:
+            for edge_idx in start_to_edges.get(start_node, ()):
+                if edge_end_ids[edge_idx] in near_end:
+                    candidate_indices.add(edge_idx)
+        for start_node in near_end:
+            for edge_idx in start_to_edges.get(start_node, ()):
+                if edge_end_ids[edge_idx] in near_start:
+                    candidate_indices.add(edge_idx)
+
+        ea_start_pos = node_pos[ea_start]
+        ea_end_pos = node_pos[ea_end]
+        for j in candidate_indices:
             if j <= i:
                 continue
-            eb = edges[j]
             # Already identical endpoint sets — handled by merge_duplicate_edges.
-            same_pair = {ea.start_node_id, ea.end_node_id} == {eb.start_node_id, eb.end_node_id}
-            if same_pair:
+            eb_start = edge_start_ids[j]
+            eb_end = edge_end_ids[j]
+            if (ea_start == eb_start and ea_end == eb_end) or (
+                ea_start == eb_end and ea_end == eb_start
+            ):
                 continue
-            fwd = _dist(ea.start_node_id, eb.start_node_id) + _dist(ea.end_node_id, eb.end_node_id)
-            rev = _dist(ea.start_node_id, eb.end_node_id) + _dist(ea.end_node_id, eb.start_node_id)
+            eb_start_pos = node_pos[eb_start]
+            eb_end_pos = node_pos[eb_end]
+            fwd = hypot(
+                ea_start_pos[0] - eb_start_pos[0],
+                ea_start_pos[1] - eb_start_pos[1],
+            ) + hypot(
+                ea_end_pos[0] - eb_end_pos[0],
+                ea_end_pos[1] - eb_end_pos[1],
+            )
+            rev = hypot(
+                ea_start_pos[0] - eb_end_pos[0],
+                ea_start_pos[1] - eb_end_pos[1],
+            ) + hypot(
+                ea_end_pos[0] - eb_start_pos[0],
+                ea_end_pos[1] - eb_start_pos[1],
+            )
             if min(fwd, rev) >= threshold_total:
                 continue
             if fwd <= rev:
-                _union(ea.start_node_id, eb.start_node_id)
-                _union(ea.end_node_id, eb.end_node_id)
+                _union(ea_start, eb_start)
+                _union(ea_end, eb_end)
             else:
-                _union(ea.start_node_id, eb.end_node_id)
-                _union(ea.end_node_id, eb.start_node_id)
+                _union(ea_start, eb_end)
+                _union(ea_end, eb_start)
 
     # Group nodes by cluster root; skip clusters of size 1 (nothing to do).
     clusters: dict[str, list[str]] = {}

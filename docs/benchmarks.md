@@ -90,17 +90,18 @@ One-off 50x50 grid, ~25 000 trajectory points:
 | before | 42.476 s | 46.185 s | 46.087 s | Endpoint union-find + near-parallel edge pair scans were quadratic |
 | endpoint + near-parallel indexes | 1.723 s | 1.318 s | 1.255 s | Endpoint and near-parallel scans use spatial candidate indexes |
 | plus T-junction segment index | 1.009 s | 0.523 s | 0.544 s | T-junction queries project only nearby candidate segments |
+| plus lean near-parallel loop | 0.912 s | 0.732 s | 0.699 s | Reuses endpoint arrays and avoids sorted candidate/set-pair hot-loop work |
 
 After these changes, `python scripts/run_benchmarks.py --no-warmup` measured:
 
 | Benchmark | elapsed (s) | Notes |
 |---|---:|---|
-| `polylines_to_graph_paris` | 0.194 | OSM public-trackpoints CSV, small local fixture |
-| `polylines_to_graph_10k_synth` | 0.819 | 50x50 grid, ~25 000 pts |
-| `shortest_path_paris` | 0.024 | Existing small-graph routing smoke |
-| `shortest_path_grid_120` | 2.548 | 120 routes on a 55x55 synthetic graph |
-| `nearest_node_grid_2000` | 0.642 | 2000 snaps on a 300x300 node grid |
-| `export_bundle_end_to_end` | 0.021 | Full export-bundle pipeline on sample trajectory |
+| `polylines_to_graph_paris` | 0.148 | OSM public-trackpoints CSV, small local fixture |
+| `polylines_to_graph_10k_synth` | 0.471 | 50x50 grid, ~25 000 pts |
+| `shortest_path_paris` | 0.019 | Existing small-graph routing smoke |
+| `shortest_path_grid_120` | 1.679 | 120 routes on a 55x55 synthetic graph |
+| `nearest_node_grid_2000` | 0.390 | 2000 snaps on a 300x300 node grid |
+| `export_bundle_end_to_end` | 0.018 | Full export-bundle pipeline on sample trajectory |
 
 ## Regression policy
 

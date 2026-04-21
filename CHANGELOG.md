@@ -67,6 +67,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `python scripts/run_benchmarks.py --no-warmup` measured
   `polylines_to_graph_10k_synth` at 0.819 s locally.
 
+- **Near-parallel merge candidate checks do less per-edge work.**
+  `merge_near_parallel_edges` now reuses precomputed edge endpoint lists,
+  inlines the candidate-neighborhood walk, and avoids sorted temporary
+  candidates and endpoint-pair set construction in the hot loop. A local
+  benchmark run measured `polylines_to_graph_10k_synth` at 0.471 s.
+
 ### Fixed
 
 - **Paris splitter golden length check now tolerates Python/Numpy drift.**
