@@ -6,7 +6,7 @@
 > このファイル → [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md)（Mermaid 6 枚 + CLI 対応表 +
 > モジュール索引）→ [`CHANGELOG.md`](../CHANGELOG.md) の順。
 
-*最終更新: 2026-04-22 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards polish + README measured-results compacting / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate + manifest policy docs polish / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理 / v0.7.1 release + asset verification / packaging metadata smoke / 0.7.2.dev0 reopen / Actions Node24 update / release+PyPI dry-run / routing hot-path perf / nearest spatial index / cache invalidation hardening / build graph spatial merge perf / T-junction segment index perf / lean near-parallel merge loop / GeoJSON export compact path / compact bundle JSON writer / README quick-start smoke）を反映済み。*
+*最終更新: 2026-04-22 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards polish + README measured-results compacting / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate + manifest policy docs polish / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理 / v0.7.1 release + asset verification / packaging metadata smoke / 0.7.2.dev0 reopen / Actions Node24 update / release+PyPI dry-run / routing hot-path perf / nearest spatial index / cache invalidation hardening / build graph spatial merge perf / T-junction segment index perf / lean near-parallel merge loop / GeoJSON export compact path / compact bundle JSON writer / README quick-start smoke / release readiness dry-run refresh）を反映済み。*
 
 ---
 
@@ -158,6 +158,13 @@
       `roadgraph_builder.cli.main` に fallback し、README 相当の `export-bundle` → validate →
       `route --output` → `guidance` → `validate-guidance` と、`--compact-geojson --compact-bundle-json`
       bundle smoke を検証。
+  45. Release readiness dry-run refresh against code commit `342f61f`。
+      `bash scripts/build_release_bundle.sh` で `dist/roadgraph_sample_bundle.tar.gz` と `.sha256` を再生成し、
+      `sha256sum -c`、展開後の `validate-manifest` / `validate-sd-nav` / `validate` を確認。
+      PyPI 公開は引き続き skip。`python3 -m build --outdir /tmp/roadgraph_builder_pypi_dist` は
+      `roadgraph_builder-0.7.2.dev0.tar.gz` と wheel を生成。ローカルの古い `twine 5.1.1` は
+      `Metadata-Version: 2.4` を読めず false negative になるが、一時 venv の `twine 6.2.0` では
+      `twine check /tmp/roadgraph_builder_pypi_dist/*` が sdist / wheel とも PASS。
 - **push 方針:** `git push` は user が `push!` などで明示するまで実行しない。
 - **未着手 (次の AI が触る候補):** ↓ §5 "Open tasks" 参照。
 
@@ -499,7 +506,8 @@ cards、release byte gates、manifest policy docs polish、README measured-resul
 
 ### 5b. 次のおすすめ候補（small／選択式）
 
-今すぐ必要な blocker は無し。次に触るなら以下の順が現実的。
+今すぐ必要な blocker は無し。code commit `342f61f` の release bundle / package build dry-run は PASS
+（ただし `Metadata-Version: 2.4` 対応のため `twine>=6` で確認する）。次に触るなら以下の順が現実的。
 
 1. **True large real-world memory / export benchmark** — raw 500k+ 実走 trajectory が手元に来た時だけ実行。
    今の `/tmp` OSM public replay では default flip の根拠にならない。
@@ -707,7 +715,8 @@ feedback / project / reference の 4 種、`MEMORY.md` は index）。
 > profile / OSM public-trace replay profile / release bundle byte + normalized-manifest gate +
 > manifest policy docs polish / README measured-results compacting）も 0.7.1 に切り出し済み。
 > Release assets は download/checksum/validate 済み。packaging metadata は SPDX license 表記へ更新済み。
-> GeoJSON large export compact path と compact bundle JSON writer も landing 済み。次は raw large trace が来た時の true large benchmark。
+> GeoJSON large export compact path と compact bundle JSON writer も landing 済み。code commit `342f61f` の
+> release bundle / package build dry-run は PASS（`twine>=6` で確認、PyPI 公開は skip）。次は raw large trace が来た時の true large benchmark。
 > 何を削って何を広げたかは
 > `CHANGELOG.md` と §3 の小節を見れば全部わかる。push / tag / AI マーカー / PyPI /
 > Mapillary は全部 user authorize か No 決定済みなので、勝手に提案しないこと。**
