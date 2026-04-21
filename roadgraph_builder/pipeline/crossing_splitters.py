@@ -23,10 +23,8 @@ from __future__ import annotations
 
 import math
 from collections import defaultdict
-from typing import NamedTuple
 
 from roadgraph_builder.utils.geometry import (
-    _closest_point_on_polyline,
     _segment_segment_intersection,
 )
 
@@ -73,6 +71,30 @@ def _build_segment_grid(
             for cell in _cells_for_segment(ax, ay, bx, by, inv_cell):
                 grid[cell].append((pi, si))
     return grid, []  # bbox list not separately needed; kept for API symmetry
+
+
+def _project_point_to_segment(
+    px: float,
+    py: float,
+    ax: float,
+    ay: float,
+    bx: float,
+    by: float,
+) -> tuple[float, tuple[float, float], float, float]:
+    """Return distance, projected point, segment fraction, and segment length."""
+    abx = bx - ax
+    aby = by - ay
+    ab2 = abx * abx + aby * aby
+    if ab2 < 1e-18:
+        t_clamped = 0.0
+        qx, qy = ax, ay
+    else:
+        t = ((px - ax) * abx + (py - ay) * aby) / ab2
+        t_clamped = max(0.0, min(1.0, t))
+        qx = ax + t_clamped * abx
+        qy = ay + t_clamped * aby
+    seg_len = math.hypot(abx, aby)
+    return math.hypot(px - qx, py - qy), (qx, qy), t_clamped, seg_len
 
 
 # ---------------------------------------------------------------------------
@@ -204,21 +226,20 @@ def split_polylines_at_t_junctions_fast(
     """Uniform grid hashing for T-junction detection.
 
     Same semantics as the O(N²) ``split_polylines_at_t_junctions`` but uses
-    a grid to reduce the candidate POLYLINE set for each endpoint query from
-    O(P) polylines to O(B) candidate polylines whose bounding boxes overlap a
-    ball of radius ``merge_threshold_m`` around the endpoint.
+    a grid to reduce the candidate segment set for each endpoint query from
+    every segment on every polyline to only segments whose expanded bounding
+    boxes overlap the endpoint cell.
 
     Strategy:
       1. Collect all endpoints from the current working list.
-      2. Build a POLYLINE grid: hash each polyline's bounding box into grid
-         cells using cell size ``grid_cell_m`` (defaults to
-         ``merge_threshold_m``).
-      3. For each endpoint ``E``, query the 3×3 cell neighbourhood to find
-         candidate polylines (those whose bbox overlaps the search ball).
-      4. For each candidate polyline ``pl`` (skipping own endpoints), call
-         ``_closest_point_on_polyline(E, pl)`` — the EXACT same computation as
-         the O(N²) version — to find the global minimum distance on ``pl``.
-      5. Accept the projection only if it is interior (arc guards satisfied).
+      2. Precompute per-segment arc starts and total lengths.
+      3. Build a segment grid: hash each segment's bbox expanded by
+         ``merge_threshold_m`` into cells using cell size ``grid_cell_m``
+         (defaults to ``merge_threshold_m``).
+      4. For each endpoint ``E``, query its cell to find candidate segments,
+         then run the exact point-to-segment projection on only those segments.
+      5. Accept the best per-polyline projection only if it is interior
+         (arc guards satisfied).
       6. Split the polyline and repeat up to ``max_passes`` times.
 
     Complexity target: O(N log N) assuming bounded polyline length relative to
@@ -233,22 +254,15 @@ def split_polylines_at_t_junctions_fast(
 
     Returns:
         New list of polylines with T-junction injection points inserted and
-        polylines split at those points.  Numerically identical to the O(N²)
-        version when segment lengths are bounded by the grid cell size.
+        polylines split at those points.
     """
     if merge_threshold_m <= 0:
         return [list(pl) for pl in polylines]
 
     cell = grid_cell_m if grid_cell_m is not None else merge_threshold_m
+    if cell <= 0:
+        cell = merge_threshold_m
     inv_cell = 1.0 / cell
-
-    def polyline_arc_length(pl: list[tuple[float, float]]) -> float:
-        total = 0.0
-        for i in range(len(pl) - 1):
-            dx = pl[i + 1][0] - pl[i][0]
-            dy = pl[i + 1][1] - pl[i][1]
-            total += math.hypot(dx, dy)
-        return total
 
     def cell_for_point(x: float, y: float) -> tuple[int, int]:
         return (int(math.floor(x * inv_cell)), int(math.floor(y * inv_cell)))
@@ -264,28 +278,44 @@ def split_polylines_at_t_junctions_fast(
                 endpoints.append(pl[0])
                 endpoints.append(pl[-1])
 
-        # Build POLYLINE bbox grid.  Index each polyline (len >= 3) by its
-        # EXPANDED bbox (expanded by merge_threshold_m) so that a point query
-        # at cell (c, r) finds every polyline whose expanded bbox covers that
-        # cell — i.e. every polyline within ``merge_threshold_m`` of the query.
-        # Cell size = merge_threshold_m; a single-cell lookup suffices.
-        poly_grid: dict[tuple[int, int], list[int]] = defaultdict(list)
+        # Build per-polyline arc starts once for this pass.  The segment grid
+        # stores segment indices, so we can compute the same arc guards without
+        # scanning the entire polyline for every endpoint candidate.
+        arc_starts: list[list[float]] = []
+        total_lengths: list[float] = []
+        for pi, pl in enumerate(work):
+            starts = [0.0]
+            total = 0.0
+            for si in range(len(pl) - 1):
+                ax, ay = pl[si]
+                bx, by = pl[si + 1]
+                total += math.hypot(bx - ax, by - ay)
+                starts.append(total)
+            arc_starts.append(starts)
+            total_lengths.append(total)
+
+        # Index every segment by its bbox expanded by merge_threshold_m. A
+        # point query in one cell then sees every segment that could be within
+        # the threshold, plus limited bbox false positives that are rejected by
+        # the exact projection below.
+        segment_grid: dict[tuple[int, int], list[tuple[int, int]]] = defaultdict(list)
         for pi, pl in enumerate(work):
             if len(pl) < 3:
                 continue
-            xs = [p[0] for p in pl]
-            ys = [p[1] for p in pl]
-            mn_x = min(xs) - merge_threshold_m
-            mx_x = max(xs) + merge_threshold_m
-            mn_y = min(ys) - merge_threshold_m
-            mx_y = max(ys) + merge_threshold_m
-            c0 = int(math.floor(mn_x * inv_cell))
-            c1 = int(math.floor(mx_x * inv_cell))
-            r0 = int(math.floor(mn_y * inv_cell))
-            r1 = int(math.floor(mx_y * inv_cell))
-            for c in range(c0, c1 + 1):
-                for r in range(r0, r1 + 1):
-                    poly_grid[(c, r)].append(pi)
+            for si in range(len(pl) - 1):
+                ax, ay = pl[si]
+                bx, by = pl[si + 1]
+                mn_x = min(ax, bx) - merge_threshold_m
+                mx_x = max(ax, bx) + merge_threshold_m
+                mn_y = min(ay, by) - merge_threshold_m
+                mx_y = max(ay, by) + merge_threshold_m
+                c0 = int(math.floor(mn_x * inv_cell))
+                c1 = int(math.floor(mx_x * inv_cell))
+                r0 = int(math.floor(mn_y * inv_cell))
+                r1 = int(math.floor(mx_y * inv_cell))
+                for c in range(c0, c1 + 1):
+                    for r in range(r0, r1 + 1):
+                        segment_grid[(c, r)].append((pi, si))
 
         # Build a set of endpoints per polyline so we can skip own endpoints
         # efficiently.
@@ -299,22 +329,31 @@ def split_polylines_at_t_junctions_fast(
         # bucket size, not O(P × E).
         # best_per_poly[idx] = (d, pt, seg_i, arc_along) or None
         best_per_poly: list[tuple | None] = [None] * len(work)
-        ep_set = set(endpoints)  # dedup for fast membership test
         for ex, ey in endpoints:
             ec = cell_for_point(ex, ey)
-            candidates = poly_grid.get(ec, [])
+            candidates = segment_grid.get(ec, [])
             if not candidates:
                 continue
-            for idx in candidates:
+            best_for_endpoint: dict[int, tuple[float, tuple[float, float], int, float]] = {}
+            for idx, seg_i in candidates:
                 pl = work[idx]
                 # Skip if this endpoint belongs to this polyline.
                 if (ex, ey) in own_endpoints[idx]:
                     continue
-                # Exact distance on the full polyline (same as O(N²) version).
-                d, pt, seg_i, arc_along = _closest_point_on_polyline(ex, ey, pl)
+                ax, ay = pl[seg_i]
+                bx, by = pl[seg_i + 1]
+                d, pt, t_clamped, seg_len = _project_point_to_segment(
+                    ex, ey, ax, ay, bx, by
+                )
+                arc_along = arc_starts[idx][seg_i] + t_clamped * seg_len
+                cur_endpoint = best_for_endpoint.get(idx)
+                if cur_endpoint is None or d < cur_endpoint[0]:
+                    best_for_endpoint[idx] = (d, pt, seg_i, arc_along)
+
+            for idx, (d, pt, seg_i, arc_along) in best_for_endpoint.items():
                 if d > merge_threshold_m:
                     continue
-                total_len = polyline_arc_length(pl)
+                total_len = total_lengths[idx]
                 if arc_along < min_interior_m or (total_len - arc_along) < min_interior_m:
                     continue
                 cur = best_per_poly[idx]

@@ -59,6 +59,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   1.2-1.7 s, with local `python scripts/run_benchmarks.py --no-warmup`
   runs measuring `polylines_to_graph_10k_synth` around 1.0-1.4 s.
 
+- **T-junction splitting now projects only nearby segments.**
+  The fast T-junction splitter indexes expanded segment bounding boxes instead
+  of expanded whole-polyline boxes, then applies the same global-nearest
+  projection and interior guard semantics per endpoint/polyline pair. The
+  50x50 synthetic grid build now runs around 0.5 s on warm local passes, and
+  `python scripts/run_benchmarks.py --no-warmup` measured
+  `polylines_to_graph_10k_synth` at 0.819 s locally.
+
 ### Fixed
 
 - **Paris splitter golden length check now tolerates Python/Numpy drift.**

@@ -148,3 +148,16 @@ def test_fast_tjunction_no_split_beyond_threshold():
     branch = [(0.0, float(y)) for y in range(-30, -19, 3)]  # endpoint at (0, -20)
     out = split_polylines_at_t_junctions_fast([main, branch], merge_threshold_m=5.0)
     assert len(out) == 2
+
+
+def test_fast_tjunction_applies_interior_guard_to_global_nearest_projection():
+    """A farther interior segment must not override a nearer end projection."""
+    from roadgraph_builder.pipeline.crossing_splitters import split_polylines_at_t_junctions_fast
+    from roadgraph_builder.utils.geometry import split_polylines_at_t_junctions
+
+    main = [(0.0, 0.0), (10.0, 0.0), (10.0, 10.0), (0.0, 10.0), (0.0, 2.0), (3.0, 2.0)]
+    branch = [(0.0, -10.0), (0.0, 0.5)]
+
+    legacy = split_polylines_at_t_junctions([main, branch], merge_threshold_m=5.0)
+    fast = split_polylines_at_t_junctions_fast([main, branch], merge_threshold_m=5.0)
+    assert fast == legacy == [main, branch]
