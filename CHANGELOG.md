@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Packaging metadata now uses a SPDX license expression.**
+  `pyproject.toml` now declares `license = "MIT"` with `license-files`, and
+  the legacy license classifier was removed so modern setuptools builds no
+  longer warn about deprecated license metadata.
+
 ## [0.7.1] — 2026-04-21
 
 ### Changed

@@ -6,7 +6,7 @@
 > このファイル → [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md)（Mermaid 6 枚 + CLI 対応表 +
 > モジュール索引）→ [`CHANGELOG.md`](../CHANGELOG.md) の順。
 
-*最終更新: 2026-04-21 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards polish + README measured-results compacting / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate + manifest policy docs polish / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理 / v0.7.1 release + asset verification）を反映済み。*
+*最終更新: 2026-04-21 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards polish + README measured-results compacting / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate + manifest policy docs polish / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理 / v0.7.1 release + asset verification / packaging metadata smoke）を反映済み。*
 
 ---
 
@@ -101,6 +101,9 @@
   30. `v0.7.1` annotated tag を push し、Release workflow で GitHub Release を作成。
       添付された `roadgraph_sample_bundle.tar.gz` と `.sha256` を `/tmp` に download し、
       `sha256sum -c` と展開後の manifest / sd_nav / road_graph validate を確認。
+  31. post-release package smoke で setuptools license metadata deprecation warning を検出。
+      `pyproject.toml` を SPDX `license = "MIT"` + `license-files = ["LICENSE"]` に更新し、
+      legacy license classifier を削除。
 - **push 方針:** `git push` は user が `push!` などで明示するまで実行しない。
 - **未着手 (次の AI が触る候補):** ↓ §5 "Open tasks" 参照。
 
@@ -645,7 +648,8 @@ feedback / project / reference の 4 種、`MEMORY.md` は index）。
 > CLI boundary split / release surface docs / float32 drift compare script / 1M synthetic memory
 > profile / OSM public-trace replay profile / release bundle byte + normalized-manifest gate +
 > manifest policy docs polish / README measured-results compacting）も 0.7.1 に切り出し済み。
-> Release assets は download/checksum/validate 済み。次は raw large trace が来た時の true large benchmark。
+> Release assets は download/checksum/validate 済み。packaging metadata は SPDX license 表記へ更新済み。
+> 次は raw large trace が来た時の true large benchmark。
 > 何を削って何を広げたかは
 > `CHANGELOG.md` と §3 の小節を見れば全部わかる。push / tag / AI マーカー / PyPI /
 > Mapillary は全部 user authorize か No 決定済みなので、勝手に提案しないこと。**
