@@ -6,7 +6,7 @@
 > このファイル → [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md)（Mermaid 6 枚 + CLI 対応表 +
 > モジュール索引）→ [`CHANGELOG.md`](../CHANGELOG.md) の順。
 
-*最終更新: 2026-04-21 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+Pages visual preview が反映済み）。*
+*最終更新: 2026-04-21 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+Pages visual preview + measured-results cards / float32 opt-in + drift report が反映済み）。*
 
 ---
 
@@ -17,7 +17,7 @@
   ナビ SD / simulation / Lanelet2 を一括エクスポートする graph-first ライブラリ。HD は
   survey-grade ではなく「HD-lite」帯まで。
 - **state:** **v0.7.0 shipped (2026-04-20)**。`main` 最新は clean、CI green、
-  `pytest` = 477 passed / 32 skipped / 4 deselected（opt-in marker 除外）。
+  最新 full local `pytest` = **483 passed / 33 skipped / 4 deselected**（opt-in marker 除外）。
 - **直前の session (2026-04-21) で landed:**
   1. V1 accuracy 実測 — Paris 20e MAE 0.938、Tokyo Ginza MAE 0.903、Berlin Mitte MAE 1.220（lane-count vs OSM `lanes=`、canonical 20 m）
   2. `scripts/measure_lane_accuracy.py` が meter-frame graph を正しく扱う bug fix（`map_origin` 自動検出）
@@ -27,37 +27,12 @@
   6. Bash / zsh completions を v0.6+v0.7 CLI 群に同期（parser-derived drift test 付き）
   7. 実走 CSV tuning — Berlin Mitte OSM public GPS sweep 追加、`40/8` 推奨を 3 都市で確認
   8. README / GitHub Pages に Paris grid route の静的 visualization preview を追加
+  9. V3 float32 trajectory optimization — design memo、opt-in prototype（default float64 維持）、
+     Paris/Berlin drift report を追加
+  10. README / GitHub Pages に **Measured results** を追加（Paris TR-aware route、lane-count MAE、
+      cross-city tuning、float32 drift）
+- **まだ push していない**。`git push` は user が `push!` などで明示するまで実行しない。
 - **未着手 (次の AI が触る候補):** ↓ §5 "Open tasks" 参照。
-
-- **Cursor handoff / 現在地 (2026-04-21 05:40 JST 時点):**
-  - branch は `main`。直近の作業は direct-to-main の小 commit で区切り済み。
-  - この PLAN handoff 更新の直前の最新実作業 commit は
-    `a72a4fb Add README and Pages visualization preview`。
-    PLAN 更新 commit が作られていれば、それがさらに上に乗っているはず。
-  - その直前に `3f35a5b Add Berlin Mitte bundle tuning sweep`、
-    `b36ad93 Refresh Paris 20e lane accuracy numbers`、
-    `962f6ab Sync CLI completions with v0.7 commands` が入っている。
-  - **まだ push していない**。`git push` は user が `push!` などで明示するまで実行しない。
-  - 作業ツリーは PLAN 更新前には clean だった。この PLAN 更新後は docs-only 差分になるはず。
-  - 最後に通した検証:
-    - full default `python3 -m pytest` → **476 passed / 32 skipped / 4 deselected**
-      （補完同期後。visual preview で attribution test が 1 本増えたので、現在の full count は
-      §10 baseline の 477 見込み）
-    - `python3 -m pytest tests/test_attribution.py tests/test_viewer_js_dijkstra.py` → **10 passed**
-    - `python3 -m pytest tests/test_bundle_export.py tests/test_validate_manifest.py` → **5 passed**
-    - `python3 -m pytest tests/test_accuracy_measure_synthetic.py` → **11 passed**
-    - `bash -n scripts/completions/roadgraph_builder.bash`
-    - `python3 -m py_compile scripts/refresh_docs_assets.py`
-    - `git diff --check`
-  - 直近で作った /tmp 派生物（commit 対象外）:
-    - `/tmp/paris_20e_raw.json`, `/tmp/paris_20e_graph.json`, `/tmp/paris_20e_lc.json`,
-      `/tmp/paris_20e_accuracy_20.json`
-    - `/tmp/osm_tune_berlin/berlin_mitte_trackpoints.csv`,
-      `/tmp/osm_tune_berlin/berlin_mitte_sweep.json`,
-      `/tmp/osm_tune_berlin/bundle_40_8/`
-    - `/tmp/paris_grid_route_preview.png`, `/tmp/roadgraph_pages_result.png`
-  - 次にやるなら **§5a V3 float32 trajectory optimization design memo**。実装ではなく、
-    先に `docs/handoff/` に設計メモを書いて user review を取るのが安全。
 
 - **コミュニケーション言語:** **日本語** 優先。ユーザーは短い JP/romaji プロンプトを好み
   （例: `osusumede` = 「おすすめで」= 委任）、ranked options + top pick の返しを期待。
@@ -333,7 +308,8 @@
 
 Unreleased は `CHANGELOG.md` の `[Unreleased]` 参照。2026-04-21 session の accuracy 実測、
 warning fix、perf flake fix、docs sync、completions sync、Berlin tuning sweep、
-README+Pages visualization preview は `[Unreleased]` 下。
+README+Pages visualization preview、float32 opt-in + drift report、README+Pages measured-results
+cards は `[Unreleased]` 下。
 
 ---
 
@@ -341,7 +317,7 @@ README+Pages visualization preview は `[Unreleased]` 下。
 
 優先度順。各タスクに **手をつける前のヒント** を付けてある。
 
-### 5a. V3 float32 trajectory 最適化（measurement done／default float64 維持）
+### 5a. V3 float32 trajectory 最適化（DONE for now／default float64 維持）
 
 - **背景:** v0.7 で `export_lanelet2` DOM rewrite が peak RSS を -10% したが、trajectory 配列の
   float64→float32 変換はまだ。**byte-identity を破る** ので単純 swap 不可。
@@ -371,6 +347,20 @@ README+Pages visualization preview は `[Unreleased]` 下。
   4. default path は byte-identical、opt-in path は coordinate / length tolerance で regression を拡張
   5. より大きい city-scale workload で RSS に効くかを見る。現時点で default は `float64` のまま。
 - **規模感:** 次は recurring drift script / larger workload があれば 1 session。
+
+### 5b. 次のおすすめ候補（small／選択式）
+
+今すぐ必要な blocker は無し。次に触るなら以下の順が現実的。
+
+1. **Release surface 整理** — README の “New in 0.6 / 0.7” と “Measured results” の関係を
+   少し整理し、Unreleased の見え方を release 前提で読みやすくする。docs-only、低リスク。
+2. **Float32 drift compare script 化** — `docs/float32_drift_report.md` で使った one-off 比較を
+   `scripts/compare_float32_drift.py` にする。release gate 化するなら有用。今は必須ではない。
+3. **Larger workload memory benchmark** — `/tmp` または synthetic で 100k+ rows の trajectory を作り、
+   `--trajectory-dtype float32` が RSS に効く規模を確認する。大きい raw data は commit しない。
+4. **Docs visual polish** — GitHub Pages metric cards は入った。次にやるなら mobile screenshot /
+   Playwright visual smoke を足すか、README の measured-results table を release badge 周辺へ
+   compact に寄せる。
 
 ---
 
