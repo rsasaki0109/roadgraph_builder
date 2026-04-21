@@ -68,14 +68,16 @@ from roadgraph_builder.cli.validate import (
     print_validation_error,
     run_validate_document,
 )
+from roadgraph_builder.cli.trajectory import (
+    add_trajectory_parsers,
+    run_fuse_traces,
+    run_infer_road_class,
+    run_infer_signalized_junctions,
+    run_match_trajectory,
+    run_reconstruct_trips,
+    run_stats,
+)
 from roadgraph_builder.utils.geo import load_wgs84_origin_json
-from roadgraph_builder.core.graph.stats import graph_stats, junction_stats
-from roadgraph_builder.routing.hmm_match import hmm_match_trajectory
-from roadgraph_builder.routing.map_match import coverage_stats, snap_trajectory_to_graph
-from roadgraph_builder.routing.trip_reconstruction import reconstruct_trips, trip_stats_summary
-from roadgraph_builder.semantics.road_class import RoadClassThresholds, infer_road_class
-from roadgraph_builder.semantics.signals import infer_signalized_junctions
-from roadgraph_builder.semantics.trace_fusion import coverage_buckets, fuse_traces_into_graph
 
 
 def _load_json_for_cli(path_str: str) -> object:
@@ -149,153 +151,7 @@ def _build_parser() -> argparse.ArgumentParser:
     add_nearest_node_parser(sub)
     add_route_parser(sub)
 
-    rtp = sub.add_parser(
-        "reconstruct-trips",
-        help="Partition a long trajectory into discrete trips (gaps + stops + graph snap).",
-    )
-    rtp.add_argument("input_json", help="Road graph JSON.")
-    rtp.add_argument("input_csv", help="Trajectory CSV (timestamp, x, y) in the graph's meter frame.")
-    rtp.add_argument(
-        "--output",
-        type=str,
-        default=None,
-        metavar="PATH",
-        help="Optional JSON path to write {stats, trips}.",
-    )
-    rtp.add_argument("--max-time-gap-s", type=float, default=300.0, metavar="S")
-    rtp.add_argument("--max-spatial-gap-m", type=float, default=200.0, metavar="M")
-    rtp.add_argument("--stop-speed-mps", type=float, default=0.8, metavar="M/S")
-    rtp.add_argument("--stop-min-duration-s", type=float, default=60.0, metavar="S")
-    rtp.add_argument("--min-trip-samples", type=int, default=3, metavar="N")
-    rtp.add_argument("--min-trip-distance-m", type=float, default=10.0, metavar="M")
-    rtp.add_argument("--snap-max-distance-m", type=float, default=20.0, metavar="M")
-
-    irc = sub.add_parser(
-        "infer-road-class",
-        help="Classify every edge as highway/arterial/residential from observed GPS speed.",
-    )
-    irc.add_argument("input_json", help="Road graph JSON.")
-    irc.add_argument("input_csv", help="Trajectory CSV (timestamp, x, y).")
-    irc.add_argument("output_json", help="Output JSON path.")
-    irc.add_argument(
-        "--max-distance-m",
-        type=float,
-        default=15.0,
-        metavar="M",
-        help="Samples farther than this from any edge are skipped.",
-    )
-    irc.add_argument(
-        "--min-samples",
-        type=int,
-        default=3,
-        metavar="N",
-        help="Minimum consecutive-sample observations per edge before labelling.",
-    )
-    irc.add_argument(
-        "--highway-mps",
-        type=float,
-        default=20.0,
-        metavar="M/S",
-        help="Lower bound on median speed for the 'highway' class.",
-    )
-    irc.add_argument(
-        "--arterial-mps",
-        type=float,
-        default=10.0,
-        metavar="M/S",
-        help="Lower bound on median speed for the 'arterial' class.",
-    )
-
-    sig = sub.add_parser(
-        "infer-signalized-junctions",
-        help="Tag graph nodes as signalized candidates from stop-window patterns in a GPS trace.",
-    )
-    sig.add_argument("input_json", help="Road graph JSON.")
-    sig.add_argument("input_csv", help="Trajectory CSV (timestamp, x, y).")
-    sig.add_argument("output_json", help="Output JSON path.")
-    sig.add_argument("--stop-speed-mps", type=float, default=0.8, metavar="M/S")
-    sig.add_argument("--stop-min-duration-s", type=float, default=30.0, metavar="S")
-    sig.add_argument("--max-distance-m", type=float, default=20.0, metavar="M")
-    sig.add_argument("--min-stops", type=int, default=2, metavar="N")
-
-    ft = sub.add_parser(
-        "fuse-traces",
-        help="Overlay multiple trajectories onto a fixed graph; record per-edge observation stats.",
-    )
-    ft.add_argument("input_json", help="Road graph JSON (e.g. sim/road_graph.json).")
-    ft.add_argument(
-        "trajectory_csvs",
-        nargs="+",
-        help="One or more trajectory CSVs in the graph's meter frame.",
-    )
-    ft.add_argument("output_json", help="Enriched road graph JSON path.")
-    ft.add_argument(
-        "--snap-max-distance-m",
-        type=float,
-        default=15.0,
-        metavar="M",
-        help="Samples farther than this are ignored per trajectory.",
-    )
-
-    mt = sub.add_parser(
-        "match-trajectory",
-        help="Snap a trajectory CSV to the graph (per-sample nearest-edge projection).",
-    )
-    mt.add_argument("input_json", help="Road graph JSON.")
-    mt.add_argument("input_csv", help="Trajectory CSV (timestamp, x, y) in the graph's meter frame.")
-    mt.add_argument(
-        "--max-distance-m",
-        type=float,
-        default=15.0,
-        metavar="M",
-        help="Samples farther than this from any edge are reported as unmatched.",
-    )
-    mt.add_argument(
-        "--output",
-        type=str,
-        default=None,
-        metavar="PATH",
-        help="Optional JSON path to write the per-sample snap details.",
-    )
-    mt.add_argument(
-        "--hmm",
-        action="store_true",
-        help="Viterbi-decode over candidate edges (prefers sequences consistent with the graph topology) instead of per-sample nearest-edge.",
-    )
-    mt.add_argument(
-        "--gps-sigma-m",
-        type=float,
-        default=5.0,
-        metavar="M",
-        help="Gaussian GPS-noise sigma for the HMM emission score (only with --hmm).",
-    )
-    mt.add_argument(
-        "--transition-limit-m",
-        type=float,
-        default=200.0,
-        metavar="M",
-        help="Cap on Dijkstra transition distance between consecutive HMM candidates (only with --hmm).",
-    )
-
-    st = sub.add_parser(
-        "stats",
-        help="Print graph_stats + junction breakdown for a road graph JSON.",
-    )
-    st.add_argument("input_json", help="Road graph JSON (e.g. sim/road_graph.json).")
-    st.add_argument(
-        "--origin-lat",
-        type=float,
-        default=None,
-        metavar="DEG",
-        help="WGS84 origin latitude. Omit to read metadata.map_origin, or skip bbox_wgs84_deg.",
-    )
-    st.add_argument(
-        "--origin-lon",
-        type=float,
-        default=None,
-        metavar="DEG",
-        help="WGS84 origin longitude. Omit to read metadata.map_origin, or skip bbox_wgs84_deg.",
-    )
+    add_trajectory_parsers(sub)
 
     add_fuse_lidar_parser(sub)
 
@@ -519,203 +375,29 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "nearest-node":
         return run_nearest_node(args, load_graph=_cli_load_graph)
     if args.command == "reconstruct-trips":
-        graph = _cli_load_graph(args.input_json)
-        try:
-            traj = load_trajectory_csv(args.input_csv)
-        except FileNotFoundError as e:
-            print(f"File not found: {e.filename}", file=sys.stderr)
-            return 1
-        trips = reconstruct_trips(
-            graph,
-            traj,
-            max_time_gap_s=args.max_time_gap_s,
-            max_spatial_gap_m=args.max_spatial_gap_m,
-            stop_speed_mps=args.stop_speed_mps,
-            stop_min_duration_s=args.stop_min_duration_s,
-            min_trip_samples=args.min_trip_samples,
-            min_trip_distance_m=args.min_trip_distance_m,
-            snap_max_distance_m=args.snap_max_distance_m,
-        )
-        summary = trip_stats_summary(trips)
-        doc = {
-            "stats": summary,
-            "trips": [
-                {
-                    "trip_id": t.trip_id,
-                    "start_index": t.start_index,
-                    "end_index": t.end_index,
-                    "start_timestamp": t.start_timestamp,
-                    "end_timestamp": t.end_timestamp,
-                    "duration_s": t.duration_s,
-                    "start_xy_m": list(t.start_xy_m),
-                    "end_xy_m": list(t.end_xy_m),
-                    "start_edge_id": t.start_edge_id,
-                    "end_edge_id": t.end_edge_id,
-                    "edge_sequence": t.edge_sequence,
-                    "sample_count": t.sample_count,
-                    "matched_sample_count": t.matched_sample_count,
-                    "total_distance_m": t.total_distance_m,
-                    "mean_speed_mps": t.mean_speed_mps,
-                }
-                for t in trips
-            ],
-        }
-        if args.output:
-            Path(args.output).write_text(
-                json.dumps(doc, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-            )
-        print(json.dumps(summary, ensure_ascii=False, indent=2))
-        return 0
+        return run_reconstruct_trips(args, load_graph=_cli_load_graph)
     if args.command == "fuse-traces":
-        graph = _cli_load_graph(args.input_json)
-        trajectories = []
-        for p in args.trajectory_csvs:
-            try:
-                trajectories.append(load_trajectory_csv(p))
-            except FileNotFoundError as e:
-                print(f"File not found: {e.filename}", file=sys.stderr)
-                return 1
-        stats = fuse_traces_into_graph(
-            graph,
-            trajectories,
-            snap_max_distance_m=args.snap_max_distance_m,
+        return run_fuse_traces(
+            args,
+            load_graph=_cli_load_graph,
+            export_graph_json_func=export_graph_json,
         )
-        export_graph_json(graph, args.output_json)
-        buckets = coverage_buckets(stats)
-        total_matched = sum(s.matched_samples for s in stats.values())
-        total_traces_seen = sum(s.trace_observation_count for s in stats.values())
-        print(
-            json.dumps(
-                {
-                    "trajectories": len(trajectories),
-                    "edges_with_observations": sum(1 for s in stats.values() if s.trace_observation_count > 0),
-                    "total_matched_samples": total_matched,
-                    "total_trace_edge_hits": total_traces_seen,
-                    "coverage_buckets": buckets,
-                },
-                ensure_ascii=False,
-                indent=2,
-            )
-        )
-        return 0
     if args.command == "infer-signalized-junctions":
-        graph = _cli_load_graph(args.input_json)
-        try:
-            traj = load_trajectory_csv(args.input_csv)
-        except FileNotFoundError as e:
-            print(f"File not found: {e.filename}", file=sys.stderr)
-            return 1
-        labelled = infer_signalized_junctions(
-            graph,
-            traj,
-            stop_speed_mps=args.stop_speed_mps,
-            stop_min_duration_s=args.stop_min_duration_s,
-            max_distance_m=args.max_distance_m,
-            min_stops=args.min_stops,
+        return run_infer_signalized_junctions(
+            args,
+            load_graph=_cli_load_graph,
+            export_graph_json_func=export_graph_json,
         )
-        export_graph_json(graph, args.output_json)
-        print(
-            json.dumps(
-                {"signalized_candidates": len(labelled), "details": labelled},
-                ensure_ascii=False,
-                indent=2,
-            )
-        )
-        return 0
     if args.command == "infer-road-class":
-        graph = _cli_load_graph(args.input_json)
-        try:
-            traj = load_trajectory_csv(args.input_csv)
-        except FileNotFoundError as e:
-            print(f"File not found: {e.filename}", file=sys.stderr)
-            return 1
-        counts = infer_road_class(
-            graph,
-            traj,
-            max_distance_m=args.max_distance_m,
-            min_samples=args.min_samples,
-            thresholds=RoadClassThresholds(
-                highway_mps=args.highway_mps,
-                arterial_mps=args.arterial_mps,
-            ),
+        return run_infer_road_class(
+            args,
+            load_graph=_cli_load_graph,
+            export_graph_json_func=export_graph_json,
         )
-        export_graph_json(graph, args.output_json)
-        print(json.dumps({"road_class_counts": counts, "total_edges": len(graph.edges)}, ensure_ascii=False, indent=2))
-        return 0
     if args.command == "match-trajectory":
-        graph = _cli_load_graph(args.input_json)
-        try:
-            traj = load_trajectory_csv(args.input_csv)
-        except FileNotFoundError as e:
-            print(f"File not found: {e.filename}", file=sys.stderr)
-            return 1
-        if args.hmm:
-            hmm_result = hmm_match_trajectory(
-                graph,
-                traj.xy,
-                candidate_radius_m=args.max_distance_m,
-                gps_sigma_m=args.gps_sigma_m,
-                transition_limit_m=args.transition_limit_m,
-            )
-            total = len(hmm_result)
-            matched = [h for h in hmm_result if h is not None]
-            edges_touched = {h.edge_id for h in matched}
-            dists = [h.distance_m for h in matched]
-            stats = {
-                "samples": total,
-                "matched": len(matched),
-                "matched_ratio": (len(matched) / total) if total else 0.0,
-                "edges_touched": len(edges_touched),
-                "mean_distance_m": float(sum(dists) / len(dists)) if dists else 0.0,
-                "max_distance_m": float(max(dists)) if dists else 0.0,
-                "algorithm": "hmm_viterbi",
-            }
-            samples_doc = [
-                {
-                    "index": h.index,
-                    "edge_id": h.edge_id,
-                    "distance_m": h.distance_m,
-                    "projection_xy_m": list(h.projection_xy_m),
-                }
-                if h is not None
-                else {"index": i, "unmatched": True}
-                for i, h in enumerate(hmm_result)
-            ]
-        else:
-            snapped = snap_trajectory_to_graph(graph, traj.xy, max_distance_m=args.max_distance_m)
-            stats = {**coverage_stats(snapped), "algorithm": "nearest_edge"}
-            samples_doc = [
-                {
-                    "index": s.index,
-                    "edge_id": s.edge_id,
-                    "distance_m": s.distance_m,
-                    "arc_length_m": s.arc_length_m,
-                    "edge_length_m": s.edge_length_m,
-                    "t": s.t,
-                    "projection_xy_m": list(s.projection_xy_m),
-                }
-                if s is not None
-                else {"index": i, "unmatched": True}
-                for i, s in enumerate(snapped)
-            ]
-        doc = {"stats": stats, "samples": samples_doc}
-        if args.output:
-            Path(args.output).write_text(
-                json.dumps(doc, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-            )
-        # Always print the stats block so single-run operators see the summary.
-        print(json.dumps(stats, ensure_ascii=False, indent=2))
-        return 0
+        return run_match_trajectory(args, load_graph=_cli_load_graph)
     if args.command == "stats":
-        graph = _cli_load_graph(args.input_json)
-        doc = {
-            "graph_stats": graph_stats(
-                graph, origin_lat=args.origin_lat, origin_lon=args.origin_lon
-            ),
-            "junctions": junction_stats(graph),
-        }
-        print(json.dumps(doc, ensure_ascii=False, indent=2))
-        return 0
+        return run_stats(args, load_graph=_cli_load_graph)
     if args.command == "route":
         return run_route(args, load_graph=_cli_load_graph, load_json=_load_json_for_cli)
     if args.command == "inspect-lidar":

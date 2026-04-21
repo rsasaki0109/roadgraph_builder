@@ -6,7 +6,7 @@
 > このファイル → [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md)（Mermaid 6 枚 + CLI 対応表 +
 > モジュール索引）→ [`CHANGELOG.md`](../CHANGELOG.md) の順。
 
-*最終更新: 2026-04-21 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards / float32 opt-in + drift report / private repo Pages blocked note / CLI boundary split wave + build/validation split が反映済み）。*
+*最終更新: 2026-04-21 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards / float32 opt-in + drift report / private repo Pages blocked note / CLI boundary split wave + build/validation/trajectory split が反映済み）。*
 
 ---
 
@@ -18,7 +18,7 @@
   survey-grade ではなく「HD-lite」帯まで。
 - **state:** **v0.7.0 shipped (2026-04-20)**。最新 push 済み `main` は CI green
   （`6c0ba63` / CI run `24704776034`）、
-  最新 full local `pytest` = **528 passed / 33 skipped / 4 deselected**（opt-in marker 除外）。
+  最新 full local `pytest` = **536 passed / 33 skipped / 4 deselected**（opt-in marker 除外）。
 - **直前の session (2026-04-21) で landed:**
   1. V1 accuracy 実測 — Paris 20e MAE 0.938、Tokyo Ginza MAE 0.903、Berlin Mitte MAE 1.220（lane-count vs OSM `lanes=`、canonical 20 m）
   2. `scripts/measure_lane_accuracy.py` が meter-frame graph を正しく扱う bug fix（`map_origin` 自動検出）
@@ -54,6 +54,10 @@
   17. `build` / `visualize` CLI を `roadgraph_builder/cli/build.py` に、schema validation 系
       `validate*` CLI を `roadgraph_builder/cli/validate.py` に分離。build params、trajectory dtype、
       JSON root validation、validator dispatch を `tests/test_cli_build_validate.py` で検証。
+  18. `reconstruct-trips` / `fuse-traces` / `match-trajectory` / `stats` /
+      `infer-road-class` / `infer-signalized-junctions` CLI を
+      `roadgraph_builder/cli/trajectory.py` に分離。trip/match/stat summary serializer と
+      injection-friendly handlers を `tests/test_cli_trajectory.py` で検証。
 - **push 方針:** `git push` は user が `push!` などで明示するまで実行しない。
 - **未着手 (次の AI が触る候補):** ↓ §5 "Open tasks" 参照。
 
@@ -378,9 +382,9 @@ cards は `[Unreleased]` 下。
 
 今すぐ必要な blocker は無し。次に触るなら以下の順が現実的。
 
-1. **CLI boundary split 継続** — major domain CLI（build/validation/routing/export/camera/lidar/OSM/guidance）は
-   分離済み。次にやるなら residual command group（trajectory/semantic/incremental/dataset/enrich/lane-count）を
-   触るが、`main.py` は 900 行弱まで下がったので優先度は下げてよい。方針は §6.6。
+1. **CLI boundary split 継続** — major domain CLI（build/validation/routing/export/camera/lidar/OSM/guidance/trajectory）は
+   分離済み。次にやるなら residual command group（incremental/dataset/enrich/lane-count）を
+   触るが、`main.py` は 600 行弱まで下がったので優先度は下げてよい。方針は §6.6。
    巨大 dispatcher を増やさないのが目的。
 2. **Release surface 整理** — README の “New in 0.6 / 0.7” と “Measured results” の関係を
    少し整理し、Unreleased の見え方を release 前提で読みやすくする。docs-only、低リスク。
