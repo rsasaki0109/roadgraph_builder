@@ -25,12 +25,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   so they no longer need the temporary
   `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24` environment flag.
 
+- **Repeated routing queries now reuse a cached topology index.**
+  `shortest_path` caches node ids, edge lengths, edge lookup, and base
+  adjacency on each `Graph` instance, invalidating when node/edge list shape
+  or edge polyline objects change. The no-turn-restriction path now uses a
+  node-level Dijkstra fast path instead of the directed incoming-edge state
+  machine, while turn-restricted and lane-level routing keep the existing
+  stateful search. A 55x55 synthetic grid with 120 queries dropped from about
+  7.0 s / 6.5 s to 2.7 s / 2.3 s / 1.9 s across repeated local passes, and
+  `scripts/run_benchmarks.py` now includes `shortest_path_grid_120` to keep
+  this route-heavy workload visible.
+
 ### Fixed
 
 - **Paris splitter golden length check now tolerates Python/Numpy drift.**
   The real-data splitter regression still pins edge/node IDs, but its aggregate
   length tolerance now allows the few-meter variation observed on the Python
   3.10 CI lane while keeping topology drift guarded.
+
+- **Benchmark script direct execution works from a source checkout.**
+  `python scripts/run_benchmarks.py --no-warmup` now inserts the repository
+  root into `sys.path`, so the documented command works even when the package
+  has not been installed into the active Python environment.
 
 ## [0.7.1] — 2026-04-21
 

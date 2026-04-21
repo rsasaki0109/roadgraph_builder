@@ -6,7 +6,7 @@
 > このファイル → [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md)（Mermaid 6 枚 + CLI 対応表 +
 > モジュール索引）→ [`CHANGELOG.md`](../CHANGELOG.md) の順。
 
-*最終更新: 2026-04-21 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards polish + README measured-results compacting / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate + manifest policy docs polish / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理 / v0.7.1 release + asset verification / packaging metadata smoke / 0.7.2.dev0 reopen / Actions Node24 update / release+PyPI dry-run）を反映済み。*
+*最終更新: 2026-04-21 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards polish + README measured-results compacting / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate + manifest policy docs polish / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理 / v0.7.1 release + asset verification / packaging metadata smoke / 0.7.2.dev0 reopen / Actions Node24 update / release+PyPI dry-run / routing hot-path perf）を反映済み。*
 
 ---
 
@@ -114,6 +114,11 @@
   35. Release / PyPI workflow の local dry-run。
       `/tmp` に `HEAD` を archive 展開し、release bundle build + checksum + extracted manifest/sd_nav/road_graph
       validation と、PyPI build job 相当の `python -m build` + `twine check dist/*` を確認。
+  36. `shortest_path` hot path の性能改善。
+      `Graph` ごとの routing index cache（node ids / edge lengths / base adjacency）と、
+      turn restriction なしの node-level Dijkstra fast path を追加。55×55 grid 120 routes は
+      local one-off で約 7.0s→2.7s（first pass）、warm pass で約 6.5s→1.9s。
+      `scripts/run_benchmarks.py` に `shortest_path_grid_120` を追加し、直接実行時の repo import も修正。
 - **push 方針:** `git push` は user が `push!` などで明示するまで実行しない。
 - **未着手 (次の AI が触る候補):** ↓ §5 "Open tasks" 参照。
 
@@ -338,7 +343,8 @@
   `examples/frozen_bundle/` に 0.3.0 時点の固定サンプル同梱。
 - **Benchmarks (v0.5+):** `scripts/run_benchmarks.py` / `make bench` が
   `polylines_to_graph_paris` / `polylines_to_graph_10k_synth` / `shortest_path_paris`（100 クエリ）/
-  `export_bundle_end_to_end` の wall-time を計測。`--baseline baseline.json` で 3× 劣化時 exit 1。
+  `shortest_path_grid_120`（55×55 grid 120 routes）/ `export_bundle_end_to_end` の wall-time を計測。
+  `--baseline baseline.json` で 3× 劣化時 exit 1。
   `docs/benchmarks.md` に baseline。CI は opt-in（`workflow_dispatch`）。
 - **PyPI scaffold:** `.github/workflows/pypi.yml`（`workflow_dispatch`, Trusted Publisher,
   secrets なし）**— § 2 の決定で inert 据え置き**。

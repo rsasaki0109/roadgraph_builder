@@ -59,6 +59,38 @@ class Route:
     lane_sequence: list[int | None] | None = None
 
 
+@dataclass(frozen=True)
+class _RoutingIndex:
+    """Topology and base metric cache for repeated shortest-path queries."""
+
+    signature: tuple[object, ...]
+    node_ids: set[str]
+    edge_by_id: dict[str, object]
+    base_lengths: dict[str, float]
+    base_adj: dict[str, list[tuple[str, str, str, float]]]
+
+
+def _routing_signature(graph: "Graph") -> tuple[object, ...]:
+    """Return a cheap mutation signature for graph topology and edge geometry.
+
+    ``Graph`` is intentionally mutable, so the cache is invalidated when the
+    node/edge lists change shape, edge endpoints change, or an edge replaces
+    its polyline object. In-place edits to polyline coordinates are outside the
+    normal routing path and should rebuild or replace the graph before routing.
+    """
+    return (
+        id(graph.nodes),
+        len(graph.nodes),
+        tuple(n.id for n in graph.nodes),
+        id(graph.edges),
+        len(graph.edges),
+        tuple(
+            (e.id, e.start_node_id, e.end_node_id, id(e.polyline), len(e.polyline))
+            for e in graph.edges
+        ),
+    )
+
+
 def _edge_length_m(edge) -> float:  # type: ignore[no-untyped-def]
     pl = edge.polyline
     total = 0.0
@@ -67,6 +99,44 @@ def _edge_length_m(edge) -> float:  # type: ignore[no-untyped-def]
         dy = float(pl[i + 1][1]) - float(pl[i][1])
         total += math.hypot(dx, dy)
     return total
+
+
+def _build_routing_index(graph: "Graph", signature: tuple[object, ...]) -> _RoutingIndex:
+    node_ids = {n.id for n in graph.nodes}
+    edge_by_id: dict[str, object] = {}
+    base_lengths: dict[str, float] = {}
+    base_adj: dict[str, list[tuple[str, str, str, float]]] = {nid: [] for nid in node_ids}
+    for e in graph.edges:
+        edge_by_id[e.id] = e
+        base_length_m = _edge_length_m(e)
+        base_lengths[e.id] = base_length_m
+        base_adj.setdefault(e.start_node_id, []).append(
+            (e.id, "forward", e.end_node_id, base_length_m)
+        )
+        if e.start_node_id != e.end_node_id:
+            base_adj.setdefault(e.end_node_id, []).append(
+                (e.id, "reverse", e.start_node_id, base_length_m)
+            )
+    return _RoutingIndex(
+        signature=signature,
+        node_ids=node_ids,
+        edge_by_id=edge_by_id,
+        base_lengths=base_lengths,
+        base_adj=base_adj,
+    )
+
+
+def _get_routing_index(graph: "Graph") -> _RoutingIndex:
+    signature = _routing_signature(graph)
+    cached = getattr(graph, "_routing_index_cache", None)
+    if isinstance(cached, _RoutingIndex) and cached.signature == signature:
+        return cached
+    index = _build_routing_index(graph, signature)
+    try:
+        setattr(graph, "_routing_index_cache", index)
+    except Exception:
+        pass
+    return index
 
 
 def _parse_restrictions(
@@ -219,61 +289,12 @@ def shortest_path(
         KeyError: ``from_node`` or ``to_node`` is not in the graph.
         ValueError: No path exists under the supplied restrictions (or confidence filter).
     """
-    node_ids = {n.id for n in graph.nodes}
+    index = _get_routing_index(graph)
+    node_ids = index.node_ids
     if from_node not in node_ids:
         raise KeyError(f"from_node {from_node!r} is not in the graph")
     if to_node not in node_ids:
         raise KeyError(f"to_node {to_node!r} is not in the graph")
-
-    # Build per-edge metadata for cost hooks.
-    edge_obs: dict[str, int] = {}
-    edge_conf: dict[str, float | None] = {}
-    for e in graph.edges:
-        edge_obs[e.id] = _observation_count(e)
-        edge_conf[e.id] = _hd_confidence(e)
-
-    # Directed adjacency: node -> list of (edge_id, direction, neighbor_node_id, base_length_m).
-    use_slope_cost = uphill_penalty is not None or downhill_bonus is not None
-    adj: dict[str, list[tuple[str, str, str, float]]] = {nid: [] for nid in node_ids}
-    for e in graph.edges:
-        # Skip edges below min_confidence threshold.
-        if min_confidence is not None:
-            conf = edge_conf.get(e.id)
-            if conf is not None and conf < min_confidence:
-                continue
-
-        base_length_m = _edge_length_m(e)
-
-        # Apply prefer_observed cost multiplier.
-        length_fwd = base_length_m
-        if prefer_observed:
-            obs = edge_obs.get(e.id, 0)
-            multiplier = observed_bonus if obs > 0 else unobserved_penalty
-            length_fwd = length_fwd * multiplier
-        length_rev = length_fwd
-
-        # Apply elevation cost multipliers (direction-sensitive).
-        if use_slope_cost:
-            s_fwd = _slope_deg(e, "forward")
-            s_rev = -s_fwd  # reverse is opposite slope
-            if s_fwd > 0 and uphill_penalty is not None:
-                length_fwd = length_fwd * uphill_penalty
-            elif s_fwd < 0 and downhill_bonus is not None:
-                length_fwd = length_fwd * downhill_bonus
-            if s_rev > 0 and uphill_penalty is not None:
-                length_rev = length_rev * uphill_penalty
-            elif s_rev < 0 and downhill_bonus is not None:
-                length_rev = length_rev * downhill_bonus
-
-        adj.setdefault(e.start_node_id, []).append(
-            (e.id, "forward", e.end_node_id, length_fwd)
-        )
-        if e.start_node_id != e.end_node_id:
-            adj.setdefault(e.end_node_id, []).append(
-                (e.id, "reverse", e.start_node_id, length_rev)
-            )
-
-    forbidden, mandatory = _parse_restrictions(turn_restrictions)
 
     if from_node == to_node:
         return Route(
@@ -285,6 +306,54 @@ def shortest_path(
             total_length_m=0.0,
         )
 
+    # Directed adjacency: node -> list of (edge_id, direction, neighbor_node_id, base_length_m).
+    use_slope_cost = uphill_penalty is not None or downhill_bonus is not None
+    if min_confidence is None and not prefer_observed and not use_slope_cost:
+        adj = index.base_adj
+    else:
+        adj = {nid: [] for nid in node_ids}
+        for e in graph.edges:
+            # Skip edges below min_confidence threshold.
+            if min_confidence is not None:
+                conf = _hd_confidence(e)
+                if conf is not None and conf < min_confidence:
+                    continue
+
+            base_length_m = index.base_lengths.get(e.id)
+            if base_length_m is None:
+                base_length_m = _edge_length_m(e)
+
+            # Apply prefer_observed cost multiplier.
+            length_fwd = base_length_m
+            if prefer_observed:
+                obs = _observation_count(e)
+                multiplier = observed_bonus if obs > 0 else unobserved_penalty
+                length_fwd = length_fwd * multiplier
+            length_rev = length_fwd
+
+            # Apply elevation cost multipliers (direction-sensitive).
+            if use_slope_cost:
+                s_fwd = _slope_deg(e, "forward")
+                s_rev = -s_fwd  # reverse is opposite slope
+                if s_fwd > 0 and uphill_penalty is not None:
+                    length_fwd = length_fwd * uphill_penalty
+                elif s_fwd < 0 and downhill_bonus is not None:
+                    length_fwd = length_fwd * downhill_bonus
+                if s_rev > 0 and uphill_penalty is not None:
+                    length_rev = length_rev * uphill_penalty
+                elif s_rev < 0 and downhill_bonus is not None:
+                    length_rev = length_rev * downhill_bonus
+
+            adj.setdefault(e.start_node_id, []).append(
+                (e.id, "forward", e.end_node_id, length_fwd)
+            )
+            if e.start_node_id != e.end_node_id:
+                adj.setdefault(e.end_node_id, []).append(
+                    (e.id, "reverse", e.start_node_id, length_rev)
+            )
+
+    forbidden, mandatory = _parse_restrictions(turn_restrictions)
+
     # -----------------------------------------------------------------------
     # A3: lane-level Dijkstra (allow_lane_change=True).
     # State = (node, incoming_edge_id or None, incoming_direction or None,
@@ -293,7 +362,7 @@ def shortest_path(
     # -----------------------------------------------------------------------
     if allow_lane_change:
         # Build per-edge lane count.
-        edge_by_id = {e.id: e for e in graph.edges}
+        edge_by_id = index.edge_by_id
         edge_lane_count: dict[str, int] = {e.id: _lane_count_for_edge(e) for e in graph.edges}
 
         # Lane state = (node, inc_edge, inc_dir, lane_idx).
@@ -304,12 +373,18 @@ def shortest_path(
         l_queue: list[tuple[float, str, str | None, str | None, int | None]] = [
             (0.0, from_node, None, None, None)
         ]
+        best_l_state: LState | None = None
+        best_cost = math.inf
 
         while l_queue:
             d, u, inc_edge, inc_dir, inc_lane = heapq.heappop(l_queue)
             l_state: LState = (u, inc_edge, inc_dir, inc_lane)
             if d > l_dist.get(l_state, math.inf):
                 continue
+            if u == to_node:
+                best_l_state = l_state
+                best_cost = d
+                break
 
             allowed_outs: set[tuple[str, str]] | None = None
             if inc_edge is not None:
@@ -349,14 +424,6 @@ def shortest_path(
                         l_prev[swap_state] = l_state
                         heapq.heappush(l_queue, (nd, u, inc_edge, inc_dir, swap_lane))
 
-        # Pick the cheapest terminal state at to_node.
-        best_l_state: LState | None = None
-        best_cost = math.inf
-        for l_state, cost in l_dist.items():
-            if l_state[0] == to_node and cost < best_cost:
-                best_cost = cost
-                best_l_state = l_state
-
         if best_l_state is None or best_cost == math.inf:
             raise ValueError(f"no path from {from_node!r} to {to_node!r} (lane-level search)")
 
@@ -377,9 +444,7 @@ def shortest_path(
         l_dirs.reverse()
         l_lanes.reverse()
 
-        actual_length = sum(
-            _edge_length_m(edge_by_id[eid]) for eid in l_edges if eid in edge_by_id
-        )
+        actual_length = sum(index.base_lengths[eid] for eid in l_edges if eid in edge_by_id)
         return Route(
             from_node=from_node,
             to_node=to_node,
@@ -395,18 +460,76 @@ def shortest_path(
     # State = (node, incoming_edge_id or None, incoming_direction or None).
     # -----------------------------------------------------------------------
 
+    if not forbidden and not mandatory:
+        node_dist: dict[str, float] = {from_node: 0.0}
+        node_prev: dict[str, tuple[str, str, str]] = {}
+        node_queue: list[tuple[float, str]] = [(0.0, from_node)]
+
+        while node_queue:
+            d, u = heapq.heappop(node_queue)
+            if d > node_dist.get(u, math.inf):
+                continue
+            if u == to_node:
+                break
+
+            for out_edge_id, out_dir, neighbor, w in adj.get(u, []):
+                nd = d + w
+                if nd < node_dist.get(neighbor, math.inf):
+                    node_dist[neighbor] = nd
+                    node_prev[neighbor] = (u, out_edge_id, out_dir)
+                    heapq.heappush(node_queue, (nd, neighbor))
+
+        if to_node not in node_dist:
+            if min_confidence is not None:
+                raise ValueError(
+                    f"no path from {from_node!r} to {to_node!r} "
+                    f"(some edges may be excluded by --min-confidence {min_confidence})"
+                )
+            raise ValueError(f"no path from {from_node!r} to {to_node!r}")
+
+        nodes: list[str] = [to_node]
+        edges: list[str] = []
+        dirs: list[str] = []
+        cur_node = to_node
+        while cur_node != from_node:
+            prev_node, edge_id, edge_dir = node_prev[cur_node]
+            edges.append(edge_id)
+            dirs.append(edge_dir)
+            cur_node = prev_node
+            nodes.append(cur_node)
+        nodes.reverse()
+        edges.reverse()
+        dirs.reverse()
+
+        edge_by_id = index.edge_by_id
+        actual_length = sum(index.base_lengths[eid] for eid in edges if eid in edge_by_id)
+        return Route(
+            from_node=from_node,
+            to_node=to_node,
+            node_sequence=nodes,
+            edge_sequence=edges,
+            edge_directions=dirs,
+            total_length_m=actual_length,
+        )
+
     # State = (node, incoming_edge_id or None, incoming_direction or None).
     State = tuple[str, str | None, str | None]
     start: State = (from_node, None, None)
     dist: dict[State, float] = {start: 0.0}
     prev: dict[State, State] = {}
     queue: list[tuple[float, str, str | None, str | None]] = [(0.0, from_node, None, None)]
+    best_state: State | None = None
+    best_cost = math.inf
 
     while queue:
         d, u, inc_edge, inc_dir = heapq.heappop(queue)
         state: State = (u, inc_edge, inc_dir)
         if d > dist.get(state, math.inf):
             continue
+        if u == to_node:
+            best_state = state
+            best_cost = d
+            break
 
         allowed_outs: set[tuple[str, str]] | None = None
         if inc_edge is not None:
@@ -424,14 +547,6 @@ def shortest_path(
                 dist[new_state] = nd
                 prev[new_state] = state
                 heapq.heappush(queue, (nd, neighbor, out_edge_id, out_dir))
-
-    # Pick the cheapest terminal state at to_node across all incoming edges.
-    best_state: State | None = None
-    best_cost = math.inf
-    for state, cost in dist.items():
-        if state[0] == to_node and cost < best_cost:
-            best_cost = cost
-            best_state = state
 
     if best_state is None or best_cost == math.inf:
         if min_confidence is not None:
@@ -457,8 +572,8 @@ def shortest_path(
     # total_length_m: when cost hooks are active, the Dijkstra dist is weighted
     # (not the true arc length). Reconstruct the actual arc length from the
     # chosen edge sequence so the returned value is always in real meters.
-    edge_by_id = {e.id: e for e in graph.edges}
-    actual_length = sum(_edge_length_m(edge_by_id[eid]) for eid in edges if eid in edge_by_id)
+    edge_by_id = index.edge_by_id
+    actual_length = sum(index.base_lengths[eid] for eid in edges if eid in edge_by_id)
 
     return Route(
         from_node=from_node,

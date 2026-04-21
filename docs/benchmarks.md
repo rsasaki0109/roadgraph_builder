@@ -35,6 +35,31 @@ Note: the 21 s includes `merge_near_parallel_edges` and
 `consolidate_clustered_junctions` (still O(N²) over edges, not targeted in
 P1). The crossing/T-junction splitters themselves take < 0.5 s for this size.
 
+## v0.7.2-dev routing hot path (2026-04-21)
+
+`shortest_path` now caches base edge lengths / adjacency per `Graph` and uses
+a node-level Dijkstra fast path when no turn restrictions or lane-level routing
+are requested. Turn-restricted routing still uses the directed incoming-edge
+state machine.
+
+One-off 55×55 grid, 120 source/destination pairs, same Python process:
+
+| Version | Pass 1 | Pass 2 | Pass 3 | Notes |
+|---|---:|---:|---:|---|
+| before | 7.002 s | 6.459 s | n/a | Rebuilt adjacency and ran directed-state Dijkstra for every query |
+| after | 2.699 s | 2.259 s | 1.900 s | Cached base topology plus node-level no-restriction Dijkstra |
+
+The benchmark suite now includes `shortest_path_grid_120`. On this workstation,
+`python scripts/run_benchmarks.py --no-warmup` measured:
+
+| Benchmark | elapsed (s) | Notes |
+|---|---:|---|
+| `polylines_to_graph_paris` | 0.181 | OSM public-trackpoints CSV, small local fixture |
+| `polylines_to_graph_10k_synth` | 42.656 | 50×50 grid, ~25 000 pts |
+| `shortest_path_paris` | 0.030 | Existing small-graph routing smoke |
+| `shortest_path_grid_120` | 1.320 | 120 routes on a 55×55 synthetic graph |
+| `export_bundle_end_to_end` | 0.024 | Full export-bundle pipeline on sample trajectory |
+
 ## Regression policy
 
 CI comparison mode (`--baseline baseline.json`) fails with exit code 1 if any

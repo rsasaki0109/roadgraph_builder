@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Performance benchmarks for roadgraph_builder.
 
-Measures wall-clock time for four scenarios:
+Measures wall-clock time for five scenarios:
   polylines_to_graph_paris       — build from OSM public trackpoints CSV
   polylines_to_graph_10k_synth   — build from 10 000-point synthetic grid
   shortest_path_paris            — 100 Dijkstra queries on the Paris graph
+  shortest_path_grid_120         — 120 Dijkstra queries on a 55×55 grid graph
   export_bundle_end_to_end       — full export-bundle pipeline (sample CSV)
 
 Usage:
@@ -25,6 +26,8 @@ import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 
 def _find_paris_csv() -> Path | None:
@@ -121,6 +124,59 @@ def run_paris_routes_100() -> int:
     return count
 
 
+def run_grid_routes_120() -> int:
+    """Run 120 shortest-path queries on a synthetic 55×55 grid graph."""
+    from roadgraph_builder.core.graph.edge import Edge
+    from roadgraph_builder.core.graph.graph import Graph
+    from roadgraph_builder.core.graph.node import Node
+    from roadgraph_builder.routing.shortest_path import shortest_path
+
+    size = 55
+    spacing = 10.0
+    nodes: list[Node] = []
+    edges: list[Edge] = []
+    for y in range(size):
+        for x in range(size):
+            nodes.append(Node(f"n{x}_{y}", (x * spacing, y * spacing)))
+
+    edge_id = 0
+    for y in range(size):
+        for x in range(size):
+            if x + 1 < size:
+                edges.append(
+                    Edge(
+                        f"e{edge_id}",
+                        f"n{x}_{y}",
+                        f"n{x + 1}_{y}",
+                        [(x * spacing, y * spacing), ((x + 1) * spacing, y * spacing)],
+                    )
+                )
+                edge_id += 1
+            if y + 1 < size:
+                edges.append(
+                    Edge(
+                        f"e{edge_id}",
+                        f"n{x}_{y}",
+                        f"n{x}_{y + 1}",
+                        [(x * spacing, y * spacing), (x * spacing, (y + 1) * spacing)],
+                    )
+                )
+                edge_id += 1
+
+    graph = Graph(nodes, edges)
+    count = 0
+    for i in range(120):
+        sx = i % size
+        sy = (i * 7) % size
+        tx = size - 1 - sx
+        ty = size - 1 - sy
+        if sx == tx and sy == ty:
+            continue
+        shortest_path(graph, f"n{sx}_{sy}", f"n{tx}_{ty}")
+        count += 1
+    return count
+
+
 def export_bundle_paris() -> None:
     """Run the full export-bundle pipeline on the sample trajectory."""
     import tempfile
@@ -156,6 +212,7 @@ BENCHMARKS: dict[str, tuple] = {
     "polylines_to_graph_paris": (build_paris_graph, 1),
     "polylines_to_graph_10k_synth": (build_10k_synth, 1),
     "shortest_path_paris": (run_paris_routes_100, 1),
+    "shortest_path_grid_120": (run_grid_routes_120, 1),
     "export_bundle_end_to_end": (export_bundle_paris, 1),
 }
 

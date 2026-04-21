@@ -73,6 +73,40 @@ def test_shortest_path_prefers_shorter_branch():
     assert math.isclose(r.total_length_m, 60.0)
 
 
+def test_shortest_path_cached_index_tracks_appended_edges():
+    g = _manual_graph()
+    assert shortest_path(g, "a", "c").edge_sequence == ["e1", "e2"]
+
+    g.edges.append(
+        Edge(
+            id="shortcut",
+            start_node_id="a",
+            end_node_id="c",
+            polyline=_straight_polyline((0, 0), (10, 0)),
+        )
+    )
+    r = shortest_path(g, "a", "c")
+    assert r.edge_sequence == ["shortcut"]
+    assert math.isclose(r.total_length_m, 10.0)
+
+
+def test_shortest_path_cached_index_tracks_replaced_polyline():
+    g = _manual_graph()
+    shortcut = Edge(
+        id="shortcut",
+        start_node_id="a",
+        end_node_id="c",
+        polyline=_straight_polyline((0, 0), (90, 0)),
+    )
+    g.edges.append(shortcut)
+    assert shortest_path(g, "a", "c").edge_sequence == ["e1", "e2"]
+
+    shortcut.polyline = _straight_polyline((0, 0), (10, 0))
+    r = shortest_path(g, "a", "c")
+    assert r.edge_sequence == ["shortcut"]
+    assert math.isclose(r.total_length_m, 10.0)
+
+
 def test_shortest_path_disjoint_raises():
     g = _manual_graph()
     g = Graph(
