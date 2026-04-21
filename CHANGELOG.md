@@ -95,6 +95,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   10.5 MB, and an `sd_nav`-shaped document dropped from about 0.65 s /
   17.0 MB to 0.15 s / 11.6 MB.
 
+- **README quick-start smoke now covers route guidance and compact bundle flags.**
+  The CLI end-to-end regression now runs from a fresh checkout even when the
+  console script has not been installed, drives `export-bundle` through
+  validators, `route --output`, `guidance`, and `validate-guidance`, and adds a
+  compact bundle smoke for `--compact-geojson --compact-bundle-json`.
+
 ### Fixed
 
 - **Paris splitter golden length check now tolerates Python/Numpy drift.**

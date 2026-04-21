@@ -1,35 +1,35 @@
-"""End-to-end CLI regression test — shells the installed entry point.
+"""End-to-end CLI regression test — shells the CLI entry point.
 
-Guards the CLI surface that unit tests touch via ``main()`` in-process:
-argument parsing, stderr messages, exit codes, file writes, and inter-step
-JSON compatibility. Runs against ``examples/sample_trajectory.csv`` so it
-works in a fresh checkout without external inputs.
+Guards argument parsing, stderr messages, exit codes, file writes, and
+inter-step JSON compatibility. Runs against ``examples/sample_trajectory.csv``
+so it works in a fresh checkout without external inputs.
 """
 
 from __future__ import annotations
 
 import json
 import os
-import shutil
 import subprocess
 import sys
 from pathlib import Path
 
-import pytest
-
 ROOT = Path(__file__).resolve().parent.parent
 
 
-def _rb() -> str:
+def _rb_command() -> list[str]:
     exe = Path(sys.executable).parent / "roadgraph_builder"
-    if not exe.is_file():
-        pytest.skip(f"roadgraph_builder CLI not found next to {sys.executable}")
-    return str(exe)
+    if exe.is_file():
+        return [str(exe)]
+    return [
+        sys.executable,
+        "-c",
+        "import sys; from roadgraph_builder.cli.main import main; raise SystemExit(main(sys.argv[1:]))",
+    ]
 
 
 def _run(*args: str, cwd: Path | None = None) -> subprocess.CompletedProcess[str]:
     result = subprocess.run(
-        [_rb(), *args],
+        [*_rb_command(), *args],
         cwd=str(cwd) if cwd else str(ROOT),
         capture_output=True,
         text=True,
@@ -134,29 +134,94 @@ def test_cli_export_bundle_full_pipeline_then_stats_route(tmp_path: Path):
         == man["junctions"]["total_nodes"]
     )
 
-    # Route between the first two nodes present in the bundle graph.
+    # Route along the first edge present in the bundle graph, then turn that
+    # route GeoJSON into guidance exactly like the README recipe.
     rg = json.loads((out_dir / "sim" / "road_graph.json").read_text(encoding="utf-8"))
-    node_ids = [n["id"] for n in rg["nodes"]]
-    if len(node_ids) >= 2:
+    if rg["edges"]:
+        first_edge = rg["edges"][0]
+        from_node = first_edge["start_node_id"]
+        to_node = first_edge["end_node_id"]
         route_out = tmp_path / "route.geojson"
         r_route = _run(
             "route",
             str(out_dir / "sim" / "road_graph.json"),
-            node_ids[0],
-            node_ids[1],
+            from_node,
+            to_node,
             "--output",
             str(route_out),
         )
-        # Disjoint components in the toy bundle are fine; either succeed with
-        # a geojson or report "no path" cleanly.
-        if r_route.returncode == 0:
-            assert route_out.is_file()
-            doc = json.loads(r_route.stdout)
-            assert doc["from_node"] == node_ids[0]
-            assert doc["to_node"] == node_ids[1]
-            assert doc["total_length_m"] >= 0.0
-        else:
-            assert "no path" in r_route.stderr or "not in the graph" in r_route.stderr
+        assert r_route.returncode == 0, r_route.stderr
+        assert route_out.is_file()
+        doc = json.loads(r_route.stdout)
+        assert doc["from_node"] == from_node
+        assert doc["to_node"] == to_node
+        assert doc["total_length_m"] >= 0.0
+
+        guidance_out = tmp_path / "guidance.json"
+        r_guidance = _run(
+            "guidance",
+            str(route_out),
+            str(out_dir / "nav" / "sd_nav.json"),
+            "--output",
+            str(guidance_out),
+            "--slight-deg",
+            "20",
+            "--sharp-deg",
+            "120",
+            "--u-turn-deg",
+            "165",
+        )
+        assert r_guidance.returncode == 0, r_guidance.stderr
+        assert guidance_out.is_file()
+        r_validate_guidance = _run("validate-guidance", str(guidance_out))
+        assert r_validate_guidance.returncode == 0, r_validate_guidance.stderr
+
+
+def test_cli_export_bundle_compact_flags_validate(tmp_path: Path):
+    pretty_dir = tmp_path / "pretty_bundle"
+    compact_dir = tmp_path / "compact_bundle"
+
+    base_args = [
+        "export-bundle",
+        str(ROOT / "examples" / "sample_trajectory.csv"),
+        "--origin-json",
+        str(ROOT / "examples" / "toy_map_origin.json"),
+        "--lane-width-m",
+        "0",
+        "--dataset-name",
+        "compact_e2e",
+    ]
+    r_pretty = _run(*base_args[:2], str(pretty_dir), *base_args[2:])
+    assert r_pretty.returncode == 0, r_pretty.stderr
+    r_compact = _run(
+        *base_args[:2],
+        str(compact_dir),
+        *base_args[2:],
+        "--compact-geojson",
+        "--compact-bundle-json",
+    )
+    assert r_compact.returncode == 0, r_compact.stderr
+
+    for sub, rel in (
+        ("validate-manifest", "manifest.json"),
+        ("validate-sd-nav", "nav/sd_nav.json"),
+        ("validate", "sim/road_graph.json"),
+    ):
+        r_validate = _run(sub, str(compact_dir / rel))
+        assert r_validate.returncode == 0, f"{sub}: {r_validate.stderr}"
+
+    for rel in ("nav/sd_nav.json", "sim/road_graph.json", "sim/map.geojson"):
+        pretty = pretty_dir / rel
+        compact = compact_dir / rel
+        assert json.loads(compact.read_text(encoding="utf-8")) == json.loads(pretty.read_text(encoding="utf-8"))
+        assert compact.stat().st_size < pretty.stat().st_size
+
+    pretty_manifest = json.loads((pretty_dir / "manifest.json").read_text(encoding="utf-8"))
+    compact_manifest = json.loads((compact_dir / "manifest.json").read_text(encoding="utf-8"))
+    pretty_manifest["generated_at_utc"] = "<dynamic-generated-at>"
+    compact_manifest["generated_at_utc"] = "<dynamic-generated-at>"
+    assert compact_manifest == pretty_manifest
+    assert (compact_dir / "manifest.json").stat().st_size < (pretty_dir / "manifest.json").stat().st_size
 
 
 def test_cli_missing_input_exits_1(tmp_path: Path):

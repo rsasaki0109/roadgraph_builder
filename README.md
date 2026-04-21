@@ -410,8 +410,9 @@ Exits with code 1 on unknown node ids, disjoint components, or when the restrict
 After `route --output` produces a route GeoJSON, `guidance` converts the merged LineString + per-edge features into a step list with maneuver categories (`depart` / `arrive` / `straight` / `slight_left` / `left` / `sharp_left` / `slight_right` / `right` / `sharp_right` / `u_turn` / `continue`). Heading change is signed (+ right, − left). Uses `sd_nav.json`'s `allowed_maneuvers` + the edge geometry — no extra data needed beyond the existing bundle.
 
 ```bash
-roadgraph_builder route out.json n0 n9 --output /tmp/route.geojson
-roadgraph_builder guidance /tmp/route.geojson /tmp/bundle/nav/sd_nav.json \
+roadgraph_builder route examples/frozen_bundle/sim/road_graph.json n0 n1 \
+  --output /tmp/route.geojson
+roadgraph_builder guidance /tmp/route.geojson examples/frozen_bundle/nav/sd_nav.json \
   --output /tmp/guidance.json \
   --slight-deg 20 --sharp-deg 120 --u-turn-deg 165
 roadgraph_builder validate-guidance /tmp/guidance.json
@@ -518,6 +519,7 @@ roadgraph_builder export-bundle examples/sample_trajectory.csv /tmp/rg_bundle --
 roadgraph_builder validate-manifest /tmp/rg_bundle/manifest.json
 roadgraph_builder validate-sd-nav /tmp/rg_bundle/nav/sd_nav.json
 roadgraph_builder validate /tmp/rg_bundle/sim/road_graph.json
+roadgraph_builder export-bundle examples/sample_trajectory.csv /tmp/rg_bundle_compact --origin-json examples/toy_map_origin.json --lane-width-m 0 --compact-geojson --compact-bundle-json
 ```
 
 ## Package layout
