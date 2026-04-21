@@ -6,7 +6,7 @@
 > このファイル → [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md)（Mermaid 6 枚 + CLI 対応表 +
 > モジュール索引）→ [`CHANGELOG.md`](../CHANGELOG.md) の順。
 
-*最終更新: 2026-04-21 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards / float32 opt-in + drift report / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理）を反映済み。*
+*最終更新: 2026-04-21 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards / float32 opt-in + drift report + compare script / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理）を反映済み。*
 
 ---
 
@@ -18,7 +18,7 @@
   survey-grade ではなく「HD-lite」帯まで。
 - **state:** **v0.7.0 shipped (2026-04-20)**。最新 push 済み `main` は CI green
   （`6c0ba63` / CI run `24704776034`）、
-  最新 full local `pytest` = **548 passed / 33 skipped / 4 deselected**（opt-in marker 除外）。
+  最新 full local `pytest` = **552 passed / 33 skipped / 4 deselected**（opt-in marker 除外）。
 - **直前の session (2026-04-21) で landed:**
   1. V1 accuracy 実測 — Paris 20e MAE 0.938、Tokyo Ginza MAE 0.903、Berlin Mitte MAE 1.220（lane-count vs OSM `lanes=`、canonical 20 m）
   2. `scripts/measure_lane_accuracy.py` が meter-frame graph を正しく扱う bug fix（`map_origin` 自動検出）
@@ -68,6 +68,10 @@
   21. README の release surface を整理し、v0.7.0 で shipped 済みの command surface と
       `[Unreleased]` の post-release validation/docs/float32/CLI refactor を分離して記述。
       stale な "trajectory CSV only" / completion caveat も解消。
+  22. `scripts/compare_float32_drift.py` を追加。trajectory CSV から float64 / opt-in float32
+      bundle を再構築し、`road_graph.json` / `sd_nav.json` / `map.geojson` / Lanelet2 OSM の
+      topology と coordinate drift を JSON/Markdown に出せる。Paris sample smoke では
+      topology unchanged、max drift **0.000141 m**。
 - **push 方針:** `git push` は user が `push!` などで明示するまで実行しない。
 - **未着手 (次の AI が触る候補):** ↓ §5 "Open tasks" 参照。
 
@@ -360,7 +364,7 @@ cards は `[Unreleased]` 下。
 ### 5a. V3 float32 trajectory 最適化（DONE for now／default float64 維持）
 
 - **背景:** v0.7 で `export_lanelet2` DOM rewrite が peak RSS を -10% したが、trajectory 配列の
-  float64→float32 変換はまだ。**byte-identity を破る** ので単純 swap 不可。
+  default float32 化はまだ。**byte-identity を破る** ので単純 swap 不可。
 - **設計メモ:** [`docs/handoff/float32_trajectory.md`](./handoff/float32_trajectory.md) 作成済み。
   結論は「default float64 維持 + opt-in float32 prototype + drift 計測」。`Trajectory.timestamps`
   と `Trajectory.z` は float64 のまま、まず `Trajectory.xy` のみを候補にする。
@@ -371,6 +375,9 @@ cards は `[Unreleased]` 下。
   tracemalloc -6 KB / max graph drift 0.00014 m、Berlin 7,500-row で loader allocation -60,000 B /
   max graph drift 0.00072 m。RSS は import high-water noise が勝つ規模なので default flip の根拠には
   しない。
+- **再現 script:** `scripts/compare_float32_drift.py` が float64 / float32 bundle を作り直し、
+  graph / sd_nav / GeoJSON / Lanelet2 OSM の topology と coordinate drift を比較する。
+  `--fail-on-topology-change` と `--max-coordinate-drift-m` で release-gate 風に使える。
 - **設計の勘所:**
   - どこで float64 が伸びるか: `io.trajectory.loader::Trajectory.xy`, `pipeline.build_graph` 内の
     numpy 配列、`routing.shortest_path` の内部距離計算など。
@@ -378,24 +385,25 @@ cards は `[Unreleased]` 下。
     末尾桁が変わる可能性。どこまで tolerance を緩められるか（schema は float で decimal 精度制約なし）
     を決める必要あり。
   - regression test: 現 `tests/test_release_bundle.py` は frozen bundle の schema / 形の検証が中心で、
-    常時 byte-for-byte diff は無い。default path の byte identity と opt-in path の tolerance test を
-    prototype 時に追加する。
+    常時 byte-for-byte diff は無い。default path の byte identity を常時 gate 化するなら別途設計する。
 - **やり方:**
   1. ~~design memo を `docs/handoff/` に書く~~（完了）
   2. ~~opt-in prototype（loader + `BuildParams` + CLI/profile flag）~~（完了）
   3. ~~`scripts/profile_memory.py` を float64/float32 両方で実測~~（完了）
-  4. default path は byte-identical、opt-in path は coordinate / length tolerance で regression を拡張
-  5. より大きい city-scale workload で RSS に効くかを見る。現時点で default は `float64` のまま。
-- **規模感:** 次は recurring drift script / larger workload があれば 1 session。
+  4. ~~one-off drift 比較を `scripts/compare_float32_drift.py` にする~~（完了）
+  5. default path は byte-identical、opt-in path は coordinate / length tolerance で regression を拡張
+  6. より大きい city-scale workload で RSS に効くかを見る。現時点で default は `float64` のまま。
+- **規模感:** 次は larger workload があれば 1 session。
 
 ### 5b. 次のおすすめ候補（small／選択式）
 
 今すぐ必要な blocker は無し。次に触るなら以下の順が現実的。
 
-1. **Float32 drift compare script 化** — `docs/float32_drift_report.md` で使った one-off 比較を
-   `scripts/compare_float32_drift.py` にする。release gate 化するなら有用。今は必須ではない。
-2. **Larger workload memory benchmark** — `/tmp` または synthetic で 100k+ rows の trajectory を作り、
+1. **Larger workload memory benchmark** — `/tmp` または synthetic で 100k+ rows の trajectory を作り、
    `--trajectory-dtype float32` が RSS に効く規模を確認する。大きい raw data は commit しない。
+2. **Default-path byte-identity gate** — float32 script は opt-in drift を比較する。default
+   `float64` path の frozen output byte identity を常時 gate に寄せるなら、既存 release bundle
+   tests と併せて設計する。
 3. **Docs visual polish** — `docs/` metric cards は入った。次にやるなら mobile screenshot /
    Playwright visual smoke を足すか、README の measured-results table を release badge 周辺へ
    compact に寄せる。
@@ -423,7 +431,7 @@ cards は `[Unreleased]` 下。
 ### 6.3 Schema / CI / テスト
 
 - Schema 変更時は対応 `validate_*` と CI の expectation を同時に更新。
-- テスト: `pytest` で 548 passed / 33 skipped / 4 deselected が baseline。
+- テスト: `pytest` で 552 passed / 33 skipped / 4 deselected が baseline。
   `pytest -m slow` / `pytest -m city_scale` は opt-in。
 - 新機能には **必ず** unit test 1 本以上（`tests/test_<feature>_*.py`）。
 - CI が conditional skip している path（LAS laspy / Node.js viewer dijkstra / OpenCV）は
@@ -535,7 +543,7 @@ python3 scripts/measure_lane_accuracy.py --graph /tmp/paris_lc.json \
 | Validators | `roadgraph_builder/validation/*.py` |
 | Viewer | `docs/index.html`, `docs/map.html`, `docs/assets/`, `docs/images/` |
 | CI / Release / PyPI | `.github/workflows/*.yml` |
-| Scripts (fetch, tune, demo, benchmark, profile, accuracy) | `scripts/` |
+| Scripts (fetch, tune, demo, benchmark, profile, accuracy, float32 drift compare) | `scripts/` |
 
 ---
 
@@ -585,7 +593,7 @@ feedback / project / reference の 4 種、`MEMORY.md` は index）。
 
 新しい機能 / バグ修正を入れる前に:
 
-- [ ] `pytest` が 548 passed / 33 skipped / 4 deselected で通ること（上下 ±1 は OK、大きく減ったら
+- [ ] `pytest` が 552 passed / 33 skipped / 4 deselected で通ること（上下 ±1 は OK、大きく減ったら
       skip 理由を確認）。
 - [ ] `CHANGELOG.md` の `[Unreleased]` にユーザー向け変更を足すこと。
 - [ ] スキーマ変更時は対応する `validate_*` と CI の expectation を同時更新すること。
@@ -598,8 +606,8 @@ feedback / project / reference の 4 種、`MEMORY.md` は index）。
 ## 11. 一行で言うと
 
 > **v0.7.0 は全部シップ済み、直近 workstream（accuracy / completions / tuning / visual preview /
-> CLI boundary split / release surface docs）も commit 済み。次は「float32 drift compare script 化」
-> から入るのがおすすめ。何を削って何を広げたかは
+> CLI boundary split / release surface docs / float32 drift compare script）も commit 済み。
+> 次は「larger workload memory benchmark」から入るのがおすすめ。何を削って何を広げたかは
 > `CHANGELOG.md` と §3 の小節を見れば全部わかる。push / tag / AI マーカー / PyPI /
 > Mapillary は全部 user authorize か No 決定済みなので、勝手に提案しないこと。**
 

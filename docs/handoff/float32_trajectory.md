@@ -172,17 +172,22 @@ Phase 1 is complete: option B landed as opt-in only:
 
 Phase 2 should measure and document drift:
 
-Phase 2 is partially complete:
+Phase 2 is complete for the current opt-in prototype:
 
 - `docs/float32_drift_report.md` records Paris 800-row and Berlin 7,500-row
   float64/float32 comparisons.
+- `scripts/compare_float32_drift.py` rebuilds float64 / float32 bundles and
+  compares `road_graph.json`, `sd_nav.json`, `map.geojson`, and Lanelet2 OSM
+  topology plus coordinate drift, with JSON/Markdown output and optional
+  failure thresholds.
 - Topology was unchanged on both samples.
 - Max observed graph / GeoJSON / Lanelet coordinate drift was below 1 mm.
 - `Trajectory.xy` allocation dropped as expected, but process RSS did not show
   a reliable win at this input size.
 
-Still open: add reusable tolerance-based regression helpers if float32 becomes
-a release gate.
+Still open: run a larger workload where trajectory XY dominates enough to move
+process RSS, and decide whether default-path byte identity needs a stricter
+frozen-output gate.
 
 Phase 3 should decide whether float32 can become default:
 

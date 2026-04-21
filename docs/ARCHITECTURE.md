@@ -357,7 +357,7 @@ flowchart TD
 | `roadgraph_builder/cli/main.py` | argparse dispatcher for every subcommand |
 | `roadgraph_builder/cli/doctor.py` | Install / asset self-check |
 | `docs/map.html` | Leaflet viewer with dataset dropdown + click-to-route |
-| `scripts/` | Fetch, refresh, build, demo, tune shell helpers (incl. `run_benchmarks.py` for `make bench` and `make_sample_lane_las.py` for the LiDAR lane-marking test fixtures) |
+| `scripts/` | Fetch, refresh, build, demo, tune shell helpers (incl. `run_benchmarks.py` for `make bench`, `compare_float32_drift.py` for dtype drift gates, and `make_sample_lane_las.py` for the LiDAR lane-marking test fixtures) |
 | `.github/workflows/` | CI, release-on-tag, PyPI workflow_dispatch |
 
 ## Further reading

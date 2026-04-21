@@ -536,6 +536,7 @@ Python package: `roadgraph_builder/`
 | `roadgraph_builder/cli/` | Thin dispatcher plus domain command modules (`build`, `validate`, `routing`, `export`, `camera`, `lidar`, `osm`, `guidance`, `trajectory`, `hd`, `incremental`, `dataset`) |
 | `docs/` | GitHub Pages viewer + bundled sample assets |
 | `scripts/refresh_docs_assets.py` | Regenerate `docs/assets` and `docs/images` |
+| `scripts/compare_float32_drift.py` | Rebuild float64/float32 bundles and report topology / coordinate drift |
 | `scripts/run_demo_bundle.sh` | Validate → `export-bundle` → validate outputs (demo) |
 | `roadgraph_builder/io/export/geojson.py` | `export_map_geojson()` for Leaflet / OSM |
 | `roadgraph_builder/utils/geo.py` | meters ↔ WGS84; `load_wgs84_origin_json` |

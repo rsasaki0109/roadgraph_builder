@@ -45,6 +45,21 @@ python3 scripts/profile_memory.py /tmp/osm_tune_berlin/berlin_mitte_trackpoints.
   --output-md /tmp/profile_berlin_float32.md
 ```
 
+The bundle comparison is now reproducible without ad-hoc parsing:
+
+```bash
+python3 scripts/compare_float32_drift.py examples/osm_public_trackpoints.csv \
+  /tmp/rg_float32_drift_compare \
+  --overwrite \
+  --output-json /tmp/rg_float32_drift_compare.json \
+  --output-md /tmp/rg_float32_drift_compare.md \
+  --max-coordinate-drift-m 0.01 \
+  --fail-on-topology-change
+```
+
+On the committed Paris sample this reports unchanged topology and max
+coordinate drift **0.000141 m**, matching the original one-off measurement.
+
 The generated bundles were compared by parsing:
 
 - `sim/road_graph.json`
@@ -134,8 +149,8 @@ Recommended next state:
 
 ## Follow-up Test Ideas
 
-- Add a reusable drift-comparison script if this measurement becomes a
-  recurring release gate.
+- Use `scripts/compare_float32_drift.py` as the reusable release-gate entry
+  point when float32 measurements need to recur.
 - Add an opt-in city-scale benchmark that asserts topology stability and
   sub-centimeter coordinate drift for `--trajectory-dtype float32`.
 - Measure on a much larger trajectory input where `Trajectory.xy` is large

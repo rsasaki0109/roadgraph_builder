@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Float32 drift comparison is now reproducible as a script.**
+  `scripts/compare_float32_drift.py` builds float64 and opt-in float32
+  bundles from the same trajectory CSV, then compares `road_graph.json`,
+  `sd_nav.json`, `map.geojson`, and Lanelet2 OSM topology plus coordinate
+  drift. It can write JSON/Markdown reports and fail as a release gate on
+  topology change or max coordinate drift.
+
 - **README release surface is now explicit about shipped vs post-release work.**
   The README separates the v0.7.0 shipped command surface from current-main
   measured results, so validation numbers, docs preview status, and float32
