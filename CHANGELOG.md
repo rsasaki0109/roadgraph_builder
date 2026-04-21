@@ -16,6 +16,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   drift. It can write JSON/Markdown reports and fail as a release gate on
   topology change or max coordinate drift.
 
+- **Float32 memory profiling now includes a 1M-row synthetic workload.**
+  A `/tmp`-only 1,000,000-row trajectory profile shows the expected
+  `Trajectory.xy` allocation drop from 24,000,568 B to 16,000,568 B and a
+  tracemalloc peak drop of about 19 MB, while process RSS after full
+  `export-bundle` only falls by about 2.6 MB because large temporary build and
+  GeoJSON serialization allocations dominate the high-water mark.
+
 - **README release surface is now explicit about shipped vs post-release work.**
   The README separates the v0.7.0 shipped command surface from current-main
   measured results, so validation numbers, docs preview status, and float32

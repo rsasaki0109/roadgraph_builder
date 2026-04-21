@@ -75,10 +75,13 @@ proportionally with edge count.
   through `load_trajectory_csv(..., xy_dtype="float32")`,
   `BuildParams(trajectory_xy_dtype="float32")`, CLI `--trajectory-dtype
   float32`, and `scripts/profile_memory.py --trajectory-dtype float32`.
-  First measurements are in [`float32_drift_report.md`](./float32_drift_report.md):
+  Measurements are in [`float32_drift_report.md`](./float32_drift_report.md):
   Berlin 7,500 rows saved 60,000 B in the loader allocation and kept topology
-  unchanged with <1 mm coordinate drift, but process-level RSS did not improve
-  enough to justify a default flip.  Default remains float64.
+  unchanged with <1 mm coordinate drift. A 1M-row synthetic run saved exactly
+  8,000,000 B in the retained trajectory XY allocation and dropped
+  tracemalloc peak by ~19 MB, but process-level RSS after full export only
+  fell by ~2.6 MB because build/export temporaries dominate. Default remains
+  float64.
 - **Polyline list-of-tuples → NumPy array**: saves ~80 % on Python object
   overhead for large graphs (1 000 polylines × 20 pts: 1 336 KB → 312 KB).
   Requires updating all consumers of `edge.polyline`; complex refactor.

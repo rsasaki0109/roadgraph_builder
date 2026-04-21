@@ -90,8 +90,43 @@ For Berlin, the top-allocation table showed
 **120,568 B**.  That 60,000 B reduction exactly matches 7,500 rows x 2 XY
 coordinates x 4 saved bytes per coordinate.
 
-Conclusion: the opt-in path works, but for current public samples the absolute
-memory win is too small to justify a default-output change.
+### 1M-row synthetic follow-up
+
+To move past the small public samples, a `/tmp`-only synthetic CSV was generated
+with 1,000,000 data rows (23 MB).  The file is not committed.
+
+```bash
+python3 scripts/profile_memory.py /tmp/rg_float32_1m_synth.csv \
+  /tmp/rg_profile_1m_float64 \
+  --trajectory-dtype float64 \
+  --output-json /tmp/rg_profile_1m_float64.json \
+  --output-md /tmp/rg_profile_1m_float64.md \
+  --top 30
+
+python3 scripts/profile_memory.py /tmp/rg_float32_1m_synth.csv \
+  /tmp/rg_profile_1m_float32 \
+  --trajectory-dtype float32 \
+  --output-json /tmp/rg_profile_1m_float32.json \
+  --output-md /tmp/rg_profile_1m_float32.md \
+  --top 30
+```
+
+| Synthetic 1M rows | float64 | float32 | Delta |
+| --- | ---: | ---: | ---: |
+| Peak RSS after trajectory load | 773,052 KB | 770,224 KB | -2,828 KB |
+| Peak RSS after export-bundle | 1,241,652 KB | 1,238,972 KB | -2,680 KB |
+| tracemalloc peak | 811,973 KB | 792,442 KB | -19,531 KB |
+| `loader.py:104` retained allocation | 24,000,568 B | 16,000,568 B | -8,000,000 B |
+
+The retained `Trajectory.xy` allocation reduction is exactly the expected
+1,000,000 rows x 2 XY coordinates x 4 saved bytes per coordinate.  The
+process-level RSS reduction remains small because the full `export-bundle`
+path builds a large trajectory GeoJSON (83 MB on disk) and uses temporary
+build/export allocations that dominate the high-water mark.
+
+Conclusion: the opt-in path works and the direct coordinate-array saving is
+real at 1M rows, but full-pipeline RSS still does not improve enough to justify
+a default-output change.
 
 ## Output Drift
 

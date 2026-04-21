@@ -180,14 +180,18 @@ Phase 2 is complete for the current opt-in prototype:
   compares `road_graph.json`, `sd_nav.json`, `map.geojson`, and Lanelet2 OSM
   topology plus coordinate drift, with JSON/Markdown output and optional
   failure thresholds.
+- A `/tmp`-only 1M-row synthetic memory profile shows the direct retained
+  `Trajectory.xy` allocation drop is real (24,000,568 B -> 16,000,568 B) and
+  tracemalloc peak drops by about 19 MB, but full `export-bundle` process RSS
+  only drops by about 2.6 MB because build/export temporaries dominate.
 - Topology was unchanged on both samples.
 - Max observed graph / GeoJSON / Lanelet coordinate drift was below 1 mm.
-- `Trajectory.xy` allocation dropped as expected, but process RSS did not show
-  a reliable win at this input size.
+- `Trajectory.xy` allocation dropped as expected, but process RSS still did
+  not show a reliable enough full-pipeline win to justify changing the default.
 
-Still open: run a larger workload where trajectory XY dominates enough to move
-process RSS, and decide whether default-path byte identity needs a stricter
-frozen-output gate.
+Still open: run a larger real-world workload where trajectory XY dominates
+enough to move process RSS, and decide whether default-path byte identity needs
+a stricter frozen-output gate.
 
 Phase 3 should decide whether float32 can become default:
 
