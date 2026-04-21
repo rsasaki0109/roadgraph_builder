@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.10%20%7C%203.12-blue.svg)](pyproject.toml)
 
-**Construct road graphs from trajectory, LiDAR, and camera data** (MVP: **trajectory CSV only**).
+**Construct road graphs from trajectory, OSM, LiDAR, and camera data.**
 
 This project builds a **graph-first** intermediate representation: **nodes** (junctions/endpoints) and **edges** (lane/road segments) with **centerline polylines** and optional **attributes**. Output is **JSON** (`schema_version`) with optional **SVG** previews and a small static viewer in **`docs/`** (local preview, or GitHub Pages when the repository/plan supports it).
 
@@ -27,6 +27,12 @@ Use the short description and topics listed in [`.github/ABOUT.md`](.github/ABOU
 | **Demo** | Static viewer in [docs/](docs/) — [diagram](docs/index.html) · **[map](docs/map.html)** (OSM tiles, TR-aware click-to-route when served locally), static previews in [docs/images](docs/images/). |
 | **Samples** | [Toy CSV](examples/sample_trajectory.csv), [OSM GPS](examples/osm_public_trackpoints.csv) (ODbL), [camera calibration + pixel detections](examples/demo_camera_calibration.json), [Paris OSM-grid + turn_restrictions](docs/assets/map_paris_grid.geojson) (ODbL). |
 
+### Current release surface
+
+The latest shipped tag is **v0.7.0**. It includes the full v0.6/v0.7 command surface shown below: lane-count inference, per-lane Lanelet2 export, uncertainty-aware routing, 3D elevation, slope and lane-change routing, camera lane detection, ground-plane LiDAR, Autoware validator bridging, incremental updates, and dataset batch export.
+
+Current `main` is ahead of v0.7.0 with post-release validation and documentation work: canonical lane-count accuracy numbers for Paris / Tokyo / Berlin, cross-city bundle tuning, the Paris TR-aware visualization preview, opt-in float32 drift measurements, private-repo docs preview notes, and a CLI boundary refactor. See [CHANGELOG.md](CHANGELOG.md) `[Unreleased]` for the exact delta.
+
 ### Visualization results
 
 The docs map ships a Paris OSM-highway graph with 10 mapped turn restrictions and a restriction-aware route overlay. This static preview is regenerated from the committed GeoJSON assets by `scripts/refresh_docs_assets.py`.
@@ -35,7 +41,9 @@ The docs map ships a Paris OSM-highway graph with 10 mapped turn restrictions an
 
 Open the interactive version locally: `cd docs && python3 -m http.server 8765`, then visit **`http://127.0.0.1:8765/map.html`**.
 
-### Measured results
+### Post-release measured results
+
+These numbers describe the current `main` validation surface. They are tracked in `[Unreleased]` because they were measured after the v0.7.0 tag.
 
 | Track | Latest result | Details |
 | --- | --- | --- |
@@ -56,7 +64,7 @@ python3 -m venv .venv && .venv/bin/pip install -e .
 
 From the repo root, **`make doctor`**, **`make demo`**, **`make tune`** (bundle + validate for parameter exploration), and **`make test`** are shortcuts (see `Makefile`). Tuning workflow: [docs/bundle_tuning.md](docs/bundle_tuning.md).
 
-### New in 0.6 / 0.7
+### Shipped in 0.6 / 0.7
 
 Short pointer — see [`CHANGELOG.md`](CHANGELOG.md) and [`docs/PLAN.md`](docs/PLAN.md) for the full story.
 
@@ -525,7 +533,7 @@ Python package: `roadgraph_builder/`
 | `roadgraph_builder/semantics/` | Placeholder for lane semantics (separate from geometry) |
 | `roadgraph_builder/schemas/` | `road_graph`, `camera_detections`, `sd_nav`, `manifest` (`.schema.json`) |
 | `roadgraph_builder/validation/` | `validate_*_document()` for graph, detections, `sd_nav`, manifest |
-| `roadgraph_builder/cli/` | CLI |
+| `roadgraph_builder/cli/` | Thin dispatcher plus domain command modules (`build`, `validate`, `routing`, `export`, `camera`, `lidar`, `osm`, `guidance`, `trajectory`, `hd`, `incremental`, `dataset`) |
 | `docs/` | GitHub Pages viewer + bundled sample assets |
 | `scripts/refresh_docs_assets.py` | Regenerate `docs/assets` and `docs/images` |
 | `scripts/run_demo_bundle.sh` | Validate → `export-bundle` → validate outputs (demo) |
@@ -570,11 +578,9 @@ public URL — this is for local reference only.
 Hand-written bash and zsh completion scripts live under
 [`scripts/completions/`](scripts/completions/). They complete the
 subcommands and the common `--turn-restrictions-json` / `--output` /
-`--origin-*` / `--lidar-points` style path arguments. Some v0.6 / v0.7
-additions (`infer-lane-count`, `validate-lanelet2`,
-`validate-lanelet2-tags`, `update-graph`, `process-dataset`,
-`detect-lane-markings-camera`) may not yet be in the completion lists —
-fall back to `--help` for those.
+`--origin-*` / `--lidar-points` style path arguments. The completion smoke
+test derives the expected subcommands from the argparse parser, so future CLI
+additions should update the scripts in the same change instead of drifting.
 
 ```bash
 # Bash (per-user)

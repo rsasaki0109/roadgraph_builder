@@ -6,7 +6,7 @@
 > このファイル → [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md)（Mermaid 6 枚 + CLI 対応表 +
 > モジュール索引）→ [`CHANGELOG.md`](../CHANGELOG.md) の順。
 
-*最終更新: 2026-04-21 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards / float32 opt-in + drift report / private repo Pages blocked note / CLI boundary split wave 完了）を反映済み。*
+*最終更新: 2026-04-21 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards / float32 opt-in + drift report / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理）を反映済み。*
 
 ---
 
@@ -65,6 +65,9 @@
       `process-dataset` CLI parser/handler を既存 `roadgraph_builder/cli/dataset.py` に集約。
       file preflight、manifest exit-code policy、incremental update summary を
       `tests/test_cli_incremental_dataset.py` で検証。`main.py` は 287 行の dispatcher まで縮小。
+  21. README の release surface を整理し、v0.7.0 で shipped 済みの command surface と
+      `[Unreleased]` の post-release validation/docs/float32/CLI refactor を分離して記述。
+      stale な "trajectory CSV only" / completion caveat も解消。
 - **push 方針:** `git push` は user が `push!` などで明示するまで実行しない。
 - **未着手 (次の AI が触る候補):** ↓ §5 "Open tasks" 参照。
 
@@ -272,7 +275,7 @@
   allocator を記録。`export_lanelet2` の `minidom.parseString → toprettyxml` を
   `_et_to_pretty_bytes` 直接 writer に置換し、byte-identical を保ったまま Paris trackpoints で
   **peak RSS 61 028 → 54 944 KB (-10.0%)**。`docs/memory_profile_v0.7.md` に詳細。
-  **float32 trajectory 変換は未着手**（byte-identity 破るので要設計、↓ §5 参照）。
+  float32 trajectory 変換は opt-in prototype 済み（default は float64 維持、drift report は ↓ §5 参照）。
 
 ### 3.10 検証 / CI / 配布
 
@@ -389,13 +392,11 @@ cards は `[Unreleased]` 下。
 
 今すぐ必要な blocker は無し。次に触るなら以下の順が現実的。
 
-1. **Release surface 整理** — README の “New in 0.6 / 0.7” と “Measured results” の関係を
-   少し整理し、Unreleased の見え方を release 前提で読みやすくする。docs-only、低リスク。
-2. **Float32 drift compare script 化** — `docs/float32_drift_report.md` で使った one-off 比較を
+1. **Float32 drift compare script 化** — `docs/float32_drift_report.md` で使った one-off 比較を
    `scripts/compare_float32_drift.py` にする。release gate 化するなら有用。今は必須ではない。
-3. **Larger workload memory benchmark** — `/tmp` または synthetic で 100k+ rows の trajectory を作り、
+2. **Larger workload memory benchmark** — `/tmp` または synthetic で 100k+ rows の trajectory を作り、
    `--trajectory-dtype float32` が RSS に効く規模を確認する。大きい raw data は commit しない。
-4. **Docs visual polish** — `docs/` metric cards は入った。次にやるなら mobile screenshot /
+3. **Docs visual polish** — `docs/` metric cards は入った。次にやるなら mobile screenshot /
    Playwright visual smoke を足すか、README の measured-results table を release badge 周辺へ
    compact に寄せる。
 
@@ -422,7 +423,7 @@ cards は `[Unreleased]` 下。
 ### 6.3 Schema / CI / テスト
 
 - Schema 変更時は対応 `validate_*` と CI の expectation を同時に更新。
-- テスト: `pytest` で 477 passed / 32 skipped / 4 deselected が baseline。
+- テスト: `pytest` で 548 passed / 33 skipped / 4 deselected が baseline。
   `pytest -m slow` / `pytest -m city_scale` は opt-in。
 - 新機能には **必ず** unit test 1 本以上（`tests/test_<feature>_*.py`）。
 - CI が conditional skip している path（LAS laspy / Node.js viewer dijkstra / OpenCV）は
@@ -529,7 +530,7 @@ python3 scripts/measure_lane_accuracy.py --graph /tmp/paris_lc.json \
 | OSM ingest / turn_restrictions convert | `roadgraph_builder/io/osm/{graph_builder.py,turn_restrictions.py}` |
 | Lanelet2 export + validators | `roadgraph_builder/io/export/{lanelet2.py,lanelet2_tags_validator.py,lanelet2_validator_bridge.py}` |
 | Graph stats / junction topology | `roadgraph_builder/core/graph/stats.py`, `roadgraph_builder/pipeline/junction_topology.py` |
-| CLI | `roadgraph_builder/cli/main.py`, `cli/doctor.py`, `cli/dataset.py` |
+| CLI | `roadgraph_builder/cli/main.py` dispatcher + `cli/{build,validate,routing,export,camera,lidar,osm,guidance,trajectory,hd,incremental,dataset}.py` |
 | Schemas | `roadgraph_builder/schemas/*.schema.json` |
 | Validators | `roadgraph_builder/validation/*.py` |
 | Viewer | `docs/index.html`, `docs/map.html`, `docs/assets/`, `docs/images/` |
@@ -584,7 +585,7 @@ feedback / project / reference の 4 種、`MEMORY.md` は index）。
 
 新しい機能 / バグ修正を入れる前に:
 
-- [ ] `pytest` が 477 passed / 32 skipped / 4 deselected で通ること（上下 ±1 は OK、大きく減ったら
+- [ ] `pytest` が 548 passed / 33 skipped / 4 deselected で通ること（上下 ±1 は OK、大きく減ったら
       skip 理由を確認）。
 - [ ] `CHANGELOG.md` の `[Unreleased]` にユーザー向け変更を足すこと。
 - [ ] スキーマ変更時は対応する `validate_*` と CI の expectation を同時更新すること。
@@ -596,8 +597,9 @@ feedback / project / reference の 4 種、`MEMORY.md` は index）。
 
 ## 11. 一行で言うと
 
-> **v0.7.0 は全部シップ済み、直近 workstream（accuracy / completions / tuning / visual preview）も
-> commit 済み。次は「V3 float32 の design memo」から入るのがおすすめ。何を削って何を広げたかは
+> **v0.7.0 は全部シップ済み、直近 workstream（accuracy / completions / tuning / visual preview /
+> CLI boundary split / release surface docs）も commit 済み。次は「float32 drift compare script 化」
+> から入るのがおすすめ。何を削って何を広げたかは
 > `CHANGELOG.md` と §3 の小節を見れば全部わかる。push / tag / AI マーカー / PyPI /
 > Mapillary は全部 user authorize か No 決定済みなので、勝手に提案しないこと。**
 

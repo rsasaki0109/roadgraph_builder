@@ -9,6 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **README release surface is now explicit about shipped vs post-release work.**
+  The README separates the v0.7.0 shipped command surface from current-main
+  measured results, so validation numbers, docs preview status, and float32
+  drift measurements read as `[Unreleased]` follow-up work rather than a
+  second release. It also removes stale "trajectory CSV only" and shell
+  completion caveats.
+
+- **CLI command boundaries are now split by domain.**
+  `roadgraph_builder/cli/main.py` is now a thin dispatcher with shared loading
+  helpers. Command parser/handler code lives in domain modules:
+  `build`, `validate`, `routing`, `export`, `camera`, `lidar`, `osm`,
+  `guidance`, `trajectory`, `hd`, `incremental`, and `dataset`.
+  Each split adds direct handler tests with injected I/O so command behavior
+  can be verified without subprocess-only coverage.
+
 - **README / GitHub Pages now surface measured results.**
   README adds a compact measured-results table for the Paris TR-aware route,
   lane-count accuracy baselines, cross-city bundle tuning, and float32 drift
