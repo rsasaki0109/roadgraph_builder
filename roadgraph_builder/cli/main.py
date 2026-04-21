@@ -12,11 +12,17 @@ from pathlib import Path
 
 from roadgraph_builder.hd.lidar_fusion import fuse_lane_boundaries_from_points
 from roadgraph_builder.hd.pipeline import SDToHDConfig, enrich_sd_to_hd
+from roadgraph_builder.cli.export import (
+    add_export_bundle_parser,
+    add_lanelet2_parsers,
+    run_export_bundle,
+    run_export_lanelet2,
+    run_validate_lanelet2,
+    run_validate_lanelet2_tags,
+)
 from roadgraph_builder.io.export.json_exporter import export_graph_json
 from roadgraph_builder.io.export.json_loader import load_graph_json
 from roadgraph_builder.io.camera.detections import apply_camera_detections_to_graph, load_camera_detections_json
-from roadgraph_builder.io.export.bundle import export_map_bundle
-from roadgraph_builder.io.export.lanelet2 import export_lanelet2
 from roadgraph_builder.io.lidar.las import load_points_xy_from_las, read_las_header
 from roadgraph_builder.io.lidar.points import load_points_xy_csv
 from roadgraph_builder.io.trajectory.loader import load_multi_trajectory_csvs, load_trajectory_csv
@@ -484,88 +490,7 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Ceiling on inferred lane count (default 6).",
     )
 
-    exo = sub.add_parser(
-        "export-lanelet2",
-        help="Write OSM XML 0.6 (WGS84) with centerlines and hd lane boundaries for JOSM / Lanelet2 tooling.",
-    )
-    exo.add_argument("input_json", help="Road graph JSON")
-    exo.add_argument("output_osm", help="Output .osm path")
-    exo.add_argument(
-        "--origin-lat",
-        type=float,
-        default=None,
-        metavar="DEG",
-        help="WGS84 origin latitude (degrees), same as map GeoJSON. Omit if metadata.map_origin has lat0/lon0.",
-    )
-    exo.add_argument(
-        "--origin-lon",
-        type=float,
-        default=None,
-        metavar="DEG",
-        help="WGS84 origin longitude (degrees).",
-    )
-    exo.add_argument(
-        "--per-lane",
-        action="store_true",
-        default=False,
-        help=(
-            "Expand each edge into one lanelet per lane using attributes.hd.lanes[] "
-            "(populated by infer-lane-count). Edges without hd.lanes fall back to "
-            "single-lanelet output. Without this flag, behavior is identical to 0.5.0."
-        ),
-    )
-    exo.add_argument(
-        "--speed-limit-tagging",
-        choices=["lanelet-attr", "regulatory-element"],
-        default="lanelet-attr",
-        metavar="{lanelet-attr,regulatory-element}",
-        help=(
-            "Speed limit tagging style (default: lanelet-attr = inline tag on lanelet, "
-            "matching 0.5.0 behavior). Use regulatory-element for strict Lanelet2 spec compliance."
-        ),
-    )
-    exo.add_argument(
-        "--lane-markings-json",
-        type=str,
-        default=None,
-        metavar="PATH",
-        help="Optional lane_markings.json for solid/dashed boundary subtype classification.",
-    )
-    exo.add_argument(
-        "--camera-detections-json",
-        type=str,
-        default=None,
-        metavar="PATH",
-        help=(
-            "Optional camera_detections.json (observations[]) to wire traffic_light and "
-            "stop_line detections into regulatory_element relations (A1). "
-            "Without this flag, output is byte-identical to v0.6.0 δ."
-        ),
-    )
-
-    vl2 = sub.add_parser(
-        "validate-lanelet2",
-        help=(
-            "Run the upstream Autoware lanelet2_validation tool on an OSM file (A2). "
-            "Exits 0 when the tool is not installed (skip) or when errors=0. "
-            "Exits 1 when the tool reports ≥1 error. "
-            "Distinct from validate-lanelet2-tags (which only checks tag completeness)."
-        ),
-    )
-    vl2.add_argument("input_osm", help="OSM XML file produced by export-lanelet2 or export-bundle.")
-    vl2.add_argument(
-        "--timeout",
-        type=int,
-        default=30,
-        metavar="SECONDS",
-        help="Hard timeout for the lanelet2_validation subprocess (default 30 s).",
-    )
-
-    vlt = sub.add_parser(
-        "validate-lanelet2-tags",
-        help="Check required Lanelet2 tags (subtype, location) on all lanelet relations in an OSM file.",
-    )
-    vlt.add_argument("input_osm", help="OSM XML file produced by export-lanelet2.")
+    add_lanelet2_parsers(sub)
 
     cam = sub.add_parser(
         "apply-camera",
@@ -575,103 +500,10 @@ def _build_parser() -> argparse.ArgumentParser:
     cam.add_argument("detections_json", help="JSON with observations[] (edge_id, kind, …)")
     cam.add_argument("output_json", help="Output JSON path")
 
-    bun = sub.add_parser(
-        "export-bundle",
-        help="Write nav/sd_nav.json, sim/{road_graph,map,trajectory}, lanelet/map.osm in one directory.",
+    add_export_bundle_parser(
+        sub,
+        add_build_params=lambda parser: _add_build_params(parser, include_trajectory_dtype=True),
     )
-    bun.add_argument("input_csv", help="Trajectory CSV (timestamp, x, y)")
-    bun.add_argument("output_dir", help="Output directory (created)")
-    bun.add_argument(
-        "--origin-json",
-        type=str,
-        default=None,
-        metavar="PATH",
-        help="JSON with lat0, lon0 (e.g. examples/toy_map_origin.json). Alternative to --origin-lat/--origin-lon.",
-    )
-    bun.add_argument(
-        "--origin-lat",
-        type=float,
-        default=None,
-        metavar="DEG",
-        help="WGS84 origin latitude (omit if --origin-json is set).",
-    )
-    bun.add_argument(
-        "--origin-lon",
-        type=float,
-        default=None,
-        metavar="DEG",
-        help="WGS84 origin longitude (omit if --origin-json is set).",
-    )
-    bun.add_argument(
-        "--dataset-name",
-        type=str,
-        default="bundle",
-        help="Label embedded in GeoJSON and metadata.",
-    )
-    bun.add_argument(
-        "--lane-width-m",
-        type=float,
-        default=3.5,
-        metavar="M",
-        help="HD-lite lane width for enrich; use 0 to skip centerline-offset boundaries.",
-    )
-    bun.add_argument(
-        "--detections-json",
-        type=str,
-        default=None,
-        metavar="PATH",
-        help="Optional camera detections JSON (same as apply-camera).",
-    )
-    bun.add_argument(
-        "--turn-restrictions-json",
-        type=str,
-        default=None,
-        metavar="PATH",
-        help="Optional manual turn-restrictions JSON merged into nav/sd_nav.json.",
-    )
-    bun.add_argument(
-        "--lidar-points",
-        type=str,
-        default=None,
-        metavar="PATH",
-        help="Optional LiDAR point set (CSV or .las) fused into per-edge boundaries.",
-    )
-    bun.add_argument(
-        "--fuse-max-dist-m",
-        type=float,
-        default=5.0,
-        metavar="M",
-        help="Max perpendicular distance from a point to an edge centerline for LiDAR fusion.",
-    )
-    bun.add_argument(
-        "--fuse-bins",
-        type=int,
-        default=32,
-        metavar="N",
-        help="Number of along-edge bins for LiDAR median aggregation.",
-    )
-    bun.add_argument(
-        "--extra-csv",
-        action="append",
-        default=[],
-        metavar="PATH",
-        help="Additional trajectory CSV to concatenate with the primary input (same meter origin). Repeatable.",
-    )
-    bun.add_argument(
-        "--lane-markings-json",
-        type=str,
-        default=None,
-        metavar="PATH",
-        help="Optional lane_markings.json for per-edge HD width refinement.",
-    )
-    bun.add_argument(
-        "--camera-detections-refine-json",
-        type=str,
-        default=None,
-        metavar="PATH",
-        help="Optional camera_detections.json for per-edge HD width refinement (separate from --detections-json).",
-    )
-    _add_build_params(bun, include_trajectory_dtype=True)
 
     bog = sub.add_parser(
         "build-osm-graph",
@@ -1376,105 +1208,11 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 0
     if args.command == "export-lanelet2":
-        graph = _cli_load_graph(args.input_json)
-        lat0, lon0 = args.origin_lat, args.origin_lon
-        if (lat0 is None) ^ (lon0 is None):
-            print("export-lanelet2: pass both --origin-lat and --origin-lon, or neither to use metadata.", file=sys.stderr)
-            return 1
-        if lat0 is None:
-            mo = graph.metadata.get("map_origin")
-            if isinstance(mo, dict) and "lat0" in mo and "lon0" in mo:
-                lat0 = float(mo["lat0"])
-                lon0 = float(mo["lon0"])
-            else:
-                print(
-                    "export-lanelet2: set --origin-lat/--origin-lon or metadata.map_origin {lat0, lon0}.",
-                    file=sys.stderr,
-                )
-                return 1
-        lm_data = None
-        if getattr(args, "lane_markings_json", None):
-            raw_lm = _load_json_for_cli(args.lane_markings_json)
-            if not isinstance(raw_lm, dict):
-                print("export-lanelet2: --lane-markings-json must be a JSON object.", file=sys.stderr)
-                return 1
-            lm_data = raw_lm
-        cam_det_data = None
-        if getattr(args, "camera_detections_json", None):
-            raw_cam = _load_json_for_cli(args.camera_detections_json)
-            if not isinstance(raw_cam, dict):
-                print("export-lanelet2: --camera-detections-json must be a JSON object.", file=sys.stderr)
-                return 1
-            cam_det_data = raw_cam
-        if getattr(args, "per_lane", False):
-            from roadgraph_builder.io.export.lanelet2 import export_lanelet2_per_lane
-            export_lanelet2_per_lane(graph, args.output_osm, origin_lat=lat0, origin_lon=lon0)
-        else:
-            export_lanelet2(
-                graph,
-                args.output_osm,
-                origin_lat=lat0,
-                origin_lon=lon0,
-                speed_limit_tagging=getattr(args, "speed_limit_tagging", "lanelet-attr"),
-                lane_markings=lm_data,
-                camera_detections=cam_det_data,
-            )
-        return 0
+        return run_export_lanelet2(args, load_graph=_cli_load_graph, load_json=_load_json_for_cli)
     if args.command == "validate-lanelet2":
-        from roadgraph_builder.io.export.lanelet2_validator_bridge import run_autoware_validator
-        osm_path = Path(args.input_osm)
-        if not osm_path.is_file():
-            print(f"File not found: {osm_path}", file=sys.stderr)
-            return 1
-        result = run_autoware_validator(osm_path, timeout_s=getattr(args, "timeout", 30))
-        # Always print the structured result as JSON on stdout.
-        import json as _json
-        print(_json.dumps(result, indent=2))
-        if result["status"] == "skipped":
-            # Graceful skip: exit 0 with a warning on stderr.
-            print(
-                f"validate-lanelet2: SKIPPED — {result['reason']}",
-                file=sys.stderr,
-            )
-            return 0
-        if result["status"] == "failed":
-            for err in result.get("error_lines", []):
-                print(f"ERROR: {err}", file=sys.stderr)
-            print(
-                f"validate-lanelet2: {result['errors']} error(s) found.",
-                file=sys.stderr,
-            )
-            return 1
-        return 0
+        return run_validate_lanelet2(args)
     if args.command == "validate-lanelet2-tags":
-        from roadgraph_builder.io.export.lanelet2 import validate_lanelet2_tags
-        osm_path = Path(args.input_osm)
-        if not osm_path.is_file():
-            print(f"File not found: {osm_path}", file=sys.stderr)
-            return 1
-        try:
-            errors, warnings = validate_lanelet2_tags(osm_path)
-        except Exception as exc:
-            print(f"validate-lanelet2-tags: failed to parse {osm_path}: {exc}", file=sys.stderr)
-            return 1
-        for w in warnings:
-            print(f"WARNING: {w}", file=sys.stderr)
-        if errors:
-            for err in errors:
-                print(f"ERROR: {err}", file=sys.stderr)
-            print(f"validate-lanelet2-tags: {len(errors)} error(s) found.", file=sys.stderr)
-            return 1
-        print(
-            json.dumps(
-                {
-                    "result": "ok",
-                    "warnings": len(warnings),
-                    "errors": 0,
-                },
-                indent=2,
-            )
-        )
-        return 0
+        return run_validate_lanelet2_tags(args)
     if args.command == "apply-camera":
         graph = _cli_load_graph(args.input_json)
         try:
@@ -1486,62 +1224,11 @@ def main(argv: list[str] | None = None) -> int:
         export_graph_json(graph, args.output_json)
         return 0
     if args.command == "export-bundle":
-        params = _build_params_from_args(args)
-        try:
-            if args.extra_csv:
-                traj = load_multi_trajectory_csvs(
-                    [args.input_csv, *args.extra_csv],
-                    load_z=params.use_3d,
-                    xy_dtype=params.trajectory_xy_dtype,
-                )
-            else:
-                traj = load_trajectory_csv(
-                    args.input_csv,
-                    load_z=params.use_3d,
-                    xy_dtype=params.trajectory_xy_dtype,
-                )
-            graph = build_graph_from_trajectory(traj, params)
-        except FileNotFoundError as e:
-            print(f"File not found: {e.filename}", file=sys.stderr)
-            return 1
-        except ValueError as e:
-            print(str(e), file=sys.stderr)
-            return 1
-        lw = None if args.lane_width_m <= 0 else args.lane_width_m
-        oj = args.origin_json
-        if oj:
-            try:
-                lat0, lon0 = load_wgs84_origin_json(oj)
-            except FileNotFoundError as e:
-                print(f"File not found: {e.filename}", file=sys.stderr)
-                return 1
-        elif args.origin_lat is not None and args.origin_lon is not None:
-            lat0, lon0 = args.origin_lat, args.origin_lon
-        else:
-            print(
-                "export-bundle: pass --origin-json PATH or both --origin-lat and --origin-lon.",
-                file=sys.stderr,
-            )
-            return 1
-        export_map_bundle(
-            graph,
-            traj.xy,
-            args.input_csv,
-            args.output_dir,
-            origin_lat=lat0,
-            origin_lon=lon0,
-            dataset_name=args.dataset_name,
-            lane_width_m=lw,
-            detections_json=args.detections_json,
-            turn_restrictions_json=args.turn_restrictions_json,
-            lidar_points=args.lidar_points,
-            fuse_max_dist_m=args.fuse_max_dist_m,
-            fuse_bins=args.fuse_bins,
-            origin_json_path=oj,
-            lane_markings_json=args.lane_markings_json,
-            camera_detections_refine_json=args.camera_detections_refine_json,
+        return run_export_bundle(
+            args,
+            build_params_from_args=_build_params_from_args,
+            load_origin=load_wgs84_origin_json,
         )
-        return 0
     if args.command == "build-osm-graph":
         from roadgraph_builder.io.osm import build_graph_from_overpass_highways
         params = _build_params_from_args(args)
