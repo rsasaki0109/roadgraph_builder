@@ -6,7 +6,7 @@
 > このファイル → [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md)（Mermaid 6 枚 + CLI 対応表 +
 > モジュール索引）→ [`CHANGELOG.md`](../CHANGELOG.md) の順。
 
-*最終更新: 2026-04-21 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards / float32 opt-in + drift report / private repo Pages blocked note が反映済み）。*
+*最終更新: 2026-04-21 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards / float32 opt-in + drift report / private repo Pages blocked note / routing CLI boundary split が反映済み）。*
 
 ---
 
@@ -35,6 +35,9 @@
   11. private repo のまま GitHub Pages を有効化しようとしたが、GitHub API が
       `Your current plan does not support GitHub Pages for this repository.` で拒否。public mirror は
       user が取り下げ、README はローカル `docs/` preview 前提に寄せた。
+  12. `route` / `nearest-node` CLI を `roadgraph_builder/cli/routing.py` に分離。parser 登録、
+      command handler、endpoint/origin/restriction helper を `main.py` から外し、helper 単位の
+      `tests/test_cli_routing.py` を追加。
 - **push 方針:** `git push` は user が `push!` などで明示するまで実行しない。
 - **未着手 (次の AI が触る候補):** ↓ §5 "Open tasks" 参照。
 
@@ -359,13 +362,16 @@ cards は `[Unreleased]` 下。
 
 今すぐ必要な blocker は無し。次に触るなら以下の順が現実的。
 
-1. **Release surface 整理** — README の “New in 0.6 / 0.7” と “Measured results” の関係を
+1. **CLI boundary split 継続** — 今回の `cli/routing.py` と同じ形で、次は
+   `export-lanelet2` / `export-bundle`、その次に camera / lidar CLI を domain module へ移す。
+   方針は §6.6。巨大 dispatcher を増やさないのが目的。
+2. **Release surface 整理** — README の “New in 0.6 / 0.7” と “Measured results” の関係を
    少し整理し、Unreleased の見え方を release 前提で読みやすくする。docs-only、低リスク。
-2. **Float32 drift compare script 化** — `docs/float32_drift_report.md` で使った one-off 比較を
+3. **Float32 drift compare script 化** — `docs/float32_drift_report.md` で使った one-off 比較を
    `scripts/compare_float32_drift.py` にする。release gate 化するなら有用。今は必須ではない。
-3. **Larger workload memory benchmark** — `/tmp` または synthetic で 100k+ rows の trajectory を作り、
+4. **Larger workload memory benchmark** — `/tmp` または synthetic で 100k+ rows の trajectory を作り、
    `--trajectory-dtype float32` が RSS に効く規模を確認する。大きい raw data は commit しない。
-4. **Docs visual polish** — `docs/` metric cards は入った。次にやるなら mobile screenshot /
+5. **Docs visual polish** — `docs/` metric cards は入った。次にやるなら mobile screenshot /
    Playwright visual smoke を足すか、README の measured-results table を release badge 周辺へ
    compact に寄せる。
 
@@ -415,6 +421,18 @@ cards は `[Unreleased]` 下。
 - pure-Python first。heavy dep（opencv, scipy, cv2）は `[extra]` にする。
 - 空グラフは `ValueError`、CLI 欠落ファイルは exit code 1 + clear stderr。
 - コメントは必要最小限。WHY だけ書く。WHAT は命名で表現。
+
+### 6.6 分割 / 依存局所化ルール
+
+- `roadgraph_builder/cli/main.py` は dispatcher と横断 helper に寄せ、domain 固有 CLI は
+  `roadgraph_builder/cli/<domain>.py` に逃がす。先行例は `cli/routing.py`。
+- domain CLI module は `add_<domain>_parser(...)`、`run_<command>(...)`、純粋 helper
+  （例: endpoint 解決、JSON shape 抽出、origin 解決）に分ける。
+- command handler は file IO loader を injectable にする。これで tests は subprocess ではなく
+  `run_<command>(args, load_graph=..., load_json=...)` を直接叩ける。
+- heavy / optional dependency は module import 時に持ち込まない。必要な command handler 内で import する。
+- test pyramid: 純粋 helper tests > injected handler tests > CLI end-to-end smoke。e2e は最小限にして、
+  失敗時に「parser」「IO」「domain logic」のどこが壊れたか分かる単位へ寄せる。
 
 ---
 

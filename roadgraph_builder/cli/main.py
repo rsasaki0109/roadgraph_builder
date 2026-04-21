@@ -21,6 +21,12 @@ from roadgraph_builder.io.lidar.las import load_points_xy_from_las, read_las_hea
 from roadgraph_builder.io.lidar.points import load_points_xy_csv
 from roadgraph_builder.io.trajectory.loader import load_multi_trajectory_csvs, load_trajectory_csv
 from roadgraph_builder.cli.doctor import run_doctor
+from roadgraph_builder.cli.routing import (
+    add_nearest_node_parser,
+    add_route_parser,
+    run_nearest_node,
+    run_route,
+)
 from roadgraph_builder.utils.geo import load_wgs84_origin_json
 from roadgraph_builder.validation import (
     validate_camera_detections_document,
@@ -36,12 +42,9 @@ from roadgraph_builder.pipeline.build_graph import (
     build_graph_from_trajectory,
 )
 from roadgraph_builder.core.graph.stats import graph_stats, junction_stats
-from roadgraph_builder.routing.geojson_export import write_route_geojson
 from roadgraph_builder.routing.hmm_match import hmm_match_trajectory
 from roadgraph_builder.routing.map_match import coverage_stats, snap_trajectory_to_graph
 from roadgraph_builder.routing.trip_reconstruction import reconstruct_trips, trip_stats_summary
-from roadgraph_builder.routing.nearest import nearest_node
-from roadgraph_builder.routing.shortest_path import shortest_path
 from roadgraph_builder.semantics.road_class import RoadClassThresholds, infer_road_class
 from roadgraph_builder.semantics.signals import infer_signalized_junctions
 from roadgraph_builder.semantics.trace_fusion import coverage_buckets, fuse_traces_into_graph
@@ -239,159 +242,8 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     ilas.add_argument("input_las", help="Path to a .las file (public header is read; point records untouched).")
 
-    nn = sub.add_parser(
-        "nearest-node",
-        help="Find the graph node nearest to a query point (lat/lon or meter-frame x/y).",
-    )
-    nn.add_argument("input_json", help="Road graph JSON.")
-    nn_group = nn.add_mutually_exclusive_group(required=True)
-    nn_group.add_argument(
-        "--latlon",
-        nargs=2,
-        type=float,
-        metavar=("LAT", "LON"),
-        help="WGS84 query; needs --origin-lat/--origin-lon or metadata.map_origin.",
-    )
-    nn_group.add_argument(
-        "--xy",
-        nargs=2,
-        type=float,
-        metavar=("X_M", "Y_M"),
-        help="Meter-frame query (same frame as the graph).",
-    )
-    nn.add_argument("--origin-lat", type=float, default=None, metavar="DEG")
-    nn.add_argument("--origin-lon", type=float, default=None, metavar="DEG")
-
-    rt = sub.add_parser(
-        "route",
-        help="Dijkstra shortest path between two nodes (by id or by lat/lon; optional turn_restrictions).",
-    )
-    rt.add_argument("input_json", help="Road graph JSON (e.g. sim/road_graph.json from export-bundle).")
-    rt.add_argument(
-        "from_node",
-        nargs="?",
-        help="Source node id (e.g. n0). Omit when using --from-latlon.",
-    )
-    rt.add_argument(
-        "to_node",
-        nargs="?",
-        help="Destination node id (e.g. n3). Omit when using --to-latlon.",
-    )
-    rt.add_argument(
-        "--from-latlon",
-        nargs=2,
-        type=float,
-        default=None,
-        metavar=("LAT", "LON"),
-        help="Snap the source to the node nearest this WGS84 coordinate.",
-    )
-    rt.add_argument(
-        "--to-latlon",
-        nargs=2,
-        type=float,
-        default=None,
-        metavar=("LAT", "LON"),
-        help="Snap the destination to the node nearest this WGS84 coordinate.",
-    )
-    rt.add_argument(
-        "--turn-restrictions-json",
-        type=str,
-        default=None,
-        metavar="PATH",
-        help="JSON with a 'turn_restrictions' array (nav/sd_nav.json or a standalone turn_restrictions.json).",
-    )
-    rt.add_argument(
-        "--output",
-        type=str,
-        default=None,
-        metavar="PATH",
-        help="Optional GeoJSON path. Writes a FeatureCollection (route LineString + per-edge features + start/end points).",
-    )
-    rt.add_argument(
-        "--origin-lat",
-        type=float,
-        default=None,
-        metavar="DEG",
-        help="WGS84 origin latitude for --output. Falls back to graph metadata.map_origin when omitted.",
-    )
-    rt.add_argument(
-        "--origin-lon",
-        type=float,
-        default=None,
-        metavar="DEG",
-        help="WGS84 origin longitude for --output.",
-    )
-    rt.add_argument(
-        "--prefer-observed",
-        action="store_true",
-        default=False,
-        help=(
-            "Prefer edges with trace observations over unobserved edges. "
-            "Multiplies cost of observed edges by --observed-bonus and unobserved "
-            "edges by --unobserved-penalty."
-        ),
-    )
-    rt.add_argument(
-        "--min-confidence",
-        type=float,
-        default=None,
-        metavar="FLOAT",
-        help=(
-            "Exclude edges whose hd_refinement.confidence < FLOAT from the search. "
-            "Exits 1 with an error message when no path is reachable."
-        ),
-    )
-    rt.add_argument(
-        "--observed-bonus",
-        type=float,
-        default=0.5,
-        metavar="FLOAT",
-        help="Cost multiplier for observed edges when --prefer-observed is set (default 0.5).",
-    )
-    rt.add_argument(
-        "--unobserved-penalty",
-        type=float,
-        default=2.0,
-        metavar="FLOAT",
-        help="Cost multiplier for unobserved edges when --prefer-observed is set (default 2.0).",
-    )
-    rt.add_argument(
-        "--uphill-penalty",
-        type=float,
-        default=None,
-        metavar="FLOAT",
-        help=(
-            "3D cost multiplier for uphill edges (slope_deg > 0). "
-            "Values >1.0 discourage ascents. Only active when the graph has elevation data."
-        ),
-    )
-    rt.add_argument(
-        "--downhill-bonus",
-        type=float,
-        default=None,
-        metavar="FLOAT",
-        help=(
-            "3D cost multiplier for downhill edges (slope_deg < 0). "
-            "Values <1.0 favour descents. Only active when the graph has elevation data."
-        ),
-    )
-    rt.add_argument(
-        "--allow-lane-change",
-        action="store_true",
-        default=False,
-        help=(
-            "A3: enable lane-level routing over (node, edge, direction, lane_index) state. "
-            "Lane swaps within the same edge cost --lane-change-cost-m. "
-            "Without this flag, routing is edge-level (byte-identical to v0.6.0)."
-        ),
-    )
-    rt.add_argument(
-        "--lane-change-cost-m",
-        type=float,
-        default=50.0,
-        metavar="M",
-        help="Cost in meters for a within-edge lane swap when --allow-lane-change is set (default 50).",
-    )
+    add_nearest_node_parser(sub)
+    add_route_parser(sub)
 
     rtp = sub.add_parser(
         "reconstruct-trips",
@@ -1201,33 +1053,7 @@ def main(argv: list[str] | None = None) -> int:
         export_graph_json(graph, args.output_json)
         return 0
     if args.command == "nearest-node":
-        graph = _cli_load_graph(args.input_json)
-        try:
-            if args.latlon is not None:
-                result = nearest_node(
-                    graph,
-                    lat=args.latlon[0],
-                    lon=args.latlon[1],
-                    origin_lat=args.origin_lat,
-                    origin_lon=args.origin_lon,
-                )
-            else:
-                result = nearest_node(graph, x_m=args.xy[0], y_m=args.xy[1])
-        except ValueError as e:
-            print(f"{args.input_json}: {e}", file=sys.stderr)
-            return 1
-        print(
-            json.dumps(
-                {
-                    "node_id": result.node_id,
-                    "distance_m": result.distance_m,
-                    "query_xy_m": list(result.query_xy_m),
-                },
-                ensure_ascii=False,
-                indent=2,
-            )
-        )
-        return 0
+        return run_nearest_node(args, load_graph=_cli_load_graph)
     if args.command == "reconstruct-trips":
         graph = _cli_load_graph(args.input_json)
         try:
@@ -1427,105 +1253,7 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(doc, ensure_ascii=False, indent=2))
         return 0
     if args.command == "route":
-        graph = _cli_load_graph(args.input_json)
-
-        def _snap(latlon, positional):
-            if latlon is not None and positional is not None:
-                print("route: pass either a node id or --*-latlon, not both.", file=sys.stderr)
-                return None, None
-            if latlon is not None:
-                try:
-                    result = nearest_node(
-                        graph,
-                        lat=latlon[0],
-                        lon=latlon[1],
-                        origin_lat=args.origin_lat,
-                        origin_lon=args.origin_lon,
-                    )
-                except ValueError as e:
-                    print(f"{args.input_json}: {e}", file=sys.stderr)
-                    return None, None
-                return result.node_id, {
-                    "requested_lat": latlon[0],
-                    "requested_lon": latlon[1],
-                    "distance_m": result.distance_m,
-                }
-            return positional, None
-
-        from_id, from_snap = _snap(args.from_latlon, args.from_node)
-        to_id, to_snap = _snap(args.to_latlon, args.to_node)
-        if from_id is None or to_id is None:
-            if args.from_latlon is None and args.from_node is None:
-                print("route: provide either from_node positional or --from-latlon.", file=sys.stderr)
-            if args.to_latlon is None and args.to_node is None:
-                print("route: provide either to_node positional or --to-latlon.", file=sys.stderr)
-            return 1
-
-        restrictions: list[dict] = []
-        if args.turn_restrictions_json:
-            tr_doc = _load_json_for_cli(args.turn_restrictions_json)
-            if isinstance(tr_doc, dict):
-                maybe = tr_doc.get("turn_restrictions", [])
-                if isinstance(maybe, list):
-                    restrictions = [r for r in maybe if isinstance(r, dict)]
-            elif isinstance(tr_doc, list):
-                restrictions = [r for r in tr_doc if isinstance(r, dict)]
-        try:
-            route = shortest_path(
-                graph,
-                from_id,
-                to_id,
-                turn_restrictions=restrictions or None,
-                prefer_observed=getattr(args, "prefer_observed", False),
-                min_confidence=getattr(args, "min_confidence", None),
-                observed_bonus=getattr(args, "observed_bonus", 0.5),
-                unobserved_penalty=getattr(args, "unobserved_penalty", 2.0),
-                uphill_penalty=getattr(args, "uphill_penalty", None),
-                downhill_bonus=getattr(args, "downhill_bonus", None),
-                allow_lane_change=getattr(args, "allow_lane_change", False),
-                lane_change_cost_m=getattr(args, "lane_change_cost_m", 50.0),
-            )
-        except KeyError as e:
-            print(f"{args.input_json}: {e.args[0]}", file=sys.stderr)
-            return 1
-        except ValueError as e:
-            print(f"{args.input_json}: {e}", file=sys.stderr)
-            return 1
-
-        if args.output:
-            lat0, lon0 = args.origin_lat, args.origin_lon
-            if (lat0 is None) ^ (lon0 is None):
-                print("route --output: pass both --origin-lat and --origin-lon, or neither.", file=sys.stderr)
-                return 1
-            if lat0 is None:
-                mo = graph.metadata.get("map_origin") if isinstance(graph.metadata, dict) else None
-                if isinstance(mo, dict) and "lat0" in mo and "lon0" in mo:
-                    lat0 = float(mo["lat0"])
-                    lon0 = float(mo["lon0"])
-                else:
-                    print(
-                        "route --output: set --origin-lat/--origin-lon or metadata.map_origin {lat0, lon0}.",
-                        file=sys.stderr,
-                    )
-                    return 1
-            write_route_geojson(args.output, graph, route, origin_lat=lat0, origin_lon=lon0)
-
-        route_doc: dict = {
-            "from_node": route.from_node,
-            "to_node": route.to_node,
-            "snapped_from": from_snap,
-            "snapped_to": to_snap,
-            "total_length_m": route.total_length_m,
-            "edge_sequence": route.edge_sequence,
-            "edge_directions": route.edge_directions,
-            "node_sequence": route.node_sequence,
-            "applied_restrictions": len(restrictions),
-            "output": args.output if args.output else None,
-        }
-        if route.lane_sequence is not None:
-            route_doc["lane_sequence"] = route.lane_sequence
-        print(json.dumps(route_doc, ensure_ascii=False, indent=2))
-        return 0
+        return run_route(args, load_graph=_cli_load_graph, load_json=_load_json_for_cli)
     if args.command == "inspect-lidar":
         p = Path(args.input_las)
         if not p.is_file():
