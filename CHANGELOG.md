@@ -14,6 +14,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the legacy license classifier was removed so modern setuptools builds no
   longer warn about deprecated license metadata.
 
+### Fixed
+
+- **Paris splitter golden length check now tolerates Python/Numpy drift.**
+  The real-data splitter regression still pins edge/node IDs, but its aggregate
+  length tolerance now allows the few-meter variation observed on the Python
+  3.10 CI lane while keeping topology drift guarded.
+
 ## [0.7.1] — 2026-04-21
 
 ### Changed

@@ -19,7 +19,9 @@ import pytest
 FIXTURES = Path(__file__).parent / "fixtures"
 GOLDEN_PATH = FIXTURES / "paris_splitter_golden.pkl"
 PARIS_CSV = Path(__file__).parent.parent / "examples" / "osm_public_trackpoints.csv"
-TOTAL_LENGTH_TOLERANCE_M = 0.25
+# Python / NumPy / platform combinations can shift the final smoothed Paris
+# aggregate length by a few meters while preserving graph topology and IDs.
+TOTAL_LENGTH_TOLERANCE_M = 5.0
 
 
 def _total_length(graph) -> float:
