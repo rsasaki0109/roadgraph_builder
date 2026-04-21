@@ -184,14 +184,20 @@ Phase 2 is complete for the current opt-in prototype:
   `Trajectory.xy` allocation drop is real (24,000,568 B -> 16,000,568 B) and
   tracemalloc peak drops by about 19 MB, but full `export-bundle` process RSS
   only drops by about 2.6 MB because build/export temporaries dominate.
-- Topology was unchanged on both samples.
-- Max observed graph / GeoJSON / Lanelet coordinate drift was below 1 mm.
+- A `/tmp` OSM public-trace replay check shows the same pattern: 500k load-only
+  `Trajectory.xy` drops 8,000,000 B -> 4,000,000 B, but 75k full export RSS
+  only drops about 4.0 MB. The 75k replay also showed edge/Lanelet ID drift
+  under float32, so it should be treated as a stress warning rather than
+  evidence for a default flip.
+- Topology was unchanged on the Paris and Berlin release-quality samples.
+- Max observed graph / GeoJSON / Lanelet coordinate drift on those samples was
+  below 1 mm.
 - `Trajectory.xy` allocation dropped as expected, but process RSS still did
   not show a reliable enough full-pipeline win to justify changing the default.
 
-Still open: run a larger real-world workload where trajectory XY dominates
-enough to move process RSS, and decide whether default-path byte identity needs
-a stricter frozen-output gate.
+Still open: only reconsider the default if a real-world workload shows a
+meaningful full-pipeline RSS win and passes a strict topology / ID stability
+gate.
 
 Phase 3 should decide whether float32 can become default:
 

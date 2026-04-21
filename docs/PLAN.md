@@ -6,7 +6,7 @@
 > このファイル → [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md)（Mermaid 6 枚 + CLI 対応表 +
 > モジュール索引）→ [`CHANGELOG.md`](../CHANGELOG.md) の順。
 
-*最終更新: 2026-04-21 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards / float32 opt-in + drift report + compare script + 1M synthetic memory profile / release bundle byte + normalized-manifest gate / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理）を反映済み。*
+*最終更新: 2026-04-21 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理）を反映済み。*
 
 ---
 
@@ -83,6 +83,10 @@
       generated README files が `examples/frozen_bundle/` と byte-for-byte 一致することを常時検証。
       `manifest.json` は `roadgraph_builder_version` と `generated_at_utc` だけを normalize して、
       それ以外を frozen manifest と厳密比較する。
+  25. `/tmp` の Paris / Tokyo / Berlin OSM public trackpoints から replay workload を作り、
+      500k load-only と 75k full `export-bundle` を測定。500k load-only は `Trajectory.xy`
+      8,000,000 B → 4,000,000 B、75k full export RSS は 272,016 KB → 267,972 KB（約 4 MB 減）。
+      ただし 75k replay では float32 の edge / Lanelet ID drift が出たため、default float64 維持を再確認。
 - **push 方針:** `git push` は user が `push!` などで明示するまで実行しない。
 - **未着手 (次の AI が触る候補):** ↓ §5 "Open tasks" 参照。
 
@@ -386,6 +390,8 @@ cards は `[Unreleased]` 下。
   tracemalloc -6 KB / max graph drift 0.00014 m、Berlin 7,500-row で loader allocation -60,000 B /
   max graph drift 0.00072 m。1M synthetic では loader allocation -8,000,000 B /
   tracemalloc peak -19,531 KB だが、full export peak RSS は -2,680 KB に留まった。
+  OSM public-trace replay では 500k load-only `Trajectory.xy` -4,000,000 B、75k full export
+  peak RSS -4,044 KB、ただし edge / Lanelet ID drift あり。
   default flip の根拠にはしない。
 - **再現 script:** `scripts/compare_float32_drift.py` が float64 / float32 bundle を作り直し、
   graph / sd_nav / GeoJSON / Lanelet2 OSM の topology と coordinate drift を比較する。
@@ -405,20 +411,21 @@ cards は `[Unreleased]` 下。
   4. ~~one-off drift 比較を `scripts/compare_float32_drift.py` にする~~（完了）
   5. ~~1M-row synthetic workload で RSS に効くかを見る~~（完了、RSS への効果は小）
   6. ~~default path の stable export artefacts を byte-identical gate 化~~（完了）
-  7. より大きい real-world city-scale workload で RSS に効くかを見る。現時点で default は `float64` のまま。
-- **規模感:** 次は real-world workload または docs visual polish があれば 1 session。
+  7. ~~OSM public-trace replay で RSS に効くかを見る~~（完了、RSS への効果は小、ID drift あり）
+  8. より大きい real-world city-scale workload は、default flip を再検討する前提が出た時だけ追加する。
+- **規模感:** 次は docs visual polish があれば 1 session。
 
 ### 5b. 次のおすすめ候補（small／選択式）
 
 今すぐ必要な blocker は無し。次に触るなら以下の順が現実的。
 
-1. **Real-world large memory benchmark** — synthetic 1M では full-pipeline RSS への効果が小さい。
-   `/tmp` の実走大規模 trajectory で `Trajectory.xy` が支配的になるかだけ追加確認する。
-2. **Manifest policy docs polish** — normalized manifest gate は入った。README や release docs に
-   「version / generated_at は動的、それ以外は frozen 比較」と一文追加するなら軽い。
-3. **Docs visual polish** — `docs/` metric cards は入った。次にやるなら mobile screenshot /
+1. **Docs visual polish** — `docs/` metric cards は入った。次にやるなら mobile screenshot /
    Playwright visual smoke を足すか、README の measured-results table を release badge 周辺へ
    compact に寄せる。
+2. **Manifest policy docs polish** — normalized manifest gate は入った。README や release docs に
+   「version / generated_at は動的、それ以外は frozen 比較」と一文追加するなら軽い。
+3. **True large real-world memory benchmark** — raw 500k+ 実走 trajectory が手元に来た時だけ実行。
+   今の `/tmp` OSM public replay では default flip の根拠にならない。
 
 ---
 
@@ -619,8 +626,8 @@ feedback / project / reference の 4 種、`MEMORY.md` は index）。
 
 > **v0.7.0 は全部シップ済み、直近 workstream（accuracy / completions / tuning / visual preview /
 > CLI boundary split / release surface docs / float32 drift compare script / 1M synthetic memory
-> profile / release bundle byte + normalized-manifest gate）も commit 済み。次は
-> 「real-world large memory benchmark」か「docs visual polish」から入るのがおすすめ。
+> profile / OSM public-trace replay profile / release bundle byte + normalized-manifest gate）も
+> commit 済み。次は「docs visual polish」から入るのがおすすめ。
 > 何を削って何を広げたかは
 > `CHANGELOG.md` と §3 の小節を見れば全部わかる。push / tag / AI マーカー / PyPI /
 > Mapillary は全部 user authorize か No 決定済みなので、勝手に提案しないこと。**

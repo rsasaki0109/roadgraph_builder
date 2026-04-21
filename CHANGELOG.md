@@ -32,6 +32,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `export-bundle` only falls by about 2.6 MB because large temporary build and
   GeoJSON serialization allocations dominate the high-water mark.
 
+- **Float32 memory profiling now includes an OSM public-trace replay stress.**
+  A `/tmp`-only replay built from Paris, Tokyo, and Berlin public trackpoints
+  shows the same direct XY allocation saving, but full `export-bundle` RSS on
+  a 75k-row replay only falls by about 4 MB and the drift comparator reports
+  edge / Lanelet ID instability under float32. The default therefore remains
+  float64.
+
 - **README release surface is now explicit about shipped vs post-release work.**
   The README separates the v0.7.0 shipped command surface from current-main
   measured results, so validation numbers, docs preview status, and float32

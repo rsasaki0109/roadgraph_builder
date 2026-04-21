@@ -128,6 +128,33 @@ Conclusion: the opt-in path works and the direct coordinate-array saving is
 real at 1M rows, but full-pipeline RSS still does not improve enough to justify
 a default-output change.
 
+### Real-trace replay follow-up
+
+The next check used `/tmp` OSM public trackpoint files from Paris, Tokyo, and
+Berlin.  The committed repo does not include these raw replay CSVs.
+
+Two replay sizes were used:
+
+- 500,000 rows for trajectory-load-only measurement.
+- 75,000 rows for full `export-bundle`; a 500,000-row full export was too slow
+  to be useful as a recurring benchmark on the dev machine.
+
+| Real-trace replay | float64 | float32 | Delta |
+| --- | ---: | ---: | ---: |
+| 500k load-only `Trajectory.xy.nbytes` | 8,000,000 B | 4,000,000 B | -4,000,000 B |
+| 500k load-only RSS after load | 399,020 KB | 395,980 KB | -3,040 KB |
+| 500k load-only tracemalloc peak | 98,008 KB | 94,098 KB | -3,910 KB |
+| 75k full-export peak RSS | 272,016 KB | 267,972 KB | -4,044 KB |
+| 75k full-export tracemalloc peak | 86,759 KB | 86,172 KB | -587 KB |
+| 75k `loader.py:104` retained allocation | 1,800,568 B | 1,200,568 B | -600,000 B |
+
+The 75k replay produced the same node and edge counts (`1540` nodes / `1295`
+edges) for both dtypes, but the reusable drift comparator reported edge
+endpoint / vertex-count mismatches and Lanelet ID drift.  This replay is a
+stress workload built by tiling traces, not a release-quality map sample, but
+it is a useful warning: float32 can perturb graph assembly enough on larger
+repeated real-trace patterns that it should remain opt-in.
+
 ## Output Drift
 
 ### Paris 800-row Sample

@@ -80,8 +80,10 @@ proportionally with edge count.
   unchanged with <1 mm coordinate drift. A 1M-row synthetic run saved exactly
   8,000,000 B in the retained trajectory XY allocation and dropped
   tracemalloc peak by ~19 MB, but process-level RSS after full export only
-  fell by ~2.6 MB because build/export temporaries dominate. Default remains
-  float64.
+  fell by ~2.6 MB because build/export temporaries dominate. A 75k OSM
+  public-trace replay full export showed a similar small RSS win (~4.0 MB)
+  and exposed graph assembly / Lanelet ID drift under opt-in float32, so the
+  default remains float64.
 - **Polyline list-of-tuples → NumPy array**: saves ~80 % on Python object
   overhead for large graphs (1 000 polylines × 20 pts: 1 336 KB → 312 KB).
   Requires updating all consumers of `edge.polyline`; complex refactor.
