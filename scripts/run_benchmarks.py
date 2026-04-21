@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Performance benchmarks for roadgraph_builder.
 
-Measures wall-clock time for eight scenarios:
+Measures wall-clock time for nine scenarios:
   polylines_to_graph_paris       — build from OSM public trackpoints CSV
   polylines_to_graph_10k_synth   — build from 50×50 synthetic grid (~25 000 pts)
   shortest_path_paris            — 100 Dijkstra queries on the Paris graph
   shortest_path_grid_120         — 120 Dijkstra queries on a 55×55 grid graph
+  reachable_grid_120             — 120 reachability queries on a 55×55 grid graph
   nearest_node_grid_2000         — 2000 nearest-node queries on a 300×300 grid
   export_geojson_grid_120_compact — compact GeoJSON export on a 120×120 grid
   export_bundle_json_grid_120_compact — compact road_graph/sd_nav/manifest JSON on a 120×120 grid
@@ -273,6 +274,21 @@ def _grid_graph(size: int, spacing: float):
     return Graph(nodes, edges)
 
 
+def run_reachable_grid_120() -> int:
+    """Run 120 service-area reachability queries on a synthetic 55×55 grid."""
+    from roadgraph_builder.routing.reachability import reachable_within
+
+    size = 55
+    graph = _grid_graph(size=size, spacing=10.0)
+    total = 0
+    for i in range(120):
+        sx = i % size
+        sy = (i * 7) % size
+        result = reachable_within(graph, f"n{sx}_{sy}", max_cost_m=60.0)
+        total += len(result.nodes) + len(result.edges)
+    return total
+
+
 def export_geojson_grid_120_compact() -> None:
     """Write compact GeoJSON for a synthetic 120×120 grid graph."""
     import tempfile
@@ -350,6 +366,7 @@ BENCHMARKS: dict[str, tuple] = {
     "polylines_to_graph_10k_synth": (build_10k_synth, 1),
     "shortest_path_paris": (run_paris_routes_100, 1),
     "shortest_path_grid_120": (run_grid_routes_120, 1),
+    "reachable_grid_120": (run_reachable_grid_120, 1),
     "nearest_node_grid_2000": (run_nearest_grid_2000, 1),
     "export_geojson_grid_120_compact": (export_geojson_grid_120_compact, 1),
     "export_bundle_json_grid_120_compact": (export_bundle_json_grid_120_compact, 1),

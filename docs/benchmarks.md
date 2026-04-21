@@ -144,6 +144,28 @@ The benchmark suite now includes `export_geojson_grid_120_compact` and
 | `export_bundle_json_grid_120_compact` | 0.421 | Compact road_graph/sd_nav/manifest JSON on a 120x120 grid |
 | `export_bundle_end_to_end` | 0.004 | Full export-bundle pipeline on sample trajectory |
 
+## v0.7.2-dev reachability benchmark (2026-04-22)
+
+The benchmark suite now includes `reachable_grid_120`, which runs 120
+service-area style reachability queries on the same 55x55 synthetic routing
+grid used by `shortest_path_grid_120`. Each query uses a 60 m cost budget and
+consumes both reached node and directed edge-span counts so result construction
+stays visible to the benchmark.
+
+On this workstation, `python scripts/run_benchmarks.py --no-warmup` measured:
+
+| Benchmark | elapsed (s) | Notes |
+|---|---:|---|
+| `polylines_to_graph_paris` | 0.162 | OSM public-trackpoints CSV, small local fixture |
+| `polylines_to_graph_10k_synth` | 0.709 | 50x50 grid, ~25 000 pts |
+| `shortest_path_paris` | 0.031 | Existing small-graph routing smoke |
+| `shortest_path_grid_120` | 2.607 | 120 routes on a 55x55 synthetic graph |
+| `reachable_grid_120` | 2.555 | 120 reachability queries, 60 m budget, 36 305 consumed node/span results |
+| `nearest_node_grid_2000` | 0.397 | 2000 snaps on a 300x300 node grid |
+| `export_geojson_grid_120_compact` | 0.497 | Compact GeoJSON export on a 120x120 grid |
+| `export_bundle_json_grid_120_compact` | 0.388 | Compact road_graph/sd_nav/manifest JSON on a 120x120 grid |
+| `export_bundle_end_to_end` | 0.004 | Full export-bundle pipeline on sample trajectory |
+
 ## Regression policy
 
 CI comparison mode (`--baseline baseline.json`) fails with exit code 1 if any

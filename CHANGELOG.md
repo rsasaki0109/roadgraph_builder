@@ -24,6 +24,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Benchmark coverage now includes reachability queries.**
+  `scripts/run_benchmarks.py` now includes `reachable_grid_120`, a 120-query
+  service-area workload on the same 55x55 routing grid as
+  `shortest_path_grid_120`. The benchmark consumes reached node and directed
+  edge-span counts, and `docs/benchmarks.md` records the current local timing
+  at about 2.6 s with a 60 m cost budget.
+
 - **Packaging metadata now uses a SPDX license expression.**
   `pyproject.toml` now declares `license = "MIT"` with `license-files`, and
   the legacy license classifier was removed so modern setuptools builds no

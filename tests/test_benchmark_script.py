@@ -39,11 +39,16 @@ class TestBenchmarkScript:
             "polylines_to_graph_10k_synth",
             "shortest_path_paris",
             "shortest_path_grid_120",
+            "reachable_grid_120",
             "nearest_node_grid_2000",
             "export_geojson_grid_120_compact",
             "export_bundle_json_grid_120_compact",
             "export_bundle_end_to_end",
         }
+
+    def test_reachable_grid_120_consumes_results(self):
+        mod = _import_script()
+        assert mod.run_reachable_grid_120() > 0
 
     def test_build_10k_synth_returns_graph(self):
         """build_10k_synth should return a Graph without error."""
