@@ -125,12 +125,19 @@ make tune
 
 | Output | Role |
 | --- | --- |
-| `out_bundle/manifest.json` | **Provenance** — tool version, UTC time, origin, input basename, output paths |
+| `out_bundle/manifest.json` | **Provenance** — tool version, UTC time, origin, input basename, output paths. `roadgraph_builder_version` and `generated_at_utc` are dynamic; the remaining fields are treated as stable release output. |
 | `out_bundle/nav/sd_nav.json` | **SD / routing seed** — topology + edge `length_m`; `allowed_maneuvers` / `allowed_maneuvers_reverse` are **geometry heuristics** at the digitized end/start node (`straight`, and at junctions/dead-ends `left`/`right`/`u_turn` when inferred) |
 | `out_bundle/sim/` | **Simulation / viz** — `road_graph.json`, `map.geojson`, `trajectory.csv` |
 | `out_bundle/lanelet/map.osm` | **Lanelet / JOSM** — OSM XML (with lanelets when L/R boundaries exist) |
 
 Use `--lane-width-m 0` to skip HD-lite ribbon offsets. Origin must match your GeoJSON / Lanelet convention (see `examples/*_origin.json`). Validate **`manifest.json`** with `roadgraph_builder validate-manifest` (`roadgraph_builder/schemas/manifest.schema.json`) and **`nav/sd_nav.json`** with `roadgraph_builder validate-sd-nav` (`sd_nav.schema.json`).
+
+Release stability policy: the default sample bundle is rebuilt in tests and
+stable generated files are compared byte-for-byte with
+[`examples/frozen_bundle/`](examples/frozen_bundle/). `manifest.json` is
+compared after normalizing only `roadgraph_builder_version` and
+`generated_at_utc`; any other manifest drift is treated as a release-surface
+change.
 
 `allowed_maneuvers` is **not** a legal turn-restriction layer. It is a permissive 2D topology hint for routing/display; signs, signals, and turn bans should be carried in optional `turn_restrictions`. Design note: [docs/navigation_turn_restrictions.md](docs/navigation_turn_restrictions.md).
 
@@ -496,7 +503,7 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 .venv/bin/pytest
 
 ### CI
 
-GitHub Actions (`.github/workflows/ci.yml`) runs `pytest` on Python 3.10 and 3.12, then **`validate-detections`** on `examples/camera_detections_sample.json`, **`validate`** on `docs/assets/sample_graph.json` and `docs/assets/osm_graph.json`, and **`export-bundle`** then **`validate-manifest`** + **`validate-sd-nav`** + **`validate`** on `manifest.json` / `nav/sd_nav.json` / `sim/road_graph.json`, for every push and pull request to `main`/`master`.
+GitHub Actions (`.github/workflows/ci.yml`) runs `pytest` on Python 3.10 and 3.12, then **`validate-detections`** on `examples/camera_detections_sample.json`, **`validate`** on `docs/assets/sample_graph.json` and `docs/assets/osm_graph.json`, and **`export-bundle`** then **`validate-manifest`** + **`validate-sd-nav`** + **`validate`** on `manifest.json` / `nav/sd_nav.json` / `sim/road_graph.json`, for every push and pull request to `main`/`master`. The pytest release-bundle gate also rebuilds the default sample bundle and compares frozen outputs, with only manifest version/timestamp normalized.
 
 Local parity:
 
@@ -562,6 +569,13 @@ restrictions — so the output reflects the maximal artifact shape. Regenerate
 with `make release-bundle` or `bash scripts/build_release_bundle.sh`; the
 script also packs `dist/roadgraph_sample_bundle.tar.gz` + a sha256 file
 suitable for attaching to a release.
+
+The frozen bundle doubles as a release contract. Stable generated artifacts are
+byte-compared in tests. `manifest.json` is normalized only for
+`roadgraph_builder_version` and `generated_at_utc`; origin, inputs, graph
+stats, junction counts, optional-source metadata, and output paths must match
+the checked-in frozen manifest unless the release surface intentionally
+changes.
 
 Every `v*` tag push triggers [`.github/workflows/release.yml`](.github/workflows/release.yml),
 which runs the same script and attaches the tarball + sha256 to the auto-created

@@ -23,3 +23,8 @@ cp -r dist/roadgraph_sample_bundle/. examples/frozen_bundle/
 frozen run; `nav/sd_nav.json` validates against
 `validate-sd-nav` / `sd_nav.schema.json`, and
 `sim/road_graph.json` validates against `validate` / `road_graph.schema.json`.
+
+Release tests rebuild the same default bundle and byte-compare the stable
+generated artifacts against this directory. For `manifest.json`, only
+`roadgraph_builder_version` and `generated_at_utc` are normalized; every other
+field is expected to remain stable unless the release contract changes.

@@ -16,6 +16,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   grid so the SVG preview and validation numbers hold up better on desktop and
   mobile.
 
+- **Manifest release policy is documented.**
+  README and the frozen bundle notes now spell out that release-bundle tests
+  normalize only `roadgraph_builder_version` and `generated_at_utc` in
+  `manifest.json`; every other manifest field is part of the stable release
+  surface unless changed intentionally.
+
 - **Release bundle tests now include a byte-identity gate for stable outputs.**
   The default `export-bundle` path is rebuilt from the sample trajectory,
   detections, turn restrictions, and LiDAR fixture during tests, and stable

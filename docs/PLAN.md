@@ -6,7 +6,7 @@
 > このファイル → [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md)（Mermaid 6 枚 + CLI 対応表 +
 > モジュール索引）→ [`CHANGELOG.md`](../CHANGELOG.md) の順。
 
-*最終更新: 2026-04-21 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards polish / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理）を反映済み。*
+*最終更新: 2026-04-21 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards polish / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate + manifest policy docs polish / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理）を反映済み。*
 
 ---
 
@@ -89,6 +89,9 @@
       ただし 75k replay では float32 の edge / Lanelet ID drift が出たため、default float64 維持を再確認。
   26. `docs/index.html` の measured-results section を整理し、metric labels / copy / responsive grid /
       focus states / palette を polish。`python3 -m http.server` + asset smoke で index/CSS/JS/SVG を確認。
+  27. README と `examples/frozen_bundle/README.md` に manifest release policy を明記。
+      `manifest.json` は `roadgraph_builder_version` / `generated_at_utc` だけ動的扱いで、
+      origin / inputs / stats / optional-source metadata / output paths は stable release surface として扱う。
 - **push 方針:** `git push` は user が `push!` などで明示するまで実行しない。
 - **未着手 (次の AI が触る候補):** ↓ §5 "Open tasks" 参照。
 
@@ -417,17 +420,15 @@ cards は `[Unreleased]` 下。
   6. ~~default path の stable export artefacts を byte-identical gate 化~~（完了）
   7. ~~OSM public-trace replay で RSS に効くかを見る~~（完了、RSS への効果は小、ID drift あり）
   8. より大きい real-world city-scale workload は、default flip を再検討する前提が出た時だけ追加する。
-- **規模感:** 次は manifest policy docs polish があれば small。
+- **規模感:** 次は README measured-results compacting があれば small。
 
 ### 5b. 次のおすすめ候補（small／選択式）
 
 今すぐ必要な blocker は無し。次に触るなら以下の順が現実的。
 
-1. **Manifest policy docs polish** — normalized manifest gate は入った。README や release docs に
-   「version / generated_at は動的、それ以外は frozen 比較」と一文追加するなら軽い。
-2. **README measured-results compacting** — docs viewer は polish 済み。README の measured-results
+1. **README measured-results compacting** — docs viewer は polish 済み。README の measured-results
    table を badge 周辺へさらに compact に寄せるなら small。
-3. **True large real-world memory benchmark** — raw 500k+ 実走 trajectory が手元に来た時だけ実行。
+2. **True large real-world memory benchmark** — raw 500k+ 実走 trajectory が手元に来た時だけ実行。
    今の `/tmp` OSM public replay では default flip の根拠にならない。
 
 ---
@@ -629,8 +630,8 @@ feedback / project / reference の 4 種、`MEMORY.md` は index）。
 
 > **v0.7.0 は全部シップ済み、直近 workstream（accuracy / completions / tuning / visual preview /
 > CLI boundary split / release surface docs / float32 drift compare script / 1M synthetic memory
-> profile / OSM public-trace replay profile / release bundle byte + normalized-manifest gate）も
-> commit 済み。次は「manifest policy docs polish」から入るのがおすすめ。
+> profile / OSM public-trace replay profile / release bundle byte + normalized-manifest gate +
+> manifest policy docs polish）も commit 済み。次は「README measured-results compacting」から入るのがおすすめ。
 > 何を削って何を広げたかは
 > `CHANGELOG.md` と §3 の小節を見れば全部わかる。push / tag / AI マーカー / PyPI /
 > Mapillary は全部 user authorize か No 決定済みなので、勝手に提案しないこと。**
