@@ -6,7 +6,7 @@
 > このファイル → [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md)（Mermaid 6 枚 + CLI 対応表 +
 > モジュール索引）→ [`CHANGELOG.md`](../CHANGELOG.md) の順。
 
-*最終更新: 2026-04-21 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理）を反映済み。*
+*最終更新: 2026-04-21 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards polish / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理）を反映済み。*
 
 ---
 
@@ -87,6 +87,8 @@
       500k load-only と 75k full `export-bundle` を測定。500k load-only は `Trajectory.xy`
       8,000,000 B → 4,000,000 B、75k full export RSS は 272,016 KB → 267,972 KB（約 4 MB 減）。
       ただし 75k replay では float32 の edge / Lanelet ID drift が出たため、default float64 維持を再確認。
+  26. `docs/index.html` の measured-results section を整理し、metric labels / copy / responsive grid /
+      focus states / palette を polish。`python3 -m http.server` + asset smoke で index/CSS/JS/SVG を確認。
 - **push 方針:** `git push` は user が `push!` などで明示するまで実行しない。
 - **未着手 (次の AI が触る候補):** ↓ §5 "Open tasks" 参照。
 
@@ -324,11 +326,13 @@
   `route_paris_grid.geojson` + `paris_grid_turn_restrictions.json` から
   `scripts/refresh_docs_assets.py` で再生成。OSM attribution を SVG 内と `docs/assets/ATTRIBUTION.md`
   に保持。
-- `docs/index.html` は従来の SVG diagram viewer の下に `paris_grid_route.svg` の result card を表示。
-  README も同じ SVG を `Visualization results` として embed し、`docs/map.html` へリンクする。
+- `docs/index.html` は従来の SVG diagram viewer の下に `paris_grid_route.svg` の result card と
+  post-release metric cards を表示。metric labels / responsive grid / focus states は
+  `docs/css/viewer.css` に集約。README も同じ SVG を `Visualization results` として embed し、
+  `docs/map.html` へリンクする。
   現 repo は private のまま維持する方針で、現在の GitHub plan では private repo Pages が作れない
   ため、README は `cd docs && python3 -m http.server 8765` のローカル preview を primary にしている。
-  Playwright で `http://127.0.0.1:18765/` を開き、card と画像ロードを確認済み。
+  `http://127.0.0.1:18765/` の local server smoke で index/CSS/JS/SVG asset load を確認済み。
 - **click-to-route UI:** ノード 2 つをクリックすると JS 側 directed-state binary-heap Dijkstra
   が `(node, incoming_edge, direction)` 状態で `no_*` / `only_*` 制限を honor。"Clear route"
   button + status 行。各 centerline feature は `start_node_id` / `end_node_id` / `length_m` 保持。
@@ -413,17 +417,16 @@ cards は `[Unreleased]` 下。
   6. ~~default path の stable export artefacts を byte-identical gate 化~~（完了）
   7. ~~OSM public-trace replay で RSS に効くかを見る~~（完了、RSS への効果は小、ID drift あり）
   8. より大きい real-world city-scale workload は、default flip を再検討する前提が出た時だけ追加する。
-- **規模感:** 次は docs visual polish があれば 1 session。
+- **規模感:** 次は manifest policy docs polish があれば small。
 
 ### 5b. 次のおすすめ候補（small／選択式）
 
 今すぐ必要な blocker は無し。次に触るなら以下の順が現実的。
 
-1. **Docs visual polish** — `docs/` metric cards は入った。次にやるなら mobile screenshot /
-   Playwright visual smoke を足すか、README の measured-results table を release badge 周辺へ
-   compact に寄せる。
-2. **Manifest policy docs polish** — normalized manifest gate は入った。README や release docs に
+1. **Manifest policy docs polish** — normalized manifest gate は入った。README や release docs に
    「version / generated_at は動的、それ以外は frozen 比較」と一文追加するなら軽い。
+2. **README measured-results compacting** — docs viewer は polish 済み。README の measured-results
+   table を badge 周辺へさらに compact に寄せるなら small。
 3. **True large real-world memory benchmark** — raw 500k+ 実走 trajectory が手元に来た時だけ実行。
    今の `/tmp` OSM public replay では default flip の根拠にならない。
 
@@ -627,7 +630,7 @@ feedback / project / reference の 4 種、`MEMORY.md` は index）。
 > **v0.7.0 は全部シップ済み、直近 workstream（accuracy / completions / tuning / visual preview /
 > CLI boundary split / release surface docs / float32 drift compare script / 1M synthetic memory
 > profile / OSM public-trace replay profile / release bundle byte + normalized-manifest gate）も
-> commit 済み。次は「docs visual polish」から入るのがおすすめ。
+> commit 済み。次は「manifest policy docs polish」から入るのがおすすめ。
 > 何を削って何を広げたかは
 > `CHANGELOG.md` と §3 の小節を見れば全部わかる。push / tag / AI マーカー / PyPI /
 > Mapillary は全部 user authorize か No 決定済みなので、勝手に提案しないこと。**

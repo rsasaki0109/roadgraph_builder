@@ -35,7 +35,7 @@
               </feMerge>
             </filter>
           </defs>
-          <rect width="100%" height="100%" fill="#0f172a" />
+          <rect width="100%" height="100%" fill="#101214" />
           <g id="layer-grid"></g>
           <g id="panzoom">
             <g id="layer-trajectory"></g>
@@ -64,33 +64,50 @@
 
       <section class="results" aria-label="Visualization results">
         <div class="results-inner">
+          <div class="section-heading">
+            <span class="eyebrow">Validation Surface</span>
+            <h2>Post-release results</h2>
+            <p>
+              Current main combines the Paris turn-restriction map preview,
+              lane-count baselines, cross-city tuning, and float32 dtype checks.
+            </p>
+          </div>
+
           <a class="result-card" href="map.html">
-            <img
-              src="images/paris_grid_route.svg"
-              alt="Paris road graph with a highlighted route and turn-restriction junctions"
-            />
+            <span class="result-media">
+              <img
+                src="images/paris_grid_route.svg"
+                alt="Paris road graph with a highlighted route and turn-restriction junctions"
+              />
+            </span>
             <span class="result-copy">
+              <span class="eyebrow">Interactive Map</span>
               <strong>Paris grid route</strong>
               <span>OSM-highway graph · 10 mapped turn restrictions · TR-aware route overlay</span>
+              <span class="result-meta">855 nodes · 1081 edges · ODbL assets</span>
             </span>
           </a>
 
           <div class="metric-grid" aria-label="Measured results">
             <a class="metric-card route" href="map.html">
+              <span class="metric-kicker">Routing</span>
               <strong>909 m</strong>
-              <span>Paris TR-aware route; unrestricted baseline is 878 m</span>
+              <span>Paris TR-aware route; unrestricted baseline is 878 m.</span>
             </a>
             <a class="metric-card accuracy" href="accuracy_report.md">
+              <span class="metric-kicker">Accuracy</span>
               <strong>0.938 MAE</strong>
-              <span>Paris 20e lane-count baseline at 20 m matching</span>
+              <span>Paris 20e lane-count baseline at 20 m matching.</span>
             </a>
             <a class="metric-card tuning" href="bundle_tuning.md">
+              <span class="metric-kicker">Tuning</span>
               <strong>40 / 8</strong>
-              <span>Conservative max-step / merge-endpoint start across 3 cities</span>
+              <span>Conservative max-step / merge-endpoint start across 3 cities.</span>
             </a>
             <a class="metric-card memory" href="float32_drift_report.md">
-              <strong>&lt;1 mm</strong>
-              <span>Opt-in float32 geometry drift; default remains float64</span>
+              <span class="metric-kicker">Memory</span>
+              <strong>float64</strong>
+              <span>Default retained after float32 replay showed small RSS wins and ID drift.</span>
             </a>
           </div>
         </div>

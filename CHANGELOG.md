@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Docs viewer result cards are easier to scan.**
+  `docs/index.html` now has a clearer post-release results section with
+  structured metric labels and updated float32 messaging. `docs/css/viewer.css`
+  refreshes the palette, card spacing, focus states, and responsive metric
+  grid so the SVG preview and validation numbers hold up better on desktop and
+  mobile.
+
 - **Release bundle tests now include a byte-identity gate for stable outputs.**
   The default `export-bundle` path is rebuilt from the sample trajectory,
   detections, turn restrictions, and LiDAR fixture during tests, and stable

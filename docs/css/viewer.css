@@ -1,13 +1,20 @@
 :root {
-  --bg: #0f172a;
-  --panel: #1e293b;
-  --text: #f1f5f9;
-  --muted: #94a3b8;
+  --bg: #101214;
+  --panel: #1b2025;
+  --surface: #20262c;
+  --surface-strong: #262d34;
+  --text: #f4f2ed;
+  --muted: #aab3ad;
   --accent: #38bdf8;
   --edge: #3b82f6;
   --traj: #94a3b8;
   --node: #f87171;
-  --grid: #334155;
+  --grid: #3b454f;
+  --border: #3a424a;
+  --gold: #e3b341;
+  --green: #54b96f;
+  --orange: #dd7d3c;
+  --cyan: #4fb3d8;
 }
 
 * {
@@ -27,6 +34,13 @@ a {
   color: var(--accent);
 }
 
+a:focus-visible,
+button:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
 .app {
   display: flex;
   flex-direction: column;
@@ -40,14 +54,14 @@ a {
   gap: 0.75rem;
   padding: 0.75rem 1rem;
   background: var(--panel);
-  border-bottom: 1px solid #334155;
+  border-bottom: 1px solid var(--border);
 }
 
 .topbar h1 {
   margin: 0;
   font-size: 1.1rem;
   font-weight: 600;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
 }
 
 .topbar .sub {
@@ -74,25 +88,25 @@ button {
   font-size: 0.875rem;
   padding: 0.35rem 0.65rem;
   border-radius: 6px;
-  border: 1px solid #475569;
-  background: #0f172a;
+  border: 1px solid #4a525a;
+  background: #121619;
   color: var(--text);
 }
 
 button {
   cursor: pointer;
-  background: #334155;
+  background: #2d343b;
 }
 
 button:hover {
-  background: #475569;
+  background: #3a424a;
 }
 
 .stage-wrap {
   flex: 1;
   position: relative;
   min-height: 420px;
-  background: radial-gradient(ellipse at 50% 0%, #1e293b 0%, #0f172a 55%);
+  background: #101214;
 }
 
 #svg-root {
@@ -113,8 +127,8 @@ button:hover {
   left: 12px;
   bottom: 12px;
   padding: 8px 12px;
-  background: rgba(15, 23, 42, 0.85);
-  border: 1px solid #334155;
+  background: rgba(16, 18, 20, 0.88);
+  border: 1px solid var(--border);
   border-radius: 8px;
   font-size: 11px;
   color: var(--muted);
@@ -127,8 +141,8 @@ button:hover {
   right: 12px;
   top: 12px;
   padding: 10px 12px;
-  background: rgba(30, 41, 59, 0.92);
-  border: 1px solid #475569;
+  background: rgba(32, 38, 44, 0.92);
+  border: 1px solid #4a525a;
   border-radius: 8px;
   font-size: 12px;
 }
@@ -154,16 +168,53 @@ button:hover {
 }
 
 .results {
-  padding: 18px 16px;
-  background: #111827;
-  border-top: 1px solid #334155;
+  padding: 22px 16px 20px;
+  background: #15191d;
+  border-top: 1px solid var(--border);
 }
 
 .results-inner {
   display: grid;
-  gap: 14px;
+  gap: 16px;
   max-width: 1120px;
   margin: 0 auto;
+}
+
+.section-heading {
+  display: grid;
+  gap: 5px;
+  max-width: 760px;
+}
+
+.section-heading h2 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 750;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
+.section-heading p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.eyebrow,
+.metric-kicker {
+  color: #d0a03d;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.result-meta {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 650;
+  line-height: 1.35;
 }
 
 .result-card {
@@ -174,32 +225,42 @@ button:hover {
   padding: 12px;
   color: var(--text);
   text-decoration: none;
-  background: #1e293b;
-  border: 1px solid #334155;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 8px;
+  transition: border-color 160ms ease, transform 160ms ease;
 }
 
 .result-card:hover {
-  border-color: #38bdf8;
+  border-color: var(--gold);
+  transform: translateY(-1px);
+}
+
+.result-media {
+  display: block;
+  overflow: hidden;
+  border: 1px solid #4a525a;
+  border-radius: 6px;
+  background: #f8fafc;
+  aspect-ratio: 16 / 9;
 }
 
 .result-card img {
   display: block;
   width: 100%;
-  height: auto;
-  border: 1px solid #475569;
-  border-radius: 6px;
-  background: #f8fafc;
+  height: 100%;
+  object-fit: cover;
 }
 
 .result-copy {
   display: grid;
-  gap: 8px;
+  gap: 7px;
 }
 
 .result-copy strong {
-  font-size: 1rem;
+  font-size: 1.25rem;
   font-weight: 700;
+  line-height: 1.2;
 }
 
 .result-copy span {
@@ -208,31 +269,45 @@ button:hover {
   line-height: 1.45;
 }
 
+.result-copy .eyebrow {
+  color: #d0a03d;
+  font-size: 0.72rem;
+}
+
+.result-copy .result-meta {
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
 .metric-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(160px, 1fr));
   gap: 10px;
 }
 
 .metric-card {
   display: grid;
-  gap: 6px;
-  min-height: 104px;
+  grid-template-rows: auto auto 1fr;
+  gap: 7px;
+  min-height: 128px;
   padding: 12px;
   color: var(--text);
   text-decoration: none;
-  background: #172033;
-  border: 1px solid #334155;
+  background: var(--surface-strong);
+  border: 1px solid var(--border);
   border-top-width: 3px;
   border-radius: 8px;
+  transition: border-color 160ms ease, transform 160ms ease;
 }
 
 .metric-card:hover {
-  border-color: #eab308;
+  border-color: var(--gold);
+  transform: translateY(-1px);
 }
 
 .metric-card strong {
-  font-size: 1.05rem;
+  font-size: 1.18rem;
   line-height: 1.2;
 }
 
@@ -242,32 +317,54 @@ button:hover {
   line-height: 1.35;
 }
 
+.metric-card .metric-kicker {
+  color: #d0a03d;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
 .metric-card.route {
-  border-top-color: #eab308;
+  border-top-color: var(--gold);
 }
 
 .metric-card.accuracy {
-  border-top-color: #22c55e;
+  border-top-color: var(--green);
 }
 
 .metric-card.tuning {
-  border-top-color: #f97316;
+  border-top-color: var(--orange);
 }
 
 .metric-card.memory {
-  border-top-color: #38bdf8;
+  border-top-color: var(--cyan);
 }
 
 .footer {
   padding: 0.6rem 1rem;
   font-size: 0.75rem;
   color: var(--muted);
-  border-top: 1px solid #334155;
+  border-top: 1px solid var(--border);
 }
 
-@media (max-width: 720px) {
+@media (max-width: 860px) {
   .result-card {
     grid-template-columns: 1fr;
+  }
+
+  .metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .topbar {
+    align-items: flex-start;
+  }
+
+  .controls {
+    width: 100%;
+    margin-left: 0;
   }
 
   .metric-grid {
