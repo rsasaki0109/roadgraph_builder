@@ -6,7 +6,7 @@
 > このファイル → [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md)（Mermaid 6 枚 + CLI 対応表 +
 > モジュール索引）→ [`CHANGELOG.md`](../CHANGELOG.md) の順。
 
-*最終更新: 2026-04-21 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards / float32 opt-in + drift report + compare script + 1M synthetic memory profile / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理）を反映済み。*
+*最終更新: 2026-04-21 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards / float32 opt-in + drift report + compare script + 1M synthetic memory profile / release bundle byte gate / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理）を反映済み。*
 
 ---
 
@@ -18,7 +18,7 @@
   survey-grade ではなく「HD-lite」帯まで。
 - **state:** **v0.7.0 shipped (2026-04-20)**。最新 push 済み `main` は CI green
   （`6c0ba63` / CI run `24704776034`）、
-  最新 full local `pytest` = **552 passed / 33 skipped / 4 deselected**（opt-in marker 除外）。
+  最新 full local `pytest` = **553 passed / 33 skipped / 4 deselected**（opt-in marker 除外）。
 - **直前の session (2026-04-21) で landed:**
   1. V1 accuracy 実測 — Paris 20e MAE 0.938、Tokyo Ginza MAE 0.903、Berlin Mitte MAE 1.220（lane-count vs OSM `lanes=`、canonical 20 m）
   2. `scripts/measure_lane_accuracy.py` が meter-frame graph を正しく扱う bug fix（`map_origin` 自動検出）
@@ -77,6 +77,11 @@
       8 MB 減、tracemalloc peak は約 19 MB 減。ただし full `export-bundle` の peak RSS は
       1,241,652 KB → 1,238,972 KB（約 2.6 MB 減）に留まり、GeoJSON/build temporaries が
       high-water を支配するため default flip の根拠にはならない。
+  24. `tests/test_release_bundle.py` に default `export-bundle` byte gate を追加。
+      sample trajectory + detections + turn_restrictions + LiDAR fixture から tmp bundle を再生成し、
+      `sd_nav.json` / `road_graph.json` / `map.geojson` / `trajectory.csv` / Lanelet2 OSM /
+      generated README files が `examples/frozen_bundle/` と byte-for-byte 一致することを常時検証。
+      `manifest.json` は version / generated_at が動的なので schema validation に留める。
 - **push 方針:** `git push` は user が `push!` などで明示するまで実行しない。
 - **未着手 (次の AI が触る候補):** ↓ §5 "Open tasks" 参照。
 
@@ -390,27 +395,27 @@ cards は `[Unreleased]` 下。
   - byte-identity への影響: `export-bundle` の `sim/road_graph.json` に保存される polyline の
     末尾桁が変わる可能性。どこまで tolerance を緩められるか（schema は float で decimal 精度制約なし）
     を決める必要あり。
-  - regression test: 現 `tests/test_release_bundle.py` は frozen bundle の schema / 形の検証が中心で、
-    常時 byte-for-byte diff は無い。default path の byte identity を常時 gate 化するなら別途設計する。
+  - regression test: `tests/test_release_bundle.py` が stable generated files を byte-for-byte で
+    frozen bundle と比較する。manifest の version / generated_at は動的なので schema validation のまま。
 - **やり方:**
   1. ~~design memo を `docs/handoff/` に書く~~（完了）
   2. ~~opt-in prototype（loader + `BuildParams` + CLI/profile flag）~~（完了）
   3. ~~`scripts/profile_memory.py` を float64/float32 両方で実測~~（完了）
   4. ~~one-off drift 比較を `scripts/compare_float32_drift.py` にする~~（完了）
   5. ~~1M-row synthetic workload で RSS に効くかを見る~~（完了、RSS への効果は小）
-  6. default path は byte-identical、opt-in path は coordinate / length tolerance で regression を拡張
+  6. ~~default path の stable export artefacts を byte-identical gate 化~~（完了）
   7. より大きい real-world city-scale workload で RSS に効くかを見る。現時点で default は `float64` のまま。
-- **規模感:** 次は default-path byte identity gate または real-world workload があれば 1 session。
+- **規模感:** 次は real-world workload または docs visual polish があれば 1 session。
 
 ### 5b. 次のおすすめ候補（small／選択式）
 
 今すぐ必要な blocker は無し。次に触るなら以下の順が現実的。
 
-1. **Default-path byte-identity gate** — float32 script は opt-in drift を比較する。default
-   `float64` path の frozen output byte identity を常時 gate に寄せるなら、既存 release bundle
-   tests と併せて設計する。
-2. **Real-world large memory benchmark** — synthetic 1M では full-pipeline RSS への効果が小さい。
+1. **Real-world large memory benchmark** — synthetic 1M では full-pipeline RSS への効果が小さい。
    `/tmp` の実走大規模 trajectory で `Trajectory.xy` が支配的になるかだけ追加確認する。
+2. **Manifest determinism policy** — stable bundle files は byte-gated 済み。`manifest.json` の
+   `generated_at_utc` / package version を normalize して比較するか、今の schema-only 検証に
+   留めるかを release policy として明文化する。
 3. **Docs visual polish** — `docs/` metric cards は入った。次にやるなら mobile screenshot /
    Playwright visual smoke を足すか、README の measured-results table を release badge 周辺へ
    compact に寄せる。
@@ -438,7 +443,7 @@ cards は `[Unreleased]` 下。
 ### 6.3 Schema / CI / テスト
 
 - Schema 変更時は対応 `validate_*` と CI の expectation を同時に更新。
-- テスト: `pytest` で 552 passed / 33 skipped / 4 deselected が baseline。
+- テスト: `pytest` で 553 passed / 33 skipped / 4 deselected が baseline。
   `pytest -m slow` / `pytest -m city_scale` は opt-in。
 - 新機能には **必ず** unit test 1 本以上（`tests/test_<feature>_*.py`）。
 - CI が conditional skip している path（LAS laspy / Node.js viewer dijkstra / OpenCV）は
@@ -600,7 +605,7 @@ feedback / project / reference の 4 種、`MEMORY.md` は index）。
 
 新しい機能 / バグ修正を入れる前に:
 
-- [ ] `pytest` が 552 passed / 33 skipped / 4 deselected で通ること（上下 ±1 は OK、大きく減ったら
+- [ ] `pytest` が 553 passed / 33 skipped / 4 deselected で通ること（上下 ±1 は OK、大きく減ったら
       skip 理由を確認）。
 - [ ] `CHANGELOG.md` の `[Unreleased]` にユーザー向け変更を足すこと。
 - [ ] スキーマ変更時は対応する `validate_*` と CI の expectation を同時更新すること。
@@ -614,7 +619,8 @@ feedback / project / reference の 4 種、`MEMORY.md` は index）。
 
 > **v0.7.0 は全部シップ済み、直近 workstream（accuracy / completions / tuning / visual preview /
 > CLI boundary split / release surface docs / float32 drift compare script / 1M synthetic memory
-> profile）も commit 済み。次は「default-path byte-identity gate」から入るのがおすすめ。
+> profile / release bundle byte gate）も commit 済み。次は「real-world large memory benchmark」
+> か「manifest determinism policy」から入るのがおすすめ。
 > 何を削って何を広げたかは
 > `CHANGELOG.md` と §3 の小節を見れば全部わかる。push / tag / AI マーカー / PyPI /
 > Mapillary は全部 user authorize か No 決定済みなので、勝手に提案しないこと。**

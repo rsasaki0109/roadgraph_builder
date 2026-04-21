@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Release bundle tests now include a byte-identity gate for stable outputs.**
+  The default `export-bundle` path is rebuilt from the sample trajectory,
+  detections, turn restrictions, and LiDAR fixture during tests, and stable
+  generated artefacts (`sd_nav.json`, `road_graph.json`, `map.geojson`,
+  `trajectory.csv`, Lanelet2 OSM, and generated README files) must match
+  `examples/frozen_bundle/` byte-for-byte. Dynamic manifest fields remain
+  covered by schema validation instead of byte comparison.
+
 - **Float32 drift comparison is now reproducible as a script.**
   `scripts/compare_float32_drift.py` builds float64 and opt-in float32
   bundles from the same trajectory CSV, then compares `road_graph.json`,

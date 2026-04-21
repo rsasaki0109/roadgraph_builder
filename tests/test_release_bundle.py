@@ -17,6 +17,15 @@ from roadgraph_builder.validation import (
 
 ROOT = Path(__file__).resolve().parent.parent
 FROZEN = ROOT / "examples" / "frozen_bundle"
+FROZEN_STABLE_GENERATED_FILES = [
+    "README.txt",
+    "nav/sd_nav.json",
+    "sim/road_graph.json",
+    "sim/map.geojson",
+    "sim/trajectory.csv",
+    "sim/README.txt",
+    "lanelet/map.osm",
+]
 
 
 def test_frozen_bundle_manifest_validates():
@@ -51,6 +60,42 @@ def test_frozen_bundle_expected_files_present():
     ]
     for rel in expected:
         assert (FROZEN / rel).is_file(), f"missing frozen bundle file: {rel}"
+
+
+def test_default_export_bundle_stable_files_match_frozen_bytes(tmp_path: Path):
+    """Default float64 export-bundle path keeps stable artefacts byte-identical."""
+    from roadgraph_builder.cli.main import main
+
+    out = tmp_path / "bundle"
+    rc = main(
+        [
+            "export-bundle",
+            str(ROOT / "examples" / "sample_trajectory.csv"),
+            str(out),
+            "--origin-json",
+            str(ROOT / "examples" / "toy_map_origin.json"),
+            "--lane-width-m",
+            "3.5",
+            "--detections-json",
+            str(ROOT / "examples" / "camera_detections_sample.json"),
+            "--turn-restrictions-json",
+            str(ROOT / "examples" / "turn_restrictions_sample.json"),
+            "--lidar-points",
+            str(ROOT / "examples" / "sample_lidar.las"),
+            "--fuse-max-dist-m",
+            "5.0",
+            "--fuse-bins",
+            "16",
+            "--dataset-name",
+            "roadgraph_sample_bundle",
+        ]
+    )
+
+    assert rc == 0
+    for rel in FROZEN_STABLE_GENERATED_FILES:
+        frozen_bytes = (FROZEN / rel).read_bytes()
+        generated_bytes = (out / rel).read_bytes()
+        assert generated_bytes == frozen_bytes, f"stable generated file drifted: {rel}"
 
 
 @pytest.mark.skipif(
