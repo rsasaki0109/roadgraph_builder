@@ -10,6 +10,7 @@ from typing import Callable, Sequence, TextIO, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from roadgraph_builder.core.graph.graph import Graph
+    from roadgraph_builder.routing.reachability import ReachabilityResult
     from roadgraph_builder.routing.shortest_path import Route
 
 
@@ -191,6 +192,105 @@ def add_route_parser(sub) -> None:  # type: ignore[no-untyped-def]
     )
 
 
+def add_reachable_parser(sub) -> None:  # type: ignore[no-untyped-def]
+    """Register the ``reachable`` subcommand."""
+
+    rc = sub.add_parser(
+        "reachable",
+        help="Find nodes and edge spans reachable from a start node within a cost budget.",
+    )
+    rc.add_argument("input_json", help="Road graph JSON (e.g. sim/road_graph.json from export-bundle).")
+    rc.add_argument(
+        "start_node",
+        nargs="?",
+        help="Start node id. Omit when using --start-latlon.",
+    )
+    rc.add_argument(
+        "--start-latlon",
+        nargs=2,
+        type=float,
+        default=None,
+        metavar=("LAT", "LON"),
+        help="Snap the start to the node nearest this WGS84 coordinate.",
+    )
+    rc.add_argument(
+        "--max-cost-m",
+        type=float,
+        required=True,
+        metavar="M",
+        help="Maximum routing cost budget. With default options this is centerline distance in meters.",
+    )
+    rc.add_argument(
+        "--turn-restrictions-json",
+        type=str,
+        default=None,
+        metavar="PATH",
+        help="JSON with a 'turn_restrictions' array (nav/sd_nav.json or a standalone turn_restrictions.json).",
+    )
+    rc.add_argument(
+        "--output",
+        type=str,
+        default=None,
+        metavar="PATH",
+        help="Optional GeoJSON path. Writes clipped reachable edge spans plus reachable nodes.",
+    )
+    rc.add_argument(
+        "--origin-lat",
+        type=float,
+        default=None,
+        metavar="DEG",
+        help="WGS84 origin latitude for --start-latlon and --output. Falls back to graph metadata.map_origin.",
+    )
+    rc.add_argument(
+        "--origin-lon",
+        type=float,
+        default=None,
+        metavar="DEG",
+        help="WGS84 origin longitude for --start-latlon and --output.",
+    )
+    rc.add_argument(
+        "--prefer-observed",
+        action="store_true",
+        default=False,
+        help="Prefer observed edges using --observed-bonus / --unobserved-penalty cost multipliers.",
+    )
+    rc.add_argument(
+        "--min-confidence",
+        type=float,
+        default=None,
+        metavar="FLOAT",
+        help="Exclude edges whose hd_refinement.confidence < FLOAT.",
+    )
+    rc.add_argument(
+        "--observed-bonus",
+        type=float,
+        default=0.5,
+        metavar="FLOAT",
+        help="Cost multiplier for observed edges when --prefer-observed is set (default 0.5).",
+    )
+    rc.add_argument(
+        "--unobserved-penalty",
+        type=float,
+        default=2.0,
+        metavar="FLOAT",
+        help="Cost multiplier for unobserved edges when --prefer-observed is set (default 2.0).",
+    )
+    rc.add_argument(
+        "--uphill-penalty",
+        type=float,
+        default=None,
+        metavar="FLOAT",
+        help="3D cost multiplier for uphill edges (slope_deg > 0).",
+    )
+    rc.add_argument(
+        "--downhill-bonus",
+        type=float,
+        default=None,
+        metavar="FLOAT",
+        help="3D cost multiplier for downhill edges (slope_deg < 0).",
+    )
+
+
 def turn_restrictions_from_document(doc: object) -> list[dict]:
     """Extract CLI-consumable turn restriction dicts from supported JSON roots."""
 
@@ -213,15 +313,16 @@ def resolve_route_endpoint(
     origin_lat: float | None,
     origin_lon: float | None,
     graph_label: str,
+    command: str = "route",
 ) -> ResolvedRouteEndpoint:
     """Resolve a route endpoint from either a node id or WGS84 coordinate."""
 
     if latlon is not None and positional is not None:
-        raise CliRoutingError("route: pass either a node id or --*-latlon, not both.")
+        raise CliRoutingError(f"{command}: pass either a node id or --*-latlon, not both.")
     if latlon is None:
         if positional is None:
             raise CliRoutingError(
-                f"route: provide either {label}_node positional or --{label}-latlon."
+                f"{command}: provide either {label}_node positional or --{label}-latlon."
             )
         return ResolvedRouteEndpoint(node_id=positional, snap=None)
 
@@ -252,11 +353,12 @@ def resolve_route_origin(
     *,
     origin_lat: float | None,
     origin_lon: float | None,
+    command: str = "route",
 ) -> tuple[float, float]:
     """Resolve the WGS84 origin needed for route GeoJSON output."""
 
     if (origin_lat is None) ^ (origin_lon is None):
-        raise CliRoutingError("route --output: pass both --origin-lat and --origin-lon, or neither.")
+        raise CliRoutingError(f"{command} --output: pass both --origin-lat and --origin-lon, or neither.")
     if origin_lat is not None and origin_lon is not None:
         return float(origin_lat), float(origin_lon)
 
@@ -264,7 +366,7 @@ def resolve_route_origin(
     if isinstance(map_origin, dict) and "lat0" in map_origin and "lon0" in map_origin:
         return float(map_origin["lat0"]), float(map_origin["lon0"])
     raise CliRoutingError(
-        "route --output: set --origin-lat/--origin-lon or metadata.map_origin {lat0, lon0}."
+        f"{command} --output: set --origin-lat/--origin-lon or metadata.map_origin {{lat0, lon0}}."
     )
 
 
@@ -293,6 +395,44 @@ def route_to_document(
     if route.lane_sequence is not None:
         doc["lane_sequence"] = route.lane_sequence
     return doc
+
+
+def reachability_to_document(
+    reachability: "ReachabilityResult",
+    *,
+    start_snap: dict[str, float] | None,
+    restrictions_count: int,
+    output: str | None,
+) -> dict[str, object]:
+    """Serialize a reachability result to the CLI JSON shape."""
+
+    return {
+        "start_node": reachability.start_node,
+        "snapped_start": start_snap,
+        "max_cost_m": reachability.max_cost_m,
+        "reached_node_count": len(reachability.nodes),
+        "reached_edge_count": len(reachability.edges),
+        "nodes": [
+            {"node_id": node.node_id, "cost_m": node.cost_m}
+            for node in reachability.nodes
+        ],
+        "edges": [
+            {
+                "edge_id": edge.edge_id,
+                "direction": edge.direction,
+                "from_node": edge.from_node,
+                "to_node": edge.to_node,
+                "start_cost_m": edge.start_cost_m,
+                "end_cost_m": edge.end_cost_m,
+                "reachable_cost_m": edge.reachable_cost_m,
+                "reachable_fraction": edge.reachable_fraction,
+                "complete": edge.complete,
+            }
+            for edge in reachability.edges
+        ],
+        "applied_restrictions": restrictions_count,
+        "output": output,
+    }
 
 
 def run_nearest_node(
@@ -431,6 +571,103 @@ def run_route(
                 route,
                 from_snap=from_endpoint.snap,
                 to_snap=to_endpoint.snap,
+                restrictions_count=len(restrictions),
+                output=args.output if args.output else None,
+            ),
+            ensure_ascii=False,
+            indent=2,
+        ),
+        file=out,
+    )
+    return 0
+
+
+def run_reachable(
+    args: argparse.Namespace,
+    *,
+    load_graph: LoadGraph,
+    load_json: LoadJson,
+    stdout: TextIO | None = None,
+    stderr: TextIO | None = None,
+) -> int:
+    """Execute ``reachable`` from parsed args."""
+
+    from roadgraph_builder.routing.geojson_export import write_reachability_geojson
+    from roadgraph_builder.routing.reachability import reachable_within
+
+    out = stdout if stdout is not None else sys.stdout
+    err = stderr if stderr is not None else sys.stderr
+    graph = load_graph(args.input_json)
+
+    if args.start_latlon is None and args.start_node is None:
+        print("reachable: provide either start_node positional or --start-latlon.", file=err)
+        return 1
+    if args.max_cost_m < 0:
+        print("reachable: --max-cost-m must be non-negative.", file=err)
+        return 1
+
+    try:
+        start_endpoint = resolve_route_endpoint(
+            graph,
+            label="start",
+            latlon=args.start_latlon,
+            positional=args.start_node,
+            origin_lat=args.origin_lat,
+            origin_lon=args.origin_lon,
+            graph_label=args.input_json,
+            command="reachable",
+        )
+    except CliRoutingError as exc:
+        print(str(exc), file=err)
+        return 1
+
+    restrictions: list[dict] = []
+    if args.turn_restrictions_json:
+        restrictions = turn_restrictions_from_document(load_json(args.turn_restrictions_json))
+    try:
+        reachability = reachable_within(
+            graph,
+            start_endpoint.node_id,
+            max_cost_m=args.max_cost_m,
+            turn_restrictions=restrictions or None,
+            prefer_observed=getattr(args, "prefer_observed", False),
+            min_confidence=getattr(args, "min_confidence", None),
+            observed_bonus=getattr(args, "observed_bonus", 0.5),
+            unobserved_penalty=getattr(args, "unobserved_penalty", 2.0),
+            uphill_penalty=getattr(args, "uphill_penalty", None),
+            downhill_bonus=getattr(args, "downhill_bonus", None),
+        )
+    except KeyError as exc:
+        print(f"{args.input_json}: {exc.args[0]}", file=err)
+        return 1
+    except ValueError as exc:
+        print(f"{args.input_json}: {exc}", file=err)
+        return 1
+
+    if args.output:
+        try:
+            lat0, lon0 = resolve_route_origin(
+                graph,
+                origin_lat=args.origin_lat,
+                origin_lon=args.origin_lon,
+                command="reachable",
+            )
+        except CliRoutingError as exc:
+            print(str(exc), file=err)
+            return 1
+        write_reachability_geojson(
+            args.output,
+            graph,
+            reachability,
+            origin_lat=lat0,
+            origin_lon=lon0,
+        )
+
+    print(
+        json.dumps(
+            reachability_to_document(
+                reachability,
+                start_snap=start_endpoint.snap,
                 restrictions_count=len(restrictions),
                 output=args.output if args.output else None,
             ),

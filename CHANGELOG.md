@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Reachability / service-area analysis is available from the routing CLI.**
+  New `routing.reachability.reachable_within` and `roadgraph_builder reachable`
+  report nodes and directed edge spans reachable from a start node within a
+  routing cost budget. The command supports node ids or `--start-latlon`,
+  optional turn restrictions, the existing observed/confidence/slope cost
+  hooks, JSON output, and clipped GeoJSON via `--output`.
+
 ### Changed
 
 - **Packaging metadata now uses a SPDX license expression.**

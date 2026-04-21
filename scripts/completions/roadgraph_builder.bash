@@ -19,7 +19,7 @@ _roadgraph_builder_completions() {
 
     local subcommands="doctor build visualize validate validate-detections \
 validate-sd-nav validate-manifest validate-turn-restrictions enrich \
-inspect-lidar nearest-node route stats match-trajectory infer-road-class \
+inspect-lidar nearest-node route reachable stats match-trajectory infer-road-class \
 infer-signalized-junctions fuse-traces reconstruct-trips fuse-lidar \
 infer-lane-count export-lanelet2 validate-lanelet2 validate-lanelet2-tags \
 apply-camera export-bundle build-osm-graph convert-osm-restrictions \
@@ -101,6 +101,12 @@ validate-lane-markings guidance validate-guidance update-graph process-dataset"
 --from-latlon --to-latlon --prefer-observed --min-confidence \
 --observed-bonus --unobserved-penalty --uphill-penalty --downhill-bonus \
 --allow-lane-change --lane-change-cost-m" -- "$cur"))
+                ;;
+            reachable)
+                COMPREPLY=($(compgen -W "\
+--start-latlon --max-cost-m --turn-restrictions-json --output \
+--origin-lat --origin-lon --prefer-observed --min-confidence \
+--observed-bonus --unobserved-penalty --uphill-penalty --downhill-bonus" -- "$cur"))
                 ;;
             match-trajectory)
                 COMPREPLY=($(compgen -W "--max-distance-m --output --hmm --gps-sigma-m --transition-limit-m" -- "$cur"))

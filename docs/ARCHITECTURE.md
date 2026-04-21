@@ -178,6 +178,7 @@ thin argparse dispatcher in `roadgraph_builder/cli/main.py`.
 | `stats` | road_graph | `{graph_stats, junctions}` JSON | `core.graph.stats.graph_stats` / `junction_stats` |
 | `nearest-node` | road_graph + query point | `{node_id, distance_m, query_xy_m}` JSON | `routing.nearest.nearest_node` |
 | `route` | road_graph + (node ids or lat/lon) + optional restrictions | route JSON (+ optional GeoJSON via `--output`) | `routing.shortest_path` / `routing.geojson_export.write_route_geojson` |
+| `reachable` | road_graph + start node/latlon + cost budget | reachable nodes / directed edge spans JSON (+ clipped GeoJSON via `--output`) | `routing.reachability.reachable_within` / `routing.geojson_export.write_reachability_geojson` |
 | `match-trajectory` | road_graph + trajectory CSV | per-sample snap JSON + coverage summary | `routing.map_match.snap_trajectory_to_graph` / `routing.hmm_match.hmm_match_trajectory` |
 | `fuse-traces` | road_graph + list of trajectories | road_graph JSON with `attributes.trace_stats` | `semantics.trace_fusion.fuse_traces_into_graph` |
 | `reconstruct-trips` | road_graph + long trajectory | trip list JSON | `semantics.trip_reconstruction.reconstruct_trips` |

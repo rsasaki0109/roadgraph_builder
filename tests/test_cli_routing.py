@@ -11,6 +11,7 @@ from roadgraph_builder.cli.routing import (
     resolve_route_endpoint,
     resolve_route_origin,
     run_nearest_node,
+    run_reachable,
     run_route,
     turn_restrictions_from_document,
 )
@@ -56,6 +57,27 @@ def _route_args(**overrides: object) -> argparse.Namespace:
         "downhill_bonus": None,
         "allow_lane_change": False,
         "lane_change_cost_m": 50.0,
+    }
+    defaults.update(overrides)
+    return argparse.Namespace(**defaults)
+
+
+def _reachable_args(**overrides: object) -> argparse.Namespace:
+    defaults: dict[str, object] = {
+        "input_json": "graph.json",
+        "start_node": "a",
+        "start_latlon": None,
+        "max_cost_m": 35.0,
+        "turn_restrictions_json": None,
+        "output": None,
+        "origin_lat": None,
+        "origin_lon": None,
+        "prefer_observed": False,
+        "min_confidence": None,
+        "observed_bonus": 0.5,
+        "unobserved_penalty": 2.0,
+        "uphill_penalty": None,
+        "downhill_bonus": None,
     }
     defaults.update(overrides)
     return argparse.Namespace(**defaults)
@@ -159,3 +181,35 @@ def test_run_route_reports_both_missing_endpoints():
     err = stderr.getvalue()
     assert "from_node positional" in err
     assert "to_node positional" in err
+
+
+def test_run_reachable_isolated_from_file_io_and_parser():
+    stdout = io.StringIO()
+
+    rc = run_reachable(
+        _reachable_args(),
+        load_graph=lambda _path: _line_graph(),
+        load_json=lambda _path: {},
+        stdout=stdout,
+    )
+
+    assert rc == 0
+    doc = json.loads(stdout.getvalue())
+    assert doc["start_node"] == "a"
+    assert doc["reached_node_count"] == 2
+    assert doc["reached_edge_count"] >= 1
+    assert doc["nodes"][0] == {"node_id": "a", "cost_m": 0.0}
+
+
+def test_run_reachable_rejects_negative_budget():
+    stderr = io.StringIO()
+
+    rc = run_reachable(
+        _reachable_args(max_cost_m=-1.0),
+        load_graph=lambda _path: _line_graph(),
+        load_json=lambda _path: {},
+        stderr=stderr,
+    )
+
+    assert rc == 1
+    assert "non-negative" in stderr.getvalue()

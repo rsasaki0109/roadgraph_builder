@@ -8,7 +8,13 @@ import pytest
 from roadgraph_builder.core.graph.edge import Edge
 from roadgraph_builder.core.graph.graph import Graph
 from roadgraph_builder.core.graph.node import Node
-from roadgraph_builder.routing.geojson_export import build_route_geojson, write_route_geojson
+from roadgraph_builder.routing.geojson_export import (
+    build_reachability_geojson,
+    build_route_geojson,
+    write_reachability_geojson,
+    write_route_geojson,
+)
+from roadgraph_builder.routing.reachability import reachable_within
 from roadgraph_builder.routing.shortest_path import shortest_path
 
 
@@ -110,3 +116,37 @@ def test_route_cli_output_requires_origin(tmp_path: Path, capsys):
     assert rc == 1
     assert "origin" in capsys.readouterr().err
     assert not out_gj.exists()
+
+
+def test_build_reachability_geojson_clips_partial_edges():
+    g = _linear_graph()
+    reachability = reachable_within(g, "a", max_cost_m=45.0)
+
+    fc = build_reachability_geojson(g, reachability, origin_lat=52.52, origin_lon=13.405)
+
+    edge_features = [f for f in fc["features"] if f["properties"]["kind"] == "reachable_edge"]
+    by_edge = {(f["properties"]["edge_id"], f["properties"]["direction"]): f for f in edge_features}
+    assert by_edge[("e1", "forward")]["properties"]["complete"] is True
+    assert by_edge[("e2", "forward")]["properties"]["complete"] is False
+    assert by_edge[("e2", "forward")]["properties"]["reachable_fraction"] == pytest.approx(0.5)
+
+    coords = by_edge[("e2", "forward")]["geometry"]["coordinates"]
+    # e2 is 30 m long and 50% reachable, so the clipped feature stops halfway.
+    assert len(coords) == 2
+    assert coords[1][0] > coords[0][0]
+
+
+def test_write_reachability_geojson_round_trips(tmp_path: Path):
+    g = _linear_graph()
+    out = tmp_path / "reachable.geojson"
+    write_reachability_geojson(
+        out,
+        g,
+        reachable_within(g, "a", max_cost_m=45.0),
+        origin_lat=52.52,
+        origin_lon=13.405,
+    )
+
+    doc = json.loads(out.read_text(encoding="utf-8"))
+    assert doc["properties"]["start_node"] == "a"
+    assert doc["properties"]["max_cost_m"] == pytest.approx(45.0)

@@ -30,7 +30,7 @@ Use the short description and topics listed in [`.github/ABOUT.md`](.github/ABOU
 | --- | --- |
 | **Input** | Trajectory CSV (`timestamp`, `x`, `y`, optional `z`) · OSM highway ways (Overpass JSON) · LAS 1.0-1.4 / LAZ point clouds (2D or 3D XYZ) · image-space pixel detections + camera calibration · raw RGB images for lane-marking detection |
 | **Pipeline** | Gap-based segmentation → arc-length Gaussian centerline → X/T-split + union-find → duplicate / near-parallel merge → junction consolidation → post-simplify. X/T-split uses an O(N log N) grid hash (v0.7). Separate OSM-highway path via `build-osm-graph` for topology-honest grids. 3D elevation propagates through edges (`polyline_z`, `slope_deg`) when `build --3d` reads a `z` column. Incremental `update-graph` merges new trajectories without a full rebuild. `process-dataset` runs the full bundle over a directory of CSVs in parallel. |
-| **Routing** | Directed-state Dijkstra honouring `no_*` / `only_*` turn restrictions. OSM `type=restriction` relations map onto graph edges via `convert-osm-restrictions`. Uncertainty-aware via `route --prefer-observed` / `--min-confidence` (v0.6). Slope-aware via `route --uphill-penalty` / `--downhill-bonus` (v0.7). Lane-level via `route --allow-lane-change` with a per-swap `--lane-change-cost-m` (v0.7). Turn-by-turn guidance via **`guidance`**. |
+| **Routing** | Directed-state Dijkstra honouring `no_*` / `only_*` turn restrictions. OSM `type=restriction` relations map onto graph edges via `convert-osm-restrictions`. Uncertainty-aware via `route --prefer-observed` / `--min-confidence` (v0.6). Slope-aware via `route --uphill-penalty` / `--downhill-bonus` (v0.7). Lane-level via `route --allow-lane-change` with a per-swap `--lane-change-cost-m` (v0.7). Service-area style reachability via **`reachable`**; turn-by-turn guidance via **`guidance`**. |
 | **Perception** | Pixel detections + pinhole calibration (OpenCV 5-coef Brown-Conrady distortion) → world ground plane → nearest edge via `project-camera`. Edge-keyed camera observations merge into `attributes.hd.semantic_rules` via `apply-camera`, and feed HD-lite refinement via `enrich --camera-detections-json`. **`detect-lane-markings-camera`** (v0.7) detects white/yellow lane markings from raw RGB with pure-NumPy HSV + connected components (no cv2/scipy) and back-projects to graph edges. |
 | **LiDAR** | `fuse-lidar` accepts CSV / LAS / LAZ and fits per-edge binned median lane boundaries. `--ground-plane` (v0.7) fits a RANSAC ground plane first and keeps only points within `height_band_m` (default 0–0.3 m) before fusing, so vegetation and overhead structures drop out. `inspect-lidar` reports LAS public-header metadata. **`detect-lane-markings`** extracts painted-line candidates from intensity peaks. |
 | **HD / Lanelet2** | `enrich --lane-width-m` for envelope + offset boundaries; `--lane-markings-json` / `--camera-detections-json` fuse sources into `metadata.hd_refinement`. **`infer-lane-count`** (v0.6) clusters paint-marker offsets into `attributes.hd.lane_count` + `hd.lanes[]` (fallback to `trace_stats.perpendicular_offsets`). `export-lanelet2` emits `roadgraph:*` ways + `lanelet` relations; `--per-lane` expands each multi-lane edge into one lanelet per lane with `lane_change` relations (v0.6); `--camera-detections-json` wires `traffic_light` / `stop_line` regulatory_elements (v0.7). **`validate-lanelet2-tags`** (v0.6) flags missing required Lanelet2 tags; **`validate-lanelet2`** (v0.7) bridges Autoware's `lanelet2_validation` CLI when on PATH. |
@@ -384,7 +384,7 @@ roadgraph_builder nearest-node examples/frozen_bundle/sim/road_graph.json \
   --latlon 52.52 13.4054
 # => {"node_id":"n1","distance_m":1.7,"query_xy_m":[...]}
 
-# Plain reachability
+# Plain shortest path
 roadgraph_builder route examples/frozen_bundle/sim/road_graph.json n0 n1
 # => {"from_node":"n0","to_node":"n1","total_length_m":15.02,"edge_sequence":["e0"],"edge_directions":["forward"],"node_sequence":["n0","n1"],"applied_restrictions":0}
 
@@ -401,7 +401,16 @@ roadgraph_builder route examples/frozen_bundle/sim/road_graph.json n0 n1 \
 roadgraph_builder route examples/frozen_bundle/sim/road_graph.json \
   --from-latlon 52.520 13.4050 --to-latlon 52.520 13.4056
 # Output includes snapped_from / snapped_to with the distance from the query point to the matched node.
+
+# Reachability / service-area style query from a node
+roadgraph_builder reachable examples/frozen_bundle/sim/road_graph.json n0 \
+  --max-cost-m 250 \
+  --turn-restrictions-json examples/frozen_bundle/nav/sd_nav.json \
+  --output /tmp/reachable.geojson
+# => nodes and directed edge spans reachable within the budget; partial edges are clipped in GeoJSON.
 ```
+
+`reachable` accepts `--start-latlon LAT LON` for the same nearest-node snap used by `route --from-latlon`. Its cost hooks (`--prefer-observed`, `--min-confidence`, `--uphill-penalty`, `--downhill-bonus`) match `route`, so the JSON / GeoJSON service area reflects the same routing policy.
 
 Exits with code 1 on unknown node ids, disjoint components, or when the restrictions make the pair unreachable.
 

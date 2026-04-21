@@ -169,6 +169,38 @@ def test_route_cli_prints_json(tmp_path: Path, capsys):
     assert math.isclose(doc["total_length_m"], 60.0)
 
 
+def test_reachable_cli_prints_json_and_writes_geojson(tmp_path: Path, capsys):
+    from roadgraph_builder.cli.main import main
+    from roadgraph_builder.io.export.json_exporter import export_graph_json
+
+    g = _manual_graph()
+    g.metadata["map_origin"] = {"lat0": 52.52, "lon0": 13.405}
+    graph_json = tmp_path / "g.json"
+    reachable_geojson = tmp_path / "reachable.geojson"
+    export_graph_json(g, graph_json)
+
+    rc = main(
+        [
+            "reachable",
+            str(graph_json),
+            "a",
+            "--max-cost-m",
+            "35",
+            "--output",
+            str(reachable_geojson),
+        ]
+    )
+
+    assert rc == 0
+    doc = json.loads(capsys.readouterr().out)
+    assert doc["start_node"] == "a"
+    assert doc["reached_node_count"] == 2
+    spans = {(e["edge_id"], e["direction"]): e for e in doc["edges"]}
+    assert spans[("e2", "forward")]["complete"] is False
+    assert spans[("e2", "forward")]["reachable_fraction"] == pytest.approx(5.0 / 30.0)
+    assert reachable_geojson.is_file()
+
+
 def test_route_cli_rejects_unknown_node(tmp_path: Path, capsys):
     from roadgraph_builder.cli.main import main
     from roadgraph_builder.io.export.json_exporter import export_graph_json

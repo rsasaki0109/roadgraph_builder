@@ -69,8 +69,10 @@ from roadgraph_builder.io.export.json_loader import load_graph_json
 from roadgraph_builder.cli.doctor import run_doctor
 from roadgraph_builder.cli.routing import (
     add_nearest_node_parser,
+    add_reachable_parser,
     add_route_parser,
     run_nearest_node,
+    run_reachable,
     run_route,
 )
 from roadgraph_builder.cli.validate import (
@@ -134,6 +136,7 @@ def _build_parser() -> argparse.ArgumentParser:
 
     add_nearest_node_parser(sub)
     add_route_parser(sub)
+    add_reachable_parser(sub)
 
     add_trajectory_parsers(sub)
 
@@ -216,6 +219,8 @@ def main(argv: list[str] | None = None) -> int:
         return run_stats(args, load_graph=_cli_load_graph)
     if args.command == "route":
         return run_route(args, load_graph=_cli_load_graph, load_json=_load_json_for_cli)
+    if args.command == "reachable":
+        return run_reachable(args, load_graph=_cli_load_graph, load_json=_load_json_for_cli)
     if args.command == "inspect-lidar":
         return run_inspect_lidar(args)
     if args.command == "fuse-lidar":

@@ -25,6 +25,7 @@ _roadgraph_builder() {
         'inspect-lidar:Print LAS public-header summary as JSON'
         'nearest-node:Find graph node nearest to a lat/lon or x/y'
         'route:Dijkstra shortest path'
+        'reachable:Find nodes and edge spans reachable within a cost budget'
         'stats:Print graph_stats + junction counts'
         'match-trajectory:Snap a trajectory CSV to the graph'
         'infer-road-class:Classify edges as highway/arterial/residential from GPS speed'
@@ -100,6 +101,22 @@ _roadgraph_builder() {
                         '--lane-change-cost-m[Within-edge lane-change cost]:float:' \
                         '--from-latlon[Source lat/lon]:float float:' \
                         '--to-latlon[Destination lat/lon]:float float:' \
+                        '*:file:_files'
+                    ;;
+                reachable)
+                    _arguments \
+                        '--start-latlon[Start lat/lon]:float float:' \
+                        '--max-cost-m[Maximum routing cost budget]:float:' \
+                        '--turn-restrictions-json[Turn restrictions JSON]:file:_files' \
+                        '--output[Reachability GeoJSON output path]:file:_files' \
+                        '--origin-lat[WGS84 origin latitude]:float:' \
+                        '--origin-lon[WGS84 origin longitude]:float:' \
+                        '--prefer-observed[Prefer edges with trace observations]' \
+                        '--min-confidence[Minimum hd_refinement confidence]:float:' \
+                        '--observed-bonus[Observed-edge cost multiplier]:float:' \
+                        '--unobserved-penalty[Unobserved-edge cost multiplier]:float:' \
+                        '--uphill-penalty[Uphill cost multiplier]:float:' \
+                        '--downhill-bonus[Downhill cost multiplier]:float:' \
                         '*:file:_files'
                     ;;
                 nearest-node)
