@@ -12,6 +12,14 @@ from pathlib import Path
 
 from roadgraph_builder.hd.lidar_fusion import fuse_lane_boundaries_from_points
 from roadgraph_builder.hd.pipeline import SDToHDConfig, enrich_sd_to_hd
+from roadgraph_builder.cli.camera import (
+    add_apply_camera_parser,
+    add_detect_lane_markings_camera_parser,
+    add_project_camera_parser,
+    run_apply_camera,
+    run_detect_lane_markings_camera,
+    run_project_camera,
+)
 from roadgraph_builder.cli.export import (
     add_export_bundle_parser,
     add_lanelet2_parsers,
@@ -22,7 +30,6 @@ from roadgraph_builder.cli.export import (
 )
 from roadgraph_builder.io.export.json_exporter import export_graph_json
 from roadgraph_builder.io.export.json_loader import load_graph_json
-from roadgraph_builder.io.camera.detections import apply_camera_detections_to_graph, load_camera_detections_json
 from roadgraph_builder.io.lidar.las import load_points_xy_from_las, read_las_header
 from roadgraph_builder.io.lidar.points import load_points_xy_csv
 from roadgraph_builder.io.trajectory.loader import load_multi_trajectory_csvs, load_trajectory_csv
@@ -492,13 +499,7 @@ def _build_parser() -> argparse.ArgumentParser:
 
     add_lanelet2_parsers(sub)
 
-    cam = sub.add_parser(
-        "apply-camera",
-        help="Merge camera/perception JSON observations into attributes.hd.semantic_rules.",
-    )
-    cam.add_argument("input_json", help="Road graph JSON")
-    cam.add_argument("detections_json", help="JSON with observations[] (edge_id, kind, …)")
-    cam.add_argument("output_json", help="Output JSON path")
+    add_apply_camera_parser(sub)
 
     add_export_bundle_parser(
         sub,
@@ -567,32 +568,7 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Optional path to write per-relation skip reasons.",
     )
 
-    pc = sub.add_parser(
-        "project-camera",
-        help=(
-            "Project per-image pixel detections onto the ground plane using a "
-            "pinhole camera + per-image vehicle pose, snap to the nearest graph "
-            "edge, and write an edge-keyed camera_detections.json."
-        ),
-    )
-    pc.add_argument("calibration_json", help="Camera calibration JSON (intrinsic + camera_to_vehicle).")
-    pc.add_argument("image_detections_json", help="Per-image pixel detections JSON.")
-    pc.add_argument("graph_json", help="Road graph JSON (same world meter frame as vehicle poses).")
-    pc.add_argument("output_json", help="Output camera_detections.json path.")
-    pc.add_argument(
-        "--ground-z-m",
-        type=float,
-        default=0.0,
-        metavar="M",
-        help="Height of the assumed-flat ground plane in the world frame.",
-    )
-    pc.add_argument(
-        "--max-edge-distance-m",
-        type=float,
-        default=5.0,
-        metavar="M",
-        help="Max perpendicular distance from a projected detection to a graph edge.",
-    )
+    add_project_camera_parser(sub)
 
     dlm = sub.add_parser(
         "detect-lane-markings",
@@ -606,24 +582,7 @@ def _build_parser() -> argparse.ArgumentParser:
     dlm.add_argument("--bin-m", type=float, default=1.0, metavar="M", help="Along-edge bin size (m).")
     dlm.add_argument("--min-points-per-bin", type=int, default=3, metavar="N", help="Min points per bin to form a cluster.")
 
-    dlmc = sub.add_parser(
-        "detect-lane-markings-camera",
-        help=(
-            "Detect lane markings from camera images using pure-NumPy HSV thresholds "
-            "and project onto graph edges (3D2). Writes a camera_lanes.json."
-        ),
-    )
-    dlmc.add_argument("graph_json", help="Road graph JSON (meter frame).")
-    dlmc.add_argument("calibration_json", help="Camera calibration JSON (CameraCalibration format).")
-    dlmc.add_argument("images_dir", help="Directory containing image files (.jpg/.png) named image_<id>.*")
-    dlmc.add_argument("poses_json", help="JSON file with per-image poses: [{image_id, pose_x_m, pose_y_m, heading_rad}, ...]")
-    dlmc.add_argument("--output", type=str, default="camera_lanes.json", metavar="PATH", help="Output JSON path (default: camera_lanes.json).")
-    dlmc.add_argument("--white-threshold", type=int, default=200, metavar="V", help="Minimum value (0-255) for white lane detection.")
-    dlmc.add_argument("--yellow-hue-lo", type=int, default=20, metavar="H", help="Lower bound of yellow hue range (0-360).")
-    dlmc.add_argument("--yellow-hue-hi", type=int, default=40, metavar="H", help="Upper bound of yellow hue range (0-360).")
-    dlmc.add_argument("--saturation-min", type=int, default=100, metavar="S", help="Minimum saturation (0-255) for yellow detection.")
-    dlmc.add_argument("--min-line-length-px", type=int, default=30, metavar="PX", help="Minimum major-axis length (pixels) for lane candidates.")
-    dlmc.add_argument("--max-edge-distance-m", type=float, default=3.5, metavar="M", help="Max lateral distance for edge snap.")
+    add_detect_lane_markings_camera_parser(sub)
 
     vlm = sub.add_parser(
         "validate-lane-markings",
@@ -1214,15 +1173,11 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "validate-lanelet2-tags":
         return run_validate_lanelet2_tags(args)
     if args.command == "apply-camera":
-        graph = _cli_load_graph(args.input_json)
-        try:
-            obs = load_camera_detections_json(args.detections_json)
-        except FileNotFoundError as e:
-            print(f"File not found: {e.filename}", file=sys.stderr)
-            return 1
-        apply_camera_detections_to_graph(graph, obs)
-        export_graph_json(graph, args.output_json)
-        return 0
+        return run_apply_camera(
+            args,
+            load_graph=_cli_load_graph,
+            export_graph_json_func=export_graph_json,
+        )
     if args.command == "export-bundle":
         return run_export_bundle(
             args,
@@ -1315,40 +1270,7 @@ def main(argv: list[str] | None = None) -> int:
             )
         return 0
     if args.command == "project-camera":
-        from roadgraph_builder.io.camera import (
-            load_camera_calibration,
-            load_image_detections_json,
-            project_image_detections_to_graph_edges,
-        )
-        try:
-            calib = load_camera_calibration(args.calibration_json)
-            items = load_image_detections_json(args.image_detections_json)
-            graph = _cli_load_graph(args.graph_json)
-        except FileNotFoundError as e:
-            print(f"File not found: {e.filename}", file=sys.stderr)
-            return 1
-        except (KeyError, ValueError, TypeError) as e:
-            print(f"{e}", file=sys.stderr)
-            return 1
-        result = project_image_detections_to_graph_edges(
-            items,
-            calib,
-            graph,
-            ground_z_m=args.ground_z_m,
-            max_edge_distance_m=args.max_edge_distance_m,
-        )
-        doc = {"format_version": 1, "observations": result.observations}
-        Path(args.output_json).write_text(
-            json.dumps(doc, indent=2) + "\n", encoding="utf-8"
-        )
-        print(
-            f"Wrote {args.output_json}: {len(result.observations)} observations "
-            f"(projected {result.projected_count}, "
-            f"dropped_above_horizon {result.dropped_above_horizon}, "
-            f"dropped_no_edge {result.dropped_no_edge}).",
-            file=sys.stderr,
-        )
-        return 0
+        return run_project_camera(args, load_graph=_cli_load_graph)
     if args.command == "detect-lane-markings":
         import numpy as _dlm_np
         from roadgraph_builder.io.lidar.lane_marking import detect_lane_markings as _detect_lane_markings
@@ -1415,142 +1337,11 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 0
     if args.command == "detect-lane-markings-camera":
-        from roadgraph_builder.io.camera.calibration import CameraCalibration
-        from roadgraph_builder.io.camera.lane_detection import (
-            detect_lanes_from_image_rgb,
-            project_camera_lanes_to_graph_edges,
+        return run_detect_lane_markings_camera(
+            args,
+            load_graph=_cli_load_graph,
+            load_json=_load_json_for_cli,
         )
-
-        graph = _cli_load_graph(args.graph_json)
-        cal_raw = _load_json_for_cli(args.calibration_json)
-        if not isinstance(cal_raw, dict):
-            print("detect-lane-markings-camera: calibration JSON must be an object.", file=sys.stderr)
-            return 1
-        try:
-            calibration = CameraCalibration.from_dict(cal_raw)
-        except (KeyError, TypeError, ValueError) as e:
-            print(f"detect-lane-markings-camera: bad calibration: {e}", file=sys.stderr)
-            return 1
-        poses_raw = _load_json_for_cli(args.poses_json)
-        if not isinstance(poses_raw, list):
-            print("detect-lane-markings-camera: poses JSON must be a list.", file=sys.stderr)
-            return 1
-
-        images_dir = Path(args.images_dir)
-        if not images_dir.is_dir():
-            print(f"Directory not found: {images_dir}", file=sys.stderr)
-            return 1
-
-        all_candidates = []
-        import_error_msg: str | None = None
-        for pose_entry in poses_raw:
-            if not isinstance(pose_entry, dict):
-                continue
-            image_id = str(pose_entry.get("image_id", ""))
-            pose_x = float(pose_entry.get("pose_x_m", 0.0))
-            pose_y = float(pose_entry.get("pose_y_m", 0.0))
-            heading = float(pose_entry.get("heading_rad", 0.0))
-
-            # Locate image file (try png and jpg).
-            img_file: Path | None = None
-            for ext in (".png", ".jpg", ".jpeg", ".PNG", ".JPG", ".JPEG"):
-                candidate = images_dir / f"{image_id}{ext}"
-                if candidate.is_file():
-                    img_file = candidate
-                    break
-            if img_file is None:
-                continue
-
-            # Load image — prefer cv2 if available, otherwise try numpy-based fallback.
-            try:
-                try:
-                    import cv2  # type: ignore[import-not-found]
-                    bgr = cv2.imread(str(img_file))
-                    if bgr is None:
-                        continue
-                    rgb_arr = cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)
-                except ImportError:
-                    # No cv2: attempt to read PNG without external deps.
-                    try:
-                        import struct, zlib
-                        _png = img_file.read_bytes()
-                        if _png[:8] != b"\x89PNG\r\n\x1a\n":
-                            print(
-                                f"detect-lane-markings-camera: cv2 not available; "
-                                f"only PNG supported without it. Skipping {img_file.name}.",
-                                file=sys.stderr,
-                            )
-                            continue
-                        # Parse IHDR
-                        w_png = struct.unpack(">I", _png[16:20])[0]
-                        h_png = struct.unpack(">I", _png[20:24])[0]
-                        bit_depth = _png[24]
-                        color_type = _png[25]
-                        if bit_depth != 8 or color_type != 2:
-                            print(f"detect-lane-markings-camera: only 8-bit RGB PNG supported. Skipping.", file=sys.stderr)
-                            continue
-                        # Collect IDAT chunks and decompress.
-                        offset_p = 8
-                        idat_data = b""
-                        while offset_p < len(_png):
-                            length = struct.unpack(">I", _png[offset_p:offset_p+4])[0]
-                            chunk_type = _png[offset_p+4:offset_p+8]
-                            if chunk_type == b"IDAT":
-                                idat_data += _png[offset_p+8:offset_p+8+length]
-                            elif chunk_type == b"IEND":
-                                break
-                            offset_p += 12 + length
-                        raw = zlib.decompress(idat_data)
-                        row_stride = 1 + w_png * 3
-                        import numpy as _np
-                        pixels_flat = []
-                        for ri in range(h_png):
-                            row_data = raw[ri * row_stride + 1: (ri + 1) * row_stride]
-                            pixels_flat.append(list(row_data))
-                        rgb_arr = _np.array(pixels_flat, dtype=_np.uint8).reshape(h_png, w_png, 3)
-                    except Exception as inner:
-                        print(f"detect-lane-markings-camera: failed to read {img_file.name}: {inner}", file=sys.stderr)
-                        continue
-            except Exception as e:
-                print(f"detect-lane-markings-camera: error loading {img_file}: {e}", file=sys.stderr)
-                continue
-
-            lanes = detect_lanes_from_image_rgb(
-                rgb_arr,
-                white_threshold=args.white_threshold,
-                yellow_hue_range=(args.yellow_hue_lo, args.yellow_hue_hi),
-                saturation_min=args.saturation_min,
-                min_line_length_px=args.min_line_length_px,
-            )
-            projected = project_camera_lanes_to_graph_edges(
-                lanes,
-                calibration,
-                graph,
-                pose_xy_m=(pose_x, pose_y),
-                heading_rad=heading,
-                max_edge_distance_m=args.max_edge_distance_m,
-            )
-            all_candidates.extend(projected)
-
-        doc = {
-            "camera_lanes": [
-                {
-                    "edge_id": c.edge_id,
-                    "world_xy_m": list(c.world_xy_m),
-                    "kind": c.kind,
-                    "side": c.side,
-                    "confidence": c.confidence,
-                }
-                for c in all_candidates
-            ]
-        }
-        out_path = Path(args.output)
-        out_path.write_text(json.dumps(doc, indent=2) + "\n", encoding="utf-8")
-        print(
-            f"Wrote {out_path}: {len(all_candidates)} camera lane candidates.",
-            file=sys.stderr,
-        )
-        return 0
     if args.command == "validate-lane-markings":
         data = _load_json_for_cli(args.input_json)
         if not isinstance(data, dict):
