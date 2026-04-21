@@ -3,12 +3,11 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 
-import json
 from pathlib import Path
 
-from roadgraph_builder.hd.pipeline import SDToHDConfig, enrich_sd_to_hd
 from roadgraph_builder.cli.build import (
     _TRAJECTORY_DTYPE_CHOICES,
     _add_build_params,
@@ -43,6 +42,11 @@ from roadgraph_builder.cli.guidance import (
     add_guidance_parsers,
     run_guidance,
     run_validate_guidance,
+)
+from roadgraph_builder.cli.hd import (
+    add_hd_parsers,
+    run_enrich,
+    run_infer_lane_count,
 )
 from roadgraph_builder.cli.export import (
     add_export_bundle_parser,
@@ -117,34 +121,7 @@ def _build_parser() -> argparse.ArgumentParser:
     add_build_parser(sub)
     add_visualize_parser(sub)
     add_validation_parsers(sub)
-
-    enr = sub.add_parser(
-        "enrich",
-        help="Attach SD→HD metadata; optional centerline-offset lane boundaries (--lane-width-m).",
-    )
-    enr.add_argument("input_json", help="Road graph JSON from `build`")
-    enr.add_argument("output_json", help="Output JSON path")
-    enr.add_argument(
-        "--lane-width-m",
-        type=float,
-        default=None,
-        metavar="M",
-        help="Lane width in meters: fill left/right boundaries by offsetting edge centerlines (HD-lite).",
-    )
-    enr.add_argument(
-        "--lane-markings-json",
-        type=str,
-        default=None,
-        metavar="PATH",
-        help="Optional lane_markings.json from detect-lane-markings for per-edge width refinement.",
-    )
-    enr.add_argument(
-        "--camera-detections-json",
-        type=str,
-        default=None,
-        metavar="PATH",
-        help="Optional camera_detections.json for per-edge width refinement.",
-    )
+    add_hd_parsers(sub)
 
     add_inspect_lidar_parser(sub)
 
@@ -154,48 +131,6 @@ def _build_parser() -> argparse.ArgumentParser:
     add_trajectory_parsers(sub)
 
     add_fuse_lidar_parser(sub)
-
-    ilc = sub.add_parser(
-        "infer-lane-count",
-        help="Infer per-edge lane count and lane geometries; writes hd.lane_count + hd.lanes[] into the graph JSON.",
-    )
-    ilc.add_argument("input_json", help="Road graph JSON (e.g. from enrich or export-bundle).")
-    ilc.add_argument("output_json", help="Output enriched road graph JSON path.")
-    ilc.add_argument(
-        "--lane-markings-json",
-        type=str,
-        default=None,
-        metavar="PATH",
-        help="Optional lane_markings.json from detect-lane-markings for paint-marker clustering.",
-    )
-    ilc.add_argument(
-        "--base-lane-width-m",
-        type=float,
-        default=3.5,
-        metavar="M",
-        help="Assumed single-lane width in meters (default 3.5).",
-    )
-    ilc.add_argument(
-        "--split-gap-m",
-        type=float,
-        default=2.0,
-        metavar="M",
-        help="1-D agglomerative clustering gap threshold (meters, default 2.0).",
-    )
-    ilc.add_argument(
-        "--min-lanes",
-        type=int,
-        default=1,
-        metavar="N",
-        help="Floor on inferred lane count (default 1).",
-    )
-    ilc.add_argument(
-        "--max-lanes",
-        type=int,
-        default=6,
-        metavar="N",
-        help="Ceiling on inferred lane count (default 6).",
-    )
 
     add_lanelet2_parsers(sub)
 
@@ -346,32 +281,12 @@ def main(argv: list[str] | None = None) -> int:
             validation_error_func=print_validation_error,
         )
     if args.command == "enrich":
-        graph = _cli_load_graph(args.input_json)
-        refinements = None
-        if args.lane_markings_json or args.camera_detections_json:
-            from roadgraph_builder.hd.refinement import refine_hd_edges as _refine_hd_edges
-            lm_data = _load_json_for_cli(args.lane_markings_json) if args.lane_markings_json else None
-            cam_data = _load_json_for_cli(args.camera_detections_json) if args.camera_detections_json else None
-            if not isinstance(lm_data, dict) and lm_data is not None:
-                print("enrich: --lane-markings-json must be a JSON object.", file=sys.stderr)
-                return 1
-            if not isinstance(cam_data, dict) and cam_data is not None:
-                print("enrich: --camera-detections-json must be a JSON object.", file=sys.stderr)
-                return 1
-            _graph_json = json.loads(Path(args.input_json).read_text(encoding="utf-8"))
-            refinements = _refine_hd_edges(
-                _graph_json,
-                lane_markings=lm_data,
-                camera_detections=cam_data,
-                base_lane_width_m=args.lane_width_m or 3.5,
-            )
-        enrich_sd_to_hd(
-            graph,
-            SDToHDConfig(lane_width_m=args.lane_width_m),
-            refinements=refinements,
+        return run_enrich(
+            args,
+            load_graph=_cli_load_graph,
+            load_json=_load_json_for_cli,
+            export_graph_json_func=export_graph_json,
         )
-        export_graph_json(graph, args.output_json)
-        return 0
     if args.command == "nearest-node":
         return run_nearest_node(args, load_graph=_cli_load_graph)
     if args.command == "reconstruct-trips":
@@ -409,61 +324,12 @@ def main(argv: list[str] | None = None) -> int:
             export_graph_json_func=export_graph_json,
         )
     if args.command == "infer-lane-count":
-        from roadgraph_builder.hd.lane_inference import infer_lane_counts as _infer_lane_counts
-        graph = _cli_load_graph(args.input_json)
-        graph_json = json.loads(Path(args.input_json).read_text(encoding="utf-8"))
-        lm_data = None
-        if args.lane_markings_json:
-            raw_lm = _load_json_for_cli(args.lane_markings_json)
-            if not isinstance(raw_lm, dict):
-                print("infer-lane-count: --lane-markings-json must be a JSON object.", file=sys.stderr)
-                return 1
-            lm_data = raw_lm
-        inferences = _infer_lane_counts(
-            graph_json,
-            lane_markings=lm_data,
-            base_lane_width_m=args.base_lane_width_m,
-            split_gap_m=args.split_gap_m,
-            min_lanes=args.min_lanes,
-            max_lanes=args.max_lanes,
+        return run_infer_lane_count(
+            args,
+            load_graph=_cli_load_graph,
+            load_json=_load_json_for_cli,
+            export_graph_json_func=export_graph_json,
         )
-        # Write lane_count + lanes[] into each edge's attributes.hd.
-        inf_by_id = {inf.edge_id: inf for inf in inferences}
-        for edge in graph.edges:
-            inf = inf_by_id.get(edge.id)
-            if inf is None:
-                continue
-            attrs = dict(edge.attributes)
-            hd = dict(attrs.get("hd", {}))
-            hd["lane_count"] = inf.lane_count
-            hd["lanes"] = [
-                {
-                    "lane_index": lg.lane_index,
-                    "offset_m": lg.offset_m,
-                    "centerline_m": [list(pt) for pt in lg.centerline_m],
-                    "confidence": lg.confidence,
-                }
-                for lg in inf.lanes
-            ]
-            hd["lane_inference_sources"] = inf.sources_used
-            attrs["hd"] = hd
-            edge.attributes = attrs
-        export_graph_json(graph, args.output_json)
-        total_lanes = sum(inf.lane_count for inf in inferences)
-        print(
-            json.dumps(
-                {
-                    "edges_processed": len(inferences),
-                    "total_lanes_inferred": total_lanes,
-                    "sources_summary": {
-                        src: sum(1 for inf in inferences if src in inf.sources_used)
-                        for src in ("lane_markings", "trace_stats", "default")
-                    },
-                },
-                indent=2,
-            )
-        )
-        return 0
     if args.command == "export-lanelet2":
         return run_export_lanelet2(args, load_graph=_cli_load_graph, load_json=_load_json_for_cli)
     if args.command == "validate-lanelet2":
