@@ -6,7 +6,7 @@
 > このファイル → [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md)（Mermaid 6 枚 + CLI 対応表 +
 > モジュール索引）→ [`CHANGELOG.md`](../CHANGELOG.md) の順。
 
-*最終更新: 2026-04-21 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards polish + README measured-results compacting / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate + manifest policy docs polish / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理 / v0.7.1 release prep）を反映済み。*
+*最終更新: 2026-04-21 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards polish + README measured-results compacting / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate + manifest policy docs polish / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理 / v0.7.1 release + asset verification）を反映済み。*
 
 ---
 
@@ -16,8 +16,10 @@
 - **目的:** 軌跡 CSV / OSM highway ways / LiDAR / camera 入力から **道路グラフ** を構築し、
   ナビ SD / simulation / Lanelet2 を一括エクスポートする graph-first ライブラリ。HD は
   survey-grade ではなく「HD-lite」帯まで。
-- **state:** **v0.7.1 release prep (2026-04-21)**。最新 push 済み `main` は CI green
-  （`fed4c33` / CI run `24720418716`）。`v0.7.0` は shipped (2026-04-20)。
+- **state:** **v0.7.1 shipped (2026-04-21)**。tag `v0.7.1` は `8282f7c`。
+  main CI run `24721558719` と Release workflow run `24721632168` は green。
+  GitHub Release assets (`roadgraph_sample_bundle.tar.gz` / `.sha256`) は download + checksum +
+  `validate-manifest` / `validate-sd-nav` / `validate` 済み。`v0.7.0` は shipped (2026-04-20)。
   最新 full local `pytest` = **553 passed / 33 skipped / 4 deselected**（opt-in marker 除外）。
 - **直前の session (2026-04-21) で landed:**
   1. V1 accuracy 実測 — Paris 20e MAE 0.938、Tokyo Ginza MAE 0.903、Berlin Mitte MAE 1.220（lane-count vs OSM `lanes=`、canonical 20 m）
@@ -96,6 +98,9 @@
       routing / accuracy / tuning / memory の 4 signals に絞り、後段の長い duplicate table を削除。
   29. `v0.7.1` release prep。`pyproject.toml` / `roadgraph_builder.__version__` を 0.7.1 に上げ、
       `CHANGELOG.md` の `[Unreleased]` を `0.7.1 — 2026-04-21` に切り出す。
+  30. `v0.7.1` annotated tag を push し、Release workflow で GitHub Release を作成。
+      添付された `roadgraph_sample_bundle.tar.gz` と `.sha256` を `/tmp` に download し、
+      `sha256sum -c` と展開後の manifest / sd_nav / road_graph validate を確認。
 - **push 方針:** `git push` は user が `push!` などで明示するまで実行しない。
 - **未着手 (次の AI が触る候補):** ↓ §5 "Open tasks" 参照。
 
@@ -636,11 +641,11 @@ feedback / project / reference の 4 種、`MEMORY.md` は index）。
 
 ## 11. 一行で言うと
 
-> **v0.7.1 release prep 済み。v0.7.0 は全部シップ済み、直近 workstream（accuracy / completions / tuning / visual preview /
+> **v0.7.1 shipped 済み。v0.7.0 は全部シップ済み、直近 workstream（accuracy / completions / tuning / visual preview /
 > CLI boundary split / release surface docs / float32 drift compare script / 1M synthetic memory
 > profile / OSM public-trace replay profile / release bundle byte + normalized-manifest gate +
 > manifest policy docs polish / README measured-results compacting）も 0.7.1 に切り出し済み。
-> 次は release prep commit の CI 確認後に `v0.7.1` tag push、または raw large trace が来た時の true large benchmark。
+> Release assets は download/checksum/validate 済み。次は raw large trace が来た時の true large benchmark。
 > 何を削って何を広げたかは
 > `CHANGELOG.md` と §3 の小節を見れば全部わかる。push / tag / AI マーカー / PyPI /
 > Mapillary は全部 user authorize か No 決定済みなので、勝手に提案しないこと。**
