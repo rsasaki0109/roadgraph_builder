@@ -6,7 +6,7 @@
 > このファイル → [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md)（Mermaid 6 枚 + CLI 対応表 +
 > モジュール索引）→ [`CHANGELOG.md`](../CHANGELOG.md) の順。
 
-*最終更新: 2026-04-21 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+Pages visual preview + measured-results cards / float32 opt-in + drift report が反映済み）。*
+*最終更新: 2026-04-21 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards / float32 opt-in + drift report / private repo Pages blocked note が反映済み）。*
 
 ---
 
@@ -16,7 +16,8 @@
 - **目的:** 軌跡 CSV / OSM highway ways / LiDAR / camera 入力から **道路グラフ** を構築し、
   ナビ SD / simulation / Lanelet2 を一括エクスポートする graph-first ライブラリ。HD は
   survey-grade ではなく「HD-lite」帯まで。
-- **state:** **v0.7.0 shipped (2026-04-20)**。`main` 最新は clean、CI green、
+- **state:** **v0.7.0 shipped (2026-04-20)**。最新 push 済み `main` は CI green
+  （`6c0ba63` / CI run `24704776034`）、
   最新 full local `pytest` = **483 passed / 33 skipped / 4 deselected**（opt-in marker 除外）。
 - **直前の session (2026-04-21) で landed:**
   1. V1 accuracy 実測 — Paris 20e MAE 0.938、Tokyo Ginza MAE 0.903、Berlin Mitte MAE 1.220（lane-count vs OSM `lanes=`、canonical 20 m）
@@ -26,12 +27,15 @@
   5. PLAN / ARCHITECTURE / README を v0.6+v0.7 CLI 群に同期
   6. Bash / zsh completions を v0.6+v0.7 CLI 群に同期（parser-derived drift test 付き）
   7. 実走 CSV tuning — Berlin Mitte OSM public GPS sweep 追加、`40/8` 推奨を 3 都市で確認
-  8. README / GitHub Pages に Paris grid route の静的 visualization preview を追加
+  8. README / `docs/` static viewer に Paris grid route の静的 visualization preview を追加
   9. V3 float32 trajectory optimization — design memo、opt-in prototype（default float64 維持）、
      Paris/Berlin drift report を追加
-  10. README / GitHub Pages に **Measured results** を追加（Paris TR-aware route、lane-count MAE、
+  10. README / `docs/` static viewer に **Measured results** を追加（Paris TR-aware route、lane-count MAE、
       cross-city tuning、float32 drift）
-- **まだ push していない**。`git push` は user が `push!` などで明示するまで実行しない。
+  11. private repo のまま GitHub Pages を有効化しようとしたが、GitHub API が
+      `Your current plan does not support GitHub Pages for this repository.` で拒否。public mirror は
+      user が取り下げ、README はローカル `docs/` preview 前提に寄せた。
+- **push 方針:** `git push` は user が `push!` などで明示するまで実行しない。
 - **未着手 (次の AI が触る候補):** ↓ §5 "Open tasks" 参照。
 
 - **コミュニケーション言語:** **日本語** 優先。ユーザーは短い JP/romaji プロンプトを好み
@@ -51,7 +55,8 @@
   **段階的**（stub 含む）。サーベイ級の cm 精度は最初から狙わない。
 - 生成したグラフ上で **ルーティング**（Dijkstra + turn_restrictions + slope-aware +
   lane-change）まで完結させ、**ナビ guidance**（turn-by-turn step）まで出す。
-- Leaflet viewer（GitHub Pages）で **click-to-route** 可視化まで。
+- Leaflet viewer（`docs/` static site、GitHub Pages は repo visibility / plan が許す時のみ）で
+  **click-to-route** 可視化まで。
 - CLI first（argparse dispatcher）、JSON schema-first、pure-Python first（heavy dep は optional extra）。
 
 ## 2. 非目標・決定済み non-goals
@@ -269,6 +274,8 @@
   に保持。
 - `docs/index.html` は従来の SVG diagram viewer の下に `paris_grid_route.svg` の result card を表示。
   README も同じ SVG を `Visualization results` として embed し、`docs/map.html` へリンクする。
+  現 repo は private のまま維持する方針で、現在の GitHub plan では private repo Pages が作れない
+  ため、README は `cd docs && python3 -m http.server 8765` のローカル preview を primary にしている。
   Playwright で `http://127.0.0.1:18765/` を開き、card と画像ロードを確認済み。
 - **click-to-route UI:** ノード 2 つをクリックすると JS 側 directed-state binary-heap Dijkstra
   が `(node, incoming_edge, direction)` 状態で `no_*` / `only_*` 制限を honor。"Clear route"
@@ -358,7 +365,7 @@ cards は `[Unreleased]` 下。
    `scripts/compare_float32_drift.py` にする。release gate 化するなら有用。今は必須ではない。
 3. **Larger workload memory benchmark** — `/tmp` または synthetic で 100k+ rows の trajectory を作り、
    `--trajectory-dtype float32` が RSS に効く規模を確認する。大きい raw data は commit しない。
-4. **Docs visual polish** — GitHub Pages metric cards は入った。次にやるなら mobile screenshot /
+4. **Docs visual polish** — `docs/` metric cards は入った。次にやるなら mobile screenshot /
    Playwright visual smoke を足すか、README の measured-results table を release badge 周辺へ
    compact に寄せる。
 

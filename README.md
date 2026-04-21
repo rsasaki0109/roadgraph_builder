@@ -6,7 +6,7 @@
 
 **Construct road graphs from trajectory, LiDAR, and camera data** (MVP: **trajectory CSV only**).
 
-This project builds a **graph-first** intermediate representation: **nodes** (junctions/endpoints) and **edges** (lane/road segments) with **centerline polylines** and optional **attributes**. Output is **JSON** (`schema_version`) with optional **SVG** previews and an **interactive viewer** on **GitHub Pages** (`docs/`).
+This project builds a **graph-first** intermediate representation: **nodes** (junctions/endpoints) and **edges** (lane/road segments) with **centerline polylines** and optional **attributes**. Output is **JSON** (`schema_version`) with optional **SVG** previews and a small static viewer in **`docs/`** (local preview, or GitHub Pages when the repository/plan supports it).
 
 ### GitHub “About” text (copy-paste)
 
@@ -24,22 +24,22 @@ Use the short description and topics listed in [`.github/ABOUT.md`](.github/ABOU
 | **HD / Lanelet2** | `enrich --lane-width-m` for envelope + offset boundaries; `--lane-markings-json` / `--camera-detections-json` fuse sources into `metadata.hd_refinement`. **`infer-lane-count`** (v0.6) clusters paint-marker offsets into `attributes.hd.lane_count` + `hd.lanes[]` (fallback to `trace_stats.perpendicular_offsets`). `export-lanelet2` emits `roadgraph:*` ways + `lanelet` relations; `--per-lane` expands each multi-lane edge into one lanelet per lane with `lane_change` relations (v0.6); `--camera-detections-json` wires `traffic_light` / `stop_line` regulatory_elements (v0.7). **`validate-lanelet2-tags`** (v0.6) flags missing required Lanelet2 tags; **`validate-lanelet2`** (v0.7) bridges Autoware's `lanelet2_validation` CLI when on PATH. |
 | **Output** | JSON (+ schema), GeoJSON, OSM XML 0.6 (Lanelet2-compatible), SVG. **`export-bundle`** writes nav / sim / lanelet / manifest in one directory. |
 | **Benchmarks** | `make bench` runs a deterministic wall-clock suite (build / shortest path / export-bundle); `--baseline` compares against recorded numbers with a 3× regression gate. Baseline in [`docs/benchmarks.md`](docs/benchmarks.md). Memory profile for v0.7 under [`docs/memory_profile_v0.7.md`](docs/memory_profile_v0.7.md) (Paris peak RSS 61→55 MB after the `export_lanelet2` DOM rewrite). Lane-count accuracy against OSM `lanes=` in [`docs/accuracy_report.md`](docs/accuracy_report.md). |
-| **Demo** | [Diagram viewer](https://rsasaki0109.github.io/roadgraph_builder/) · **[Map (OSM tiles)](https://rsasaki0109.github.io/roadgraph_builder/map.html)** (TR-aware click-to-route), static previews in [docs/images](docs/images/). |
+| **Demo** | Static viewer in [docs/](docs/) — [diagram](docs/index.html) · **[map](docs/map.html)** (OSM tiles, TR-aware click-to-route when served locally), static previews in [docs/images](docs/images/). |
 | **Samples** | [Toy CSV](examples/sample_trajectory.csv), [OSM GPS](examples/osm_public_trackpoints.csv) (ODbL), [camera calibration + pixel detections](examples/demo_camera_calibration.json), [Paris OSM-grid + turn_restrictions](docs/assets/map_paris_grid.geojson) (ODbL). |
 
 ### Visualization results
 
-The GitHub Pages map ships a Paris OSM-highway graph with 10 mapped turn restrictions and a restriction-aware route overlay. This static preview is regenerated from the committed GeoJSON assets by `scripts/refresh_docs_assets.py`.
+The docs map ships a Paris OSM-highway graph with 10 mapped turn restrictions and a restriction-aware route overlay. This static preview is regenerated from the committed GeoJSON assets by `scripts/refresh_docs_assets.py`.
 
-[![Paris OSM-highway grid with a TR-aware route](docs/images/paris_grid_route.svg)](https://rsasaki0109.github.io/roadgraph_builder/map.html)
+[![Paris OSM-highway grid with a TR-aware route](docs/images/paris_grid_route.svg)](docs/map.html)
 
-Open the interactive version: **[Map (OSM tiles)](https://rsasaki0109.github.io/roadgraph_builder/map.html)**.
+Open the interactive version locally: `cd docs && python3 -m http.server 8765`, then visit **`http://127.0.0.1:8765/map.html`**.
 
 ### Measured results
 
 | Track | Latest result | Details |
 | --- | --- | --- |
-| **Paris grid visualization** | 855 nodes / 1081 edges, 10 mapped OSM turn restrictions, TR-aware route **909 m** vs unrestricted **878 m** | [Interactive map](https://rsasaki0109.github.io/roadgraph_builder/map.html), [asset attribution](docs/assets/ATTRIBUTION.md) |
+| **Paris grid visualization** | 855 nodes / 1081 edges, 10 mapped OSM turn restrictions, TR-aware route **909 m** vs unrestricted **878 m** | [local map](docs/map.html), [asset attribution](docs/assets/ATTRIBUTION.md) |
 | **Lane-count baseline** | OSM `lanes=` MAE at canonical 20 m matching: Paris 20e **0.938**, Tokyo Ginza **0.903**, Berlin Mitte **1.220** | [accuracy report](docs/accuracy_report.md) |
 | **Bundle tuning** | Conservative starting point remains `--max-step-m 40 --merge-endpoint-m 8` across Paris / Tokyo / Berlin; Berlin 40/8 validates at 58 nodes / 57 edges / 52% LCC | [tuning guide](docs/bundle_tuning.md) |
 | **Memory / dtype** | Opt-in `--trajectory-dtype float32` keeps topology unchanged on Paris + Berlin; max observed drift **0.00072 m**, default remains float64 | [float32 drift report](docs/float32_drift_report.md) |
@@ -130,7 +130,7 @@ Use `--lane-width-m 0` to skip HD-lite ribbon offsets. Origin must match your Ge
 
 | Resource | URL |
 | --- | --- |
-| **Live viewer** (after Pages) | `https://rsasaki0109.github.io/roadgraph_builder/` |
+| **Local viewer** | `docs/index.html` / `docs/map.html` (serve with `cd docs && python3 -m http.server 8765`) |
 | **Changelog** | [CHANGELOG.md](CHANGELOG.md) |
 | **Plan / handoff** | [docs/PLAN.md](docs/PLAN.md) |
 | **PyPI** | Not published by default; see [PyPI (optional)](#pypi-optional) |
@@ -192,18 +192,9 @@ These are **static exports** from `roadgraph_builder visualize` (regenerate with
 
 > **まだ「地図」では？** — 衛星写真や地図タイルのような“地図”ではありませんが、**道路構造を読むための図**としてはここまで寄せています。これからも見た目とアルゴリズムを詰めていきます。
 
-### Interactive viewer (GitHub Pages)
+### Interactive viewer (`docs/`)
 
-The **`docs/`** folder is a small static site.
-
-1. In the GitHub repo: **Settings → Pages → Build and deployment → Source**: **Deploy from a branch**, branch **`main`**, folder **`/docs`**, Save.
-2. After a minute, open:
-   - **`https://<user>.github.io/roadgraph_builder/`** — diagram viewer (SVG-style pan/zoom)
-   - **`https://<user>.github.io/roadgraph_builder/map.html`** — **real basemap** (OSM tiles + GeoJSON: trajectory, centerlines, nodes, **HD-lite lane boundaries** when `attributes.hd` is filled — bundled assets use `enrich --lane-width-m 3.5` via `scripts/refresh_docs_assets.py`). Click any two nodes to route between them; the JS Dijkstra is **directed-state and TR-aware** when the dataset ships a restrictions overlay. The dropdown selects between four datasets:
-     - **Paris grid** (default, 855 nodes / 1081 edges — derived from OSM highway ways, ships with 10 OSM turn restrictions as red-dot markers. ODbL.)
-     - **Paris** (older, trajectory-derived, 123 edges / 223 nodes; from OSM public GPS, ODbL.)
-     - **OSM Berlin sample** (4 edges, smaller).
-     - **Toy** (synthetic trajectory from `examples/sample_trajectory.csv`).
+The **`docs/`** folder is a small static site. This repository is currently private; on the current GitHub plan, private-repo GitHub Pages is not available, so the supported preview path is local.
 
 Local preview (no GitHub required):
 
@@ -212,6 +203,17 @@ cd docs && python3 -m http.server 8765
 # http://127.0.0.1:8765/          — diagram viewer
 # http://127.0.0.1:8765/map.html  — OSM map + GeoJSON
 ```
+
+When Pages is available (public repo, Pages-capable private repo plan, or a separate public static mirror):
+
+1. In the GitHub repo: **Settings → Pages → Build and deployment → Source**: **Deploy from a branch**, branch **`main`**, folder **`/docs`**, Save.
+2. After a minute, open the Pages URL shown by GitHub:
+   - site root — diagram viewer (SVG-style pan/zoom)
+   - `map.html` — **real basemap** (OSM tiles + GeoJSON: trajectory, centerlines, nodes, **HD-lite lane boundaries** when `attributes.hd` is filled — bundled assets use `enrich --lane-width-m 3.5` via `scripts/refresh_docs_assets.py`). Click any two nodes to route between them; the JS Dijkstra is **directed-state and TR-aware** when the dataset ships a restrictions overlay. The dropdown selects between four datasets:
+     - **Paris grid** (default, 855 nodes / 1081 edges — derived from OSM highway ways, ships with 10 OSM turn restrictions as red-dot markers. ODbL.)
+     - **Paris** (older, trajectory-derived, 123 edges / 223 nodes; from OSM public GPS, ODbL.)
+     - **OSM Berlin sample** (4 edges, smaller).
+     - **Toy** (synthetic trajectory from `examples/sample_trajectory.csv`).
 
 Regenerate bundled JSON/CSV/SVG for `docs/` after changing examples or pipeline logic:
 
