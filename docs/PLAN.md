@@ -341,24 +341,28 @@ README+Pages visualization preview は `[Unreleased]` 下。
 
 優先度順。各タスクに **手をつける前のヒント** を付けてある。
 
-### 5a. V3 float32 trajectory 最適化（long／設計フェーズ先行）
+### 5a. V3 float32 trajectory 最適化（long／prototype は user review 後）
 
 - **背景:** v0.7 で `export_lanelet2` DOM rewrite が peak RSS を -10% したが、trajectory 配列の
   float64→float32 変換はまだ。**byte-identity を破る** ので単純 swap 不可。
+- **設計メモ:** [`docs/handoff/float32_trajectory.md`](./handoff/float32_trajectory.md) 作成済み。
+  結論は「default float64 維持 + opt-in float32 prototype + drift 計測」。`Trajectory.timestamps`
+  と `Trajectory.z` は float64 のまま、まず `Trajectory.xy` のみを候補にする。
 - **設計の勘所:**
   - どこで float64 が伸びるか: `io.trajectory.loader::Trajectory.xy`, `pipeline.build_graph` 内の
     numpy 配列、`routing.shortest_path` の内部距離計算など。
   - byte-identity への影響: `export-bundle` の `sim/road_graph.json` に保存される polyline の
     末尾桁が変わる可能性。どこまで tolerance を緩められるか（schema は float で decimal 精度制約なし）
     を決める必要あり。
-  - regression test: 現 shipped bundle との diff を `examples/frozen_bundle/` に対して比較する
-    既存 test があるか要確認（`tests/test_bundle_frozen.py` が該当しそう）。
+  - regression test: 現 `tests/test_release_bundle.py` は frozen bundle の schema / 形の検証が中心で、
+    常時 byte-for-byte diff は無い。default path の byte identity と opt-in path の tolerance test を
+    prototype 時に追加する。
 - **やり方:**
-  1. design memo を `docs/handoff/` に書く（どこで型を変えるか、byte-identity への影響 matrix）
+  1. ~~design memo を `docs/handoff/` に書く~~（完了）
   2. user review → GO サイン
-  3. prototype（1 hotspot だけ）
-  4. measure with `scripts/profile_memory.py`
-  5. regression を広げる / 縮める
+  3. opt-in prototype（`load_trajectory_csv(..., xy_dtype=...)` + `BuildParams` / CLI flag は要判断）
+  4. `scripts/profile_memory.py` を float64/float32 両方で実測
+  5. default path は byte-identical、opt-in path は coordinate / length tolerance で regression
 - **規模感:** 2-3 session 使う可能性あり。fresh session で設計 memo から start するのが安全。
 
 ---

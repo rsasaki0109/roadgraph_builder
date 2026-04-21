@@ -47,6 +47,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   baselines (no LiDAR markings / trace_stats) and document the 20 m canonical
   tolerance vs the original 5 m recipe.
 
+- **V3 follow-up: float32 trajectory optimization now has a handoff memo.**
+  `docs/handoff/float32_trajectory.md` records the current dtype flow,
+  byte-identity impact matrix, and recommended opt-in prototype path:
+  keep default `Trajectory.xy` as float64, measure float32 as an explicit
+  coordinate-array optimization, and add drift/tolerance tests before any
+  default-output change.
+
 ### Fixed
 
 - **V1: `measure_lane_accuracy.py` now handles meter-frame graphs.** When the
