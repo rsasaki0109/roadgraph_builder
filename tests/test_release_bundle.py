@@ -26,6 +26,17 @@ FROZEN_STABLE_GENERATED_FILES = [
     "sim/README.txt",
     "lanelet/map.osm",
 ]
+MANIFEST_DYNAMIC_FIELDS = {
+    "roadgraph_builder_version": "<dynamic-version>",
+    "generated_at_utc": "<dynamic-generated-at>",
+}
+
+
+def _manifest_with_dynamic_fields_normalized(path: Path) -> dict:
+    data = json.loads(path.read_text(encoding="utf-8"))
+    for key, value in MANIFEST_DYNAMIC_FIELDS.items():
+        data[key] = value
+    return data
 
 
 def test_frozen_bundle_manifest_validates():
@@ -62,8 +73,8 @@ def test_frozen_bundle_expected_files_present():
         assert (FROZEN / rel).is_file(), f"missing frozen bundle file: {rel}"
 
 
-def test_default_export_bundle_stable_files_match_frozen_bytes(tmp_path: Path):
-    """Default float64 export-bundle path keeps stable artefacts byte-identical."""
+def test_default_export_bundle_matches_frozen_outputs(tmp_path: Path):
+    """Default float64 export-bundle output stays deterministic."""
     from roadgraph_builder.cli.main import main
 
     out = tmp_path / "bundle"
@@ -96,6 +107,12 @@ def test_default_export_bundle_stable_files_match_frozen_bytes(tmp_path: Path):
         frozen_bytes = (FROZEN / rel).read_bytes()
         generated_bytes = (out / rel).read_bytes()
         assert generated_bytes == frozen_bytes, f"stable generated file drifted: {rel}"
+
+    generated_manifest = json.loads((out / "manifest.json").read_text(encoding="utf-8"))
+    validate_manifest_document(generated_manifest)
+    assert _manifest_with_dynamic_fields_normalized(
+        out / "manifest.json"
+    ) == _manifest_with_dynamic_fields_normalized(FROZEN / "manifest.json")
 
 
 @pytest.mark.skipif(

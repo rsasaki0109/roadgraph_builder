@@ -6,7 +6,7 @@
 > このファイル → [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md)（Mermaid 6 枚 + CLI 対応表 +
 > モジュール索引）→ [`CHANGELOG.md`](../CHANGELOG.md) の順。
 
-*最終更新: 2026-04-21 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards / float32 opt-in + drift report + compare script + 1M synthetic memory profile / release bundle byte gate / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理）を反映済み。*
+*最終更新: 2026-04-21 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards / float32 opt-in + drift report + compare script + 1M synthetic memory profile / release bundle byte + normalized-manifest gate / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理）を反映済み。*
 
 ---
 
@@ -81,7 +81,8 @@
       sample trajectory + detections + turn_restrictions + LiDAR fixture から tmp bundle を再生成し、
       `sd_nav.json` / `road_graph.json` / `map.geojson` / `trajectory.csv` / Lanelet2 OSM /
       generated README files が `examples/frozen_bundle/` と byte-for-byte 一致することを常時検証。
-      `manifest.json` は version / generated_at が動的なので schema validation に留める。
+      `manifest.json` は `roadgraph_builder_version` と `generated_at_utc` だけを normalize して、
+      それ以外を frozen manifest と厳密比較する。
 - **push 方針:** `git push` は user が `push!` などで明示するまで実行しない。
 - **未着手 (次の AI が触る候補):** ↓ §5 "Open tasks" 参照。
 
@@ -396,7 +397,7 @@ cards は `[Unreleased]` 下。
     末尾桁が変わる可能性。どこまで tolerance を緩められるか（schema は float で decimal 精度制約なし）
     を決める必要あり。
   - regression test: `tests/test_release_bundle.py` が stable generated files を byte-for-byte で
-    frozen bundle と比較する。manifest の version / generated_at は動的なので schema validation のまま。
+    frozen bundle と比較する。manifest は version / generated_at のみ normalize して比較する。
 - **やり方:**
   1. ~~design memo を `docs/handoff/` に書く~~（完了）
   2. ~~opt-in prototype（loader + `BuildParams` + CLI/profile flag）~~（完了）
@@ -413,9 +414,8 @@ cards は `[Unreleased]` 下。
 
 1. **Real-world large memory benchmark** — synthetic 1M では full-pipeline RSS への効果が小さい。
    `/tmp` の実走大規模 trajectory で `Trajectory.xy` が支配的になるかだけ追加確認する。
-2. **Manifest determinism policy** — stable bundle files は byte-gated 済み。`manifest.json` の
-   `generated_at_utc` / package version を normalize して比較するか、今の schema-only 検証に
-   留めるかを release policy として明文化する。
+2. **Manifest policy docs polish** — normalized manifest gate は入った。README や release docs に
+   「version / generated_at は動的、それ以外は frozen 比較」と一文追加するなら軽い。
 3. **Docs visual polish** — `docs/` metric cards は入った。次にやるなら mobile screenshot /
    Playwright visual smoke を足すか、README の measured-results table を release badge 周辺へ
    compact に寄せる。
@@ -619,8 +619,8 @@ feedback / project / reference の 4 種、`MEMORY.md` は index）。
 
 > **v0.7.0 は全部シップ済み、直近 workstream（accuracy / completions / tuning / visual preview /
 > CLI boundary split / release surface docs / float32 drift compare script / 1M synthetic memory
-> profile / release bundle byte gate）も commit 済み。次は「real-world large memory benchmark」
-> か「manifest determinism policy」から入るのがおすすめ。
+> profile / release bundle byte + normalized-manifest gate）も commit 済み。次は
+> 「real-world large memory benchmark」か「docs visual polish」から入るのがおすすめ。
 > 何を削って何を広げたかは
 > `CHANGELOG.md` と §3 の小節を見れば全部わかる。push / tag / AI マーカー / PyPI /
 > Mapillary は全部 user authorize か No 決定済みなので、勝手に提案しないこと。**
