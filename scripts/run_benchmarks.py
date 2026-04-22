@@ -134,7 +134,7 @@ def run_grid_routes_120() -> int:
     from roadgraph_builder.core.graph.edge import Edge
     from roadgraph_builder.core.graph.graph import Graph
     from roadgraph_builder.core.graph.node import Node
-    from roadgraph_builder.routing.shortest_path import shortest_path
+    from roadgraph_builder.routing.shortest_path import RoutePlanner
 
     size = 55
     spacing = 10.0
@@ -169,6 +169,7 @@ def run_grid_routes_120() -> int:
                 edge_id += 1
 
     graph = Graph(nodes, edges)
+    planner = RoutePlanner(graph)
     count = 0
     for i in range(120):
         sx = i % size
@@ -177,7 +178,7 @@ def run_grid_routes_120() -> int:
         ty = size - 1 - sy
         if sx == tx and sy == ty:
             continue
-        shortest_path(graph, f"n{sx}_{sy}", f"n{tx}_{ty}")
+        planner.shortest_path(f"n{sx}_{sy}", f"n{tx}_{ty}")
         count += 1
     return count
 

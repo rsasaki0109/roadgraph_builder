@@ -9,7 +9,7 @@ import pytest
 from roadgraph_builder.core.graph.edge import Edge
 from roadgraph_builder.core.graph.graph import Graph
 from roadgraph_builder.core.graph.node import Node
-from roadgraph_builder.routing.shortest_path import shortest_path
+from roadgraph_builder.routing.shortest_path import RoutePlanner, shortest_path
 
 
 def _straight_polyline(p0: tuple[float, float], p1: tuple[float, float], steps: int = 2):
@@ -136,6 +136,14 @@ def test_shortest_path_cached_index_tracks_in_place_polyline_mutation():
     assert math.isclose(r.total_length_m, 100.0)
 
 
+def test_route_planner_reuses_prepared_state_for_repeated_queries():
+    g = _manual_graph()
+    planner = RoutePlanner(g)
+
+    assert planner.shortest_path("a", "c") == shortest_path(g, "a", "c")
+    assert planner.shortest_path("c", "a") == shortest_path(g, "c", "a")
+
+
 def test_shortest_path_disjoint_raises():
     g = _manual_graph()
     g = Graph(
@@ -246,6 +254,22 @@ def test_no_turn_forces_detour():
     assert r.edge_sequence == ["e1", "e3", "e4"]
     # a-b-d detour should go through d, not e2.
     assert "e2" not in r.edge_sequence
+
+
+def test_route_planner_applies_turn_restrictions():
+    g = _two_route_graph()
+    restrictions = [
+        {
+            "junction_node_id": "b",
+            "from_edge_id": "e1",
+            "from_direction": "forward",
+            "to_edge_id": "e2",
+            "to_direction": "forward",
+            "restriction": "no_left_turn",
+        }
+    ]
+    planner = RoutePlanner(g, turn_restrictions=restrictions)
+    assert planner.shortest_path("a", "c").edge_sequence == ["e1", "e3", "e4"]
 
 
 def test_only_turn_whitelists_single_branch():

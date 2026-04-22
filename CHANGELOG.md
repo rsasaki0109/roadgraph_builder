@@ -24,6 +24,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Repeated shortest-path queries can reuse prepared routing state.**
+  `routing.shortest_path.RoutePlanner` prepares the routing index, weighted
+  adjacency, parsed turn policy, and lane counts once for many route queries.
+  The functional `shortest_path(...)` API remains as a one-query wrapper, while
+  `shortest_path_grid_120` now uses the planner and dropped from about 1.71 s
+  to about 0.96 s in the committed baseline, with warm direct passes around
+  0.60 s locally.
+
 - **Routing search internals now share one core policy layer.**
   `roadgraph_builder.routing._core` owns routing topology caching, weighted
   adjacency construction, edge-cost hooks, and parsed turn policies used by

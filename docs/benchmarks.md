@@ -162,21 +162,38 @@ machine.
 | before analyzer | 2.649 | Revalidated routing topology for every query and used directed state search |
 | after analyzer | 0.270 | Reuses prepared adjacency and uses node-level Dijkstra without turn restrictions |
 
-On this workstation,
-`python scripts/run_benchmarks.py --no-warmup --output docs/assets/benchmark_baseline_0.7.2-dev.json`
-measured:
+The committed baseline JSON records:
 
 | Benchmark | elapsed (s) | Notes |
 |---|---:|---|
 | `polylines_to_graph_paris` | 0.116 | OSM public-trackpoints CSV, small local fixture |
 | `polylines_to_graph_10k_synth` | 0.486 | 50x50 grid, ~25 000 pts |
 | `shortest_path_paris` | 0.021 | Existing small-graph routing smoke |
-| `shortest_path_grid_120` | 1.711 | 120 routes on a 55x55 synthetic graph |
+| `shortest_path_grid_120` | 0.959 | 120 routes on a 55x55 synthetic graph using one prepared `RoutePlanner` |
 | `reachable_grid_120` | 0.270 | 120 reachability queries, 60 m budget, 36 305 consumed node/span results |
 | `nearest_node_grid_2000` | 0.432 | 2000 snaps on a 300x300 node grid |
 | `export_geojson_grid_120_compact` | 0.572 | Compact GeoJSON export on a 120x120 grid |
 | `export_bundle_json_grid_120_compact` | 0.441 | Compact road_graph/sd_nav/manifest JSON on a 120x120 grid |
 | `export_bundle_end_to_end` | 0.005 | Full export-bundle pipeline on sample trajectory |
+
+## v0.7.2-dev RoutePlanner benchmark (2026-04-22)
+
+`RoutePlanner` prepares the shared routing index, weighted adjacency, parsed
+turn policy, and lane counts once, then answers many shortest-path queries over
+that prepared state. The public `shortest_path(...)` function is still available
+as a one-query wrapper.
+
+`run_grid_routes_120` now builds a single planner for the 55x55 synthetic graph.
+On this workstation:
+
+| Version | elapsed (s) | Notes |
+|---|---:|---|
+| before planner | 1.711 | Function API per query; cached topology but repeated planner-local setup |
+| after planner | 0.959 | One prepared `RoutePlanner` reused across all 120 queries |
+
+Five direct passes of `run_grid_routes_120()` in the same Python process measured
+0.973 s, 0.599 s, 0.589 s, 0.602 s, and 0.604 s. A full comparison run with the
+previous baseline reported no regressions.
 
 ## Regression policy
 
