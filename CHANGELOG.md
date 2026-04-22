@@ -31,6 +31,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   edge-span counts, and `docs/benchmarks.md` records the current local timing
   at about 2.6 s with a 60 m cost budget.
 
+- **Benchmark results can be saved and compared from a committed baseline.**
+  `scripts/run_benchmarks.py --output PATH` writes result JSON in the same shape
+  accepted by `--baseline`, and `docs/assets/benchmark_baseline_0.7.2-dev.json`
+  records the current deterministic suite for the 3x regression gate.
+
 - **Packaging metadata now uses a SPDX license expression.**
   `pyproject.toml` now declares `license = "MIT"` with `license-files`, and
   the legacy license classifier was removed so modern setuptools builds no

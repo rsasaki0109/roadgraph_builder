@@ -1,0 +1,29 @@
+{
+  "polylines_to_graph_paris": {
+    "elapsed_s": 0.11630044993944466
+  },
+  "polylines_to_graph_10k_synth": {
+    "elapsed_s": 0.48589068395085633
+  },
+  "shortest_path_paris": {
+    "elapsed_s": 0.021492765052244067
+  },
+  "shortest_path_grid_120": {
+    "elapsed_s": 1.7106788968667388
+  },
+  "reachable_grid_120": {
+    "elapsed_s": 2.6490414871368557
+  },
+  "nearest_node_grid_2000": {
+    "elapsed_s": 0.43206897797062993
+  },
+  "export_geojson_grid_120_compact": {
+    "elapsed_s": 0.5724765069317073
+  },
+  "export_bundle_json_grid_120_compact": {
+    "elapsed_s": 0.44118230417370796
+  },
+  "export_bundle_end_to_end": {
+    "elapsed_s": 0.005385373951867223
+  }
+}

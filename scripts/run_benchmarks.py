@@ -13,12 +13,13 @@ Measures wall-clock time for nine scenarios:
   export_bundle_end_to_end       — full export-bundle pipeline (sample CSV)
 
 Usage:
-    python scripts/run_benchmarks.py [--baseline baseline.json]
+    python scripts/run_benchmarks.py [--baseline baseline.json] [--output results.json]
 
 With --baseline, compares against a saved baseline JSON and exits 1 if any
 benchmark regresses by more than 200 % (3x slower).
 
-Output is JSON printed to stdout; stderr gets human-readable progress.
+Output is JSON printed to stdout and optionally written with --output; stderr
+gets human-readable progress.
 """
 
 from __future__ import annotations
@@ -398,6 +399,12 @@ def run_benchmarks(warmup: bool = True) -> dict[str, dict]:
     return results
 
 
+def write_results_json(results: dict, path: Path) -> None:
+    """Write benchmark results in the same format accepted by --baseline."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(results, indent=2) + "\n", encoding="utf-8")
+
+
 def compare_to_baseline(results: dict, baseline: dict) -> list[str]:
     """Return list of regression messages (empty = no regressions)."""
     regressions: list[str] = []
@@ -426,16 +433,31 @@ def main() -> int:
         help="Saved baseline JSON to compare against. Exit 1 if any benchmark regresses > 200%%.",
     )
     p.add_argument(
+        "--output",
+        type=str,
+        default=None,
+        metavar="PATH",
+        help="Write the measured results JSON to PATH for future --baseline comparisons.",
+    )
+    p.add_argument(
         "--no-warmup",
         action="store_true",
         help="Skip warmup runs (faster but less stable).",
     )
     args = p.parse_args()
 
+    if args.baseline and args.output:
+        baseline_path = Path(args.baseline).resolve()
+        output_path = Path(args.output).resolve()
+        if baseline_path == output_path:
+            print("Output path must differ from baseline path.", file=sys.stderr)
+            return 1
+
     print("Running benchmarks ...", file=sys.stderr)
     results = run_benchmarks(warmup=not args.no_warmup)
     print(json.dumps(results, indent=2))
 
+    exit_code = 0
     if args.baseline:
         bl_path = Path(args.baseline)
         if not bl_path.is_file():
@@ -446,10 +468,16 @@ def main() -> int:
         if regressions:
             for msg in regressions:
                 print(f"REGRESSION: {msg}", file=sys.stderr)
-            return 1
-        print("No regressions detected.", file=sys.stderr)
+            exit_code = 1
+        else:
+            print("No regressions detected.", file=sys.stderr)
 
-    return 0
+    if args.output and exit_code == 0:
+        out_path = Path(args.output)
+        write_results_json(results, out_path)
+        print(f"Wrote benchmark results to {out_path}", file=sys.stderr)
+
+    return exit_code
 
 
 if __name__ == "__main__":

@@ -6,11 +6,13 @@ without asserting on wall time (time assertions are inherently flaky in CI).
 
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SCRIPT = ROOT / "scripts" / "run_benchmarks.py"
+BASELINE = ROOT / "docs" / "assets" / "benchmark_baseline_0.7.2-dev.json"
 
 
 def _import_script():
@@ -30,6 +32,7 @@ class TestBenchmarkScript:
         mod = _import_script()
         assert hasattr(mod, "BENCHMARKS")
         assert hasattr(mod, "run_benchmarks")
+        assert hasattr(mod, "write_results_json")
         assert hasattr(mod, "compare_to_baseline")
 
     def test_benchmarks_dict_has_expected_entries(self):
@@ -79,6 +82,25 @@ class TestBenchmarkScript:
         baseline = {}  # bar not in baseline
         assert mod.compare_to_baseline(results, baseline) == []
 
+    def test_write_results_json_roundtrip(self, tmp_path):
+        mod = _import_script()
+        out = tmp_path / "nested" / "results.json"
+        results = {"foo": {"elapsed_s": 1.25}}
+
+        mod.write_results_json(results, out)
+
+        assert json.loads(out.read_text(encoding="utf-8")) == results
+
+    def test_committed_baseline_matches_benchmark_entries(self):
+        mod = _import_script()
+
+        baseline = json.loads(BASELINE.read_text(encoding="utf-8"))
+
+        assert set(baseline) == set(mod.BENCHMARKS)
+        assert all(isinstance(entry.get("elapsed_s"), (float, int)) for entry in baseline.values())
+        assert all(entry["elapsed_s"] > 0 for entry in baseline.values())
+        assert all("error" not in entry for entry in baseline.values())
+
     def test_cli_help(self):
         """Script accepts --help without error."""
         import subprocess
@@ -89,3 +111,26 @@ class TestBenchmarkScript:
         )
         assert r.returncode == 0
         assert "benchmark" in r.stdout.lower() or "benchmark" in r.stderr.lower()
+
+    def test_cli_rejects_same_baseline_and_output(self, tmp_path):
+        """Avoid accidental baseline overwrite when refreshing benchmark JSON."""
+        import subprocess
+        same = tmp_path / "baseline.json"
+        same.write_text("{}", encoding="utf-8")
+
+        r = subprocess.run(
+            [
+                sys.executable,
+                str(SCRIPT),
+                "--baseline",
+                str(same),
+                "--output",
+                str(same),
+                "--no-warmup",
+            ],
+            capture_output=True,
+            text=True,
+        )
+
+        assert r.returncode == 1
+        assert "Output path must differ" in r.stderr
