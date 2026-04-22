@@ -22,7 +22,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   static Pages viewer now link to the sample. The Pages landing page also
   renders the JSON as an A* vs Dijkstra fallback comparison with expanded /
   queued state counts, edge counts, route lengths, heuristic state, and
-  fallback reason.
+  fallback reason. A committed README / Showcase screenshot is rendered by
+  `scripts/render_route_diagnostics_screenshot.py` through headless Chrome so
+  the comparison is visible before opening Pages.
 
 - **Reachability / service-area analysis is available from the routing CLI.**
   New `routing.reachability.reachable_within` and `roadgraph_builder reachable`

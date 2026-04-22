@@ -90,6 +90,7 @@ python3 -m venv .venv && .venv/bin/pip install -e .
 
 ## Visuals To Attach
 
+- Route diagnostics comparison: `docs/images/route_diagnostics_compare.png`
 - README image: `docs/images/paris_grid_route.svg`
 - Interactive local map: `docs/map.html`
 - Architecture: `docs/ARCHITECTURE.md`
@@ -101,4 +102,3 @@ python3 -m venv .venv && .venv/bin/pip install -e .
 - OSM-derived assets require ODbL attribution.
 - Private repository GitHub Pages may require a paid plan or public visibility.
 - PyPI publishing is scaffolded but intentionally skipped unless explicitly enabled.
-

@@ -30,6 +30,12 @@ body {
   color: var(--text);
 }
 
+body.diagnostics-preview-page {
+  height: auto;
+  min-height: 100%;
+  background: #15191d;
+}
+
 a {
   color: var(--accent);
 }
@@ -509,6 +515,20 @@ button:hover {
   line-height: 1.4;
 }
 
+.diagnostics-preview-shell {
+  display: grid;
+  align-items: center;
+  min-height: 100vh;
+  padding: 28px;
+}
+
+.diagnostics-preview-panel {
+  grid-template-columns: minmax(320px, 0.58fr) minmax(0, 1.42fr);
+  width: min(1280px, 100%);
+  margin: 0 auto;
+  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.32);
+}
+
 .footer {
   padding: 0.6rem 1rem;
   font-size: 0.75rem;
@@ -550,5 +570,9 @@ button:hover {
 
   .diagnostics-summary {
     grid-template-columns: 1fr;
+  }
+
+  .diagnostics-preview-shell {
+    padding: 16px;
   }
 }

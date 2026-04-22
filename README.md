@@ -56,7 +56,9 @@ v0.7.1 adds post-v0.7.0 validation and release-hardening work: canonical lane-co
 
 ### Visualization results
 
-The docs map ships a Paris OSM-highway graph with 10 mapped turn restrictions, a restriction-aware route overlay, and a 500 m reachability overlay from the same start node. The docs landing page also loads the generated `route --explain` sample and compares safe A* against the Paris Dijkstra fallback using expanded / queued state counts. These static assets are regenerated from committed GeoJSON / JSON inputs by `scripts/refresh_docs_assets.py`.
+The docs map ships a Paris OSM-highway graph with 10 mapped turn restrictions, a restriction-aware route overlay, and a 500 m reachability overlay from the same start node. The docs landing page also loads the generated `route --explain` sample and compares safe A* against the Paris Dijkstra fallback using expanded / queued state counts. These static assets are regenerated from committed GeoJSON / JSON inputs by `scripts/refresh_docs_assets.py`; the diagnostics screenshot below is rendered with `scripts/render_route_diagnostics_screenshot.py`. OSM-derived asset attribution is tracked in [`docs/assets/ATTRIBUTION.md`](docs/assets/ATTRIBUTION.md).
+
+[![Route diagnostics comparison: safe A* expands 2 states while the Paris Dijkstra fallback expands 783 states](docs/images/route_diagnostics_compare.png)](docs/index.html)
 
 [![Paris OSM-highway grid with a TR-aware route and 500 m reachability overlay](docs/images/paris_grid_route.svg)](docs/map.html)
 
@@ -582,6 +584,7 @@ Python package: `roadgraph_builder/`
 | `roadgraph_builder/cli/` | Thin dispatcher plus domain command modules (`build`, `validate`, `routing`, `export`, `camera`, `lidar`, `osm`, `guidance`, `trajectory`, `hd`, `incremental`, `dataset`) |
 | `docs/` | Static viewer + bundled sample assets |
 | `scripts/refresh_docs_assets.py` | Regenerate `docs/assets` and `docs/images` |
+| `scripts/render_route_diagnostics_screenshot.py` | Render the README route diagnostics comparison PNG with headless Chrome |
 | `scripts/compare_float32_drift.py` | Rebuild float64/float32 bundles and report topology / coordinate drift |
 | `scripts/run_demo_bundle.sh` | Validate → `export-bundle` → validate outputs (demo) |
 | `roadgraph_builder/io/export/geojson.py` | `export_map_geojson()` for Leaflet / OSM |

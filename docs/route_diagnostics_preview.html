@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>roadgraph_builder — route diagnostics preview</title>
+    <link rel="stylesheet" href="css/viewer.css" />
+  </head>
+  <body class="diagnostics-preview-page">
+    <main class="diagnostics-preview-shell" aria-label="Route diagnostics screenshot preview">
+      <section class="diagnostics-panel diagnostics-preview-panel" aria-label="Route explain diagnostics">
+        <div class="diagnostics-copy">
+          <span class="eyebrow">Observable Routing</span>
+          <strong>Route search work is visible, not guessed</strong>
+          <span>
+            <code>route --explain</code> emits engine choice, fallback reason,
+            expanded states, queued states, route edge count, and total length.
+            The generated sample compares safe A* against the Paris turn-restriction
+            fallback.
+          </span>
+          <a href="assets/route_explain_sample.json">Open generated diagnostics JSON</a>
+        </div>
+        <div class="diagnostics-compare" id="route-diagnostics-compare" aria-live="polite">
+          <div class="diagnostics-loading">Loading route diagnostics…</div>
+        </div>
+      </section>
+    </main>
+    <script src="js/route_diagnostics.js"></script>
+  </body>
+</html>

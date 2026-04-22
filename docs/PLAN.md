@@ -6,7 +6,7 @@
 > このファイル → [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md)（Mermaid 6 枚 + CLI 対応表 +
 > モジュール索引）→ [`CHANGELOG.md`](../CHANGELOG.md) の順。
 
-*最終更新: 2026-04-23 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards polish + README measured-results compacting / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate + manifest policy docs polish / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理 / v0.7.1 release + asset verification / packaging metadata smoke / 0.7.2.dev0 reopen / Actions Node24 update / release+PyPI dry-run / routing hot-path perf / nearest spatial index / cache invalidation hardening / build graph spatial merge perf / T-junction segment index perf / lean near-parallel merge loop / GeoJSON export compact path / compact bundle JSON writer / README quick-start smoke / release readiness dry-run refresh / reachable service-area CLI / reachable docs overlay / reachable benchmark coverage / benchmark baseline JSON / reachability analyzer perf / routing core split / RoutePlanner perf / GitHub star-growth surfaces / launch kit docs / safe A* routing / route explain diagnostics / route explain docs surface / route explain comparison UI）を反映済み。*
+*最終更新: 2026-04-23 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards polish + README measured-results compacting / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate + manifest policy docs polish / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理 / v0.7.1 release + asset verification / packaging metadata smoke / 0.7.2.dev0 reopen / Actions Node24 update / release+PyPI dry-run / routing hot-path perf / nearest spatial index / cache invalidation hardening / build graph spatial merge perf / T-junction segment index perf / lean near-parallel merge loop / GeoJSON export compact path / compact bundle JSON writer / README quick-start smoke / release readiness dry-run refresh / reachable service-area CLI / reachable docs overlay / reachable benchmark coverage / benchmark baseline JSON / reachability analyzer perf / routing core split / RoutePlanner perf / GitHub star-growth surfaces / launch kit docs / safe A* routing / route explain diagnostics / route explain docs surface / route explain comparison UI / route diagnostics README screenshot）を反映済み。*
 
 ---
 
@@ -231,6 +231,11 @@
       safe A* と Dijkstra fallback の expanded / queued states、edge count、route length、
       heuristic 状態、fallback reason を同じ比較表で表示する。README / SHOWCASE も
       「JSON へのリンク」ではなく observable routing の比較ビューとして説明する形に更新。
+  59. route diagnostics README screenshot。
+      `docs/route_diagnostics_preview.html` と `scripts/render_route_diagnostics_screenshot.py` を追加し、
+      headless Chrome で `docs/images/route_diagnostics_compare.png` を再生成できるようにした。
+      README / SHOWCASE はこの PNG を埋め込み、Pages を開く前に safe A* と Paris Dijkstra fallback
+      の state-count 比較が見える。
 - **push 方針:** `git push` は user が `push!` などで明示するまで実行しない。
 - **未着手 (次の AI が触る候補):** ↓ §5 "Open tasks" 参照。
 
@@ -486,6 +491,10 @@
   `route_paris_grid.geojson` + `paris_grid_turn_restrictions.json` から
   `scripts/refresh_docs_assets.py` で再生成。OSM attribution を SVG 内と `docs/assets/ATTRIBUTION.md`
   に保持。
+- `docs/images/route_diagnostics_compare.png`: README / Showcase 用の route explain 比較 screenshot。
+  `docs/route_diagnostics_preview.html` を headless Chrome で描画する
+  `scripts/render_route_diagnostics_screenshot.py` で再生成。元データは
+  `docs/assets/route_explain_sample.json`。
 - `docs/index.html` は従来の SVG diagram viewer の下に `paris_grid_route.svg` の result card と
   post-release metric cards を表示。metric labels / responsive grid / focus states は
   `docs/css/viewer.css` に集約。README も同じ SVG を `Visualization results` として embed し、

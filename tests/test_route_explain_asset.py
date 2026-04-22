@@ -6,6 +6,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 ASSET = ROOT / "docs" / "assets" / "route_explain_sample.json"
+SCREENSHOT = ROOT / "docs" / "images" / "route_diagnostics_compare.png"
 
 
 def test_route_explain_sample_asset_has_expected_diagnostics():
@@ -49,3 +50,30 @@ def test_route_explain_sample_is_linked_from_pages_index():
     assert "Route search work is visible" in index
     assert 'fetch("assets/route_explain_sample.json")' in diagnostics_js
     assert "renderDiagnosticsComparison" in diagnostics_js
+
+
+def test_route_diagnostics_preview_screenshot_is_wired():
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    showcase = (ROOT / "docs" / "SHOWCASE.md").read_text(encoding="utf-8")
+    preview = (ROOT / "docs" / "route_diagnostics_preview.html").read_text(
+        encoding="utf-8"
+    )
+    script = (
+        ROOT / "scripts" / "render_route_diagnostics_screenshot.py"
+    ).read_text(encoding="utf-8")
+    attribution = (ROOT / "docs" / "assets" / "ATTRIBUTION.md").read_text(
+        encoding="utf-8"
+    )
+
+    image_ref = "docs/images/route_diagnostics_compare.png"
+    assert image_ref in readme
+    assert "images/route_diagnostics_compare.png" in showcase
+    assert "route_diagnostics_compare.png" in attribution
+    assert 'id="route-diagnostics-compare"' in preview
+    assert 'src="js/route_diagnostics.js"' in preview
+    assert "route_diagnostics_preview.html" in script
+    assert "route_diagnostics_compare.png" in script
+
+    data = SCREENSHOT.read_bytes()
+    assert data.startswith(b"\x89PNG\r\n\x1a\n")
+    assert SCREENSHOT.stat().st_size < 500_000
