@@ -7,7 +7,7 @@ import pytest
 from roadgraph_builder.core.graph.edge import Edge
 from roadgraph_builder.core.graph.graph import Graph
 from roadgraph_builder.core.graph.node import Node
-from roadgraph_builder.routing.reachability import reachable_within
+from roadgraph_builder.routing.reachability import ReachabilityAnalyzer, reachable_within
 
 
 def _line(p0: tuple[float, float], p1: tuple[float, float]) -> list[tuple[float, float]]:
@@ -66,6 +66,56 @@ def test_reachable_within_respects_turn_restrictions():
     assert ("e2", "forward") not in spans
     assert spans[("e3", "forward")].complete is True
     assert {n.node_id for n in result.nodes} == {"a", "b", "d"}
+
+
+def test_reachable_unrestricted_fast_path_matches_state_search():
+    graph = _branch_graph()
+    no_restrictions = reachable_within(graph, "a", max_cost_m=80.0)
+    irrelevant_restriction = [
+        {
+            "junction_node_id": "missing",
+            "from_edge_id": "missing_from",
+            "from_direction": "forward",
+            "to_edge_id": "missing_to",
+            "to_direction": "forward",
+            "restriction": "no_straight",
+        }
+    ]
+    state_search = reachable_within(
+        graph,
+        "a",
+        max_cost_m=80.0,
+        turn_restrictions=irrelevant_restriction,
+    )
+
+    assert no_restrictions == state_search
+
+
+def test_reachability_analyzer_reuses_policy_for_many_queries():
+    graph = _branch_graph()
+    restrictions = [
+        {
+            "junction_node_id": "b",
+            "from_edge_id": "e1",
+            "from_direction": "forward",
+            "to_edge_id": "e2",
+            "to_direction": "forward",
+            "restriction": "no_straight",
+        }
+    ]
+    analyzer = ReachabilityAnalyzer(graph, turn_restrictions=restrictions)
+
+    assert analyzer.reachable_within("a", max_cost_m=80.0) == reachable_within(
+        graph,
+        "a",
+        max_cost_m=80.0,
+        turn_restrictions=restrictions,
+    )
+    assert {n.node_id for n in analyzer.reachable_within("b", max_cost_m=30.0).nodes} == {
+        "a",
+        "b",
+        "c",
+    }
 
 
 def test_reachable_within_uses_confidence_filter_and_unknown_node_errors():

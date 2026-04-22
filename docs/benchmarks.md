@@ -152,6 +152,16 @@ grid used by `shortest_path_grid_120`. Each query uses a 60 m cost budget and
 consumes both reached node and directed edge-span counts so result construction
 stays visible to the benchmark.
 
+`ReachabilityAnalyzer` now prepares the routing index, weighted adjacency, and
+turn-restriction policy once for repeated service-area queries. The unrestricted
+path also uses node-level Dijkstra instead of the directed incoming-edge state
+machine.
+
+| Version | elapsed (s) | Notes |
+|---|---:|---|
+| before analyzer | 2.649 | Revalidated routing topology for every query and used directed state search |
+| after analyzer | 0.270 | Reuses prepared adjacency and uses node-level Dijkstra without turn restrictions |
+
 On this workstation,
 `python scripts/run_benchmarks.py --no-warmup --output docs/assets/benchmark_baseline_0.7.2-dev.json`
 measured:
@@ -162,7 +172,7 @@ measured:
 | `polylines_to_graph_10k_synth` | 0.486 | 50x50 grid, ~25 000 pts |
 | `shortest_path_paris` | 0.021 | Existing small-graph routing smoke |
 | `shortest_path_grid_120` | 1.711 | 120 routes on a 55x55 synthetic graph |
-| `reachable_grid_120` | 2.649 | 120 reachability queries, 60 m budget, 36 305 consumed node/span results |
+| `reachable_grid_120` | 0.270 | 120 reachability queries, 60 m budget, 36 305 consumed node/span results |
 | `nearest_node_grid_2000` | 0.432 | 2000 snaps on a 300x300 node grid |
 | `export_geojson_grid_120_compact` | 0.572 | Compact GeoJSON export on a 120x120 grid |
 | `export_bundle_json_grid_120_compact` | 0.441 | Compact road_graph/sd_nav/manifest JSON on a 120x120 grid |

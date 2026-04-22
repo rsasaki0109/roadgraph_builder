@@ -6,7 +6,7 @@
 > このファイル → [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md)（Mermaid 6 枚 + CLI 対応表 +
 > モジュール索引）→ [`CHANGELOG.md`](../CHANGELOG.md) の順。
 
-*最終更新: 2026-04-22 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards polish + README measured-results compacting / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate + manifest policy docs polish / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理 / v0.7.1 release + asset verification / packaging metadata smoke / 0.7.2.dev0 reopen / Actions Node24 update / release+PyPI dry-run / routing hot-path perf / nearest spatial index / cache invalidation hardening / build graph spatial merge perf / T-junction segment index perf / lean near-parallel merge loop / GeoJSON export compact path / compact bundle JSON writer / README quick-start smoke / release readiness dry-run refresh / reachable service-area CLI / reachable docs overlay / reachable benchmark coverage / benchmark baseline JSON）を反映済み。*
+*最終更新: 2026-04-22 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards polish + README measured-results compacting / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate + manifest policy docs polish / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理 / v0.7.1 release + asset verification / packaging metadata smoke / 0.7.2.dev0 reopen / Actions Node24 update / release+PyPI dry-run / routing hot-path perf / nearest spatial index / cache invalidation hardening / build graph spatial merge perf / T-junction segment index perf / lean near-parallel merge loop / GeoJSON export compact path / compact bundle JSON writer / README quick-start smoke / release readiness dry-run refresh / reachable service-area CLI / reachable docs overlay / reachable benchmark coverage / benchmark baseline JSON / reachability analyzer perf）を反映済み。*
 
 ---
 
@@ -20,7 +20,7 @@
   最新 main CI run `24751415820` と Release workflow run `24721632168` は green。
   GitHub Release assets (`roadgraph_sample_bundle.tar.gz` / `.sha256`) は download + checksum +
   `validate-manifest` / `validate-sd-nav` / `validate` 済み。`v0.7.0` は shipped (2026-04-20)。
-  最新 full local `pytest` = **592 passed / 28 skipped / 4 deselected**（opt-in marker 除外）。
+  最新 full local `pytest` = **594 passed / 28 skipped / 4 deselected**（opt-in marker 除外）。
 - **直近の sessions (2026-04-21〜2026-04-22) で landed:**
   1. V1 accuracy 実測 — Paris 20e MAE 0.938、Tokyo Ginza MAE 0.903、Berlin Mitte MAE 1.220（lane-count vs OSM `lanes=`、canonical 20 m）
   2. `scripts/measure_lane_accuracy.py` が meter-frame graph を正しく扱う bug fix（`map_origin` 自動検出）
@@ -178,13 +178,18 @@
   48. reachable benchmark coverage。
       `scripts/run_benchmarks.py` に `reachable_grid_120` を追加。55×55 synthetic routing grid で
       120 本の service-area query を走らせ、60 m budget で到達 node と directed edge span を消費する。
-      local `python scripts/run_benchmarks.py --no-warmup` では `reachable_grid_120` が 2.649s、
+      local `python scripts/run_benchmarks.py --no-warmup` では `reachable_grid_120` が 0.270s、
       全 benchmark suite は引き続き 1 分未満。
   49. benchmark baseline JSON。
       `scripts/run_benchmarks.py --output PATH` で `--baseline` と同じ JSON shape を保存可能にし、
       誤操作防止のため `--baseline` と `--output` が同一 path の場合は exit 1 にする。
       `docs/assets/benchmark_baseline_0.7.2-dev.json` を committed baseline とし、
       `tests/test_benchmark_script.py` が benchmark entry との同期と正の elapsed time を検証する。
+  50. reachability analyzer perf。
+      `routing.reachability.ReachabilityAnalyzer` が graph/policy ごとに routing index、weighted adjacency、
+      turn restriction policy を 1 回だけ準備する。`reachable_within` は従来 API を維持しつつ analyzer を
+      使う。turn restriction なしの到達圏探索は directed incoming-edge state machine ではなく
+      node-level Dijkstra を使うため、`reachable_grid_120` は 2.649s → 0.270s まで短縮。
 - **push 方針:** `git push` は user が `push!` などで明示するまで実行しない。
 - **未着手 (次の AI が触る候補):** ↓ §5 "Open tasks" 参照。
 
@@ -273,7 +278,8 @@
   start/end Point の FeatureCollection に。
 - `routing.reachability.reachable_within`: start node から cost budget 内の reachable node と
   directed edge span を返す。`route` と同じ turn restriction / observed / confidence / slope cost hooks を使い、
-  `write_reachability_geojson` は partial edge を clipped LineString で出す。
+  `write_reachability_geojson` は partial edge を clipped LineString で出す。多数 query は
+  `routing.reachability.ReachabilityAnalyzer` で routing index / weighted adjacency / policy を再利用する。
 - CLI: `route`（id or `--from-latlon`/`--to-latlon`）、`reachable`（id or `--start-latlon`）、
   `--turn-restrictions-json`、`--output PATH.geojson`、`nearest-node`、`stats`。
 - `core.graph.stats.graph_stats` / `junction_stats` は `export-bundle` と `stats` CLI が共有。
@@ -531,7 +537,8 @@ cards、release byte gates、manifest policy docs polish、README measured-resul
 
 ### 5b. 次のおすすめ候補（small／選択式）
 
-今すぐ必要な blocker は無し。benchmark suite は committed baseline JSON まで整備済み。
+今すぐ必要な blocker は無し。benchmark suite は committed baseline JSON まで整備済みで、
+repeated reachability は analyzer 化済み。
 code commit `342f61f` の release bundle / package build dry-run は PASS
 （ただし `Metadata-Version: 2.4` 対応のため `twine>=6` で確認する）。次に触るなら以下の順が現実的。
 
@@ -562,7 +569,7 @@ code commit `342f61f` の release bundle / package build dry-run は PASS
 ### 6.3 Schema / CI / テスト
 
 - Schema 変更時は対応 `validate_*` と CI の expectation を同時に更新。
-- テスト: `pytest` で 592 passed / 28 skipped / 4 deselected が baseline。
+- テスト: `pytest` で 594 passed / 28 skipped / 4 deselected が baseline。
   `pytest -m slow` / `pytest -m city_scale` は opt-in。
 - 新機能には **必ず** unit test 1 本以上（`tests/test_<feature>_*.py`）。
 - CI が conditional skip している path（LAS laspy / Node.js viewer dijkstra / OpenCV）は
@@ -724,7 +731,7 @@ feedback / project / reference の 4 種、`MEMORY.md` は index）。
 
 新しい機能 / バグ修正を入れる前に:
 
-- [ ] `pytest` が 592 passed / 28 skipped / 4 deselected で通ること（上下 ±1 は OK、大きく減ったら
+- [ ] `pytest` が 594 passed / 28 skipped / 4 deselected で通ること（上下 ±1 は OK、大きく減ったら
       skip 理由を確認）。
 - [ ] `CHANGELOG.md` の `[Unreleased]` にユーザー向け変更を足すこと。
 - [ ] スキーマ変更時は対応する `validate_*` と CI の expectation を同時更新すること。
@@ -742,7 +749,8 @@ feedback / project / reference の 4 種、`MEMORY.md` は index）。
 > manifest policy docs polish / README measured-results compacting）も 0.7.1 に切り出し済み。
 > Release assets は download/checksum/validate 済み。packaging metadata は SPDX license 表記へ更新済み。
 > GeoJSON large export compact path と compact bundle JSON writer も landing 済み。`reachable` service-area
-> CLI と Paris docs overlay、`reachable_grid_120` benchmark coverage、committed benchmark baseline JSON も追加済み。code commit `342f61f` の release bundle / package build dry-run は PASS
+> CLI と Paris docs overlay、`reachable_grid_120` benchmark coverage、committed benchmark baseline JSON、
+> reachability analyzer perf も追加済み。code commit `342f61f` の release bundle / package build dry-run は PASS
 >（`twine>=6` で確認、PyPI 公開は skip）。次は raw large trace が来た時の true large benchmark。
 > 何を削って何を広げたかは
 > `CHANGELOG.md` と §3 の小節を見れば全部わかる。push / tag / AI マーカー / PyPI /

@@ -24,6 +24,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Repeated reachability queries can reuse prepared routing state.**
+  `routing.reachability.ReachabilityAnalyzer` prepares the routing index,
+  weighted adjacency, and turn-restriction policy once for many service-area
+  queries. The no-turn-restriction path now uses node-level Dijkstra, and
+  `reachable_grid_120` dropped from about 2.6 s to about 0.27 s locally.
+
 - **Benchmark coverage now includes reachability queries.**
   `scripts/run_benchmarks.py` now includes `reachable_grid_120`, a 120-query
   service-area workload on the same 55x55 routing grid as

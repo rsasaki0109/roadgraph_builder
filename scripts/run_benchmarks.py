@@ -277,15 +277,16 @@ def _grid_graph(size: int, spacing: float):
 
 def run_reachable_grid_120() -> int:
     """Run 120 service-area reachability queries on a synthetic 55×55 grid."""
-    from roadgraph_builder.routing.reachability import reachable_within
+    from roadgraph_builder.routing.reachability import ReachabilityAnalyzer
 
     size = 55
     graph = _grid_graph(size=size, spacing=10.0)
+    analyzer = ReachabilityAnalyzer(graph)
     total = 0
     for i in range(120):
         sx = i % size
         sy = (i * 7) % size
-        result = reachable_within(graph, f"n{sx}_{sy}", max_cost_m=60.0)
+        result = analyzer.reachable_within(f"n{sx}_{sy}", max_cost_m=60.0)
         total += len(result.nodes) + len(result.edges)
     return total
 
