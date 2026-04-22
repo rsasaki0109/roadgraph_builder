@@ -41,6 +41,7 @@ class TestBenchmarkScript:
             "polylines_to_graph_paris",
             "polylines_to_graph_10k_synth",
             "shortest_path_paris",
+            "shortest_path_grid_120_functional",
             "shortest_path_grid_120",
             "reachable_grid_120",
             "nearest_node_grid_2000",

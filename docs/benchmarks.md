@@ -169,6 +169,7 @@ The committed baseline JSON records:
 | `polylines_to_graph_paris` | 0.116 | OSM public-trackpoints CSV, small local fixture |
 | `polylines_to_graph_10k_synth` | 0.486 | 50x50 grid, ~25 000 pts |
 | `shortest_path_paris` | 0.021 | Existing small-graph routing smoke |
+| `shortest_path_grid_120_functional` | 2.571 | 120 repeated `shortest_path(...)` wrapper calls on a 55x55 synthetic graph |
 | `shortest_path_grid_120` | 0.601 | 120 routes on a 55x55 synthetic graph using one prepared `RoutePlanner` |
 | `reachable_grid_120` | 0.270 | 120 reachability queries, 60 m budget, 36 305 consumed node/span results |
 | `nearest_node_grid_2000` | 0.432 | 2000 snaps on a 300x300 node grid |
@@ -213,6 +214,29 @@ Direct passes of `run_grid_routes_120()` after the A* change measured 0.758 s,
 0.665 s, 0.604 s, 0.595 s, and 0.575 s. Full benchmark comparisons measured
 `shortest_path_grid_120` at 0.749 s with `--no-warmup` and 0.622 s with warmup;
 both reported no regressions. The committed routing baseline is 0.601 s.
+
+## v0.7.2-dev functional shortest_path planner cache (2026-04-23)
+
+The public `shortest_path(...)` function now reuses a graph-local default
+`RoutePlanner` when no turn restrictions, confidence filters, observation
+weights, slope costs, or lane-level routing options are active. Mutation
+safety is preserved by validating against the routing signature before reuse.
+Option-heavy searches still build a fresh planner because those costs can
+depend on mutable edge attributes.
+
+On this workstation, five repeated passes over the 55x55 grid using the
+functional API measured:
+
+| Version | elapsed (s) | Notes |
+|---|---:|---|
+| before cache | 5.744 / 4.665 / 4.585 | Rebuilt planner-local state for each of 120 `shortest_path(...)` calls |
+| after cache | 2.701 / 2.614 / 2.142 / 2.662 / 2.639 | Reuses the graph-local default planner while still checking graph mutation |
+
+The explicit `RoutePlanner` path remains the fastest option for high-throughput
+batch routing. In the same local pass it measured 0.670 / 0.658 / 0.660 /
+0.621 / 0.413 s because it does not need per-call graph mutation checks. The
+benchmark suite now includes `shortest_path_grid_120_functional`; the committed
+baseline records 2.571 s from `python scripts/run_benchmarks.py --no-warmup`.
 
 ## Regression policy
 

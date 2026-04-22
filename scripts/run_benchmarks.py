@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Performance benchmarks for roadgraph_builder.
 
-Measures wall-clock time for nine scenarios:
+Measures wall-clock time for ten scenarios:
   polylines_to_graph_paris       — build from OSM public trackpoints CSV
   polylines_to_graph_10k_synth   — build from 50×50 synthetic grid (~25 000 pts)
   shortest_path_paris            — 100 route queries on the Paris graph
+  shortest_path_grid_120_functional — 120 functional shortest_path calls on a 55×55 grid graph
   shortest_path_grid_120         — 120 RoutePlanner queries on a 55×55 grid graph
   reachable_grid_120             — 120 reachability queries on a 55×55 grid graph
   nearest_node_grid_2000         — 2000 nearest-node queries on a 300×300 grid
@@ -179,6 +180,25 @@ def run_grid_routes_120() -> int:
         if sx == tx and sy == ty:
             continue
         planner.shortest_path(f"n{sx}_{sy}", f"n{tx}_{ty}")
+        count += 1
+    return count
+
+
+def run_grid_routes_120_functional() -> int:
+    """Run 120 repeated functional shortest_path calls on a synthetic 55×55 grid."""
+    from roadgraph_builder.routing.shortest_path import shortest_path
+
+    size = 55
+    graph = _grid_graph(size=size, spacing=10.0)
+    count = 0
+    for i in range(120):
+        sx = i % size
+        sy = (i * 7) % size
+        tx = size - 1 - sx
+        ty = size - 1 - sy
+        if sx == tx and sy == ty:
+            continue
+        shortest_path(graph, f"n{sx}_{sy}", f"n{tx}_{ty}")
         count += 1
     return count
 
@@ -368,6 +388,7 @@ BENCHMARKS: dict[str, tuple] = {
     "polylines_to_graph_paris": (build_paris_graph, 1),
     "polylines_to_graph_10k_synth": (build_10k_synth, 1),
     "shortest_path_paris": (run_paris_routes_100, 1),
+    "shortest_path_grid_120_functional": (run_grid_routes_120_functional, 1),
     "shortest_path_grid_120": (run_grid_routes_120, 1),
     "reachable_grid_120": (run_reachable_grid_120, 1),
     "nearest_node_grid_2000": (run_nearest_grid_2000, 1),

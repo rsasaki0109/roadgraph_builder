@@ -8,6 +8,9 @@
   "shortest_path_paris": {
     "elapsed_s": 0.021492765052244067
   },
+  "shortest_path_grid_120_functional": {
+    "elapsed_s": 2.571162512060255
+  },
   "shortest_path_grid_120": {
     "elapsed_s": 0.6009219589177519
   },

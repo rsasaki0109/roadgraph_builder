@@ -144,6 +144,43 @@ def test_route_planner_reuses_prepared_state_for_repeated_queries():
     assert planner.shortest_path("c", "a") == shortest_path(g, "c", "a")
 
 
+def test_shortest_path_function_api_reuses_default_planner_cache():
+    g = _manual_graph()
+
+    assert shortest_path(g, "a", "c").edge_sequence == ["e1", "e2"]
+    cached = getattr(g, "_shortest_path_default_planner_cache", None)
+    assert isinstance(cached, RoutePlanner)
+
+    assert shortest_path(g, "c", "a").edge_sequence == ["e2", "e1"]
+    assert getattr(g, "_shortest_path_default_planner_cache", None) is cached
+
+
+def test_shortest_path_function_api_invalidates_default_planner_cache_on_mutation():
+    g = _manual_graph()
+    assert shortest_path(g, "a", "c").edge_sequence == ["e1", "e2"]
+    cached = getattr(g, "_shortest_path_default_planner_cache", None)
+
+    g.edges.append(
+        Edge(
+            id="shortcut",
+            start_node_id="a",
+            end_node_id="c",
+            polyline=_straight_polyline((0, 0), (10, 0)),
+        )
+    )
+
+    assert shortest_path(g, "a", "c").edge_sequence == ["shortcut"]
+    assert getattr(g, "_shortest_path_default_planner_cache", None) is not cached
+
+
+def test_shortest_path_function_api_does_not_cache_attribute_weighted_options():
+    g = _manual_graph()
+
+    shortest_path(g, "a", "c", prefer_observed=True)
+
+    assert getattr(g, "_shortest_path_default_planner_cache", None) is None
+
+
 def test_route_planner_uses_straight_line_heuristic_on_metric_graph():
     planner = RoutePlanner(_manual_graph())
     assert planner._use_straight_line_heuristic is True

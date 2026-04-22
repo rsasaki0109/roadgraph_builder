@@ -39,6 +39,7 @@ from roadgraph_builder.routing._core import (
     get_routing_index as _get_routing_index,
     lane_count_for_edge as _lane_count_for_edge,
     parse_turn_policy as _parse_turn_policy,
+    routing_signature as _routing_signature,
 )
 
 if TYPE_CHECKING:
@@ -532,6 +533,48 @@ class RoutePlanner:
         return route
 
 
+def _can_use_default_planner_cache(
+    *,
+    turn_restrictions: Iterable[dict] | None,
+    prefer_observed: bool,
+    min_confidence: float | None,
+    observed_bonus: float,
+    unobserved_penalty: float,
+    uphill_penalty: float | None,
+    downhill_bonus: float | None,
+    allow_lane_change: bool,
+    lane_change_cost_m: float,
+) -> bool:
+    """Return True when ``shortest_path`` can safely reuse a graph-local planner."""
+
+    return (
+        turn_restrictions is None
+        and not prefer_observed
+        and min_confidence is None
+        and observed_bonus == 0.5
+        and unobserved_penalty == 2.0
+        and uphill_penalty is None
+        and downhill_bonus is None
+        and not allow_lane_change
+        and lane_change_cost_m == 50.0
+    )
+
+
+def _cached_default_planner(graph: "Graph") -> RoutePlanner:
+    """Return a default ``RoutePlanner`` cached on ``graph`` when still valid."""
+
+    signature = _routing_signature(graph)
+    cached = getattr(graph, "_shortest_path_default_planner_cache", None)
+    if isinstance(cached, RoutePlanner) and cached.index.signature == signature:
+        return cached
+    planner = RoutePlanner(graph)
+    try:
+        setattr(graph, "_shortest_path_default_planner_cache", planner)
+    except Exception:
+        pass
+    return planner
+
+
 def shortest_path(
     graph: "Graph",
     from_node: str,
@@ -583,8 +626,7 @@ def shortest_path(
         KeyError: ``from_node`` or ``to_node`` is not in the graph.
         ValueError: No path exists under the supplied restrictions (or confidence filter).
     """
-    planner = RoutePlanner(
-        graph,
+    if _can_use_default_planner_cache(
         turn_restrictions=turn_restrictions,
         prefer_observed=prefer_observed,
         min_confidence=min_confidence,
@@ -594,5 +636,19 @@ def shortest_path(
         downhill_bonus=downhill_bonus,
         allow_lane_change=allow_lane_change,
         lane_change_cost_m=lane_change_cost_m,
-    )
+    ):
+        planner = _cached_default_planner(graph)
+    else:
+        planner = RoutePlanner(
+            graph,
+            turn_restrictions=turn_restrictions,
+            prefer_observed=prefer_observed,
+            min_confidence=min_confidence,
+            observed_bonus=observed_bonus,
+            unobserved_penalty=unobserved_penalty,
+            uphill_penalty=uphill_penalty,
+            downhill_bonus=downhill_bonus,
+            allow_lane_change=allow_lane_change,
+            lane_change_cost_m=lane_change_cost_m,
+        )
     return planner.shortest_path(from_node, to_node)
