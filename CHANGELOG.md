@@ -24,6 +24,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Routing search internals now share one core policy layer.**
+  `roadgraph_builder.routing._core` owns routing topology caching, weighted
+  adjacency construction, edge-cost hooks, and parsed turn policies used by
+  both `shortest_path` and reachability. Focused tests now cover that shared
+  layer directly so future routing performance work has a smaller blast radius.
+
 - **Repeated reachability queries can reuse prepared routing state.**
   `routing.reachability.ReachabilityAnalyzer` prepares the routing index,
   weighted adjacency, and turn-restriction policy once for many service-area

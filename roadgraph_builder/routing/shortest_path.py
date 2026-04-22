@@ -28,6 +28,14 @@ import math
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Iterable
 
+from roadgraph_builder.routing._core import (
+    RoutingCostOptions,
+    build_weighted_adjacency as _build_weighted_adjacency,
+    get_routing_index as _get_routing_index,
+    lane_count_for_edge as _lane_count_for_edge,
+    parse_turn_policy as _parse_turn_policy,
+)
+
 if TYPE_CHECKING:
     from roadgraph_builder.core.graph.graph import Graph
 
@@ -57,199 +65,6 @@ class Route:
     edge_directions: list[str]
     total_length_m: float
     lane_sequence: list[int | None] | None = None
-
-
-@dataclass(frozen=True)
-class _RoutingIndex:
-    """Topology and base metric cache for repeated shortest-path queries."""
-
-    signature: tuple[object, ...]
-    node_ids: set[str]
-    edge_by_id: dict[str, object]
-    base_lengths: dict[str, float]
-    base_adj: dict[str, list[tuple[str, str, str, float]]]
-
-
-def _routing_signature(graph: "Graph") -> tuple[object, ...]:
-    """Return a cheap mutation signature for graph topology and edge geometry.
-
-    ``Graph`` is intentionally mutable, so the cache is invalidated when the
-    node/edge lists change shape, edge endpoints change, an edge replaces its
-    polyline object, or polyline coordinate values change in place.
-    """
-    return (
-        id(graph.nodes),
-        len(graph.nodes),
-        tuple(n.id for n in graph.nodes),
-        id(graph.edges),
-        len(graph.edges),
-        tuple(_edge_cache_signature(e) for e in graph.edges),
-    )
-
-
-def _polyline_cache_signature(polyline) -> tuple[int, int, int]:  # type: ignore[no-untyped-def]
-    acc = 1469598103934665603
-    for x_raw, y_raw in polyline:
-        point_hash = hash((float(x_raw), float(y_raw)))
-        acc ^= point_hash & 0xFFFFFFFFFFFFFFFF
-        acc = (acc * 1099511628211) & 0xFFFFFFFFFFFFFFFF
-    return (id(polyline), len(polyline), acc)
-
-
-def _edge_cache_signature(edge) -> tuple[object, ...]:  # type: ignore[no-untyped-def]
-    return (
-        edge.id,
-        edge.start_node_id,
-        edge.end_node_id,
-        _polyline_cache_signature(edge.polyline),
-    )
-
-
-def _edge_length_m(edge) -> float:  # type: ignore[no-untyped-def]
-    pl = edge.polyline
-    total = 0.0
-    for i in range(len(pl) - 1):
-        dx = float(pl[i + 1][0]) - float(pl[i][0])
-        dy = float(pl[i + 1][1]) - float(pl[i][1])
-        total += math.hypot(dx, dy)
-    return total
-
-
-def _build_routing_index(graph: "Graph", signature: tuple[object, ...]) -> _RoutingIndex:
-    node_ids = {n.id for n in graph.nodes}
-    edge_by_id: dict[str, object] = {}
-    base_lengths: dict[str, float] = {}
-    base_adj: dict[str, list[tuple[str, str, str, float]]] = {nid: [] for nid in node_ids}
-    for e in graph.edges:
-        edge_by_id[e.id] = e
-        base_length_m = _edge_length_m(e)
-        base_lengths[e.id] = base_length_m
-        base_adj.setdefault(e.start_node_id, []).append(
-            (e.id, "forward", e.end_node_id, base_length_m)
-        )
-        if e.start_node_id != e.end_node_id:
-            base_adj.setdefault(e.end_node_id, []).append(
-                (e.id, "reverse", e.start_node_id, base_length_m)
-            )
-    return _RoutingIndex(
-        signature=signature,
-        node_ids=node_ids,
-        edge_by_id=edge_by_id,
-        base_lengths=base_lengths,
-        base_adj=base_adj,
-    )
-
-
-def _get_routing_index(graph: "Graph") -> _RoutingIndex:
-    signature = _routing_signature(graph)
-    cached = getattr(graph, "_routing_index_cache", None)
-    if isinstance(cached, _RoutingIndex) and cached.signature == signature:
-        return cached
-    index = _build_routing_index(graph, signature)
-    try:
-        setattr(graph, "_routing_index_cache", index)
-    except Exception:
-        pass
-    return index
-
-
-def _parse_restrictions(
-    entries: Iterable[dict] | None,
-) -> tuple[
-    set[tuple[str, str, str, str, str]],
-    dict[tuple[str, str, str], set[tuple[str, str]]],
-]:
-    """Return ``(forbidden, mandatory)``.
-
-    ``forbidden`` is the set of disallowed
-    ``(junction, from_edge, from_dir, to_edge, to_dir)`` tuples from every
-    ``no_*`` restriction.
-
-    ``mandatory`` maps ``(junction, from_edge, from_dir)`` to the set of
-    ``(to_edge, to_dir)`` tuples the vehicle **must** pick at that junction
-    on that approach (collected from every ``only_*`` restriction).
-    """
-    forbidden: set[tuple[str, str, str, str, str]] = set()
-    mandatory: dict[tuple[str, str, str], set[tuple[str, str]]] = {}
-    if entries is None:
-        return forbidden, mandatory
-    for r in entries:
-        junction = str(r["junction_node_id"])
-        from_edge = str(r["from_edge_id"])
-        from_dir = str(r.get("from_direction", "forward"))
-        to_edge = str(r["to_edge_id"])
-        to_dir = str(r.get("to_direction", "forward"))
-        rt = str(r["restriction"])
-        if rt.startswith("no_"):
-            forbidden.add((junction, from_edge, from_dir, to_edge, to_dir))
-        elif rt.startswith("only_"):
-            key = (junction, from_edge, from_dir)
-            mandatory.setdefault(key, set()).add((to_edge, to_dir))
-    return forbidden, mandatory
-
-
-def _observation_count(edge) -> int:  # type: ignore[no-untyped-def]
-    """Return trace_observation_count from edge.attributes.trace_stats, or 0."""
-    attrs = edge.attributes if isinstance(edge.attributes, dict) else {}
-    ts = attrs.get("trace_stats")
-    if isinstance(ts, dict):
-        v = ts.get("trace_observation_count", 0)
-        try:
-            return int(v)
-        except (TypeError, ValueError):
-            return 0
-    return 0
-
-
-def _hd_confidence(edge) -> float | None:  # type: ignore[no-untyped-def]
-    """Return hd_refinement.confidence from edge.attributes.hd, or None."""
-    attrs = edge.attributes if isinstance(edge.attributes, dict) else {}
-    hd = attrs.get("hd")
-    if isinstance(hd, dict):
-        ref = hd.get("hd_refinement")
-        if isinstance(ref, dict):
-            c = ref.get("confidence")
-            if c is not None:
-                try:
-                    return float(c)
-                except (TypeError, ValueError):
-                    pass
-    return None
-
-
-def _slope_deg(edge, direction: str) -> float:  # type: ignore[no-untyped-def]
-    """Return slope in degrees for the edge in the given traversal direction.
-
-    Positive = uphill in that direction.  Returns 0.0 when no elevation data.
-    ``direction`` is 'forward' (start→end) or 'reverse' (end→start).
-    """
-    attrs = edge.attributes if isinstance(edge.attributes, dict) else {}
-    sd = attrs.get("slope_deg")
-    if sd is None:
-        hd = attrs.get("hd")
-        if isinstance(hd, dict):
-            sd = hd.get("slope_deg")
-    if sd is None:
-        return 0.0
-    try:
-        s = float(sd)  # type: ignore[arg-type]
-    except (TypeError, ValueError):
-        return 0.0
-    return s if direction == "forward" else -s
-
-
-def _lane_count_for_edge(edge) -> int:  # type: ignore[no-untyped-def]
-    """Return hd.lane_count from edge.attributes, or 1 as fallback."""
-    attrs = edge.attributes if isinstance(edge.attributes, dict) else {}
-    hd = attrs.get("hd")
-    if isinstance(hd, dict):
-        lc = hd.get("lane_count")
-        if lc is not None:
-            try:
-                return max(1, int(lc))
-            except (TypeError, ValueError):
-                pass
-    return 1
 
 
 def shortest_path(
@@ -320,53 +135,16 @@ def shortest_path(
             total_length_m=0.0,
         )
 
-    # Directed adjacency: node -> list of (edge_id, direction, neighbor_node_id, base_length_m).
-    use_slope_cost = uphill_penalty is not None or downhill_bonus is not None
-    if min_confidence is None and not prefer_observed and not use_slope_cost:
-        adj = index.base_adj
-    else:
-        adj = {nid: [] for nid in node_ids}
-        for e in graph.edges:
-            # Skip edges below min_confidence threshold.
-            if min_confidence is not None:
-                conf = _hd_confidence(e)
-                if conf is not None and conf < min_confidence:
-                    continue
-
-            base_length_m = index.base_lengths.get(e.id)
-            if base_length_m is None:
-                base_length_m = _edge_length_m(e)
-
-            # Apply prefer_observed cost multiplier.
-            length_fwd = base_length_m
-            if prefer_observed:
-                obs = _observation_count(e)
-                multiplier = observed_bonus if obs > 0 else unobserved_penalty
-                length_fwd = length_fwd * multiplier
-            length_rev = length_fwd
-
-            # Apply elevation cost multipliers (direction-sensitive).
-            if use_slope_cost:
-                s_fwd = _slope_deg(e, "forward")
-                s_rev = -s_fwd  # reverse is opposite slope
-                if s_fwd > 0 and uphill_penalty is not None:
-                    length_fwd = length_fwd * uphill_penalty
-                elif s_fwd < 0 and downhill_bonus is not None:
-                    length_fwd = length_fwd * downhill_bonus
-                if s_rev > 0 and uphill_penalty is not None:
-                    length_rev = length_rev * uphill_penalty
-                elif s_rev < 0 and downhill_bonus is not None:
-                    length_rev = length_rev * downhill_bonus
-
-            adj.setdefault(e.start_node_id, []).append(
-                (e.id, "forward", e.end_node_id, length_fwd)
-            )
-            if e.start_node_id != e.end_node_id:
-                adj.setdefault(e.end_node_id, []).append(
-                    (e.id, "reverse", e.start_node_id, length_rev)
-            )
-
-    forbidden, mandatory = _parse_restrictions(turn_restrictions)
+    cost_options = RoutingCostOptions(
+        prefer_observed=prefer_observed,
+        min_confidence=min_confidence,
+        observed_bonus=observed_bonus,
+        unobserved_penalty=unobserved_penalty,
+        uphill_penalty=uphill_penalty,
+        downhill_bonus=downhill_bonus,
+    )
+    adj = _build_weighted_adjacency(graph, index, cost_options)
+    turn_policy = _parse_turn_policy(turn_restrictions)
 
     # -----------------------------------------------------------------------
     # A3: lane-level Dijkstra (allow_lane_change=True).
@@ -400,17 +178,10 @@ def shortest_path(
                 best_cost = d
                 break
 
-            allowed_outs: set[tuple[str, str]] | None = None
-            if inc_edge is not None:
-                allowed_outs = mandatory.get((u, inc_edge, inc_dir))
-
             # Expand cross-edge transitions (same as standard routing).
             for out_edge_id, out_dir, neighbor, w in adj.get(u, []):
-                if inc_edge is not None:
-                    if (u, inc_edge, inc_dir, out_edge_id, out_dir) in forbidden:
-                        continue
-                    if allowed_outs is not None and (out_edge_id, out_dir) not in allowed_outs:
-                        continue
+                if not turn_policy.allows_transition(u, inc_edge, inc_dir, out_edge_id, out_dir):
+                    continue
                 out_lane_count = edge_lane_count.get(out_edge_id, 1)
                 # Enter each lane of the outgoing edge.
                 for out_lane in range(out_lane_count):
@@ -474,7 +245,7 @@ def shortest_path(
     # State = (node, incoming_edge_id or None, incoming_direction or None).
     # -----------------------------------------------------------------------
 
-    if not forbidden and not mandatory:
+    if turn_policy.is_empty:
         node_dist: dict[str, float] = {from_node: 0.0}
         node_prev: dict[str, tuple[str, str, str]] = {}
         node_queue: list[tuple[float, str]] = [(0.0, from_node)]
@@ -545,16 +316,9 @@ def shortest_path(
             best_cost = d
             break
 
-        allowed_outs: set[tuple[str, str]] | None = None
-        if inc_edge is not None:
-            allowed_outs = mandatory.get((u, inc_edge, inc_dir))
-
         for out_edge_id, out_dir, neighbor, w in adj.get(u, []):
-            if inc_edge is not None:
-                if (u, inc_edge, inc_dir, out_edge_id, out_dir) in forbidden:
-                    continue
-                if allowed_outs is not None and (out_edge_id, out_dir) not in allowed_outs:
-                    continue
+            if not turn_policy.allows_transition(u, inc_edge, inc_dir, out_edge_id, out_dir):
+                continue
             nd = d + w
             new_state: State = (neighbor, out_edge_id, out_dir)
             if nd < dist.get(new_state, math.inf):

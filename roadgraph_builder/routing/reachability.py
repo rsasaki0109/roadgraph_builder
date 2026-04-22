@@ -14,23 +14,18 @@ import math
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Iterable
 
-from roadgraph_builder.routing.shortest_path import (
-    _RoutingIndex,
-    _edge_length_m,
-    _get_routing_index,
-    _hd_confidence,
-    _observation_count,
-    _parse_restrictions,
-    _slope_deg,
+from roadgraph_builder.routing._core import (
+    DirectedAdjacency,
+    RoutingCostOptions,
+    RoutingIndex,
+    TurnPolicy,
+    build_weighted_adjacency,
+    get_routing_index,
+    parse_turn_policy,
 )
 
 if TYPE_CHECKING:
     from roadgraph_builder.core.graph.graph import Graph
-
-
-DirectedAdjacency = dict[str, list[tuple[str, str, str, float]]]
-ForbiddenTurns = set[tuple[str, str, str, str, str]]
-MandatoryTurns = dict[tuple[str, str, str], set[tuple[str, str]]]
 
 
 @dataclass(frozen=True)
@@ -64,67 +59,6 @@ class ReachabilityResult:
     max_cost_m: float
     nodes: list[ReachableNode]
     edges: list[ReachableEdge]
-
-
-def _weighted_adjacency(
-    graph: "Graph",
-    index: _RoutingIndex,
-    *,
-    prefer_observed: bool,
-    min_confidence: float | None,
-    observed_bonus: float,
-    unobserved_penalty: float,
-    uphill_penalty: float | None,
-    downhill_bonus: float | None,
-) -> DirectedAdjacency:
-    """Build the weighted adjacency used by reachability.
-
-    This mirrors the weighting hooks in ``shortest_path``.  The common default
-    path reuses the cached base adjacency directly.
-    """
-
-    use_slope_cost = uphill_penalty is not None or downhill_bonus is not None
-    if min_confidence is None and not prefer_observed and not use_slope_cost:
-        return index.base_adj
-
-    adj: DirectedAdjacency = {nid: [] for nid in index.node_ids}
-    for edge in graph.edges:
-        if min_confidence is not None:
-            conf = _hd_confidence(edge)
-            if conf is not None and conf < min_confidence:
-                continue
-
-        base_length_m = index.base_lengths.get(edge.id)
-        if base_length_m is None:
-            base_length_m = _edge_length_m(edge)
-
-        length_fwd = base_length_m
-        if prefer_observed:
-            obs = _observation_count(edge)
-            multiplier = observed_bonus if obs > 0 else unobserved_penalty
-            length_fwd *= multiplier
-        length_rev = length_fwd
-
-        if use_slope_cost:
-            slope_fwd = _slope_deg(edge, "forward")
-            slope_rev = -slope_fwd
-            if slope_fwd > 0 and uphill_penalty is not None:
-                length_fwd *= uphill_penalty
-            elif slope_fwd < 0 and downhill_bonus is not None:
-                length_fwd *= downhill_bonus
-            if slope_rev > 0 and uphill_penalty is not None:
-                length_rev *= uphill_penalty
-            elif slope_rev < 0 and downhill_bonus is not None:
-                length_rev *= downhill_bonus
-
-        adj.setdefault(edge.start_node_id, []).append(
-            (edge.id, "forward", edge.end_node_id, length_fwd)
-        )
-        if edge.start_node_id != edge.end_node_id:
-            adj.setdefault(edge.end_node_id, []).append(
-                (edge.id, "reverse", edge.start_node_id, length_rev)
-            )
-    return adj
 
 
 def _edge_span(
@@ -210,10 +144,9 @@ def _reachable_within_prepared(
     start_node: str,
     *,
     max_cost_m: float,
-    index: _RoutingIndex,
+    index: RoutingIndex,
     adj: DirectedAdjacency,
-    forbidden: ForbiddenTurns,
-    mandatory: MandatoryTurns,
+    turn_policy: TurnPolicy,
 ) -> ReachabilityResult:
     if max_cost_m < 0:
         raise ValueError("max_cost_m must be non-negative")
@@ -221,7 +154,7 @@ def _reachable_within_prepared(
     if start_node not in index.node_ids:
         raise KeyError(f"start_node {start_node!r} is not in the graph")
 
-    if not forbidden and not mandatory:
+    if turn_policy.is_empty:
         best_node_cost: dict[str, float] = {start_node: 0.0}
         edge_spans: dict[tuple[str, str], ReachableEdge] = {}
         queue: list[tuple[float, str]] = [(0.0, start_node)]
@@ -277,16 +210,15 @@ def _reachable_within_prepared(
             continue
 
         node_id, incoming_edge, incoming_direction = state
-        allowed_outs: set[tuple[str, str]] | None = None
-        if incoming_edge is not None:
-            allowed_outs = mandatory.get((node_id, incoming_edge, incoming_direction))
-
         for edge_id, direction, neighbor, edge_cost in adj.get(node_id, []):
-            if incoming_edge is not None:
-                if (node_id, incoming_edge, incoming_direction, edge_id, direction) in forbidden:
-                    continue
-                if allowed_outs is not None and (edge_id, direction) not in allowed_outs:
-                    continue
+            if not turn_policy.allows_transition(
+                node_id,
+                incoming_edge,
+                incoming_direction,
+                edge_id,
+                direction,
+            ):
+                continue
 
             span = _edge_span(
                 edge_id=edge_id,
@@ -338,11 +270,9 @@ class ReachabilityAnalyzer:
         uphill_penalty: float | None = None,
         downhill_bonus: float | None = None,
     ) -> None:
-        index = _get_routing_index(graph)
+        index = get_routing_index(graph)
         self._index = index
-        self._adj = _weighted_adjacency(
-            graph,
-            index,
+        self._cost_options = RoutingCostOptions(
             prefer_observed=prefer_observed,
             min_confidence=min_confidence,
             observed_bonus=observed_bonus,
@@ -350,7 +280,12 @@ class ReachabilityAnalyzer:
             uphill_penalty=uphill_penalty,
             downhill_bonus=downhill_bonus,
         )
-        self._forbidden, self._mandatory = _parse_restrictions(turn_restrictions)
+        self._adj = build_weighted_adjacency(
+            graph,
+            index,
+            self._cost_options,
+        )
+        self._turn_policy = parse_turn_policy(turn_restrictions)
 
     def reachable_within(self, start_node: str, *, max_cost_m: float) -> ReachabilityResult:
         """Return nodes and directed edge spans reachable within ``max_cost_m``."""
@@ -360,8 +295,7 @@ class ReachabilityAnalyzer:
             max_cost_m=max_cost_m,
             index=self._index,
             adj=self._adj,
-            forbidden=self._forbidden,
-            mandatory=self._mandatory,
+            turn_policy=self._turn_policy,
         )
 
 

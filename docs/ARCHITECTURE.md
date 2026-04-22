@@ -116,7 +116,9 @@ flowchart TD
     end
 
     subgraph routing
+        CORE[_core<br/>routing index<br/>cost hooks<br/>turn policy]
         shortest_path
+        reachability
         nearest
         geojson_export
     end
@@ -282,16 +284,25 @@ flowchart LR
 ```mermaid
 flowchart LR
     subgraph routing
+        CORE[_core<br/>RoutingIndex<br/>RoutingCostOptions<br/>TurnPolicy]
         SP[shortest_path<br/>Dijkstra over<br/>node, incoming_edge, direction]
+        RA[ReachabilityAnalyzer<br/>service-area Dijkstra]
         NN[nearest_node]
         RGJ[build_route_geojson<br/>write_route_geojson]
     end
 
+    CORE --> SP
+    CORE --> RA
     N[node id] --> SP
+    N --> RA
     LL[lat, lon + origin] --> NN --> SP
+    NN --> RA
     TR[turn_restrictions<br/>no_* / only_*] -.optional.-> SP
+    TR -.optional.-> RA
     SP --> Route((Route dataclass<br/>node_sequence<br/>edge_sequence<br/>edge_directions<br/>total_length_m))
+    RA --> Reach((ReachabilityResult<br/>nodes<br/>directed edge spans))
     Route --> RGJ --> GJ[route.geojson<br/>route LineString +<br/>route_edge +<br/>route_start / route_end]
+    Reach --> RGJ --> RG[reachable.geojson<br/>clipped edge spans +<br/>reachable nodes]
 ```
 
 The Leaflet viewer (`docs/map.html`) ships a second, smaller Dijkstra in
@@ -349,9 +360,11 @@ flowchart TD
 | `roadgraph_builder/navigation/sd_maneuvers.py` | Geometry-only `allowed_maneuvers(_reverse)` at each digitized end node |
 | `roadgraph_builder/navigation/turn_restrictions.py` | Loader + camera extraction + merge for `sd_nav.turn_restrictions` |
 | `roadgraph_builder/navigation/guidance.py` | `build_guidance` — turn-by-turn GuidanceStep list from route GeoJSON + sd_nav (depart / arrive / slight / left / right / sharp / u_turn / continue categories) |
+| `roadgraph_builder/routing/_core.py` | Shared routing internals: graph mutation signature, cached `RoutingIndex`, weighted adjacency from observation/confidence/slope hooks, and parsed `TurnPolicy` for `no_*` / `only_*` restrictions |
 | `roadgraph_builder/routing/shortest_path.py` | Directed-state Dijkstra that honours `no_*` / `only_*` restrictions; 0.6 adds `prefer_observed` / `min_confidence` cost hooks; 0.7 extends the state to `(node, incoming_edge, direction, lane_index)` for `allow_lane_change=True` with `lane_change_cost_m` swap penalty |
+| `roadgraph_builder/routing/reachability.py` | Service-area reachability over the shared routing core; `ReachabilityAnalyzer` reuses prepared topology / weighted adjacency / policy across many queries and emits reachable nodes plus directed edge spans |
 | `roadgraph_builder/routing/nearest.py` | `nearest_node` (xy or lat/lon) |
-| `roadgraph_builder/routing/geojson_export.py` | Route → GeoJSON FeatureCollection |
+| `roadgraph_builder/routing/geojson_export.py` | Route / reachability → GeoJSON FeatureCollection |
 | `roadgraph_builder/schemas/*.schema.json` | JSON Schemas shipped as package resources |
 | `roadgraph_builder/validation/*.py` | One `validate_*_document` per schema (Draft 2020-12) |
 | `roadgraph_builder/viz/svg_export.py` | Map-like SVG for the `visualize` command |
