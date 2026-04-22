@@ -57,6 +57,7 @@ def _route_args(**overrides: object) -> argparse.Namespace:
         "downhill_bonus": None,
         "allow_lane_change": False,
         "lane_change_cost_m": 50.0,
+        "explain": False,
     }
     defaults.update(overrides)
     return argparse.Namespace(**defaults)
@@ -165,6 +166,46 @@ def test_run_route_isolated_from_file_io_and_parser():
     assert doc["to_node"] == "b"
     assert doc["edge_sequence"] == ["e1"]
     assert doc["applied_restrictions"] == 0
+    assert "diagnostics" not in doc
+
+
+def test_run_route_explain_includes_diagnostics():
+    stdout = io.StringIO()
+
+    rc = run_route(
+        _route_args(explain=True),
+        load_graph=lambda _path: _line_graph(),
+        load_json=lambda _path: {},
+        stdout=stdout,
+    )
+
+    assert rc == 0
+    doc = json.loads(stdout.getvalue())
+    diagnostics = doc["diagnostics"]
+    assert diagnostics["search_engine"] == "astar"
+    assert diagnostics["heuristic_enabled"] is True
+    assert diagnostics["fallback_reason"] is None
+    assert diagnostics["expanded_states"] > 0
+    assert diagnostics["queued_states"] >= diagnostics["expanded_states"]
+    assert diagnostics["route_edge_count"] == 1
+    assert diagnostics["total_length_m"] == 30.0
+
+
+def test_run_route_explain_reports_cost_fallback():
+    stdout = io.StringIO()
+
+    rc = run_route(
+        _route_args(explain=True, prefer_observed=True),
+        load_graph=lambda _path: _line_graph(),
+        load_json=lambda _path: {},
+        stdout=stdout,
+    )
+
+    assert rc == 0
+    diagnostics = json.loads(stdout.getvalue())["diagnostics"]
+    assert diagnostics["search_engine"] == "dijkstra"
+    assert diagnostics["heuristic_enabled"] is False
+    assert diagnostics["fallback_reason"] == "cost_discount"
 
 
 def test_run_route_reports_both_missing_endpoints():

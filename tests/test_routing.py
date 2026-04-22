@@ -211,6 +211,65 @@ def test_route_planner_disables_heuristic_for_dangling_edge_nodes():
     assert planner._use_straight_line_heuristic is False
 
 
+def test_route_planner_records_astar_diagnostics():
+    planner = RoutePlanner(_manual_graph())
+    route = planner.shortest_path("a", "c")
+    diagnostics = planner.last_diagnostics
+
+    assert diagnostics is not None
+    assert diagnostics.search_engine == "astar"
+    assert diagnostics.heuristic_enabled is True
+    assert diagnostics.fallback_reason is None
+    assert diagnostics.expanded_states > 0
+    assert diagnostics.queued_states >= diagnostics.expanded_states
+    assert diagnostics.route_edge_count == len(route.edge_sequence)
+    assert diagnostics.total_length_m == route.total_length_m
+    assert diagnostics.to_dict()["search_engine"] == "astar"
+
+
+def test_route_planner_records_cost_fallback_diagnostics():
+    planner = RoutePlanner(_manual_graph(), prefer_observed=True)
+    planner.shortest_path("a", "c")
+    diagnostics = planner.last_diagnostics
+
+    assert diagnostics is not None
+    assert diagnostics.search_engine == "dijkstra"
+    assert diagnostics.heuristic_enabled is False
+    assert diagnostics.fallback_reason == "cost_discount"
+
+
+def test_route_planner_records_dangling_node_fallback_diagnostics():
+    g = Graph(
+        nodes=[
+            Node(id="a", position=(0.0, 0.0)),
+            Node(id="b", position=(10.0, 0.0)),
+        ],
+        edges=[
+            Edge(
+                id="valid",
+                start_node_id="a",
+                end_node_id="b",
+                polyline=[(0.0, 0.0), (10.0, 0.0)],
+            ),
+            Edge(
+                id="dangling",
+                start_node_id="a",
+                end_node_id="missing",
+                polyline=[(0.0, 0.0), (1.0, 0.0)],
+            ),
+        ],
+    )
+
+    planner = RoutePlanner(g)
+    planner.shortest_path("a", "b")
+    diagnostics = planner.last_diagnostics
+
+    assert diagnostics is not None
+    assert diagnostics.search_engine == "dijkstra"
+    assert diagnostics.heuristic_enabled is False
+    assert diagnostics.fallback_reason == "dangling_node"
+
+
 def test_shortest_path_disjoint_raises():
     g = _manual_graph()
     g = Graph(
@@ -242,6 +301,21 @@ def test_route_cli_prints_json(tmp_path: Path, capsys):
     assert doc["to_node"] == "c"
     assert doc["edge_sequence"] == ["e1", "e2"]
     assert math.isclose(doc["total_length_m"], 60.0)
+
+
+def test_route_cli_explain_prints_diagnostics(tmp_path: Path, capsys):
+    from roadgraph_builder.cli.main import main
+    from roadgraph_builder.io.export.json_exporter import export_graph_json
+
+    out = tmp_path / "g.json"
+    export_graph_json(_manual_graph(), out)
+
+    rc = main(["route", str(out), "a", "c", "--explain"])
+
+    assert rc == 0
+    diagnostics = json.loads(capsys.readouterr().out)["diagnostics"]
+    assert diagnostics["search_engine"] == "astar"
+    assert diagnostics["fallback_reason"] is None
 
 
 def test_reachable_cli_prints_json_and_writes_geojson(tmp_path: Path, capsys):

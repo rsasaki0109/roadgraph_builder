@@ -24,7 +24,7 @@ _roadgraph_builder() {
         'enrich:Attach SD→HD metadata and optional lane boundaries'
         'inspect-lidar:Print LAS public-header summary as JSON'
         'nearest-node:Find graph node nearest to a lat/lon or x/y'
-        'route:Dijkstra shortest path'
+        'route:A* / Dijkstra route'
         'reachable:Find nodes and edge spans reachable within a cost budget'
         'stats:Print graph_stats + junction counts'
         'match-trajectory:Snap a trajectory CSV to the graph'
@@ -99,6 +99,7 @@ _roadgraph_builder() {
                         '--downhill-bonus[Downhill cost multiplier]:float:' \
                         '--allow-lane-change[Enable lane-level routing]' \
                         '--lane-change-cost-m[Within-edge lane-change cost]:float:' \
+                        '--explain[Include routing engine diagnostics]' \
                         '--from-latlon[Source lat/lon]:float float:' \
                         '--to-latlon[Destination lat/lon]:float float:' \
                         '*:file:_files'

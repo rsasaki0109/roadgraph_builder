@@ -62,7 +62,7 @@ def add_route_parser(sub) -> None:  # type: ignore[no-untyped-def]
 
     rt = sub.add_parser(
         "route",
-        help="Dijkstra shortest path between two nodes (by id or by lat/lon; optional turn_restrictions).",
+        help="A* / Dijkstra route between two nodes (by id or by lat/lon; optional turn_restrictions).",
     )
     rt.add_argument("input_json", help="Road graph JSON (e.g. sim/road_graph.json from export-bundle).")
     rt.add_argument(
@@ -189,6 +189,12 @@ def add_route_parser(sub) -> None:  # type: ignore[no-untyped-def]
         default=50.0,
         metavar="M",
         help="Cost in meters for a within-edge lane swap when --allow-lane-change is set (default 50).",
+    )
+    rt.add_argument(
+        "--explain",
+        action="store_true",
+        default=False,
+        help="Include routing engine diagnostics in the JSON output.",
     )
 
 
@@ -377,6 +383,7 @@ def route_to_document(
     to_snap: dict[str, float] | None,
     restrictions_count: int,
     output: str | None,
+    diagnostics: dict[str, object] | None = None,
 ) -> dict[str, object]:
     """Serialize the route result to the CLI JSON shape."""
 
@@ -394,6 +401,8 @@ def route_to_document(
     }
     if route.lane_sequence is not None:
         doc["lane_sequence"] = route.lane_sequence
+    if diagnostics is not None:
+        doc["diagnostics"] = diagnostics
     return doc
 
 
@@ -489,7 +498,7 @@ def run_route(
     """Execute ``route`` from parsed args."""
 
     from roadgraph_builder.routing.geojson_export import write_route_geojson
-    from roadgraph_builder.routing.shortest_path import shortest_path
+    from roadgraph_builder.routing.shortest_path import RoutePlanner
 
     out = stdout if stdout is not None else sys.stdout
     err = stderr if stderr is not None else sys.stderr
@@ -532,10 +541,8 @@ def run_route(
     if args.turn_restrictions_json:
         restrictions = turn_restrictions_from_document(load_json(args.turn_restrictions_json))
     try:
-        route = shortest_path(
+        planner = RoutePlanner(
             graph,
-            from_endpoint.node_id,
-            to_endpoint.node_id,
             turn_restrictions=restrictions or None,
             prefer_observed=getattr(args, "prefer_observed", False),
             min_confidence=getattr(args, "min_confidence", None),
@@ -546,6 +553,7 @@ def run_route(
             allow_lane_change=getattr(args, "allow_lane_change", False),
             lane_change_cost_m=getattr(args, "lane_change_cost_m", 50.0),
         )
+        route = planner.shortest_path(from_endpoint.node_id, to_endpoint.node_id)
     except KeyError as exc:
         print(f"{args.input_json}: {exc.args[0]}", file=err)
         return 1
@@ -573,6 +581,11 @@ def run_route(
                 to_snap=to_endpoint.snap,
                 restrictions_count=len(restrictions),
                 output=args.output if args.output else None,
+                diagnostics=(
+                    planner.last_diagnostics.to_dict()
+                    if getattr(args, "explain", False) and planner.last_diagnostics
+                    else None
+                ),
             ),
             ensure_ascii=False,
             indent=2,

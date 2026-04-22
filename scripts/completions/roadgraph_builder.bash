@@ -100,7 +100,7 @@ validate-lane-markings guidance validate-guidance update-graph process-dataset"
 --turn-restrictions-json --output --origin-lat --origin-lon \
 --from-latlon --to-latlon --prefer-observed --min-confidence \
 --observed-bonus --unobserved-penalty --uphill-penalty --downhill-bonus \
---allow-lane-change --lane-change-cost-m" -- "$cur"))
+--allow-lane-change --lane-change-cost-m --explain" -- "$cur"))
                 ;;
             reachable)
                 COMPREPLY=($(compgen -W "\

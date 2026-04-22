@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Route CLI explain mode exposes routing engine diagnostics.**
+  `roadgraph_builder route --explain` adds a `diagnostics` object to stdout
+  with the selected search engine, whether the safe A* heuristic was enabled,
+  fallback reason when Dijkstra is used, expanded / queued state counts, route
+  edge count, and total length.
+
 - **Reachability / service-area analysis is available from the routing CLI.**
   New `routing.reachability.reachable_within` and `roadgraph_builder reachable`
   report nodes and directed edge spans reachable from a start node within a

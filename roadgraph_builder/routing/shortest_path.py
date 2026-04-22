@@ -76,6 +76,30 @@ class Route:
     lane_sequence: list[int | None] | None = None
 
 
+@dataclass(frozen=True)
+class RouteDiagnostics:
+    """Search metadata captured for the most recent ``RoutePlanner`` query."""
+
+    search_engine: str
+    heuristic_enabled: bool
+    fallback_reason: str | None
+    expanded_states: int
+    queued_states: int
+    route_edge_count: int
+    total_length_m: float
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "search_engine": self.search_engine,
+            "heuristic_enabled": self.heuristic_enabled,
+            "fallback_reason": self.fallback_reason,
+            "expanded_states": self.expanded_states,
+            "queued_states": self.queued_states,
+            "route_edge_count": self.route_edge_count,
+            "total_length_m": self.total_length_m,
+        }
+
+
 class RoutePlanner:
     """Prepared shortest-path planner for repeated queries on one graph.
 
@@ -133,6 +157,7 @@ class RoutePlanner:
         self.min_confidence = min_confidence
         self.allow_lane_change = allow_lane_change
         self.lane_change_cost_m = lane_change_cost_m
+        self.last_diagnostics: RouteDiagnostics | None = None
 
         cost_options = RoutingCostOptions(
             prefer_observed=prefer_observed,
@@ -144,10 +169,10 @@ class RoutePlanner:
         )
         self.adj: DirectedAdjacency = _build_weighted_adjacency(graph, self.index, cost_options)
         self.turn_policy: TurnPolicy = _parse_turn_policy(turn_restrictions)
-        self._use_straight_line_heuristic = (
-            cost_options.preserves_base_metric_lower_bound
-            and self._adjacency_respects_node_distance_lower_bound()
+        self._heuristic_fallback_reason = self._straight_line_heuristic_fallback_reason(
+            cost_options
         )
+        self._use_straight_line_heuristic = self._heuristic_fallback_reason is None
         self.edge_lane_count: dict[str, int] = (
             {edge.id: _lane_count_for_edge(edge) for edge in graph.edges}
             if allow_lane_change
@@ -178,9 +203,8 @@ class RoutePlanner:
         if to_node not in node_ids:
             raise KeyError(f"to_node {to_node!r} is not in the graph")
 
-    @staticmethod
-    def _empty_route(from_node: str, to_node: str) -> Route:
-        return Route(
+    def _empty_route(self, from_node: str, to_node: str) -> Route:
+        route = Route(
             from_node=from_node,
             to_node=to_node,
             node_sequence=[from_node],
@@ -188,6 +212,14 @@ class RoutePlanner:
             edge_directions=[],
             total_length_m=0.0,
         )
+        self._record_diagnostics(
+            expanded_states=0,
+            queued_states=0,
+            route=route,
+            fallback_reason="trivial_route",
+            search_engine="trivial",
+        )
+        return route
 
     def _actual_length(self, edge_ids: Iterable[str]) -> float:
         edge_by_id = self.index.edge_by_id
@@ -200,17 +232,51 @@ class RoutePlanner:
             return math.inf
         return math.hypot(to_xy[0] - from_xy[0], to_xy[1] - from_xy[1])
 
-    def _adjacency_respects_node_distance_lower_bound(self) -> bool:
-        for from_node, steps in self.adj.items():
-            for _, _, to_node, cost_m in steps:
-                if cost_m + 1e-9 < self._node_distance(from_node, to_node):
-                    return False
-        return True
-
     def _heuristic(self, node_id: str, to_node: str) -> float:
         if not self._use_straight_line_heuristic:
             return 0.0
         return self._node_distance(node_id, to_node)
+
+    def _straight_line_heuristic_fallback_reason(
+        self,
+        cost_options: RoutingCostOptions,
+    ) -> str | None:
+        if self.allow_lane_change:
+            return "lane_level"
+        if not cost_options.preserves_base_metric_lower_bound:
+            return "cost_discount"
+        return self._node_distance_lower_bound_violation_reason()
+
+    def _node_distance_lower_bound_violation_reason(self) -> str | None:
+        for from_node, steps in self.adj.items():
+            for _, _, to_node, cost_m in steps:
+                distance = self._node_distance(from_node, to_node)
+                if math.isinf(distance):
+                    return "dangling_node"
+                if cost_m + 1e-9 < distance:
+                    return "non_metric_geometry"
+        return None
+
+    def _record_diagnostics(
+        self,
+        *,
+        expanded_states: int,
+        queued_states: int,
+        route: Route,
+        fallback_reason: str | None = None,
+        search_engine: str | None = None,
+    ) -> None:
+        reason = self._heuristic_fallback_reason if fallback_reason is None else fallback_reason
+        engine = search_engine or ("astar" if self._use_straight_line_heuristic else "dijkstra")
+        self.last_diagnostics = RouteDiagnostics(
+            search_engine=engine,
+            heuristic_enabled=self._use_straight_line_heuristic,
+            fallback_reason=reason,
+            expanded_states=expanded_states,
+            queued_states=queued_states,
+            route_edge_count=len(route.edge_sequence),
+            total_length_m=route.total_length_m,
+        )
 
     def _heuristic_for_target(self, to_node: str) -> Callable[[str], float]:
         if not self._use_straight_line_heuristic:
@@ -251,6 +317,8 @@ class RoutePlanner:
         l_queue: list[tuple[float, str, str | None, str | None, int | None]] = [
             (0.0, from_node, None, None, None)
         ]
+        expanded_states = 0
+        queued_states = 1
         best_l_state: LState | None = None
         best_cost = math.inf
 
@@ -259,6 +327,7 @@ class RoutePlanner:
             l_state: LState = (u, inc_edge, inc_dir, inc_lane)
             if d > l_dist.get(l_state, math.inf):
                 continue
+            expanded_states += 1
             if u == to_node:
                 best_l_state = l_state
                 best_cost = d
@@ -281,6 +350,7 @@ class RoutePlanner:
                         l_dist[new_l_state] = nd
                         l_prev[new_l_state] = l_state
                         heapq.heappush(l_queue, (nd, neighbor, out_edge_id, out_dir, out_lane))
+                        queued_states += 1
 
             # Expand intra-edge lane swaps: stay at the same node, same edge.
             if inc_edge is not None and inc_lane is not None:
@@ -294,6 +364,7 @@ class RoutePlanner:
                         l_dist[swap_state] = nd
                         l_prev[swap_state] = l_state
                         heapq.heappush(l_queue, (nd, u, inc_edge, inc_dir, swap_lane))
+                        queued_states += 1
 
         if best_l_state is None or best_cost == math.inf:
             raise ValueError(f"no path from {from_node!r} to {to_node!r} (lane-level search)")
@@ -314,7 +385,7 @@ class RoutePlanner:
         l_dirs.reverse()
         l_lanes.reverse()
 
-        return Route(
+        route = Route(
             from_node=from_node,
             to_node=to_node,
             node_sequence=l_nodes,
@@ -323,6 +394,12 @@ class RoutePlanner:
             total_length_m=self._actual_length(l_edges),
             lane_sequence=l_lanes,
         )
+        self._record_diagnostics(
+            expanded_states=expanded_states,
+            queued_states=queued_states,
+            route=route,
+        )
+        return route
 
     def _shortest_path_unrestricted(self, from_node: str, to_node: str) -> Route:
         heuristic = self._heuristic_for_target(to_node)
@@ -332,11 +409,14 @@ class RoutePlanner:
         node_queue: list[tuple[float, float, float, str]] = [
             (start_h, start_h, 0.0, from_node)
         ]
+        expanded_states = 0
+        queued_states = 1
 
         while node_queue:
             _, _, d, u = heapq.heappop(node_queue)
             if d > node_dist.get(u, math.inf):
                 continue
+            expanded_states += 1
             if u == to_node:
                 break
 
@@ -347,6 +427,7 @@ class RoutePlanner:
                     node_prev[neighbor] = (u, out_edge_id, out_dir)
                     h = heuristic(neighbor)
                     heapq.heappush(node_queue, (nd + h, h, nd, neighbor))
+                    queued_states += 1
 
         if to_node not in node_dist:
             raise self._no_path_error(from_node, to_node)
@@ -365,7 +446,7 @@ class RoutePlanner:
         edges.reverse()
         dirs.reverse()
 
-        return Route(
+        route = Route(
             from_node=from_node,
             to_node=to_node,
             node_sequence=nodes,
@@ -373,6 +454,12 @@ class RoutePlanner:
             edge_directions=dirs,
             total_length_m=self._actual_length(edges),
         )
+        self._record_diagnostics(
+            expanded_states=expanded_states,
+            queued_states=queued_states,
+            route=route,
+        )
+        return route
 
     def _shortest_path_restricted(self, from_node: str, to_node: str) -> Route:
         heuristic = self._heuristic_for_target(to_node)
@@ -385,6 +472,8 @@ class RoutePlanner:
         queue: list[tuple[float, float, float, str, str | None, str | None]] = [
             (start_h, start_h, 0.0, from_node, None, None)
         ]
+        expanded_states = 0
+        queued_states = 1
         best_state: State | None = None
         best_cost = math.inf
 
@@ -393,6 +482,7 @@ class RoutePlanner:
             state: State = (u, inc_edge, inc_dir)
             if d > dist.get(state, math.inf):
                 continue
+            expanded_states += 1
             if u == to_node:
                 best_state = state
                 best_cost = d
@@ -408,6 +498,7 @@ class RoutePlanner:
                     prev[new_state] = state
                     h = heuristic(neighbor)
                     heapq.heappush(queue, (nd + h, h, nd, neighbor, out_edge_id, out_dir))
+                    queued_states += 1
 
         if best_state is None or best_cost == math.inf:
             raise self._no_path_error(from_node, to_node)
@@ -425,7 +516,7 @@ class RoutePlanner:
         edges.reverse()
         dirs.reverse()
 
-        return Route(
+        route = Route(
             from_node=from_node,
             to_node=to_node,
             node_sequence=nodes,
@@ -433,6 +524,12 @@ class RoutePlanner:
             edge_directions=dirs,
             total_length_m=self._actual_length(edges),
         )
+        self._record_diagnostics(
+            expanded_states=expanded_states,
+            queued_states=queued_states,
+            route=route,
+        )
+        return route
 
 
 def shortest_path(

@@ -16,7 +16,12 @@ from roadgraph_builder.routing.reachability import (
     ReachableNode,
     reachable_within,
 )
-from roadgraph_builder.routing.shortest_path import Route, RoutePlanner, shortest_path
+from roadgraph_builder.routing.shortest_path import (
+    Route,
+    RouteDiagnostics,
+    RoutePlanner,
+    shortest_path,
+)
 from roadgraph_builder.routing.trip_reconstruction import Trip, reconstruct_trips, trip_stats_summary
 
 __all__ = [
@@ -27,6 +32,7 @@ __all__ = [
     "ReachableEdge",
     "ReachableNode",
     "Route",
+    "RouteDiagnostics",
     "RoutePlanner",
     "SnappedPoint",
     "Trip",

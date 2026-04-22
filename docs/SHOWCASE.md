@@ -65,12 +65,15 @@ roadgraph_builder route graph.json n0 n9 \
   --turn-restrictions-json turn_restrictions.json \
   --prefer-observed \
   --min-confidence 0.3 \
+  --explain \
   --output route.geojson
 ```
 
 The same routing layer supports safe A* acceleration, Dijkstra fallback,
 slope-aware cost, lane-change routing, and prepared `RoutePlanner` instances
-for repeated shortest-path queries.
+for repeated shortest-path queries. `--explain` adds route diagnostics such as
+the selected engine, fallback reason, and queue work without changing the normal
+route fields.
 
 ### Explore Reachability
 
@@ -114,7 +117,7 @@ because the intermediate graph is explicit, testable, and easy to extend.
 - `shortest_path_grid_120`: 120 shortest-path queries on a 55x55 synthetic grid using one `RoutePlanner`; committed baseline `0.601 s`.
 - `reachable_grid_120`: 120 service-area queries on the same grid using `ReachabilityAnalyzer`; committed baseline `0.270 s`.
 - `nearest_node_grid_2000`: 2000 nearest-node snaps on a 300x300 node grid; committed baseline `0.432 s`.
-- Full local test suite after the latest routing work: `605 passed, 28 skipped, 4 deselected`.
+- Full local test suite after the latest routing work: `611 passed, 28 skipped, 4 deselected`.
 
 ## Local Preview
 

@@ -403,6 +403,10 @@ roadgraph_builder nearest-node examples/frozen_bundle/sim/road_graph.json \
 roadgraph_builder route examples/frozen_bundle/sim/road_graph.json n0 n1
 # => {"from_node":"n0","to_node":"n1","total_length_m":15.02,"edge_sequence":["e0"],"edge_directions":["forward"],"node_sequence":["n0","n1"],"applied_restrictions":0}
 
+# Explain the search engine choice and queue work
+roadgraph_builder route examples/frozen_bundle/sim/road_graph.json n0 n1 --explain
+# => "diagnostics": {"search_engine":"astar","heuristic_enabled":true,"fallback_reason":null,...}
+
 # Respecting the bundle's nav/sd_nav.json (or a standalone turn_restrictions.json)
 roadgraph_builder route examples/frozen_bundle/sim/road_graph.json n0 n1 \
   --turn-restrictions-json examples/frozen_bundle/nav/sd_nav.json
@@ -426,6 +430,12 @@ roadgraph_builder reachable examples/frozen_bundle/sim/road_graph.json n0 \
 ```
 
 `reachable` accepts `--start-latlon LAT LON` for the same nearest-node snap used by `route --from-latlon`. Its cost hooks (`--prefer-observed`, `--min-confidence`, `--uphill-penalty`, `--downhill-bonus`) match `route`, so the JSON / GeoJSON service area reflects the same routing policy.
+
+`route --explain` leaves the normal route fields intact and adds `diagnostics`
+with `search_engine`, `heuristic_enabled`, `fallback_reason`, `expanded_states`,
+`queued_states`, `route_edge_count`, and `total_length_m`. Fallback reasons
+include `cost_discount`, `non_metric_geometry`, `dangling_node`, and
+`lane_level`.
 
 Exits with code 1 on unknown node ids, disjoint components, or when the restrictions make the pair unreachable.
 
