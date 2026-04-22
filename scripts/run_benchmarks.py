@@ -4,8 +4,8 @@
 Measures wall-clock time for nine scenarios:
   polylines_to_graph_paris       — build from OSM public trackpoints CSV
   polylines_to_graph_10k_synth   — build from 50×50 synthetic grid (~25 000 pts)
-  shortest_path_paris            — 100 Dijkstra queries on the Paris graph
-  shortest_path_grid_120         — 120 Dijkstra queries on a 55×55 grid graph
+  shortest_path_paris            — 100 route queries on the Paris graph
+  shortest_path_grid_120         — 120 RoutePlanner queries on a 55×55 grid graph
   reachable_grid_120             — 120 reachability queries on a 55×55 grid graph
   nearest_node_grid_2000         — 2000 nearest-node queries on a 300×300 grid
   export_geojson_grid_120_compact — compact GeoJSON export on a 120×120 grid

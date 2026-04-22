@@ -169,7 +169,7 @@ The committed baseline JSON records:
 | `polylines_to_graph_paris` | 0.116 | OSM public-trackpoints CSV, small local fixture |
 | `polylines_to_graph_10k_synth` | 0.486 | 50x50 grid, ~25 000 pts |
 | `shortest_path_paris` | 0.021 | Existing small-graph routing smoke |
-| `shortest_path_grid_120` | 0.959 | 120 routes on a 55x55 synthetic graph using one prepared `RoutePlanner` |
+| `shortest_path_grid_120` | 0.601 | 120 routes on a 55x55 synthetic graph using one prepared `RoutePlanner` |
 | `reachable_grid_120` | 0.270 | 120 reachability queries, 60 m budget, 36 305 consumed node/span results |
 | `nearest_node_grid_2000` | 0.432 | 2000 snaps on a 300x300 node grid |
 | `export_geojson_grid_120_compact` | 0.572 | Compact GeoJSON export on a 120x120 grid |
@@ -194,6 +194,25 @@ On this workstation:
 Five direct passes of `run_grid_routes_120()` in the same Python process measured
 0.973 s, 0.599 s, 0.589 s, 0.602 s, and 0.604 s. A full comparison run with the
 previous baseline reported no regressions.
+
+## v0.7.2-dev safe A* routing fast path (2026-04-22)
+
+`RoutePlanner` now uses straight-line node distance as an A* heuristic when it
+can prove that every weighted adjacency step is at least as expensive as the
+node-to-node straight-line distance. Cost discounts such as `prefer_observed`
+with the default observed bonus, downhill bonuses below 1.0, or graphs whose
+node positions do not bound edge geometry fall back to the zero-heuristic
+Dijkstra behavior.
+
+| Version | elapsed (s) | Notes |
+|---|---:|---|
+| prepared planner | 0.959 | One `RoutePlanner`, node-level queue, no A* heuristic |
+| safe A* planner | 0.601 | Same workload with cached straight-line lower-bound pruning |
+
+Direct passes of `run_grid_routes_120()` after the A* change measured 0.758 s,
+0.665 s, 0.604 s, 0.595 s, and 0.575 s. Full benchmark comparisons measured
+`shortest_path_grid_120` at 0.749 s with `--no-warmup` and 0.622 s with warmup;
+both reported no regressions. The committed routing baseline is 0.601 s.
 
 ## Regression policy
 

@@ -23,6 +23,7 @@ class RoutingIndex:
 
     signature: tuple[object, ...]
     node_ids: set[str]
+    node_positions: dict[str, tuple[float, float]]
     edge_by_id: dict[str, object]
     base_lengths: dict[str, float]
     base_adj: DirectedAdjacency
@@ -50,6 +51,20 @@ class RoutingCostOptions:
             and not self.prefer_observed
             and not self.uses_slope_cost
         )
+
+    @property
+    def preserves_base_metric_lower_bound(self) -> bool:
+        """Return True when weighted edge costs never drop below base lengths."""
+
+        if self.prefer_observed and (
+            self.observed_bonus < 1.0 or self.unobserved_penalty < 1.0
+        ):
+            return False
+        if self.uphill_penalty is not None and self.uphill_penalty < 1.0:
+            return False
+        if self.downhill_bonus is not None and self.downhill_bonus < 1.0:
+            return False
+        return True
 
 
 @dataclass(frozen=True)
@@ -96,12 +111,12 @@ class TurnPolicy:
 
 
 def routing_signature(graph: "Graph") -> tuple[object, ...]:
-    """Return a mutation signature for graph topology and edge geometry."""
+    """Return a mutation signature for topology, node positions, and edge geometry."""
 
     return (
         id(graph.nodes),
         len(graph.nodes),
-        tuple(n.id for n in graph.nodes),
+        tuple((n.id, float(n.position[0]), float(n.position[1])) for n in graph.nodes),
         id(graph.edges),
         len(graph.edges),
         tuple(edge_cache_signature(e) for e in graph.edges),
@@ -138,6 +153,10 @@ def edge_length_m(edge) -> float:  # type: ignore[no-untyped-def]
 
 def build_routing_index(graph: "Graph", signature: tuple[object, ...]) -> RoutingIndex:
     node_ids = {n.id for n in graph.nodes}
+    node_positions = {
+        n.id: (float(n.position[0]), float(n.position[1]))
+        for n in graph.nodes
+    }
     edge_by_id: dict[str, object] = {}
     base_lengths: dict[str, float] = {}
     base_adj: DirectedAdjacency = {nid: [] for nid in node_ids}
@@ -155,6 +174,7 @@ def build_routing_index(graph: "Graph", signature: tuple[object, ...]) -> Routin
     return RoutingIndex(
         signature=signature,
         node_ids=node_ids,
+        node_positions=node_positions,
         edge_by_id=edge_by_id,
         base_lengths=base_lengths,
         base_adj=base_adj,

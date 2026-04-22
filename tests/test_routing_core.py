@@ -70,6 +70,34 @@ def test_weighted_adjacency_reuses_base_adjacency_for_default_costs():
     assert build_weighted_adjacency(graph, index, RoutingCostOptions()) is index.base_adj
 
 
+def test_routing_index_tracks_node_position_mutation():
+    graph = _core_graph()
+    index = get_routing_index(graph)
+
+    graph.nodes[1].position = (10.0, 5.0)
+    updated = get_routing_index(graph)
+
+    assert updated is not index
+    assert updated.node_positions["b"] == (10.0, 5.0)
+
+
+def test_cost_options_report_when_straight_line_heuristic_is_safe():
+    assert RoutingCostOptions().preserves_base_metric_lower_bound
+    assert RoutingCostOptions(min_confidence=0.5).preserves_base_metric_lower_bound
+    assert RoutingCostOptions(
+        prefer_observed=True,
+        observed_bonus=1.0,
+        unobserved_penalty=2.0,
+    ).preserves_base_metric_lower_bound
+    assert not RoutingCostOptions(
+        prefer_observed=True,
+        observed_bonus=0.5,
+        unobserved_penalty=2.0,
+    ).preserves_base_metric_lower_bound
+    assert not RoutingCostOptions(downhill_bonus=0.5).preserves_base_metric_lower_bound
+    assert not RoutingCostOptions(uphill_penalty=0.5).preserves_base_metric_lower_bound
+
+
 def test_weighted_adjacency_applies_cost_hooks_and_filters_confidence():
     graph = _core_graph()
     index = get_routing_index(graph)

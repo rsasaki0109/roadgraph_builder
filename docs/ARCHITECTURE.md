@@ -286,7 +286,7 @@ flowchart LR
 flowchart LR
     subgraph routing
         CORE[_core<br/>RoutingIndex<br/>RoutingCostOptions<br/>TurnPolicy]
-        SP[RoutePlanner<br/>shortest_path wrapper<br/>Dijkstra over<br/>node, incoming_edge, direction]
+        SP[RoutePlanner<br/>shortest_path wrapper<br/>A* / Dijkstra over<br/>node, incoming_edge, direction]
         RA[ReachabilityAnalyzer<br/>service-area Dijkstra]
         NN[nearest_node]
         RGJ[build_route_geojson<br/>write_route_geojson]
@@ -362,7 +362,7 @@ flowchart TD
 | `roadgraph_builder/navigation/turn_restrictions.py` | Loader + camera extraction + merge for `sd_nav.turn_restrictions` |
 | `roadgraph_builder/navigation/guidance.py` | `build_guidance` — turn-by-turn GuidanceStep list from route GeoJSON + sd_nav (depart / arrive / slight / left / right / sharp / u_turn / continue categories) |
 | `roadgraph_builder/routing/_core.py` | Shared routing internals: graph mutation signature, cached `RoutingIndex`, weighted adjacency from observation/confidence/slope hooks, and parsed `TurnPolicy` for `no_*` / `only_*` restrictions |
-| `roadgraph_builder/routing/shortest_path.py` | `RoutePlanner` prepares routing index / weighted adjacency / turn policy / lane counts for repeated route queries; `shortest_path(...)` remains the one-query wrapper. Directed-state Dijkstra honours `no_*` / `only_*` restrictions; 0.6 adds `prefer_observed` / `min_confidence` cost hooks; 0.7 extends the state to `(node, incoming_edge, direction, lane_index)` for `allow_lane_change=True` with `lane_change_cost_m` swap penalty |
+| `roadgraph_builder/routing/shortest_path.py` | `RoutePlanner` prepares routing index / weighted adjacency / turn policy / lane counts for repeated route queries; `shortest_path(...)` remains the one-query wrapper. Safe straight-line A* is used when edge costs preserve node-distance lower bounds, with Dijkstra fallback otherwise. Directed-state search honours `no_*` / `only_*` restrictions; 0.6 adds `prefer_observed` / `min_confidence` cost hooks; 0.7 extends the state to `(node, incoming_edge, direction, lane_index)` for `allow_lane_change=True` with `lane_change_cost_m` swap penalty |
 | `roadgraph_builder/routing/reachability.py` | Service-area reachability over the shared routing core; `ReachabilityAnalyzer` reuses prepared topology / weighted adjacency / policy across many queries and emits reachable nodes plus directed edge spans |
 | `roadgraph_builder/routing/nearest.py` | `nearest_node` (xy or lat/lon) |
 | `roadgraph_builder/routing/geojson_export.py` | Route / reachability → GeoJSON FeatureCollection |

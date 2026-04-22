@@ -144,6 +144,73 @@ def test_route_planner_reuses_prepared_state_for_repeated_queries():
     assert planner.shortest_path("c", "a") == shortest_path(g, "c", "a")
 
 
+def test_route_planner_uses_straight_line_heuristic_on_metric_graph():
+    planner = RoutePlanner(_manual_graph())
+    assert planner._use_straight_line_heuristic is True
+
+
+def test_route_planner_falls_back_when_node_positions_are_not_lower_bounds():
+    g = Graph(
+        nodes=[
+            Node(id="a", position=(0.0, 0.0)),
+            Node(id="b", position=(1000.0, 0.0)),
+            Node(id="c", position=(1.0, 0.0)),
+        ],
+        edges=[
+            Edge(
+                id="cheap_ab",
+                start_node_id="a",
+                end_node_id="b",
+                polyline=[(0.0, 0.0), (1.0, 0.0)],
+            ),
+            Edge(
+                id="cheap_bc",
+                start_node_id="b",
+                end_node_id="c",
+                polyline=[(1.0, 0.0), (2.0, 0.0)],
+            ),
+            Edge(
+                id="expensive_ac",
+                start_node_id="a",
+                end_node_id="c",
+                polyline=[(0.0, 0.0), (10.0, 0.0)],
+            ),
+        ],
+    )
+    planner = RoutePlanner(g)
+
+    assert planner._use_straight_line_heuristic is False
+    assert planner.shortest_path("a", "c").edge_sequence == ["cheap_ab", "cheap_bc"]
+
+
+def test_route_planner_disables_heuristic_for_cost_discounts():
+    g = _manual_graph()
+
+    assert RoutePlanner(g, prefer_observed=True)._use_straight_line_heuristic is False
+    assert RoutePlanner(g, downhill_bonus=0.5)._use_straight_line_heuristic is False
+
+
+def test_route_planner_disables_heuristic_for_dangling_edge_nodes():
+    g = Graph(
+        nodes=[
+            Node(id="a", position=(0.0, 0.0)),
+            Node(id="b", position=(10.0, 0.0)),
+        ],
+        edges=[
+            Edge(
+                id="dangling",
+                start_node_id="a",
+                end_node_id="missing",
+                polyline=[(0.0, 0.0), (1.0, 0.0)],
+            )
+        ],
+    )
+
+    planner = RoutePlanner(g)
+
+    assert planner._use_straight_line_heuristic is False
+
+
 def test_shortest_path_disjoint_raises():
     g = _manual_graph()
     g = Graph(

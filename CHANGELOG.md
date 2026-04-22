@@ -29,6 +29,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Shortest-path routing now uses a safe A* fast path.**
+  `RoutePlanner` uses cached straight-line node distance as an A* heuristic
+  only when the configured edge costs preserve the base metric lower bound;
+  discounted observed/downhill costs and graphs whose node positions do not
+  bound edge costs fall back to Dijkstra. Equal-priority A* candidates now
+  prefer lower remaining distance. `shortest_path_grid_120` dropped from about
+  0.96 s to about 0.60 s in the committed baseline.
+
 - **Repeated shortest-path queries can reuse prepared routing state.**
   `routing.shortest_path.RoutePlanner` prepares the routing index, weighted
   adjacency, parsed turn policy, and lane counts once for many route queries.

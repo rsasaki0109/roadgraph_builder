@@ -6,7 +6,7 @@
 > このファイル → [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md)（Mermaid 6 枚 + CLI 対応表 +
 > モジュール索引）→ [`CHANGELOG.md`](../CHANGELOG.md) の順。
 
-*最終更新: 2026-04-22 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards polish + README measured-results compacting / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate + manifest policy docs polish / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理 / v0.7.1 release + asset verification / packaging metadata smoke / 0.7.2.dev0 reopen / Actions Node24 update / release+PyPI dry-run / routing hot-path perf / nearest spatial index / cache invalidation hardening / build graph spatial merge perf / T-junction segment index perf / lean near-parallel merge loop / GeoJSON export compact path / compact bundle JSON writer / README quick-start smoke / release readiness dry-run refresh / reachable service-area CLI / reachable docs overlay / reachable benchmark coverage / benchmark baseline JSON / reachability analyzer perf / routing core split / RoutePlanner perf / GitHub star-growth surfaces / launch kit docs）を反映済み。*
+*最終更新: 2026-04-22 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards polish + README measured-results compacting / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate + manifest policy docs polish / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理 / v0.7.1 release + asset verification / packaging metadata smoke / 0.7.2.dev0 reopen / Actions Node24 update / release+PyPI dry-run / routing hot-path perf / nearest spatial index / cache invalidation hardening / build graph spatial merge perf / T-junction segment index perf / lean near-parallel merge loop / GeoJSON export compact path / compact bundle JSON writer / README quick-start smoke / release readiness dry-run refresh / reachable service-area CLI / reachable docs overlay / reachable benchmark coverage / benchmark baseline JSON / reachability analyzer perf / routing core split / RoutePlanner perf / GitHub star-growth surfaces / launch kit docs / safe A* routing）を反映済み。*
 
 ---
 
@@ -20,7 +20,7 @@
   最新 main CI run `24751415820` と Release workflow run `24721632168` は green。
   GitHub Release assets (`roadgraph_sample_bundle.tar.gz` / `.sha256`) は download + checksum +
   `validate-manifest` / `validate-sd-nav` / `validate` 済み。`v0.7.0` は shipped (2026-04-20)。
-  最新 full local `pytest` = **599 passed / 28 skipped / 4 deselected**（opt-in marker 除外）。
+  最新 full local `pytest` = **605 passed / 28 skipped / 4 deselected**（opt-in marker 除外）。
 - **直近の sessions (2026-04-21〜2026-04-22) で landed:**
   1. V1 accuracy 実測 — Paris 20e MAE 0.938、Tokyo Ginza MAE 0.903、Berlin Mitte MAE 1.220（lane-count vs OSM `lanes=`、canonical 20 m）
   2. `scripts/measure_lane_accuracy.py` が meter-frame graph を正しく扱う bug fix（`map_origin` 自動検出）
@@ -211,6 +211,11 @@
       measured signals、local preview を整理。`docs/LAUNCH.md` に X / Bluesky / LinkedIn /
       Hacker News / Reddit 向け投稿文、3 command demo、添付 visual、caveats を用意。
       README 冒頭から Showcase / Launch notes / Architecture / Benchmarks / Contributing に誘導。
+  55. safe A* routing。
+      `RoutePlanner` が edge cost と node 間直線距離の lower-bound 条件を満たす時だけ cached A*
+      heuristic を使い、tie-break は目的地に近い候補を優先する。observed/downhill discount や
+      node position と edge geometry がズレた graph は Dijkstra fallback にする。routing signature は
+      node position 変更も検出する。`shortest_path_grid_120` は committed baseline で 0.959s → 0.601s。
 - **push 方針:** `git push` は user が `push!` などで明示するまで実行しない。
 - **未着手 (次の AI が触る候補):** ↓ §5 "Open tasks" 参照。
 
@@ -229,7 +234,7 @@
   **`export-bundle`** で一括出力する。
 - **HD** は「測量完成品」ではなく、`enrich` による **HD-lite 帯**、LiDAR／カメラは
   **段階的**（stub 含む）。サーベイ級の cm 精度は最初から狙わない。
-- 生成したグラフ上で **ルーティング**（Dijkstra + turn_restrictions + slope-aware +
+- 生成したグラフ上で **ルーティング**（A* / Dijkstra + turn_restrictions + slope-aware +
   lane-change）まで完結させ、**ナビ guidance**（turn-by-turn step）まで出す。
 - Leaflet viewer（`docs/` static site、GitHub Pages は repo visibility / plan が許す時のみ）で
   **click-to-route** 可視化まで。
@@ -288,7 +293,8 @@
 
 - `routing.shortest_path`: `RoutePlanner` が graph/policy ごとの routing index、weighted adjacency、
   turn restriction policy、lane count を再利用し、`shortest_path(...)` は従来 API 互換の wrapper。
-  directed-state Dijkstra (`node`, `incoming_edge`, `direction`)、
+  straight-line node distance が weighted adjacency の lower bound として安全な場合は A*、それ以外は
+  Dijkstra fallback。directed-state search (`node`, `incoming_edge`, `direction`)、
   v0.7 で `(node, incoming_edge, direction, lane_index)` まで拡張（`--allow-lane-change`）。
   `no_*` / `only_*` 両対応、同 edge 内 lane swap に `--lane-change-cost-m`（default 50 m）加算。
 - `routing._core`: `shortest_path` と `reachability` が共有する internal core。Graph mutation
@@ -452,7 +458,7 @@
   `--baseline docs/assets/benchmark_baseline_0.7.2-dev.json` で 3× 劣化時 exit 1。
   `--output PATH` で同形式の結果 JSON を保存可能。`docs/benchmarks.md` に baseline notes。
   `shortest_path_grid_120` は 1 つの `RoutePlanner` を 120 route query で再利用し、
-  committed baseline は 0.959s。
+  safe A* fast path 後の committed baseline は 0.601s。
   CI は opt-in（`workflow_dispatch`）。
 - **PyPI scaffold:** `.github/workflows/pypi.yml`（`workflow_dispatch`, Trusted Publisher,
   secrets なし）**— § 2 の決定で inert 据え置き**。
@@ -600,7 +606,7 @@ code commit `342f61f` の release bundle / package build dry-run は PASS
 ### 6.3 Schema / CI / テスト
 
 - Schema 変更時は対応 `validate_*` と CI の expectation を同時に更新。
-- テスト: `pytest` で 599 passed / 28 skipped / 4 deselected が baseline。
+- テスト: `pytest` で 605 passed / 28 skipped / 4 deselected が baseline。
   `pytest -m slow` / `pytest -m city_scale` は opt-in。
 - 新機能には **必ず** unit test 1 本以上（`tests/test_<feature>_*.py`）。
 - CI が conditional skip している path（LAS laspy / Node.js viewer dijkstra / OpenCV）は
@@ -698,7 +704,7 @@ python3 scripts/measure_lane_accuracy.py --graph /tmp/paris_lc.json \
 | --- | --- |
 | Bundle / sd_nav | `roadgraph_builder/io/export/bundle.py` |
 | Maneuvers / turn_restrictions | `roadgraph_builder/navigation/` |
-| Routing (Dijkstra, reachability, nearest, route geojson, lane-change) | `roadgraph_builder/routing/`（core は `routing/_core.py`） |
+| Routing (A* / Dijkstra, reachability, nearest, route geojson, lane-change) | `roadgraph_builder/routing/`（core は `routing/_core.py`） |
 | HD enrich / LiDAR fusion / lane inference / refinement | `roadgraph_builder/hd/` |
 | Incremental build (`update-graph`) | `roadgraph_builder/pipeline/incremental.py` |
 | Batch (`process-dataset`) | `roadgraph_builder/cli/dataset.py` |
@@ -762,7 +768,7 @@ feedback / project / reference の 4 種、`MEMORY.md` は index）。
 
 新しい機能 / バグ修正を入れる前に:
 
-- [ ] `pytest` が 599 passed / 28 skipped / 4 deselected で通ること（上下 ±1 は OK、大きく減ったら
+- [ ] `pytest` が 605 passed / 28 skipped / 4 deselected で通ること（上下 ±1 は OK、大きく減ったら
       skip 理由を確認）。
 - [ ] `CHANGELOG.md` の `[Unreleased]` にユーザー向け変更を足すこと。
 - [ ] スキーマ変更時は対応する `validate_*` と CI の expectation を同時更新すること。
@@ -781,7 +787,7 @@ feedback / project / reference の 4 種、`MEMORY.md` は index）。
 > Release assets は download/checksum/validate 済み。packaging metadata は SPDX license 表記へ更新済み。
 > GeoJSON large export compact path と compact bundle JSON writer も landing 済み。`reachable` service-area
 > CLI と Paris docs overlay、`reachable_grid_120` benchmark coverage、committed benchmark baseline JSON、
-> reachability analyzer perf、routing core split、RoutePlanner perf、GitHub star-growth surfaces、launch kit docs も追加済み。code commit `342f61f` の release bundle / package build dry-run は PASS
+> reachability analyzer perf、routing core split、RoutePlanner perf、GitHub star-growth surfaces、launch kit docs、safe A* routing も追加済み。code commit `342f61f` の release bundle / package build dry-run は PASS
 >（`twine>=6` で確認、PyPI 公開は skip）。次は raw large trace が来た時の true large benchmark。
 > 何を削って何を広げたかは
 > `CHANGELOG.md` と §3 の小節を見れば全部わかる。push / tag / AI マーカー / PyPI /
