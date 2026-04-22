@@ -6,7 +6,7 @@
 > このファイル → [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md)（Mermaid 6 枚 + CLI 対応表 +
 > モジュール索引）→ [`CHANGELOG.md`](../CHANGELOG.md) の順。
 
-*最終更新: 2026-04-22 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards polish + README measured-results compacting / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate + manifest policy docs polish / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理 / v0.7.1 release + asset verification / packaging metadata smoke / 0.7.2.dev0 reopen / Actions Node24 update / release+PyPI dry-run / routing hot-path perf / nearest spatial index / cache invalidation hardening / build graph spatial merge perf / T-junction segment index perf / lean near-parallel merge loop / GeoJSON export compact path / compact bundle JSON writer / README quick-start smoke / release readiness dry-run refresh / reachable service-area CLI / reachable docs overlay / reachable benchmark coverage / benchmark baseline JSON / reachability analyzer perf / routing core split / RoutePlanner perf / GitHub star-growth surfaces）を反映済み。*
+*最終更新: 2026-04-22 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards polish + README measured-results compacting / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate + manifest policy docs polish / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理 / v0.7.1 release + asset verification / packaging metadata smoke / 0.7.2.dev0 reopen / Actions Node24 update / release+PyPI dry-run / routing hot-path perf / nearest spatial index / cache invalidation hardening / build graph spatial merge perf / T-junction segment index perf / lean near-parallel merge loop / GeoJSON export compact path / compact bundle JSON writer / README quick-start smoke / release readiness dry-run refresh / reachable service-area CLI / reachable docs overlay / reachable benchmark coverage / benchmark baseline JSON / reachability analyzer perf / routing core split / RoutePlanner perf / GitHub star-growth surfaces / launch kit docs）を反映済み。*
 
 ---
 
@@ -206,6 +206,11 @@
       `.github/ABOUT.md` は GPS / OSM / LiDAR / camera / Lanelet2 / routing を含む説明と topics、
       `gh repo edit` 用 command に更新。GitHub issue forms（bug / feature / showcase）と
       PR template を追加し、外部 contributor / user showcase の導線を用意。
+  54. launch kit docs。
+      `docs/SHOWCASE.md` に 30 秒 pitch、Paris OSM-grid showcase、core workflows、対象ユーザー、
+      measured signals、local preview を整理。`docs/LAUNCH.md` に X / Bluesky / LinkedIn /
+      Hacker News / Reddit 向け投稿文、3 command demo、添付 visual、caveats を用意。
+      README 冒頭から Showcase / Launch notes / Architecture / Benchmarks / Contributing に誘導。
 - **push 方針:** `git push` は user が `push!` などで明示するまで実行しない。
 - **未着手 (次の AI が触る候補):** ↓ §5 "Open tasks" 参照。
 
@@ -568,8 +573,8 @@ code commit `342f61f` の release bundle / package build dry-run は PASS
 
 1. **True large real-world memory / export benchmark** — raw 500k+ 実走 trajectory が手元に来た時だけ実行。
    今の `/tmp` OSM public replay では default flip の根拠にならない。
-2. **GitHub repository metadata apply** — repo を public にする/露出を増やすタイミングで、
-   `.github/ABOUT.md` の `gh repo edit ... --add-topic ...` を実行して About / topics を同期する。
+2. **Public launch** — user が repo public 化を明示した時だけ、visibility / Pages / launch post を実行。
+   投稿文は `docs/LAUNCH.md`、showcase 導線は `docs/SHOWCASE.md`。
 3. **Push / PR / tag prep** — user が `push!` / release tag を明示した時だけ実行。
 
 ---
@@ -776,7 +781,7 @@ feedback / project / reference の 4 種、`MEMORY.md` は index）。
 > Release assets は download/checksum/validate 済み。packaging metadata は SPDX license 表記へ更新済み。
 > GeoJSON large export compact path と compact bundle JSON writer も landing 済み。`reachable` service-area
 > CLI と Paris docs overlay、`reachable_grid_120` benchmark coverage、committed benchmark baseline JSON、
-> reachability analyzer perf、routing core split、RoutePlanner perf、GitHub star-growth surfaces も追加済み。code commit `342f61f` の release bundle / package build dry-run は PASS
+> reachability analyzer perf、routing core split、RoutePlanner perf、GitHub star-growth surfaces、launch kit docs も追加済み。code commit `342f61f` の release bundle / package build dry-run は PASS
 >（`twine>=6` で確認、PyPI 公開は skip）。次は raw large trace が来た時の true large benchmark。
 > 何を削って何を広げたかは
 > `CHANGELOG.md` と §3 の小節を見れば全部わかる。push / tag / AI マーカー / PyPI /

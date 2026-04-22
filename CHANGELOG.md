@@ -22,6 +22,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   plus static README/Site preview render the 500 m service-area spans alongside
   the TR-aware route.
 
+- **Launch and showcase docs are ready for public discovery.**
+  `docs/SHOWCASE.md` gives a 30-second product tour with reproducible signals,
+  and `docs/LAUNCH.md` collects public announcement copy for X / Bluesky,
+  LinkedIn, Hacker News, Reddit, and quick demos.
+
 ### Changed
 
 - **Repeated shortest-path queries can reuse prepared routing state.**

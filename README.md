@@ -8,6 +8,8 @@
 
 This project builds a **graph-first** intermediate representation: **nodes** (junctions/endpoints) and **edges** (lane/road segments) with **centerline polylines** and optional **attributes**. Output is **JSON** (`schema_version`) with optional **SVG** previews and a small static viewer in **`docs/`** (local preview, or GitHub Pages when the repository/plan supports it).
 
+**Start here:** [Showcase](docs/SHOWCASE.md) · [Launch notes](docs/LAUNCH.md) · [Architecture](docs/ARCHITECTURE.md) · [Benchmarks](docs/benchmarks.md) · [Contributing](CONTRIBUTING.md)
+
 ### Why people star this repo
 
 - **One pipeline, multiple map targets** — build once, then export navigation JSON, simulation GeoJSON, and Lanelet2-style OSM XML.

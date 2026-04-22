@@ -10,6 +10,15 @@ Use **Settings → General → About → Description** (or `gh repo edit`).
 
 **Website (optional):** your GitHub Pages URL when Pages is available, e.g. `https://<user>.github.io/roadgraph_builder/`
 
+## Launch Copy
+
+`roadgraph_builder` turns GPS trajectories or OSM highway ways into an explicit
+road graph, then exports navigation JSON, simulation GeoJSON, and Lanelet2-style
+OSM. It includes routing, turn restrictions, service-area reachability,
+LiDAR/camera hooks, schemas, benchmarks, and a Paris OSM-grid showcase.
+
+See [`docs/LAUNCH.md`](../docs/LAUNCH.md) for longer public posts.
+
 **GitHub CLI:**
 
 ```bash
