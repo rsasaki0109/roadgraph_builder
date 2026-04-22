@@ -72,6 +72,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   so they no longer need the temporary
   `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24` environment flag.
 
+- **GitHub star-growth surfaces now show the current product shape.**
+  README now leads with why the project is useful, the GitHub About copy was
+  refreshed for OSM / LiDAR / camera / Lanelet2 / routing support, package
+  metadata uses the broader GPS/OSM description, and GitHub issue / PR
+  templates make bug reports, feature requests, and showcases easier to open.
+
 - **Repeated routing queries now reuse a cached topology index.**
   `shortest_path` caches node ids, edge lengths, edge lookup, and base
   adjacency on each `Graph` instance, invalidating when node/edge list shape

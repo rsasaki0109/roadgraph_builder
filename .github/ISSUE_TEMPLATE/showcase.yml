@@ -1,0 +1,33 @@
+name: Showcase / use case
+description: Share a map, dataset shape, benchmark result, integration, or downstream use.
+title: "showcase: "
+labels: ["showcase"]
+body:
+  - type: textarea
+    id: use_case
+    attributes:
+      label: What did you build?
+      description: Describe the workflow and what roadgraph_builder helped with.
+    validations:
+      required: true
+  - type: textarea
+    id: inputs_outputs
+    attributes:
+      label: Inputs and outputs
+      description: Mention data types, commands, output formats, and approximate graph size.
+    validations:
+      required: true
+  - type: textarea
+    id: visuals
+    attributes:
+      label: Visuals or links
+      description: Add screenshots, GeoJSON previews, repo links, or a short writeup if public.
+    validations:
+      required: false
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes for maintainers
+      description: Any rough edges, missing docs, or follow-up ideas.
+    validations:
+      required: false

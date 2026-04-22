@@ -1,0 +1,48 @@
+name: Bug report
+description: Report a reproducible problem in the library, CLI, exporters, or viewer.
+title: "bug: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report this. A small repro and the output of `roadgraph_builder doctor` are usually enough to debug quickly.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What failed, and what did you expect instead?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction steps
+      description: Include the shortest command sequence or Python snippet that triggers the problem.
+      placeholder: |
+        roadgraph_builder ...
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual output
+      description: Paste stderr/stdout, traceback, or validation output.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Paste `roadgraph_builder doctor` and Python / OS details.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: data
+    attributes:
+      label: Data notes
+      description: Describe the data shape without uploading private traces, credentials, IMEIs, or raw point clouds.
+    validations:
+      required: false

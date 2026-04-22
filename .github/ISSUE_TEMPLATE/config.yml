@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Architecture overview
+    url: https://github.com/rsasaki0109/roadgraph_builder/blob/main/docs/ARCHITECTURE.md
+    about: Start here if you want to find the right module or extension point.
+  - name: Local visualization docs
+    url: https://github.com/rsasaki0109/roadgraph_builder#interactive-viewer-docs
+    about: The docs folder contains the static viewer assets and map preview entry points.

@@ -8,6 +8,13 @@
 
 This project builds a **graph-first** intermediate representation: **nodes** (junctions/endpoints) and **edges** (lane/road segments) with **centerline polylines** and optional **attributes**. Output is **JSON** (`schema_version`) with optional **SVG** previews and a small static viewer in **`docs/`** (local preview, or GitHub Pages when the repository/plan supports it).
 
+### Why people star this repo
+
+- **One pipeline, multiple map targets** — build once, then export navigation JSON, simulation GeoJSON, and Lanelet2-style OSM XML.
+- **Real routing semantics** — shortest path, turn restrictions, slope-aware cost, lane-change routing, service-area reachability, and turn-by-turn guidance share the same graph.
+- **Sensor-ready without forcing heavy deps** — LiDAR LAS/LAZ, camera projection, lane-marking detection, HD-lite refinement, and schema validation are modular and mostly pure Python.
+- **Measured, reproducible progress** — committed Paris visualization assets, benchmark baselines, accuracy reports, memory reports, release-bundle byte gates, and CI keep claims checkable.
+
 ### Measured results
 
 v0.7.1 packages the post-v0.7.0 validation results below. Current `main` is
@@ -22,7 +29,7 @@ open for the next patch as `0.7.2.dev0`.
 
 ### GitHub “About” text (copy-paste)
 
-Use the short description and topics listed in [`.github/ABOUT.md`](.github/ABOUT.md), or run `gh repo edit` (see below).
+Use the short description and topics listed in [`.github/ABOUT.md`](.github/ABOUT.md), or run the `gh repo edit` command there after the repository is public.
 
 ### Features
 
@@ -171,7 +178,7 @@ change.
 | **Typical use** | Routing, ETA, coarse “which roads connect” | Lane keeping, planning in lane coordinates, rules & obstacles |
 | **Geometry** | Often **meter–tens of m** is acceptable for links | Often **lane boundaries**, **cm-class** accuracy in many specs |
 | **Common inputs** | GNSS traces, road-network DBs, crowd probes | LiDAR, cameras, RTK/IMU, surveys, HD anchors |
-| **This project today** | **Good fit as a seed:** graph + centerlines + topology attributes (`degree`, `junction_hint`), plus GeoJSON on OSM tiles for sanity checks | **Not HD-complete:** lane **boundaries** are not produced yet; LiDAR/camera are **stubs**; Lanelet2 / full semantics are **future** work |
+| **This project today** | **Good fit as a seed:** graph + centerlines + topology attributes (`degree`, `junction_hint`), turn-restriction-aware routing, service-area reachability, and GeoJSON on OSM tiles for sanity checks | **HD-lite, not survey HD:** lane envelopes, lane-count inference, Lanelet2 export, LiDAR/camera hooks, and regulatory elements exist, but cm-class production maps still require calibrated data and validation |
 
 **日本語で一言:** **SD** に向けた「道路のつながり＋中心線」の**中間表現**には使える。**HD** に必要な**レーン境界・高精度・規則**は、別データ（LiDAR 等）とセマンティクス層を足してから、という前提。
 
@@ -551,11 +558,11 @@ Python package: `roadgraph_builder/`
 | `roadgraph_builder/hd/` | `enrich_sd_to_hd`, `fuse_lane_boundaries_from_points`, centerline offsets |
 | `roadgraph_builder/utils/geometry.py` | Clustering / centerline helpers |
 | `roadgraph_builder/viz/` | SVG export (trajectory + graph) |
-| `roadgraph_builder/semantics/` | Placeholder for lane semantics (separate from geometry) |
+| `roadgraph_builder/semantics/` | Trace fusion, map matching summaries, trip reconstruction, road-class and signalized-junction inference |
 | `roadgraph_builder/schemas/` | `road_graph`, `camera_detections`, `sd_nav`, `manifest` (`.schema.json`) |
 | `roadgraph_builder/validation/` | `validate_*_document()` for graph, detections, `sd_nav`, manifest |
 | `roadgraph_builder/cli/` | Thin dispatcher plus domain command modules (`build`, `validate`, `routing`, `export`, `camera`, `lidar`, `osm`, `guidance`, `trajectory`, `hd`, `incremental`, `dataset`) |
-| `docs/` | GitHub Pages viewer + bundled sample assets |
+| `docs/` | Static viewer + bundled sample assets |
 | `scripts/refresh_docs_assets.py` | Regenerate `docs/assets` and `docs/images` |
 | `scripts/compare_float32_drift.py` | Rebuild float64/float32 bundles and report topology / coordinate drift |
 | `scripts/run_demo_bundle.sh` | Validate → `export-bundle` → validate outputs (demo) |

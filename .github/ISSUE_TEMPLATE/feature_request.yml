@@ -1,0 +1,40 @@
+name: Feature request
+description: Propose a new workflow, exporter, parser, routing capability, or validation gate.
+title: "feat: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What user workflow is blocked today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the smallest useful version and expected inputs / outputs.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Build graph / topology
+        - Routing / reachability / guidance
+        - OSM / turn restrictions
+        - LiDAR / camera / HD-lite
+        - Lanelet2 / simulation export
+        - CLI / schemas / validation
+        - Docs / examples / viewer
+    validations:
+      required: true
+  - type: textarea
+    id: validation
+    attributes:
+      label: Validation idea
+      description: How should this be tested or measured?
+    validations:
+      required: false
