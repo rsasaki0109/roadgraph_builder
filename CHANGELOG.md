@@ -19,7 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `docs/assets/route_explain_sample.json` is generated from real
   `RoutePlanner` diagnostics and covers both a metric safe-A* route and the
   Paris turn-restriction route's Dijkstra fallback. README, Showcase, and the
-  static Pages viewer now link to the sample.
+  static Pages viewer now link to the sample. The Pages landing page also
+  renders the JSON as an A* vs Dijkstra fallback comparison with expanded /
+  queued state counts, edge counts, route lengths, heuristic state, and
+  fallback reason.
 
 - **Reachability / service-area analysis is available from the routing CLI.**
   New `routing.reachability.reachable_within` and `roadgraph_builder reachable`

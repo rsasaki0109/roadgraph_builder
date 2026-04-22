@@ -24,7 +24,7 @@ open for the next patch as `0.7.2.dev0`.
 
 | Signal | Current result | Source |
 | --- | --- | --- |
-| **Routing** | Paris TR-aware route **909 m** vs unrestricted **878 m**; `route --explain` sample reports A* and Dijkstra fallback decisions | [map](docs/map.html) · [diagnostics JSON](docs/assets/route_explain_sample.json) |
+| **Routing** | Paris TR-aware route **909 m** vs unrestricted **878 m**; `route --explain` sample compares A* and Dijkstra fallback work | [map](docs/map.html) · [diagnostics compare](docs/index.html) · [JSON](docs/assets/route_explain_sample.json) |
 | **Accuracy** | Lane-count MAE @ 20 m: Paris **0.938** / Tokyo **0.903** / Berlin **1.220** | [accuracy report](docs/accuracy_report.md) |
 | **Tuning** | Conservative cross-city start: `--max-step-m 40 --merge-endpoint-m 8` | [tuning guide](docs/bundle_tuning.md) |
 | **Memory** | Default remains **float64**; float32 is opt-in after replay showed small RSS wins and ID drift | [float32 report](docs/float32_drift_report.md) |
@@ -56,7 +56,7 @@ v0.7.1 adds post-v0.7.0 validation and release-hardening work: canonical lane-co
 
 ### Visualization results
 
-The docs map ships a Paris OSM-highway graph with 10 mapped turn restrictions, a restriction-aware route overlay, and a 500 m reachability overlay from the same start node. This static preview is regenerated from the committed GeoJSON assets by `scripts/refresh_docs_assets.py`.
+The docs map ships a Paris OSM-highway graph with 10 mapped turn restrictions, a restriction-aware route overlay, and a 500 m reachability overlay from the same start node. The docs landing page also loads the generated `route --explain` sample and compares safe A* against the Paris Dijkstra fallback using expanded / queued state counts. These static assets are regenerated from committed GeoJSON / JSON inputs by `scripts/refresh_docs_assets.py`.
 
 [![Paris OSM-highway grid with a TR-aware route and 500 m reachability overlay](docs/images/paris_grid_route.svg)](docs/map.html)
 

@@ -114,21 +114,18 @@
           <div class="diagnostics-panel" aria-label="Route explain diagnostics">
             <div class="diagnostics-copy">
               <span class="eyebrow">Observable Routing</span>
-              <strong>Safe A* and fallback decisions are inspectable</strong>
+              <strong>Route search work is visible, not guessed</strong>
               <span>
-                <code>route --explain</code> emits engine choice and queue work. The generated
-                sample includes a metric route that uses A* and the Paris TR-aware
-                route that safely falls back to Dijkstra on non-metric geometry.
+                <code>route --explain</code> emits engine choice, fallback reason,
+                expanded states, queued states, route edge count, and total length.
+                This panel loads the generated sample and compares safe A* against
+                the Paris turn-restriction fallback.
               </span>
               <a href="assets/route_explain_sample.json">Open generated diagnostics JSON</a>
             </div>
-            <pre class="diagnostics-code"><code>{
-  "search_engine": "astar",
-  "heuristic_enabled": true,
-  "expanded_states": 2,
-  "queued_states": 2,
-  "fallback_reason": null
-}</code></pre>
+            <div class="diagnostics-compare" id="route-diagnostics-compare" aria-live="polite">
+              <div class="diagnostics-loading">Loading route diagnostics…</div>
+            </div>
           </div>
         </div>
       </section>
@@ -142,6 +139,7 @@
         <a href="map.html">Map (OSM tiles)</a>
       </footer>
     </div>
+    <script src="js/route_diagnostics.js"></script>
     <script src="js/viewer.js"></script>
   </body>
 </html>

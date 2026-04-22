@@ -31,11 +31,21 @@ def test_route_explain_sample_asset_has_expected_diagnostics():
     assert paris_diag["search_engine"] == "dijkstra"
     assert paris_diag["heuristic_enabled"] is False
     assert paris_diag["fallback_reason"] == "non_metric_geometry"
+    assert paris_diag["expanded_states"] > astar["expanded_states"]
+    assert paris_diag["queued_states"] > astar["queued_states"]
     assert paris_diag["route_edge_count"] == len(paris["edge_sequence"])
 
 
 def test_route_explain_sample_is_linked_from_pages_index():
     index = (ROOT / "docs" / "index.html").read_text(encoding="utf-8")
+    diagnostics_js = (ROOT / "docs" / "js" / "route_diagnostics.js").read_text(
+        encoding="utf-8"
+    )
 
     assert "assets/route_explain_sample.json" in index
     assert "route --explain" in index
+    assert 'id="route-diagnostics-compare"' in index
+    assert 'src="js/route_diagnostics.js"' in index
+    assert "Route search work is visible" in index
+    assert 'fetch("assets/route_explain_sample.json")' in diagnostics_js
+    assert "renderDiagnosticsComparison" in diagnostics_js

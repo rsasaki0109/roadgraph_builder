@@ -374,18 +374,139 @@ button:hover {
   font-weight: 700;
 }
 
-.diagnostics-code {
-  margin: 0;
+.diagnostics-compare {
+  display: grid;
+  gap: 10px;
   min-width: 0;
-  overflow: auto;
+}
+
+.diagnostics-loading,
+.diagnostics-error {
+  display: grid;
+  align-content: center;
+  min-height: 180px;
+  min-width: 0;
   padding: 12px;
   background: #080b0e;
   border: 1px solid #303942;
   border-radius: 6px;
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.diagnostics-error {
+  border-color: #7f3c3c;
+  color: #fca5a5;
+}
+
+.diagnostics-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.diagnostics-engine {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  padding: 10px;
+  background: #080b0e;
+  border: 1px solid #303942;
+  border-left: 4px solid var(--cyan);
+  border-radius: 6px;
+}
+
+.diagnostics-engine.fallback {
+  border-left-color: var(--orange);
+}
+
+.diagnostics-engine .metric-kicker {
+  color: #d0a03d;
+  font-size: 0.72rem;
+}
+
+.diagnostics-engine span {
+  color: var(--muted);
+  font-size: 0.76rem;
+  line-height: 1.35;
+}
+
+.diagnostics-engine strong {
+  color: var(--text);
+  font-size: 1.04rem;
+  line-height: 1.2;
+}
+
+.diagnostics-pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.diagnostics-pill {
+  display: inline-flex;
+  width: fit-content;
+  max-width: 100%;
+  padding: 2px 6px;
+  color: #d8f3ff;
+  background: #13222b;
+  border: 1px solid #2d5263;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.diagnostics-pill.warn {
+  color: #ffe6cb;
+  background: #2a1d12;
+  border-color: #6f4524;
+}
+
+.diagnostics-table-wrap {
+  min-width: 0;
+  overflow-x: auto;
+  background: #080b0e;
+  border: 1px solid #303942;
+  border-radius: 6px;
+}
+
+.diagnostics-table {
+  width: 100%;
+  min-width: 620px;
+  border-collapse: collapse;
   color: #d8f3ff;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
-  font-size: 0.78rem;
+  font-size: 0.74rem;
   line-height: 1.45;
+}
+
+.diagnostics-table th,
+.diagnostics-table td {
+  padding: 8px 9px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid #27313a;
+}
+
+.diagnostics-table th {
+  color: #e7d7a3;
+  font-weight: 750;
+}
+
+.diagnostics-table td {
+  color: #c9e5ef;
+}
+
+.diagnostics-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.diagnostics-note {
+  color: var(--muted);
+  font-size: 0.76rem;
+  line-height: 1.4;
 }
 
 .footer {
@@ -407,6 +528,10 @@ button:hover {
   .diagnostics-panel {
     grid-template-columns: 1fr;
   }
+
+  .diagnostics-table {
+    min-width: 560px;
+  }
 }
 
 @media (max-width: 520px) {
@@ -420,6 +545,10 @@ button:hover {
   }
 
   .metric-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .diagnostics-summary {
     grid-template-columns: 1fr;
   }
 }

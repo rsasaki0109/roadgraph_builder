@@ -20,6 +20,7 @@ HD-lite geometry, semantics, routing, and provenance.
 | Signal | Why it matters | Link |
 | --- | --- | --- |
 | Paris map preview | Real OSM-derived graph with turn restrictions, route overlay, and 500 m reachability overlay | [map](map.html) |
+| Route diagnostics compare | Generated `route --explain` samples show safe A* vs Dijkstra fallback search work | [viewer](index.html) |
 | Static route preview | Works in the GitHub README without running a server | [SVG](images/paris_grid_route.svg) |
 | Architecture | One-page module map for build, routing, perception, export, schemas, and CLI | [architecture](ARCHITECTURE.md) |
 | Benchmarks | Deterministic build / routing / reachability / export timings with a committed baseline | [benchmarks](benchmarks.md) |
@@ -115,7 +116,7 @@ because the intermediate graph is explicit, testable, and easy to extend.
 ## Measured Signals
 
 - `shortest_path_grid_120`: 120 shortest-path queries on a 55x55 synthetic grid using one `RoutePlanner`; committed baseline `0.601 s`.
-- `route_explain_sample`: generated `route --explain` JSON covering a safe A* metric sample and a Paris TR-aware Dijkstra fallback; see [`route_explain_sample.json`](assets/route_explain_sample.json).
+- `route_explain_sample`: generated `route --explain` JSON covering a safe A* metric sample and a Paris TR-aware Dijkstra fallback; the docs landing page renders it as an A* vs fallback comparison, and the raw sample lives in [`route_explain_sample.json`](assets/route_explain_sample.json).
 - `reachable_grid_120`: 120 service-area queries on the same grid using `ReachabilityAnalyzer`; committed baseline `0.270 s`.
 - `nearest_node_grid_2000`: 2000 nearest-node snaps on a 300x300 node grid; committed baseline `0.432 s`.
 - Full local test suite after the latest routing work: `613 passed, 28 skipped, 4 deselected`.
