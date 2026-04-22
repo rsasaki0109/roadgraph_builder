@@ -21,6 +21,8 @@ DEFAULT_REPO_URL = "https://github.com/rsasaki0109/roadgraph_builder"
 DEFAULT_PAGES_URL = "https://rsasaki0109.github.io/roadgraph_builder/"
 PARIS_GRID_REACHABLE_START_NODE = "n312"
 PARIS_GRID_REACHABLE_MAX_COST_M = 500.0
+PARIS_GRID_ROUTE_FROM_NODE = "n312"
+PARIS_GRID_ROUTE_TO_NODE = "n191"
 
 
 def _load_origin(path: Path) -> tuple[float, float]:
@@ -36,6 +38,161 @@ def _coords(line: object) -> list[tuple[float, float]]:
         if isinstance(pt, list) and len(pt) >= 2:
             out.append((float(pt[0]), float(pt[1])))
     return out
+
+
+def _graph_from_map_geojson(path: Path):
+    """Rebuild a meter-frame Graph from a committed map GeoJSON asset."""
+
+    from roadgraph_builder.core.graph.edge import Edge
+    from roadgraph_builder.core.graph.graph import Graph
+    from roadgraph_builder.core.graph.node import Node
+    from roadgraph_builder.utils.geo import lonlat_to_meters
+
+    if not path.is_file():
+        return None
+    doc = json.loads(path.read_text(encoding="utf-8"))
+    props = doc.get("properties", {})
+    if not isinstance(props, dict):
+        return None
+    try:
+        origin_lat = float(props["origin_lat"])
+        origin_lon = float(props["origin_lon"])
+    except (KeyError, TypeError, ValueError):
+        return None
+
+    nodes: list[Node] = []
+    edges: list[Edge] = []
+    for feature in doc.get("features", []):
+        if not isinstance(feature, dict):
+            continue
+        f_props = feature.get("properties", {})
+        geom = feature.get("geometry", {})
+        if not isinstance(f_props, dict) or not isinstance(geom, dict):
+            continue
+        if f_props.get("kind") == "node":
+            coords = geom.get("coordinates")
+            node_id = f_props.get("node_id")
+            if isinstance(coords, list) and len(coords) >= 2 and isinstance(node_id, str):
+                nodes.append(
+                    Node(
+                        node_id,
+                        lonlat_to_meters(
+                            float(coords[0]),
+                            float(coords[1]),
+                            origin_lat,
+                            origin_lon,
+                        ),
+                    )
+                )
+            continue
+        if f_props.get("kind") != "centerline" or geom.get("type") != "LineString":
+            continue
+        edge_id = f_props.get("edge_id")
+        start = f_props.get("start_node_id")
+        end = f_props.get("end_node_id")
+        if not (isinstance(edge_id, str) and isinstance(start, str) and isinstance(end, str)):
+            continue
+        polyline = [
+            lonlat_to_meters(lon, lat, origin_lat, origin_lon)
+            for lon, lat in _coords(geom.get("coordinates"))
+        ]
+        if len(polyline) >= 2:
+            edges.append(Edge(edge_id, start, end, polyline))
+    if not nodes or not edges:
+        return None
+    return Graph(nodes, edges)
+
+
+def _route_explain_document(
+    *,
+    sample_id: str,
+    label: str,
+    source: str,
+    command: str | None,
+    route,
+    diagnostics,
+    restrictions_count: int,
+) -> dict[str, object]:
+    return {
+        "id": sample_id,
+        "label": label,
+        "source": source,
+        "command": command,
+        "from_node": route.from_node,
+        "to_node": route.to_node,
+        "total_length_m": route.total_length_m,
+        "edge_sequence": route.edge_sequence,
+        "edge_directions": route.edge_directions,
+        "node_sequence": route.node_sequence,
+        "applied_restrictions": restrictions_count,
+        "diagnostics": diagnostics.to_dict(),
+    }
+
+
+def _write_route_explain_sample_asset() -> None:
+    """Write real route diagnostics examples for README / Pages snippets."""
+
+    from roadgraph_builder.io.export.json_loader import load_graph_json
+    from roadgraph_builder.navigation.turn_restrictions import load_turn_restrictions_json
+    from roadgraph_builder.routing.shortest_path import RoutePlanner
+
+    samples: list[dict[str, object]] = []
+
+    frozen_graph = ROOT / "examples" / "frozen_bundle" / "sim" / "road_graph.json"
+    if frozen_graph.is_file():
+        graph = load_graph_json(frozen_graph)
+        planner = RoutePlanner(graph)
+        route = planner.shortest_path("n0", "n1")
+        if planner.last_diagnostics is not None:
+            samples.append(
+                _route_explain_document(
+                    sample_id="metric_sample_astar",
+                    label="Metric sample route using safe A*",
+                    source="examples/frozen_bundle/sim/road_graph.json",
+                    command=(
+                        "roadgraph_builder route "
+                        "examples/frozen_bundle/sim/road_graph.json n0 n1 --explain"
+                    ),
+                    route=route,
+                    diagnostics=planner.last_diagnostics,
+                    restrictions_count=0,
+                )
+            )
+
+    paris_graph = _graph_from_map_geojson(ASSETS / "map_paris_grid.geojson")
+    restrictions_path = ASSETS / "paris_grid_turn_restrictions.json"
+    if paris_graph is not None and restrictions_path.is_file():
+        restrictions = load_turn_restrictions_json(restrictions_path)
+        planner = RoutePlanner(paris_graph, turn_restrictions=restrictions)
+        route = planner.shortest_path(PARIS_GRID_ROUTE_FROM_NODE, PARIS_GRID_ROUTE_TO_NODE)
+        if planner.last_diagnostics is not None:
+            samples.append(
+                _route_explain_document(
+                    sample_id="paris_grid_dijkstra_fallback",
+                    label="Paris TR-aware route with safe Dijkstra fallback",
+                    source="docs/assets/map_paris_grid.geojson",
+                    command=None,
+                    route=route,
+                    diagnostics=planner.last_diagnostics,
+                    restrictions_count=len(restrictions),
+                )
+            )
+
+    if not samples:
+        return
+    doc = {
+        "schema_version": 1,
+        "generated_by": "scripts/refresh_docs_assets.py",
+        "description": "RoutePlanner diagnostics examples shown in README and GitHub Pages.",
+        "attribution": "Paris sample derived from OpenStreetMap data © OpenStreetMap contributors.",
+        "license": "ODbL-1.0 for the Paris OSM-derived sample; MIT for generated project code.",
+        "license_url": "https://opendatacommons.org/licenses/odbl/1-0/",
+        "samples": samples,
+    }
+    (ASSETS / "route_explain_sample.json").write_text(
+        json.dumps(doc, indent=2) + "\n",
+        encoding="utf-8",
+    )
 
 
 def _clip_line_fraction(
@@ -682,7 +839,12 @@ def main() -> None:
         )
         grid_geo_tmp.unlink(missing_ok=True)
         trs = load_turn_restrictions_json(ASSETS / "paris_grid_turn_restrictions.json")
-        route = shortest_path(grid, "n312", "n191", turn_restrictions=trs)
+        route = shortest_path(
+            grid,
+            PARIS_GRID_ROUTE_FROM_NODE,
+            PARIS_GRID_ROUTE_TO_NODE,
+            turn_restrictions=trs,
+        )
         write_route_geojson(
             ASSETS / "route_paris_grid.geojson",
             grid,
@@ -695,6 +857,7 @@ def main() -> None:
         )
 
     _write_paris_grid_reachability_asset()
+    _write_route_explain_sample_asset()
 
     # Viewer metadata (bounds hint optional)
     meta = {

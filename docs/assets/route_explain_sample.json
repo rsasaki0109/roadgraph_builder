@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "generated_by": "scripts/refresh_docs_assets.py",
+  "description": "RoutePlanner diagnostics examples shown in README and GitHub Pages.",
+  "attribution": "Paris sample derived from OpenStreetMap data \u00a9 OpenStreetMap contributors.",
+  "license": "ODbL-1.0 for the Paris OSM-derived sample; MIT for generated project code.",
+  "license_url": "https://opendatacommons.org/licenses/odbl/1-0/",
+  "samples": [
+    {
+      "id": "metric_sample_astar",
+      "label": "Metric sample route using safe A*",
+      "source": "examples/frozen_bundle/sim/road_graph.json",
+      "command": "roadgraph_builder route examples/frozen_bundle/sim/road_graph.json n0 n1 --explain",
+      "from_node": "n0",
+      "to_node": "n1",
+      "total_length_m": 15.016324450410627,
+      "edge_sequence": [
+        "e0"
+      ],
+      "edge_directions": [
+        "forward"
+      ],
+      "node_sequence": [
+        "n0",
+        "n1"
+      ],
+      "applied_restrictions": 0,
+      "diagnostics": {
+        "search_engine": "astar",
+        "heuristic_enabled": true,
+        "fallback_reason": null,
+        "expanded_states": 2,
+        "queued_states": 2,
+        "route_edge_count": 1,
+        "total_length_m": 15.016324450410627
+      }
+    },
+    {
+      "id": "paris_grid_dijkstra_fallback",
+      "label": "Paris TR-aware route with safe Dijkstra fallback",
+      "source": "docs/assets/map_paris_grid.geojson",
+      "command": null,
+      "from_node": "n312",
+      "to_node": "n191",
+      "total_length_m": 909.4485603259117,
+      "edge_sequence": [
+        "e224",
+        "e657",
+        "e576",
+        "e1062",
+        "e1061",
+        "e1047",
+        "e513",
+        "e9",
+        "e338",
+        "e337",
+        "e129"
+      ],
+      "edge_directions": [
+        "forward",
+        "forward",
+        "forward",
+        "forward",
+        "forward",
+        "forward",
+        "forward",
+        "reverse",
+        "reverse",
+        "reverse",
+        "forward"
+      ],
+      "node_sequence": [
+        "n312",
+        "n313",
+        "n619",
+        "n620",
+        "n852",
+        "n850",
+        "n169",
+        "n17",
+        "n16",
+        "n172",
+        "n190",
+        "n191"
+      ],
+      "applied_restrictions": 10,
+      "diagnostics": {
+        "search_engine": "dijkstra",
+        "heuristic_enabled": false,
+        "fallback_reason": "non_metric_geometry",
+        "expanded_states": 783,
+        "queued_states": 879,
+        "route_edge_count": 11,
+        "total_length_m": 909.4485603259117
+      }
+    }
+  ]
+}

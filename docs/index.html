@@ -92,7 +92,7 @@
             <a class="metric-card route" href="map.html">
               <span class="metric-kicker">Routing</span>
               <strong>909 m</strong>
-              <span>Paris TR-aware route; unrestricted baseline is 878 m.</span>
+              <span>Paris TR-aware route; unrestricted baseline is 878 m, with explain diagnostics.</span>
             </a>
             <a class="metric-card accuracy" href="accuracy_report.md">
               <span class="metric-kicker">Accuracy</span>
@@ -109,6 +109,26 @@
               <strong>float64</strong>
               <span>Default retained after float32 replay showed small RSS wins and ID drift.</span>
             </a>
+          </div>
+
+          <div class="diagnostics-panel" aria-label="Route explain diagnostics">
+            <div class="diagnostics-copy">
+              <span class="eyebrow">Observable Routing</span>
+              <strong>Safe A* and fallback decisions are inspectable</strong>
+              <span>
+                <code>route --explain</code> emits engine choice and queue work. The generated
+                sample includes a metric route that uses A* and the Paris TR-aware
+                route that safely falls back to Dijkstra on non-metric geometry.
+              </span>
+              <a href="assets/route_explain_sample.json">Open generated diagnostics JSON</a>
+            </div>
+            <pre class="diagnostics-code"><code>{
+  "search_engine": "astar",
+  "heuristic_enabled": true,
+  "expanded_states": 2,
+  "queued_states": 2,
+  "fallback_reason": null
+}</code></pre>
           </div>
         </div>
       </section>

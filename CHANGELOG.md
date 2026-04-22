@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   fallback reason when Dijkstra is used, expanded / queued state counts, route
   edge count, and total length.
 
+- **Route explain diagnostics are visible in docs and Pages.**
+  `docs/assets/route_explain_sample.json` is generated from real
+  `RoutePlanner` diagnostics and covers both a metric safe-A* route and the
+  Paris turn-restriction route's Dijkstra fallback. README, Showcase, and the
+  static Pages viewer now link to the sample.
+
 - **Reachability / service-area analysis is available from the routing CLI.**
   New `routing.reachability.reachable_within` and `roadgraph_builder reachable`
   report nodes and directed edge spans reachable from a start node within a
