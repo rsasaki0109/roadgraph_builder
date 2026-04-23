@@ -383,7 +383,7 @@ roadgraph_builder match-trajectory /tmp/rg_bundle/sim/road_graph.json \
 # Summary on stdout; per-sample snap details in /tmp/match.json
 ```
 
-Samples farther than `--max-distance-m` from any edge are reported as unmatched in both the summary and the detailed JSON. `--explain` keeps the normal fields intact and adds edge-index diagnostics such as indexed segment count, cell count, overflow segment count, query count, and elapsed milliseconds.
+Samples farther than `--max-distance-m` from any edge are reported as unmatched in both the summary and the detailed JSON. `--explain` keeps the normal fields intact and adds edge-index diagnostics such as indexed segment count, cell count, overflow segment count, query count, and elapsed milliseconds. A committed nearest-edge / HMM example lives in [`docs/assets/map_match_explain_sample.json`](docs/assets/map_match_explain_sample.json).
 
 ### Shortest path (routing)
 

@@ -1,0 +1,252 @@
+{
+  "schema_version": 1,
+  "generated_by": "scripts/refresh_docs_assets.py",
+  "description": "Map matching --explain examples shown in README and Showcase.",
+  "source_graph": "examples/frozen_bundle/sim/road_graph.json",
+  "source_trajectory": "examples/sample_trajectory.csv",
+  "elapsed_ms_note": "elapsed_ms is normalized to 0.0 in this committed docs asset for stable diffs.",
+  "samples": [
+    {
+      "id": "toy_nearest_edge",
+      "label": "Toy trajectory nearest-edge projection with edge-index diagnostics",
+      "command": "roadgraph_builder match-trajectory examples/frozen_bundle/sim/road_graph.json examples/sample_trajectory.csv --max-distance-m 5 --explain",
+      "result": {
+        "stats": {
+          "samples": 8,
+          "matched": 8,
+          "matched_ratio": 1.0,
+          "edges_touched": 2,
+          "mean_distance_m": 0.045824274053400726,
+          "max_distance_m": 0.19999999999999996,
+          "algorithm": "nearest_edge",
+          "diagnostics": {
+            "algorithm": "nearest_edge",
+            "sample_count": 8,
+            "matched_count": 8,
+            "max_distance_m": 5.0,
+            "elapsed_ms": 0.0,
+            "edge_index": {
+              "enabled": true,
+              "segment_count": 2,
+              "cell_count": 2,
+              "cell_size_m": 22.80350850198276,
+              "cell_segment_refs": 2,
+              "mean_cell_segments": 1.0,
+              "max_cell_segments": 1,
+              "overflow_segment_count": 0
+            },
+            "projection_queries": 8
+          }
+        },
+        "samples": [
+          {
+            "index": 0,
+            "edge_id": "e0",
+            "distance_m": 0.0,
+            "arc_length_m": 0.0,
+            "edge_length_m": 15.016324450410627,
+            "t": 0.0,
+            "projection_xy_m": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "index": 1,
+            "edge_id": "e0",
+            "distance_m": 0.033297096213602835,
+            "arc_length_m": 5.003887618980241,
+            "edge_length_m": 15.016324450410627,
+            "t": 0.3332298549824826,
+            "projection_xy_m": [
+              4.998447824737239,
+              0.2332608984877378
+            ]
+          },
+          {
+            "index": 2,
+            "edge_id": "e0",
+            "distance_m": 0.03329709621360292,
+            "arc_length_m": 10.012436831430385,
+            "edge_length_m": 15.016324450410627,
+            "t": 0.6667701450175173,
+            "projection_xy_m": [
+              10.00155217526276,
+              0.46673910151226206
+            ]
+          },
+          {
+            "index": 3,
+            "edge_id": "e0",
+            "distance_m": 0.0,
+            "arc_length_m": 15.016324450410627,
+            "edge_length_m": 15.016324450410627,
+            "t": 1.0,
+            "projection_xy_m": [
+              15.0,
+              0.7
+            ]
+          },
+          {
+            "index": 4,
+            "edge_id": "e1",
+            "distance_m": 0.0,
+            "arc_length_m": 0.0,
+            "edge_length_m": 15.0,
+            "t": 0.0,
+            "projection_xy_m": [
+              50.0,
+              1.0
+            ]
+          },
+          {
+            "index": 5,
+            "edge_id": "e1",
+            "distance_m": 0.10000000000000009,
+            "arc_length_m": 5.0,
+            "edge_length_m": 15.0,
+            "t": 0.3333333333333333,
+            "projection_xy_m": [
+              55.0,
+              1.0
+            ]
+          },
+          {
+            "index": 6,
+            "edge_id": "e1",
+            "distance_m": 0.19999999999999996,
+            "arc_length_m": 10.0,
+            "edge_length_m": 15.0,
+            "t": 0.6666666666666666,
+            "projection_xy_m": [
+              60.0,
+              1.0
+            ]
+          },
+          {
+            "index": 7,
+            "edge_id": "e1",
+            "distance_m": 0.0,
+            "arc_length_m": 15.0,
+            "edge_length_m": 15.0,
+            "t": 1.0,
+            "projection_xy_m": [
+              65.0,
+              1.0
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "toy_hmm_viterbi",
+      "label": "Toy trajectory HMM/Viterbi map matching with indexed candidates",
+      "command": "roadgraph_builder match-trajectory examples/frozen_bundle/sim/road_graph.json examples/sample_trajectory.csv --max-distance-m 5 --hmm --explain",
+      "result": {
+        "stats": {
+          "samples": 8,
+          "matched": 8,
+          "matched_ratio": 1.0,
+          "edges_touched": 2,
+          "mean_distance_m": 0.045824274053400726,
+          "max_distance_m": 0.19999999999999996,
+          "algorithm": "hmm_viterbi",
+          "diagnostics": {
+            "algorithm": "hmm_viterbi",
+            "sample_count": 8,
+            "matched_count": 8,
+            "max_distance_m": 5.0,
+            "elapsed_ms": 0.0,
+            "edge_index": {
+              "enabled": true,
+              "segment_count": 2,
+              "cell_count": 2,
+              "cell_size_m": 22.80350850198276,
+              "cell_segment_refs": 2,
+              "mean_cell_segments": 1.0,
+              "max_cell_segments": 1,
+              "overflow_segment_count": 0
+            },
+            "candidate_radius_m": 5.0,
+            "candidate_queries": 8,
+            "candidate_limit_per_sample": 5
+          }
+        },
+        "samples": [
+          {
+            "index": 0,
+            "edge_id": "e0",
+            "distance_m": 0.0,
+            "projection_xy_m": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "index": 1,
+            "edge_id": "e0",
+            "distance_m": 0.033297096213602835,
+            "projection_xy_m": [
+              4.998447824737239,
+              0.2332608984877378
+            ]
+          },
+          {
+            "index": 2,
+            "edge_id": "e0",
+            "distance_m": 0.03329709621360292,
+            "projection_xy_m": [
+              10.00155217526276,
+              0.46673910151226206
+            ]
+          },
+          {
+            "index": 3,
+            "edge_id": "e0",
+            "distance_m": 0.0,
+            "projection_xy_m": [
+              15.0,
+              0.7
+            ]
+          },
+          {
+            "index": 4,
+            "edge_id": "e1",
+            "distance_m": 0.0,
+            "projection_xy_m": [
+              50.0,
+              1.0
+            ]
+          },
+          {
+            "index": 5,
+            "edge_id": "e1",
+            "distance_m": 0.10000000000000009,
+            "projection_xy_m": [
+              55.0,
+              1.0
+            ]
+          },
+          {
+            "index": 6,
+            "edge_id": "e1",
+            "distance_m": 0.19999999999999996,
+            "projection_xy_m": [
+              60.0,
+              1.0
+            ]
+          },
+          {
+            "index": 7,
+            "edge_id": "e1",
+            "distance_m": 0.0,
+            "projection_xy_m": [
+              65.0,
+              1.0
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

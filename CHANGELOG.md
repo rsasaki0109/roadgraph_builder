@@ -150,7 +150,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `roadgraph_builder match-trajectory --explain` keeps the normal stats and
   sample JSON shape, then adds a `stats.diagnostics` object with elapsed
   milliseconds, projection/candidate query counts, and edge-index details such
-  as segment count, cell count, cell size, and overflow segment count.
+  as segment count, cell count, cell size, and overflow segment count. The docs
+  now include `docs/assets/map_match_explain_sample.json` with nearest-edge and
+  HMM examples generated from the frozen toy bundle.
 
 - **Routing caches now detect more graph mutations.**
   `nearest_node` cache signatures now cover every node on small/medium graphs

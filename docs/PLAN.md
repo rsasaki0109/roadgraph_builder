@@ -20,7 +20,7 @@
   最新 main CI run `24751415820` と Release workflow run `24721632168` は green。
   GitHub Release assets (`roadgraph_sample_bundle.tar.gz` / `.sha256`) は download + checksum +
   `validate-manifest` / `validate-sd-nav` / `validate` 済み。`v0.7.0` は shipped (2026-04-20)。
-  最新 full local `pytest` = **639 passed / 3 skipped / 4 deselected**（opt-in marker 除外）。
+  最新 full local `pytest` = **641 passed / 3 skipped / 4 deselected**（opt-in marker 除外）。
 - **直近の sessions (2026-04-21〜2026-04-22) で landed:**
   1. V1 accuracy 実測 — Paris 20e MAE 0.938、Tokyo Ginza MAE 0.903、Berlin Mitte MAE 1.220（lane-count vs OSM `lanes=`、canonical 20 m）
   2. `scripts/measure_lane_accuracy.py` が meter-frame graph を正しく扱う bug fix（`map_origin` 自動検出）
@@ -253,6 +253,11 @@
       `roadgraph_builder match-trajectory --explain` が通常の stats/sample JSON shape を保ったまま
       `stats.diagnostics` に elapsed ms、projection/candidate query count、edge-index segment/cell/overflow
       counts を追加する。bash / zsh completion も `--explain` に同期。
+  63. map matching explain sample asset。
+      `scripts/refresh_docs_assets.py` が frozen toy bundle から
+      `docs/assets/map_match_explain_sample.json` を生成する。nearest-edge と HMM の
+      `match-trajectory --explain` 出力例を README / SHOWCASE からリンクし、attribution に synthetic
+      repo-license asset として明記。
 - **push 方針:** `git push` は user が `push!` などで明示するまで実行しない。
 - **未着手 (次の AI が触る候補):** ↓ §5 "Open tasks" 参照。
 
@@ -649,7 +654,7 @@ code commit `342f61f` の release bundle / package build dry-run は PASS
 ### 6.3 Schema / CI / テスト
 
 - Schema 変更時は対応 `validate_*` と CI の expectation を同時に更新。
-- テスト: `pytest` で 639 passed / 3 skipped / 4 deselected が baseline。
+- テスト: `pytest` で 641 passed / 3 skipped / 4 deselected が baseline。
   `pytest -m slow` / `pytest -m city_scale` は opt-in。
 - 新機能には **必ず** unit test 1 本以上（`tests/test_<feature>_*.py`）。
 - CI が conditional skip している path（LAS laspy / Node.js viewer dijkstra / OpenCV）は
@@ -811,7 +816,7 @@ feedback / project / reference の 4 種、`MEMORY.md` は index）。
 
 新しい機能 / バグ修正を入れる前に:
 
-- [ ] `pytest` が 639 passed / 3 skipped / 4 deselected で通ること（上下 ±1 は OK、大きく減ったら
+- [ ] `pytest` が 641 passed / 3 skipped / 4 deselected で通ること（上下 ±1 は OK、大きく減ったら
       skip 理由を確認）。
 - [ ] `CHANGELOG.md` の `[Unreleased]` にユーザー向け変更を足すこと。
 - [ ] スキーマ変更時は対応する `validate_*` と CI の expectation を同時更新すること。

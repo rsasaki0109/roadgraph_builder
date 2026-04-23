@@ -195,6 +195,97 @@ def _write_route_explain_sample_asset() -> None:
     )
 
 
+def _write_map_match_explain_sample_asset() -> None:
+    """Write map-matching diagnostics examples for README / Showcase snippets."""
+
+    from roadgraph_builder.cli.trajectory import (
+        add_match_diagnostics,
+        hmm_matches_to_document,
+        match_trajectory_diagnostics,
+        snapped_matches_to_document,
+    )
+    from roadgraph_builder.io.export.json_loader import load_graph_json
+    from roadgraph_builder.io.trajectory.loader import load_trajectory_csv
+    from roadgraph_builder.routing.hmm_match import hmm_match_trajectory
+    from roadgraph_builder.routing.map_match import coverage_stats, snap_trajectory_to_graph
+
+    graph_path = ROOT / "examples" / "frozen_bundle" / "sim" / "road_graph.json"
+    traj_path = ROOT / "examples" / "sample_trajectory.csv"
+    if not (graph_path.is_file() and traj_path.is_file()):
+        return
+
+    graph = load_graph_json(graph_path)
+    traj = load_trajectory_csv(traj_path)
+    max_distance_m = 5.0
+
+    nearest = snap_trajectory_to_graph(graph, traj.xy, max_distance_m=max_distance_m)
+    nearest_doc = add_match_diagnostics(
+        snapped_matches_to_document(nearest, coverage_stats_func=coverage_stats),
+        match_trajectory_diagnostics(
+            graph,
+            algorithm="nearest_edge",
+            sample_count=len(traj.xy),
+            matched_count=sum(sample is not None for sample in nearest),
+            max_distance_m=max_distance_m,
+            elapsed_s=0.0,
+        ),
+    )
+
+    hmm = hmm_match_trajectory(
+        graph,
+        traj.xy,
+        candidate_radius_m=max_distance_m,
+        gps_sigma_m=5.0,
+        transition_limit_m=200.0,
+    )
+    hmm_doc = add_match_diagnostics(
+        hmm_matches_to_document(hmm),
+        match_trajectory_diagnostics(
+            graph,
+            algorithm="hmm_viterbi",
+            sample_count=len(traj.xy),
+            matched_count=sum(sample is not None for sample in hmm),
+            max_distance_m=max_distance_m,
+            elapsed_s=0.0,
+        ),
+    )
+
+    doc = {
+        "schema_version": 1,
+        "generated_by": "scripts/refresh_docs_assets.py",
+        "description": "Map matching --explain examples shown in README and Showcase.",
+        "source_graph": "examples/frozen_bundle/sim/road_graph.json",
+        "source_trajectory": "examples/sample_trajectory.csv",
+        "elapsed_ms_note": "elapsed_ms is normalized to 0.0 in this committed docs asset for stable diffs.",
+        "samples": [
+            {
+                "id": "toy_nearest_edge",
+                "label": "Toy trajectory nearest-edge projection with edge-index diagnostics",
+                "command": (
+                    "roadgraph_builder match-trajectory "
+                    "examples/frozen_bundle/sim/road_graph.json "
+                    "examples/sample_trajectory.csv --max-distance-m 5 --explain"
+                ),
+                "result": nearest_doc,
+            },
+            {
+                "id": "toy_hmm_viterbi",
+                "label": "Toy trajectory HMM/Viterbi map matching with indexed candidates",
+                "command": (
+                    "roadgraph_builder match-trajectory "
+                    "examples/frozen_bundle/sim/road_graph.json "
+                    "examples/sample_trajectory.csv --max-distance-m 5 --hmm --explain"
+                ),
+                "result": hmm_doc,
+            },
+        ],
+    }
+    (ASSETS / "map_match_explain_sample.json").write_text(
+        json.dumps(doc, indent=2) + "\n",
+        encoding="utf-8",
+    )
+
+
 def _clip_line_fraction(
     line: list[tuple[float, float]],
     fraction: float,
@@ -858,6 +949,7 @@ def main() -> None:
 
     _write_paris_grid_reachability_asset()
     _write_route_explain_sample_asset()
+    _write_map_match_explain_sample_asset()
 
     # Viewer metadata (bounds hint optional)
     meta = {
