@@ -42,6 +42,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   map-console product surface is visible on the GitHub README without running
   a server.
 
+- **Opt-in browser smoke for the map console.**
+  `tests/js/map_console_smoke.spec.mjs` (desktop 2D inspector counts, desktop
+  3D non-blank WebGL canvas, mobile 390×844 horizontal-overflow check) runs
+  under system Chrome via `@playwright/test`. The Python harness at
+  `tests/test_map_console_browser_smoke.py` serves `docs/`, drives
+  `npx -y -p @playwright/test playwright test`, and stays excluded from the
+  default `pytest` run via the new `browser_smoke` marker. Invoke with
+  `make viewer-smoke` or `pytest -m browser_smoke`; the test skips when
+  `node`, `npx`, or a system Chrome/Chromium is missing.
+
 - **Reachability / service-area analysis is available from the routing CLI.**
   New `routing.reachability.reachable_within` and `roadgraph_builder reachable`
   report nodes and directed edge spans reachable from a start node within a

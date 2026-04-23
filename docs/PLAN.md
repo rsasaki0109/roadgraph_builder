@@ -6,7 +6,7 @@
 > このファイル → [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md)（Mermaid 6 枚 + CLI 対応表 +
 > モジュール索引）→ [`CHANGELOG.md`](../CHANGELOG.md) の順。
 
-*最終更新: 2026-04-24 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards polish + README measured-results compacting / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate + manifest policy docs polish / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理 / v0.7.1 release + asset verification / packaging metadata smoke / 0.7.2.dev0 reopen / Actions Node24 update / release+PyPI dry-run / routing hot-path perf / nearest spatial index / cache invalidation hardening / build graph spatial merge perf / T-junction segment index perf / lean near-parallel merge loop / GeoJSON export compact path / compact bundle JSON writer / README quick-start smoke / release readiness dry-run refresh / reachable service-area CLI / reachable docs overlay / reachable benchmark coverage / benchmark baseline JSON / reachability analyzer perf / routing core split / RoutePlanner perf / GitHub star-growth surfaces / launch kit docs / safe A* routing / route explain diagnostics / route explain docs surface / route explain comparison UI / route diagnostics README screenshot / functional shortest_path planner cache + sampled validation / nearest-edge projection index / match-trajectory explain diagnostics / HMM bridge ambiguity benchmark / HMM adjacency reuse perf / HMM tail-cost cache / HMM long trajectory benchmark / edge-index cell tuning / 2D/3D map console / PLAN handoff expansion / map console pushed + CI green / Claude handoff refresh / map console hero screenshots）を反映済み。*
+*最終更新: 2026-04-24 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards polish + README measured-results compacting / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate + manifest policy docs polish / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理 / v0.7.1 release + asset verification / packaging metadata smoke / 0.7.2.dev0 reopen / Actions Node24 update / release+PyPI dry-run / routing hot-path perf / nearest spatial index / cache invalidation hardening / build graph spatial merge perf / T-junction segment index perf / lean near-parallel merge loop / GeoJSON export compact path / compact bundle JSON writer / README quick-start smoke / release readiness dry-run refresh / reachable service-area CLI / reachable docs overlay / reachable benchmark coverage / benchmark baseline JSON / reachability analyzer perf / routing core split / RoutePlanner perf / GitHub star-growth surfaces / launch kit docs / safe A* routing / route explain diagnostics / route explain docs surface / route explain comparison UI / route diagnostics README screenshot / functional shortest_path planner cache + sampled validation / nearest-edge projection index / match-trajectory explain diagnostics / HMM bridge ambiguity benchmark / HMM adjacency reuse perf / HMM tail-cost cache / HMM long trajectory benchmark / edge-index cell tuning / 2D/3D map console / PLAN handoff expansion / map console pushed + CI green / Claude handoff refresh / map console hero screenshots / map console browser smoke opt-in pytest）を反映済み。*
 
 ---
 
@@ -314,6 +314,15 @@
       `docs/images/map_console_2d.png` / `map_console_3d.png` を PIL quantize 後に committed asset
       として生成する。README "Visualization results" と `docs/SHOWCASE.md` に両 PNG を埋め込み、
       GitHub README 上で 2D inspector / 3D graph preview が直接見えるようにした。
+  73. map console browser smoke を opt-in pytest 化。
+      `tests/js/map_console_smoke.spec.mjs` に desktop 2D (Paris grid inspector counts) / desktop 3D
+      (WebGL pixel nonblank + `#scene3d-status` node mention) / mobile 2D (horizontal overflow 無し)
+      の 3 アサートを書き、`tests/test_map_console_browser_smoke.py` がローカル http.server +
+      `npx -y -p @playwright/test playwright test` で駆動する。@playwright/test の ESM resolve は
+      NODE_PATH が効かないため、npx cache の node_modules を `mktemp -d` に symlink して spec を
+      コピーし、そこから `playwright test ... --channel chrome` を走らせる。`pytest -m browser_smoke`
+      / `make viewer-smoke` が entry point、default `pytest` は `not browser_smoke` で除外済み。
+      `node` / `npx` / `google-chrome` が無い環境は skip。
 - **push 方針:** `git push` は user が `push!` などで明示するまで実行しない。
 - **未着手 (次の AI が触る候補):** ↓ §5 "Open tasks" 参照。
 
@@ -597,8 +606,11 @@
 - **committed regression boundary:** JS Dijkstra は `tests/test_viewer_js_dijkstra.py` +
   `tests/js/test_viewer_dijkstra.mjs` が `docs/map.html` から `buildRestrictionIndex` / `dijkstra` を抽出する。
   そのためこの 2 関数名と抽出しやすい top-level function shape は維持すること。
-  Full browser smoke はまだ committed test ではなく手動 one-off。理由は system Chrome / Playwright /
-  external CDN に依存するため。必要なら optional browser test として `pytest` skip-on-missing 方式で追加する。
+  Full browser smoke は `tests/test_map_console_browser_smoke.py` + `tests/js/map_console_smoke.spec.mjs`
+  として committed 済み。`@pytest.mark.browser_smoke` で default `pytest` からは除外、
+  `make viewer-smoke` / `pytest -m browser_smoke` で opt-in 実行、node / npx / system Chrome が無ければ skip。
+  アサートは paris_grid inspector counts / 3D `#scene3d-canvas` の `readPixels` 非ゼロ /
+  `#scene3d-status` に "node" 含む / mobile 390×844 の horizontal overflow 無し。
 - **manual browser smoke recipe:** 8765 が埋まっていたら別 port を使う。
   2026-04-23 は 8765 が使用中だったため 18765 を使用した。
 
@@ -747,10 +759,13 @@ code commit `342f61f` の release bundle / package build dry-run は PASS
    で `docs/images/map_console_2d.png` (667 KB) / `map_console_3d.png` (77 KB) を PIL 256-color quantize
    で圧縮して生成する。README "Visualization results" と `docs/SHOWCASE.md` に両 PNG を embed 済み。
    再生成は OSM tiles / Leaflet / Three.js 外部 fetch 必要な点を両方の docstring/本文で明記。
-2. **Optional browser smoke をテスト化** — 現状の browser smoke は one-off。
-   価値は高いが external CDN / OSM tiles / Chrome availability に依存するため、通常 CI には入れず、
-   `pytest` の skip-on-missing または `make viewer-smoke` の opt-in が現実的。
-   最小検証は 2D load、dynamic route、3D status、WebGL pixel nonblank、mobile horizontal overflow なし。
+2. **Optional browser smoke をテスト化** — ~~DONE 2026-04-24~~。
+   `tests/js/map_console_smoke.spec.mjs` + `tests/test_map_console_browser_smoke.py` が
+   `@pytest.mark.browser_smoke` で opt-in。`make viewer-smoke` = `pytest -m browser_smoke`。
+   desktop 2D (paris_grid inspector counts > 500 + restrictions ≥ 5) / desktop 3D (WebGL
+   `readPixels` が 0 でない + `#scene3d-status` に "node") / mobile 390×844 (horizontal overflow 無し)
+   の 3 assertion。default `pytest` は `not browser_smoke` で excluded。node / npx / system Chrome
+   不在時は skip、3 連続 run で stable（6.9s–8.7s）。
 3. **3D viewer の product interaction を深める** — 3D は現状「graph preview」。
    次の本質的な改善は、3D canvas 上の edge/node picking、route step highlight、inspector detail sync、
    route replay / cost coloring。これをやるなら `docs/map.html` が肥大化しているため、

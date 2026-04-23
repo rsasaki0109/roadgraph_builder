@@ -5,3 +5,7 @@ output/
 *.egg-info/
 dist/
 build/
+# Playwright artefacts from running the opt-in viewer smoke (or any manual
+# playwright invocation) from the repo root.
+test-results/
+playwright-report/

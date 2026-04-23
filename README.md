@@ -78,7 +78,7 @@ python3 -m venv .venv && .venv/bin/pip install -e .
 .venv/bin/roadgraph_builder validate out_hd_envelope.json
 ```
 
-From the repo root, **`make doctor`**, **`make demo`**, **`make tune`** (bundle + validate for parameter exploration), and **`make test`** are shortcuts (see `Makefile`). Tuning workflow: [docs/bundle_tuning.md](docs/bundle_tuning.md).
+From the repo root, **`make doctor`**, **`make demo`**, **`make tune`** (bundle + validate for parameter exploration), and **`make test`** are shortcuts (see `Makefile`). Opt-in suites: `make viewer-smoke` runs the Playwright / system Chrome smoke for `docs/map.html`, `pytest -m slow` the long perf regressions, and `pytest -m city_scale` the real-OSM fetch tests. Tuning workflow: [docs/bundle_tuning.md](docs/bundle_tuning.md).
 
 ### Shipped in 0.6 / 0.7
 

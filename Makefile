@@ -1,11 +1,16 @@
 # Run from repository root.
-.PHONY: install test bench demo tune doctor release-bundle docs
+.PHONY: install test viewer-smoke bench demo tune doctor release-bundle docs
 
 install:
 	python3 -m pip install -e ".[dev]"
 
 test:
 	PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest
+
+# Opt-in Playwright-driven smoke for docs/map.html. Requires Node.js, npx, and
+# a system Chrome/Chromium on PATH; the test skips when any is missing.
+viewer-smoke:
+	PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -m browser_smoke
 
 bench:
 	python scripts/run_benchmarks.py
