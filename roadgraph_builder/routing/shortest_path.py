@@ -36,6 +36,7 @@ from roadgraph_builder.routing._core import (
     RoutingIndex,
     TurnPolicy,
     build_weighted_adjacency as _build_weighted_adjacency,
+    edge_cache_signature as _edge_cache_signature,
     get_routing_index as _get_routing_index,
     lane_count_for_edge as _lane_count_for_edge,
     parse_turn_policy as _parse_turn_policy,
@@ -44,6 +45,11 @@ from roadgraph_builder.routing._core import (
 
 if TYPE_CHECKING:
     from roadgraph_builder.core.graph.graph import Graph
+
+
+_DEFAULT_PLANNER_EXACT_NODE_LIMIT = 512
+_DEFAULT_PLANNER_EXACT_EDGE_LIMIT = 1024
+_DEFAULT_PLANNER_SAMPLE_COUNT = 96
 
 
 def _zero_heuristic(_: str) -> float:
@@ -560,14 +566,67 @@ def _can_use_default_planner_cache(
     )
 
 
+def _sample_indices(length: int, max_count: int = _DEFAULT_PLANNER_SAMPLE_COUNT) -> tuple[int, ...]:
+    if length <= max_count:
+        return tuple(range(length))
+    last = length - 1
+    return tuple(sorted({round(i * last / (max_count - 1)) for i in range(max_count)}))
+
+
+def _sampled_default_planner_signature(graph: "Graph") -> tuple[object, ...]:
+    """Return a lightweight validation signature for default wrapper caching.
+
+    Small graphs keep the exact routing signature. Large graphs use stable
+    samples to avoid making every ``shortest_path(...)`` wrapper call scan all
+    nodes and edge polylines. The full ``RoutingIndex`` still uses the exact
+    signature when it is built or explicitly requested.
+    """
+
+    node_count = len(graph.nodes)
+    edge_count = len(graph.edges)
+    if (
+        node_count <= _DEFAULT_PLANNER_EXACT_NODE_LIMIT
+        and edge_count <= _DEFAULT_PLANNER_EXACT_EDGE_LIMIT
+    ):
+        return ("exact", _routing_signature(graph))
+
+    node_samples = tuple(
+        (
+            i,
+            graph.nodes[i].id,
+            float(graph.nodes[i].position[0]),
+            float(graph.nodes[i].position[1]),
+        )
+        for i in _sample_indices(node_count)
+    )
+    edge_samples = tuple(
+        (i, _edge_cache_signature(graph.edges[i]))
+        for i in _sample_indices(edge_count)
+    )
+    return (
+        "sampled",
+        id(graph.nodes),
+        node_count,
+        node_samples,
+        id(graph.edges),
+        edge_count,
+        edge_samples,
+    )
+
+
 def _cached_default_planner(graph: "Graph") -> RoutePlanner:
     """Return a default ``RoutePlanner`` cached on ``graph`` when still valid."""
 
-    signature = _routing_signature(graph)
+    signature = _sampled_default_planner_signature(graph)
     cached = getattr(graph, "_shortest_path_default_planner_cache", None)
-    if isinstance(cached, RoutePlanner) and cached.index.signature == signature:
+    cached_signature = getattr(cached, "_default_planner_cache_signature", None)
+    if isinstance(cached, RoutePlanner) and cached_signature == signature:
         return cached
     planner = RoutePlanner(graph)
+    try:
+        setattr(planner, "_default_planner_cache_signature", signature)
+    except Exception:
+        pass
     try:
         setattr(graph, "_shortest_path_default_planner_cache", planner)
     except Exception:

@@ -49,11 +49,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Repeated functional shortest-path calls reuse a default planner cache.**
   The public `shortest_path(...)` wrapper now caches a graph-local default
   `RoutePlanner` for the common no-restrictions / no-extra-cost-hooks case,
-  while still invalidating on graph topology, node-position, or edge-geometry
-  mutation. The new `shortest_path_grid_120_functional` benchmark covers 120
-  repeated wrapper calls on a 55x55 grid and dropped from local passes around
-  4.6-5.7 s to about 2.1-2.7 s. Explicit `RoutePlanner` remains the fastest
-  path for batch routing because it avoids per-call graph mutation checks.
+  using exact cache validation on small graphs and fixed node / edge samples
+  on larger graphs to avoid scanning every coordinate on each wrapper call.
+  The new `shortest_path_grid_120_functional` benchmark covers 120 repeated
+  wrapper calls on a 55x55 grid and dropped from local passes around 4.6-5.7 s
+  to about 0.7-1.0 s, with a committed no-warmup baseline of 0.812 s. Explicit
+  `RoutePlanner` remains the strongest choice when routing over a graph that is
+  being mutated between queries.
 
 - **Shortest-path routing now uses a safe A* fast path.**
   `RoutePlanner` uses cached straight-line node distance as an A* heuristic

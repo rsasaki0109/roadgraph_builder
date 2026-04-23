@@ -6,7 +6,7 @@
 > このファイル → [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md)（Mermaid 6 枚 + CLI 対応表 +
 > モジュール索引）→ [`CHANGELOG.md`](../CHANGELOG.md) の順。
 
-*最終更新: 2026-04-23 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards polish + README measured-results compacting / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate + manifest policy docs polish / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理 / v0.7.1 release + asset verification / packaging metadata smoke / 0.7.2.dev0 reopen / Actions Node24 update / release+PyPI dry-run / routing hot-path perf / nearest spatial index / cache invalidation hardening / build graph spatial merge perf / T-junction segment index perf / lean near-parallel merge loop / GeoJSON export compact path / compact bundle JSON writer / README quick-start smoke / release readiness dry-run refresh / reachable service-area CLI / reachable docs overlay / reachable benchmark coverage / benchmark baseline JSON / reachability analyzer perf / routing core split / RoutePlanner perf / GitHub star-growth surfaces / launch kit docs / safe A* routing / route explain diagnostics / route explain docs surface / route explain comparison UI / route diagnostics README screenshot / functional shortest_path planner cache）を反映済み。*
+*最終更新: 2026-04-23 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards polish + README measured-results compacting / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate + manifest policy docs polish / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理 / v0.7.1 release + asset verification / packaging metadata smoke / 0.7.2.dev0 reopen / Actions Node24 update / release+PyPI dry-run / routing hot-path perf / nearest spatial index / cache invalidation hardening / build graph spatial merge perf / T-junction segment index perf / lean near-parallel merge loop / GeoJSON export compact path / compact bundle JSON writer / README quick-start smoke / release readiness dry-run refresh / reachable service-area CLI / reachable docs overlay / reachable benchmark coverage / benchmark baseline JSON / reachability analyzer perf / routing core split / RoutePlanner perf / GitHub star-growth surfaces / launch kit docs / safe A* routing / route explain diagnostics / route explain docs surface / route explain comparison UI / route diagnostics README screenshot / functional shortest_path planner cache + sampled validation）を反映済み。*
 
 ---
 
@@ -238,10 +238,11 @@
       の state-count 比較が見える。
   60. functional shortest_path planner cache。
       public `shortest_path(...)` wrapper が no restrictions / no extra cost hooks / no lane-level の
-      default case だけ graph-local `RoutePlanner` を再利用する。routing signature で topology、
-      node position、edge geometry mutation は検出し続け、属性依存 cost hooks は stale risk を避けるため
-      cache 対象外。55x55 grid の 120 functional calls は local one-off で 4.6-5.7s → 2.1-2.7s。
-      `shortest_path_grid_120_functional` benchmark と baseline 2.571s を追加。
+      default case だけ graph-local `RoutePlanner` を再利用する。小さい graph は exact routing
+      signature のまま、大きい graph は fixed node / edge sample で cache validation し、属性依存
+      cost hooks は stale risk を避けるため cache 対象外。55x55 grid の 120 functional calls は
+      local one-off で 4.6-5.7s → exact validation 2.1-2.7s → sampled validation 0.7-1.0s。
+      `shortest_path_grid_120_functional` benchmark baseline は 0.812s。
 - **push 方針:** `git push` は user が `push!` などで明示するまで実行しない。
 - **未着手 (次の AI が触る候補):** ↓ §5 "Open tasks" 参照。
 

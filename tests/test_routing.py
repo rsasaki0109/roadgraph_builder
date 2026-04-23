@@ -173,6 +173,31 @@ def test_shortest_path_function_api_invalidates_default_planner_cache_on_mutatio
     assert getattr(g, "_shortest_path_default_planner_cache", None) is not cached
 
 
+def test_shortest_path_function_api_invalidates_large_sampled_cache_on_sample_mutation():
+    nodes = []
+    edges = []
+    for i in range(1200):
+        nodes.append(Node(id=f"n{i}", position=(float(i), 0.0)))
+        if i > 0:
+            edges.append(
+                Edge(
+                    id=f"e{i - 1}",
+                    start_node_id=f"n{i - 1}",
+                    end_node_id=f"n{i}",
+                    polyline=[(float(i - 1), 0.0), (float(i), 0.0)],
+                )
+            )
+    g = Graph(nodes=nodes, edges=edges)
+
+    shortest_path(g, "n0", "n10")
+    cached = getattr(g, "_shortest_path_default_planner_cache", None)
+
+    g.nodes[0].position = (-1.0, 0.0)
+    shortest_path(g, "n0", "n10")
+
+    assert getattr(g, "_shortest_path_default_planner_cache", None) is not cached
+
+
 def test_shortest_path_function_api_does_not_cache_attribute_weighted_options():
     g = _manual_graph()
 

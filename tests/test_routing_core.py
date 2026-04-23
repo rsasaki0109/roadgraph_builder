@@ -81,6 +81,17 @@ def test_routing_index_tracks_node_position_mutation():
     assert updated.node_positions["b"] == (10.0, 5.0)
 
 
+def test_routing_index_tracks_two_point_polyline_mutation():
+    graph = _core_graph()
+    index = get_routing_index(graph)
+
+    graph.edges[0].polyline[1] = (12.0, 0.0)
+    updated = get_routing_index(graph)
+
+    assert updated is not index
+    assert updated.base_lengths["e1"] == pytest.approx(12.0)
+
+
 def test_cost_options_report_when_straight_line_heuristic_is_safe():
     assert RoutingCostOptions().preserves_base_metric_lower_bound
     assert RoutingCostOptions(min_confidence=0.5).preserves_base_metric_lower_bound

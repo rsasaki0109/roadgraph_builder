@@ -123,13 +123,24 @@ def routing_signature(graph: "Graph") -> tuple[object, ...]:
     )
 
 
-def polyline_cache_signature(polyline) -> tuple[int, int, int]:  # type: ignore[no-untyped-def]
+def polyline_cache_signature(polyline) -> tuple[object, ...]:  # type: ignore[no-untyped-def]
+    length = len(polyline)
+    if length == 0:
+        return (id(polyline), 0)
+    if length == 1:
+        x0, y0 = polyline[0]
+        return (id(polyline), 1, float(x0), float(y0))
+    if length == 2:
+        x0, y0 = polyline[0]
+        x1, y1 = polyline[1]
+        return (id(polyline), 2, float(x0), float(y0), float(x1), float(y1))
+
     acc = 1469598103934665603
     for x_raw, y_raw in polyline:
         point_hash = hash((float(x_raw), float(y_raw)))
         acc ^= point_hash & 0xFFFFFFFFFFFFFFFF
         acc = (acc * 1099511628211) & 0xFFFFFFFFFFFFFFFF
-    return (id(polyline), len(polyline), acc)
+    return (id(polyline), length, acc)
 
 
 def edge_cache_signature(edge) -> tuple[object, ...]:  # type: ignore[no-untyped-def]
