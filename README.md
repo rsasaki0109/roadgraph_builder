@@ -56,13 +56,17 @@ v0.7.1 adds post-v0.7.0 validation and release-hardening work: canonical lane-co
 
 ### Visualization results
 
-The docs map ships a Paris OSM-highway graph with 10 mapped turn restrictions, a restriction-aware route overlay, and a 500 m reachability overlay from the same start node. The docs landing page also loads the generated `route --explain` sample and compares safe A* against the Paris Dijkstra fallback using expanded / queued state counts. These static assets are regenerated from committed GeoJSON / JSON inputs by `scripts/refresh_docs_assets.py`; the diagnostics screenshot below is rendered with `scripts/render_route_diagnostics_screenshot.py`. OSM-derived asset attribution is tracked in [`docs/assets/ATTRIBUTION.md`](docs/assets/ATTRIBUTION.md).
+The docs map ships a Paris OSM-highway graph with 10 mapped turn restrictions, a restriction-aware route overlay, and a 500 m reachability overlay from the same start node. The docs landing page also loads the generated `route --explain` sample and compares safe A* against the Paris Dijkstra fallback using expanded / queued state counts. These static assets are regenerated from committed GeoJSON / JSON inputs by `scripts/refresh_docs_assets.py`; the diagnostics screenshot below is rendered with `scripts/render_route_diagnostics_screenshot.py`, and the map-console screenshots with `scripts/render_map_console_screenshot.py` (uses system Chrome via Playwright and pulls OSM tiles / Leaflet / Three.js over the network). OSM-derived asset attribution is tracked in [`docs/assets/ATTRIBUTION.md`](docs/assets/ATTRIBUTION.md).
+
+[![2D map console: Paris OSM grid with route, reachability, turn restrictions, and inspector metrics](docs/images/map_console_2d.png)](docs/map.html)
+
+[![3D graph console: same Paris grid rendered as a Three.js preview, inspector keeps route / reachability / restriction counts](docs/images/map_console_3d.png)](docs/map.html)
 
 [![Route diagnostics comparison: safe A* expands 2 states while the Paris Dijkstra fallback expands 783 states](docs/images/route_diagnostics_compare.png)](docs/index.html)
 
 [![Paris OSM-highway grid with a TR-aware route and 500 m reachability overlay](docs/images/paris_grid_route.svg)](docs/map.html)
 
-Open the interactive version locally: `cd docs && python3 -m http.server 8765`, then visit **`http://127.0.0.1:8765/map.html`**.
+Open the interactive version locally: `cd docs && python3 -m http.server 8765`, then visit **`http://127.0.0.1:8765/map.html`** (add `?view=3d` for the 3D graph preview, `?dataset=paris` to switch to the public-GPS sample).
 
 ### Quick start
 

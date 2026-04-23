@@ -1400,7 +1400,23 @@
         })
         .catch(() => {});
 
-      show("paris_grid").catch((err) => {
+      async function bootstrap() {
+        const params = new URLSearchParams(window.location.search);
+        const allowed = new Set(Object.keys(DATASET_URLS));
+        const requested = params.get("dataset");
+        const initialDataset = allowed.has(requested) ? requested : "paris_grid";
+        const initialView = params.get("view") === "3d" ? "3d" : "2d";
+        const datasetSel = document.getElementById("dataset");
+        if (datasetSel.value !== initialDataset) datasetSel.value = initialDataset;
+        await show(initialDataset);
+        if (initialView === "3d") {
+          setView("3d");
+          await render3DScene();
+        }
+        document.body.dataset.ready = initialView;
+      }
+
+      bootstrap().catch((err) => {
         document.querySelector(".bar").appendChild(document.createTextNode(" Load error: " + err));
       });
     </script>

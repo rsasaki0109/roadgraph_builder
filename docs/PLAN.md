@@ -6,7 +6,7 @@
 > このファイル → [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md)（Mermaid 6 枚 + CLI 対応表 +
 > モジュール索引）→ [`CHANGELOG.md`](../CHANGELOG.md) の順。
 
-*最終更新: 2026-04-24 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards polish + README measured-results compacting / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate + manifest policy docs polish / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理 / v0.7.1 release + asset verification / packaging metadata smoke / 0.7.2.dev0 reopen / Actions Node24 update / release+PyPI dry-run / routing hot-path perf / nearest spatial index / cache invalidation hardening / build graph spatial merge perf / T-junction segment index perf / lean near-parallel merge loop / GeoJSON export compact path / compact bundle JSON writer / README quick-start smoke / release readiness dry-run refresh / reachable service-area CLI / reachable docs overlay / reachable benchmark coverage / benchmark baseline JSON / reachability analyzer perf / routing core split / RoutePlanner perf / GitHub star-growth surfaces / launch kit docs / safe A* routing / route explain diagnostics / route explain docs surface / route explain comparison UI / route diagnostics README screenshot / functional shortest_path planner cache + sampled validation / nearest-edge projection index / match-trajectory explain diagnostics / HMM bridge ambiguity benchmark / HMM adjacency reuse perf / HMM tail-cost cache / HMM long trajectory benchmark / edge-index cell tuning / 2D/3D map console / PLAN handoff expansion / map console pushed + CI green / Claude handoff refresh）を反映済み。*
+*最終更新: 2026-04-24 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards polish + README measured-results compacting / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate + manifest policy docs polish / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理 / v0.7.1 release + asset verification / packaging metadata smoke / 0.7.2.dev0 reopen / Actions Node24 update / release+PyPI dry-run / routing hot-path perf / nearest spatial index / cache invalidation hardening / build graph spatial merge perf / T-junction segment index perf / lean near-parallel merge loop / GeoJSON export compact path / compact bundle JSON writer / README quick-start smoke / release readiness dry-run refresh / reachable service-area CLI / reachable docs overlay / reachable benchmark coverage / benchmark baseline JSON / reachability analyzer perf / routing core split / RoutePlanner perf / GitHub star-growth surfaces / launch kit docs / safe A* routing / route explain diagnostics / route explain docs surface / route explain comparison UI / route diagnostics README screenshot / functional shortest_path planner cache + sampled validation / nearest-edge projection index / match-trajectory explain diagnostics / HMM bridge ambiguity benchmark / HMM adjacency reuse perf / HMM tail-cost cache / HMM long trajectory benchmark / edge-index cell tuning / 2D/3D map console / PLAN handoff expansion / map console pushed + CI green / Claude handoff refresh / map console hero screenshots）を反映済み。*
 
 ---
 
@@ -307,6 +307,13 @@
       2D/3D map console の内部構造、検証済み手順、既知制約、次にやる価値が高い候補をこの PLAN に追記。
       次の AI / Cursor が「何を push すべきか」「何を追加検証すべきか」「まだ product として足りない
       体験は何か」を cold-start で読める状態にする。
+  72. map console hero screenshots。
+      `docs/map.html` に `?view=2d|3d` と `?dataset=…` の URL param と `body[data-ready]` シグナルを
+      追加し、`scripts/render_map_console_screenshot.py` がローカル http.server + Playwright CLI
+      (`npx -y -p @playwright/test playwright screenshot --channel chrome`) で
+      `docs/images/map_console_2d.png` / `map_console_3d.png` を PIL quantize 後に committed asset
+      として生成する。README "Visualization results" と `docs/SHOWCASE.md` に両 PNG を埋め込み、
+      GitHub README 上で 2D inspector / 3D graph preview が直接見えるようにした。
 - **push 方針:** `git push` は user が `push!` などで明示するまで実行しない。
 - **未着手 (次の AI が触る候補):** ↓ §5 "Open tasks" 参照。
 
@@ -612,6 +619,14 @@
   `route_paris_grid.geojson` + `paris_grid_turn_restrictions.json` から
   `scripts/refresh_docs_assets.py` で再生成。OSM attribution を SVG 内と `docs/assets/ATTRIBUTION.md`
   に保持。
+- `docs/images/map_console_2d.png` / `docs/images/map_console_3d.png`: README / SHOWCASE 用の
+  map-console hero screenshot。`docs/map.html` は `?view=2d|3d` と `?dataset=…` URL param を受け付け、
+  ローディング完了時に `document.body.dataset.ready` を立てる。
+  `scripts/render_map_console_screenshot.py` が `docs/` を `http.server` で serve し、
+  `npx -y -p @playwright/test playwright screenshot --channel chrome --viewport-size 1600,900
+  --wait-for-selector "body[data-ready]" ...` で両 view を撮り、PIL 256-color quantize で
+  2 MB → 667 KB (2D) / 184 KB → 77 KB (3D) に圧縮。OSM tiles / Leaflet / Three.js は外部 fetch なので
+  ネットワーク前提。regeneration 時に OSM tile が変わると PNG も変わる点だけ注意。
 - `docs/images/route_diagnostics_compare.png`: README / Showcase 用の route explain 比較 screenshot。
   `docs/route_diagnostics_preview.html` を headless Chrome で描画する
   `scripts/render_route_diagnostics_screenshot.py` で再生成。元データは
@@ -726,12 +741,12 @@ code commit `342f61f` の release bundle / package build dry-run は PASS
 ただし README/SHOWCASE に埋め込む静的 hero 画像はまだ旧 `paris_grid_route.svg` 中心。
 次に触るなら以下の順が現実的。
 
-1. **README / Showcase に map-console screenshot を載せる** — star-growth / product clarity の次の一手。
-   既存 `docs/images/paris_grid_route.svg` は静的な route preview として優秀だが、2D/3D console の価値
-   （inspector、overlay toggles、3D graph）を README 上で直接見せられていない。
-   Playwright で `/tmp/roadgraph-map-desktop-3d.png` 相当を再生成し、`docs/images/map_console_3d.png`
-   として committed asset にする候補。生成 script 化するなら `scripts/render_map_console_screenshot.py`
-   か Node/Playwright helper を追加し、外部 OSM tiles / CDN に依存することを明記する。
+1. **README / Showcase に map-console screenshot を載せる** — ~~DONE 2026-04-24~~。
+   `docs/map.html` に `?view=2d|3d` と `?dataset=…` URL param + `body[data-ready]` ready signal を追加。
+   `scripts/render_map_console_screenshot.py` が local http.server + Playwright CLI (system Chrome)
+   で `docs/images/map_console_2d.png` (667 KB) / `map_console_3d.png` (77 KB) を PIL 256-color quantize
+   で圧縮して生成する。README "Visualization results" と `docs/SHOWCASE.md` に両 PNG を embed 済み。
+   再生成は OSM tiles / Leaflet / Three.js 外部 fetch 必要な点を両方の docstring/本文で明記。
 2. **Optional browser smoke をテスト化** — 現状の browser smoke は one-off。
    価値は高いが external CDN / OSM tiles / Chrome availability に依存するため、通常 CI には入れず、
    `pytest` の skip-on-missing または `make viewer-smoke` の opt-in が現実的。

@@ -32,6 +32,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   toggles, and dynamic-route synchronization so click-to-route updates both the
   2D and 3D representations.
 
+- **Map-console hero screenshots for README and Showcase.**
+  `docs/map.html` accepts `?view=2d|3d` and `?dataset=…` query parameters and
+  exposes a `body[data-ready]` signal so headless tooling can capture stable
+  frames. A new `scripts/render_map_console_screenshot.py` serves `docs/` over
+  a local HTTP server and drives the Playwright CLI with system Chrome to
+  produce committed `docs/images/map_console_2d.png` and `map_console_3d.png`.
+  README "Visualization results" and `docs/SHOWCASE.md` embed the PNGs so the
+  map-console product surface is visible on the GitHub README without running
+  a server.
+
 - **Reachability / service-area analysis is available from the routing CLI.**
   New `routing.reachability.reachable_within` and `roadgraph_builder reachable`
   report nodes and directed edge spans reachable from a start node within a
