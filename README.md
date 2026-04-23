@@ -375,7 +375,7 @@ roadgraph_builder validate-lane-markings lane_markings.json
 
 ### Map matching (snap a trajectory to the graph)
 
-Given a road graph and a new trajectory CSV in the same meter frame, `match-trajectory` projects each sample onto the closest edge's polyline and summarises how well the trajectory tracks the graph. Repeated samples use a graph-local edge spatial index, and `--hmm` uses the same indexed candidate lookup before Viterbi decoding.
+Given a road graph and a new trajectory CSV in the same meter frame, `match-trajectory` projects each sample onto the closest edge's polyline and summarises how well the trajectory tracks the graph. Repeated samples use a graph-local edge spatial index, and `--hmm` uses the same indexed candidate lookup before Viterbi decoding with along-edge transition distances.
 
 ```bash
 roadgraph_builder match-trajectory /tmp/rg_bundle/sim/road_graph.json \

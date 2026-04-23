@@ -154,6 +154,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   now include `docs/assets/map_match_explain_sample.json` with nearest-edge and
   HMM examples generated from the frozen toy bundle.
 
+- **HMM map matching uses along-edge transition distances.**
+  `hmm_match_trajectory` now carries each candidate's projection arc length and
+  edge length through Viterbi, so transition penalties include the distance from
+  the previous projection to an endpoint, graph distance between endpoints, and
+  the distance from the next endpoint to the current projection. This removes a
+  shortcut that treated connected edge transitions as endpoint-to-endpoint only.
+
 - **Routing caches now detect more graph mutations.**
   `nearest_node` cache signatures now cover every node on small/medium graphs
   and evenly sampled node positions on very large graphs, so middle-node

@@ -12,7 +12,7 @@ penalty** proportional to its projection distance (Gaussian on the GPS error).
 The **transition penalty** between consecutive candidates is the absolute
 difference between (a) the ``(i, i+1)`` Euclidean distance and (b) the
 shortest-path distance between the candidate projections, measured in graph
-meters. Candidates on the same edge pay zero transition.
+meters. Candidates on the same edge use along-edge projection distance.
 
 Heavier than ``snap_trajectory_to_graph`` but still O(N · K²) with
 ``K = candidate_count`` after a spatial-index candidate lookup.
@@ -41,6 +41,15 @@ class HmmMatch:
     distance_m: float
 
 
+@dataclass(frozen=True)
+class _Candidate:
+    edge_id: str
+    distance_m: float
+    projection_xy_m: tuple[float, float]
+    arc_length_m: float
+    edge_length_m: float
+
+
 def _node_distances(graph: "Graph", start_node: str, limit: float) -> dict[str, float]:
     """Dijkstra from ``start_node`` on undirected edges, stopping at ``limit``."""
     adj: dict[str, list[tuple[str, float]]] = {n.id: [] for n in graph.nodes}
@@ -66,6 +75,48 @@ def _node_distances(graph: "Graph", start_node: str, limit: float) -> dict[str, 
                 dist[v] = nd
                 heapq.heappush(heap, (nd, v))
     return dist
+
+
+def _endpoint_tail_costs(edge, candidate: _Candidate) -> dict[str, float]:  # type: ignore[no-untyped-def]
+    """Distance from a candidate projection to each endpoint along its edge."""
+
+    to_start = max(candidate.arc_length_m, 0.0)
+    to_end = max(candidate.edge_length_m - candidate.arc_length_m, 0.0)
+    if edge.start_node_id == edge.end_node_id:
+        return {edge.start_node_id: min(to_start, to_end)}
+    return {
+        edge.start_node_id: to_start,
+        edge.end_node_id: to_end,
+    }
+
+
+def _transition_graph_distance(
+    prev: _Candidate,
+    cur: _Candidate,
+    *,
+    edge_by_id: dict[str, object],
+    node_dists,
+    transition_limit_m: float,
+) -> float:
+    """Shortest graph distance between two candidate projections."""
+
+    if prev.edge_id == cur.edge_id:
+        graph_dist = abs(cur.arc_length_m - prev.arc_length_m)
+        return graph_dist if graph_dist <= transition_limit_m else math.inf
+
+    prev_edge = edge_by_id[prev.edge_id]
+    cur_edge = edge_by_id[cur.edge_id]
+    prev_tails = _endpoint_tail_costs(prev_edge, prev)
+    cur_tails = _endpoint_tail_costs(cur_edge, cur)
+    best_link = math.inf
+    for pnode, prev_tail in prev_tails.items():
+        dists = node_dists(pnode)
+        for cnode, cur_tail in cur_tails.items():
+            if cnode in dists:
+                total = prev_tail + dists[cnode] + cur_tail
+                if total < best_link:
+                    best_link = total
+    return best_link if best_link <= transition_limit_m else math.inf
 
 
 def hmm_match_trajectory(
@@ -96,15 +147,20 @@ def hmm_match_trajectory(
         return [None] * len(xy)
 
     # Per-edge endpoint index.
-    edge_by_id = {e.id: e for e in edges}
+    edge_by_id = {str(e.id): e for e in edges}
 
     edge_index = get_edge_projection_index(graph)
 
-    # Per-sample candidate list: [(edge_id, distance, projection_xy)].
-    candidates: list[list[tuple[str, float, tuple[float, float]]]] = []
+    candidates: list[list[_Candidate]] = []
     for px, py in xy:
         cand = [
-            (projection.edge_id, projection.distance_m, projection.projection_xy_m)
+            _Candidate(
+                edge_id=projection.edge_id,
+                distance_m=projection.distance_m,
+                projection_xy_m=projection.projection_xy_m,
+                arc_length_m=projection.arc_length_m,
+                edge_length_m=projection.edge_length_m,
+            )
             for projection in edge_index.candidate_projections(
                 float(px),
                 float(py),
@@ -125,7 +181,7 @@ def hmm_match_trajectory(
     # Initial sample: emission only; no candidate → unmatched.
     if not candidates[0]:
         return [None] * n
-    scores[0] = [emission_cost(d) for _eid, d, _p in candidates[0]]
+    scores[0] = [emission_cost(c.distance_m) for c in candidates[0]]
     back[0] = [-1] * len(candidates[0])
 
     # Cache node-distance Dijkstra by start_node_id of the candidate edge to
@@ -146,7 +202,7 @@ def hmm_match_trajectory(
             continue
         if not prev_cands:
             # Restart: independent emission.
-            scores[t] = [emission_cost(d) for _eid, d, _p in cur_cands]
+            scores[t] = [emission_cost(c.distance_m) for c in cur_cands]
             back[t] = [-1] * len(cur_cands)
             continue
 
@@ -156,36 +212,23 @@ def hmm_match_trajectory(
 
         sc_t: list[float] = []
         bk_t: list[int] = []
-        for ci, (cur_edge_id, cur_d, cur_proj) in enumerate(cur_cands):
-            cur_edge = edge_by_id[cur_edge_id]
+        for cur_cand in cur_cands:
             best_total = math.inf
             best_prev = -1
-            for pi, (prev_edge_id, prev_d, prev_proj) in enumerate(prev_cands):
+            for pi, prev_cand in enumerate(prev_cands):
                 if scores[t - 1][pi] == math.inf:
                     continue
-                if prev_edge_id == cur_edge_id:
-                    # Same edge → graph distance is along-edge chord approximated by projection.
-                    graph_dist = math.hypot(
-                        cur_proj[0] - prev_proj[0], cur_proj[1] - prev_proj[1]
-                    )
-                else:
-                    # Use the best of (prev_start, prev_end) → (cur_start, cur_end)
-                    prev_edge = edge_by_id[prev_edge_id]
-                    best_link = math.inf
-                    for pnode in (prev_edge.start_node_id, prev_edge.end_node_id):
-                        dists = node_dists(pnode)
-                        for cnode in (cur_edge.start_node_id, cur_edge.end_node_id):
-                            if cnode in dists:
-                                # Approximate: prev_proj → pnode along prev_edge,
-                                # plus graph-to-graph, plus cnode → cur_proj along cur_edge.
-                                # We do not re-compute the along-edge tail distances
-                                # (cheap approximation; tuning knob if needed).
-                                best_link = min(best_link, dists[cnode])
-                    graph_dist = best_link
+                graph_dist = _transition_graph_distance(
+                    prev_cand,
+                    cur_cand,
+                    edge_by_id=edge_by_id,
+                    node_dists=node_dists,
+                    transition_limit_m=transition_limit_m,
+                )
                 if not math.isfinite(graph_dist):
                     continue
                 trans = abs(step_gps - graph_dist)
-                total = scores[t - 1][pi] + trans + emission_cost(cur_d)
+                total = scores[t - 1][pi] + trans + emission_cost(cur_cand.distance_m)
                 if total < best_total:
                     best_total = total
                     best_prev = pi
@@ -201,8 +244,13 @@ def hmm_match_trajectory(
         for i in range(n):
             cand = candidates[i]
             if cand:
-                eid, d, proj = cand[0]
-                result[i] = HmmMatch(index=i, edge_id=eid, projection_xy_m=proj, distance_m=d)
+                c = cand[0]
+                result[i] = HmmMatch(
+                    index=i,
+                    edge_id=c.edge_id,
+                    projection_xy_m=c.projection_xy_m,
+                    distance_m=c.distance_m,
+                )
         return result
 
     cur_idx = int(min(range(len(scores[-1])), key=lambda k: scores[-1][k]))
@@ -213,8 +261,13 @@ def hmm_match_trajectory(
                 # Find a fallback for the previous sample.
                 cur_idx = int(min(range(len(scores[i - 1])), key=lambda k: scores[i - 1][k])) if scores[i - 1] else -1
             continue
-        eid, d, proj = candidates[i][cur_idx]
-        result[i] = HmmMatch(index=i, edge_id=eid, projection_xy_m=proj, distance_m=d)
+        c = candidates[i][cur_idx]
+        result[i] = HmmMatch(
+            index=i,
+            edge_id=c.edge_id,
+            projection_xy_m=c.projection_xy_m,
+            distance_m=c.distance_m,
+        )
         cur_idx = back[i][cur_idx] if back[i] else -1
     return result
 
