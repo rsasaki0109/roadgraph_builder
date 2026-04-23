@@ -162,8 +162,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   shortcut that treated connected edge transitions as endpoint-to-endpoint only.
   The benchmark suite now includes `hmm_match_bridge_500`, which covers 500
   boundary-straddling HMM samples with nearby disconnected bridge distractors and
-  now records a committed baseline of 0.090 s after transition Dijkstra started
-  reusing the routing index's cached base adjacency.
+  now records a committed baseline of 0.058 s after transition Dijkstra started
+  reusing the routing index's cached base adjacency and candidates started
+  carrying precomputed endpoint tail costs.
 
 - **Routing caches now detect more graph mutations.**
   `nearest_node` cache signatures now cover every node on small/medium graphs

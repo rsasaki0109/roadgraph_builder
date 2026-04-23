@@ -32,6 +32,9 @@ if TYPE_CHECKING:
     from roadgraph_builder.core.graph.graph import Graph
 
 
+_TailCosts = tuple[tuple[str, float], ...]
+
+
 @dataclass(frozen=True)
 class HmmMatch:
     """One sample's Viterbi pick."""
@@ -49,6 +52,7 @@ class _Candidate:
     projection_xy_m: tuple[float, float]
     arc_length_m: float
     edge_length_m: float
+    tail_costs: _TailCosts = ()
 
 
 def _node_distances(
@@ -74,17 +78,30 @@ def _node_distances(
     return dist
 
 
-def _endpoint_tail_costs(edge, candidate: _Candidate) -> dict[str, float]:  # type: ignore[no-untyped-def]
+def _endpoint_tail_costs(edge, candidate: _Candidate) -> _TailCosts:  # type: ignore[no-untyped-def]
     """Distance from a candidate projection to each endpoint along its edge."""
 
-    to_start = max(candidate.arc_length_m, 0.0)
-    to_end = max(candidate.edge_length_m - candidate.arc_length_m, 0.0)
+    return _endpoint_tail_costs_from_arc(
+        edge,
+        arc_length_m=candidate.arc_length_m,
+        edge_length_m=candidate.edge_length_m,
+    )
+
+
+def _endpoint_tail_costs_from_arc(
+    edge,
+    *,
+    arc_length_m: float,
+    edge_length_m: float,
+) -> _TailCosts:  # type: ignore[no-untyped-def]
+    to_start = max(arc_length_m, 0.0)
+    to_end = max(edge_length_m - arc_length_m, 0.0)
     if edge.start_node_id == edge.end_node_id:
-        return {edge.start_node_id: min(to_start, to_end)}
-    return {
-        edge.start_node_id: to_start,
-        edge.end_node_id: to_end,
-    }
+        return ((edge.start_node_id, min(to_start, to_end)),)
+    return (
+        (edge.start_node_id, to_start),
+        (edge.end_node_id, to_end),
+    )
 
 
 def _transition_graph_distance(
@@ -101,18 +118,18 @@ def _transition_graph_distance(
         graph_dist = abs(cur.arc_length_m - prev.arc_length_m)
         return graph_dist if graph_dist <= transition_limit_m else math.inf
 
-    prev_edge = edge_by_id[prev.edge_id]
-    cur_edge = edge_by_id[cur.edge_id]
-    prev_tails = _endpoint_tail_costs(prev_edge, prev)
-    cur_tails = _endpoint_tail_costs(cur_edge, cur)
+    prev_tails = prev.tail_costs or _endpoint_tail_costs(edge_by_id[prev.edge_id], prev)
+    cur_tails = cur.tail_costs or _endpoint_tail_costs(edge_by_id[cur.edge_id], cur)
     best_link = math.inf
-    for pnode, prev_tail in prev_tails.items():
+    for pnode, prev_tail in prev_tails:
         dists = node_dists(pnode)
-        for cnode, cur_tail in cur_tails.items():
-            if cnode in dists:
-                total = prev_tail + dists[cnode] + cur_tail
-                if total < best_link:
-                    best_link = total
+        for cnode, cur_tail in cur_tails:
+            if prev_tail + cur_tail > transition_limit_m:
+                continue
+            link_dist = dists.get(cnode, math.inf)
+            total = prev_tail + link_dist + cur_tail
+            if total < best_link:
+                best_link = total
     return best_link if best_link <= transition_limit_m else math.inf
 
 
@@ -157,6 +174,11 @@ def hmm_match_trajectory(
                 projection_xy_m=projection.projection_xy_m,
                 arc_length_m=projection.arc_length_m,
                 edge_length_m=projection.edge_length_m,
+                tail_costs=_endpoint_tail_costs_from_arc(
+                    edge_by_id[projection.edge_id],
+                    arc_length_m=projection.arc_length_m,
+                    edge_length_m=projection.edge_length_m,
+                ),
             )
             for projection in edge_index.candidate_projections(
                 float(px),
@@ -216,6 +238,7 @@ def hmm_match_trajectory(
         for cur_cand in cur_cands:
             best_total = math.inf
             best_prev = -1
+            cur_emission = emission_cost(cur_cand.distance_m)
             for pi, prev_cand in enumerate(prev_cands):
                 if scores[t - 1][pi] == math.inf:
                     continue
@@ -229,7 +252,7 @@ def hmm_match_trajectory(
                 if not math.isfinite(graph_dist):
                     continue
                 trans = abs(step_gps - graph_dist)
-                total = scores[t - 1][pi] + trans + emission_cost(cur_cand.distance_m)
+                total = scores[t - 1][pi] + trans + cur_emission
                 if total < best_total:
                     best_total = total
                     best_prev = pi

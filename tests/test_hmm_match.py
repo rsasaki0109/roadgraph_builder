@@ -113,6 +113,43 @@ def test_hmm_transition_uses_projection_tail_distances():
     assert dist == 10.0
 
 
+def test_hmm_transition_uses_precomputed_tail_costs():
+    prev = _Candidate(
+        "e0",
+        0.0,
+        (95.0, 0.0),
+        arc_length_m=95.0,
+        edge_length_m=100.0,
+        tail_costs=(("b", 5.0),),
+    )
+    cur = _Candidate(
+        "e1",
+        0.0,
+        (105.0, 0.0),
+        arc_length_m=5.0,
+        edge_length_m=100.0,
+        tail_costs=(("b", 5.0),),
+    )
+    calls: list[str] = []
+
+    def node_dists(node: str) -> dict[str, float]:
+        calls.append(node)
+        return {"b": 0.0} if node == "b" else {}
+
+    assert (
+        _transition_graph_distance(
+            prev,
+            cur,
+            edge_by_id={},
+            node_dists=node_dists,
+            transition_limit_m=50.0,
+        )
+        == 10.0
+    )
+
+    assert calls == ["b"]
+
+
 def test_hmm_node_distances_use_cached_directed_adjacency():
     adj = {
         "a": [("e0", "forward", "b", 5.0)],

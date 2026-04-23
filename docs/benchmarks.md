@@ -174,7 +174,7 @@ The committed baseline JSON records:
 | `reachable_grid_120` | 0.270 | 120 reachability queries, 60 m budget, 36 305 consumed node/span results |
 | `nearest_node_grid_2000` | 0.432 | 2000 snaps on a 300x300 node grid |
 | `map_match_grid_5000` | 1.519 | 5000 nearest-edge snaps on a 120x120 grid graph |
-| `hmm_match_bridge_500` | 0.090 | 500 HMM samples across connected edge boundaries with nearby disconnected bridge distractors |
+| `hmm_match_bridge_500` | 0.058 | 500 HMM samples across connected edge boundaries with nearby disconnected bridge distractors |
 | `export_geojson_grid_120_compact` | 0.572 | Compact GeoJSON export on a 120x120 grid |
 | `export_bundle_json_grid_120_compact` | 0.441 | Compact road_graph/sd_nav/manifest JSON on a 120x120 grid |
 | `export_bundle_end_to_end` | 0.005 | Full export-bundle pipeline on sample trajectory |
@@ -267,13 +267,13 @@ prefer the connected chain. The benchmark counts only matches that stay off the
 bridge distractors, making the along-edge transition fix visible as a
 performance-and-correctness signal.
 
-The first committed bridge benchmark baseline was 0.496 s. After reusing the
-routing index's cached base adjacency for transition Dijkstra, the no-warmup
-suite measurement dropped to 0.090 s while preserving the same 500/500 connected
-matches.
+The first committed bridge benchmark baseline was 0.496 s. Reusing the routing
+index's cached base adjacency for transition Dijkstra dropped the no-warmup
+suite measurement to 0.090 s; precomputing candidate endpoint tail costs then
+reduced it to 0.058 s while preserving the same 500/500 connected matches.
 
-The committed baseline records 0.090 s from a no-warmup suite run
-(`python scripts/run_benchmarks.py --no-warmup --output /tmp/roadgraph_hmm_adjacency_baseline.json`).
+The committed baseline records 0.058 s from a no-warmup suite run
+(`python scripts/run_benchmarks.py --no-warmup --output /tmp/roadgraph_hmm_tail_baseline.json`).
 The corresponding unit test requires all 500 decoded samples to remain on the
 connected chain.
 
