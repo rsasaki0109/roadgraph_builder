@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Performance benchmarks for roadgraph_builder.
 
-Measures wall-clock time for eleven scenarios:
+Measures wall-clock time for twelve scenarios:
   polylines_to_graph_paris       — build from OSM public trackpoints CSV
   polylines_to_graph_10k_synth   — build from 50×50 synthetic grid (~25 000 pts)
   shortest_path_paris            — 100 route queries on the Paris graph
@@ -10,6 +10,7 @@ Measures wall-clock time for eleven scenarios:
   reachable_grid_120             — 120 reachability queries on a 55×55 grid graph
   nearest_node_grid_2000         — 2000 nearest-node queries on a 300×300 grid
   map_match_grid_5000            — 5000 nearest-edge snaps on a 120×120 grid graph
+  hmm_match_bridge_500           — 500 HMM snaps through connected edges with bridge distractors
   export_geojson_grid_120_compact — compact GeoJSON export on a 120×120 grid
   export_bundle_json_grid_120_compact — compact road_graph/sd_nav/manifest JSON on a 120×120 grid
   export_bundle_end_to_end       — full export-bundle pipeline (sample CSV)
@@ -251,6 +252,61 @@ def run_map_match_grid_5000() -> int:
     return sum(1 for sample in snapped if sample is not None)
 
 
+def run_hmm_match_bridge_500() -> int:
+    """Run 500 HMM snaps through connected edges with nearby bridge distractors."""
+    import numpy as np
+    from roadgraph_builder.core.graph.edge import Edge
+    from roadgraph_builder.core.graph.graph import Graph
+    from roadgraph_builder.core.graph.node import Node
+    from roadgraph_builder.routing.hmm_match import hmm_match_trajectory
+
+    boundary_count = 250
+    nodes: list[Node] = []
+    edges: list[Edge] = []
+    for i in range(boundary_count + 2):
+        nodes.append(Node(f"n{i}", (i * 100.0, 0.0)))
+    for i in range(boundary_count + 1):
+        edges.append(
+            Edge(
+                f"e{i}",
+                f"n{i}",
+                f"n{i + 1}",
+                [(i * 100.0, 0.0), ((i + 1) * 100.0, 0.0)],
+            )
+        )
+    for i in range(1, boundary_count + 1):
+        nodes.append(Node(f"b{i}a", (i * 100.0 - 5.0, 0.4)))
+        nodes.append(Node(f"b{i}b", (i * 100.0 + 5.0, 0.4)))
+        edges.append(
+            Edge(
+                f"bridge{i}",
+                f"b{i}a",
+                f"b{i}b",
+                [(i * 100.0 - 5.0, 0.4), (i * 100.0 + 5.0, 0.4)],
+            )
+        )
+
+    xy = np.empty((boundary_count * 2, 2), dtype=np.float64)
+    for i in range(boundary_count):
+        boundary_x = float((i + 1) * 100.0)
+        xy[2 * i] = (boundary_x - 5.0, 0.0)
+        xy[2 * i + 1] = (boundary_x + 5.0, 0.0)
+
+    graph = Graph(nodes, edges)
+    matched = hmm_match_trajectory(
+        graph,
+        xy,
+        candidate_radius_m=6.0,
+        gps_sigma_m=10.0,
+        transition_limit_m=120.0,
+    )
+    return sum(
+        1
+        for match in matched
+        if match is not None and not match.edge_id.startswith("bridge")
+    )
+
+
 def export_bundle_paris() -> None:
     """Run the full export-bundle pipeline on the sample trajectory."""
     import tempfile
@@ -416,6 +472,7 @@ BENCHMARKS: dict[str, tuple] = {
     "reachable_grid_120": (run_reachable_grid_120, 1),
     "nearest_node_grid_2000": (run_nearest_grid_2000, 1),
     "map_match_grid_5000": (run_map_match_grid_5000, 1),
+    "hmm_match_bridge_500": (run_hmm_match_bridge_500, 1),
     "export_geojson_grid_120_compact": (export_geojson_grid_120_compact, 1),
     "export_bundle_json_grid_120_compact": (export_bundle_json_grid_120_compact, 1),
     "export_bundle_end_to_end": (export_bundle_paris, 1),

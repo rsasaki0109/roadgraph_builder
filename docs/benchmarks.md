@@ -174,6 +174,7 @@ The committed baseline JSON records:
 | `reachable_grid_120` | 0.270 | 120 reachability queries, 60 m budget, 36 305 consumed node/span results |
 | `nearest_node_grid_2000` | 0.432 | 2000 snaps on a 300x300 node grid |
 | `map_match_grid_5000` | 1.519 | 5000 nearest-edge snaps on a 120x120 grid graph |
+| `hmm_match_bridge_500` | 0.496 | 500 HMM samples across connected edge boundaries with nearby disconnected bridge distractors |
 | `export_geojson_grid_120_compact` | 0.572 | Compact GeoJSON export on a 120x120 grid |
 | `export_bundle_json_grid_120_compact` | 0.441 | Compact road_graph/sd_nav/manifest JSON on a 120x120 grid |
 | `export_bundle_end_to_end` | 0.005 | Full export-bundle pipeline on sample trajectory |
@@ -255,6 +256,21 @@ synthetic grid graph and snaps 5000 samples to the nearest edge with a 2 m
 threshold. On this workstation, direct passes measured 1.178 / 1.012 / 1.122 s;
 the full no-warmup benchmark comparison recorded the committed baseline at
 1.519 s and reported no regressions.
+
+## v0.7.2-dev HMM bridge ambiguity benchmark (2026-04-23)
+
+The benchmark suite now includes `hmm_match_bridge_500`, which builds a chain of
+connected 100 m edges and places short disconnected "bridge" edges 0.4 m away
+from every edge boundary. Each GPS pair straddles a boundary, so the nearest
+individual candidate can look tempting while the HMM transition model should
+prefer the connected chain. The benchmark counts only matches that stay off the
+bridge distractors, making the along-edge transition fix visible as a
+performance-and-correctness signal.
+
+The committed baseline records 0.496 s from
+`python scripts/run_benchmarks.py --no-warmup --baseline docs/assets/benchmark_baseline_0.7.2-dev.json`.
+The corresponding unit test requires all 500 decoded samples to remain on the
+connected chain.
 
 ## Regression policy
 
