@@ -47,6 +47,7 @@ class TestBenchmarkScript:
             "nearest_node_grid_2000",
             "map_match_grid_5000",
             "hmm_match_bridge_500",
+            "hmm_match_long_grid_2000",
             "export_geojson_grid_120_compact",
             "export_bundle_json_grid_120_compact",
             "export_bundle_end_to_end",
@@ -59,6 +60,10 @@ class TestBenchmarkScript:
     def test_hmm_match_bridge_500_consumes_connected_matches(self):
         mod = _import_script()
         assert mod.run_hmm_match_bridge_500() == 500
+
+    def test_hmm_match_long_grid_2000_stays_on_route(self):
+        mod = _import_script()
+        assert mod.run_hmm_match_long_grid_2000() == 2000
 
     def test_build_10k_synth_returns_graph(self):
         """build_10k_synth should return a Graph without error."""

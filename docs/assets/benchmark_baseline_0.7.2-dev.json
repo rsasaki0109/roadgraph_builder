@@ -26,6 +26,9 @@
   "hmm_match_bridge_500": {
     "elapsed_s": 0.057977074990049005
   },
+  "hmm_match_long_grid_2000": {
+    "elapsed_s": 0.29174028895795345
+  },
   "export_geojson_grid_120_compact": {
     "elapsed_s": 0.5724765069317073
   },

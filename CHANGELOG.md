@@ -164,7 +164,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   boundary-straddling HMM samples with nearby disconnected bridge distractors and
   now records a committed baseline of 0.058 s after transition Dijkstra started
   reusing the routing index's cached base adjacency and candidates started
-  carrying precomputed endpoint tail costs.
+  carrying precomputed endpoint tail costs. The new `hmm_match_long_grid_2000`
+  benchmark extends the same correctness signal to a 2000-sample snake-grid
+  trajectory with disconnected alias edges.
 
 - **Routing caches now detect more graph mutations.**
   `nearest_node` cache signatures now cover every node on small/medium graphs

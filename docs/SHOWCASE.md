@@ -124,8 +124,9 @@ because the intermediate graph is explicit, testable, and easy to extend.
 - `nearest_node_grid_2000`: 2000 nearest-node snaps on a 300x300 node grid; committed baseline `0.432 s`.
 - `map_match_grid_5000`: 5000 nearest-edge snaps on a 120x120 grid graph using the shared edge projection index; committed baseline `1.519 s`.
 - `hmm_match_bridge_500`: 500 HMM samples across connected edge boundaries with nearby disconnected bridge distractors; committed baseline `0.058 s`.
+- `hmm_match_long_grid_2000`: 2000 HMM samples along a snake grid route with disconnected alias edges; committed baseline `0.292 s`.
 - `map_match_explain_sample`: generated `match-trajectory --explain` JSON showing nearest-edge and HMM diagnostics over the frozen toy bundle; raw sample lives in [`map_match_explain_sample.json`](assets/map_match_explain_sample.json).
-- Full local test suite after the latest routing work: `646 passed, 3 skipped, 4 deselected`.
+- Full local test suite after the latest routing work: `647 passed, 3 skipped, 4 deselected`.
 
 ## Local Preview
 

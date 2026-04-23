@@ -175,6 +175,7 @@ The committed baseline JSON records:
 | `nearest_node_grid_2000` | 0.432 | 2000 snaps on a 300x300 node grid |
 | `map_match_grid_5000` | 1.519 | 5000 nearest-edge snaps on a 120x120 grid graph |
 | `hmm_match_bridge_500` | 0.058 | 500 HMM samples across connected edge boundaries with nearby disconnected bridge distractors |
+| `hmm_match_long_grid_2000` | 0.292 | 2000 HMM samples along a snake grid route with disconnected alias edges |
 | `export_geojson_grid_120_compact` | 0.572 | Compact GeoJSON export on a 120x120 grid |
 | `export_bundle_json_grid_120_compact` | 0.441 | Compact road_graph/sd_nav/manifest JSON on a 120x120 grid |
 | `export_bundle_end_to_end` | 0.005 | Full export-bundle pipeline on sample trajectory |
@@ -276,6 +277,19 @@ The committed baseline records 0.058 s from a no-warmup suite run
 (`python scripts/run_benchmarks.py --no-warmup --output /tmp/roadgraph_hmm_tail_baseline.json`).
 The corresponding unit test requires all 500 decoded samples to remain on the
 connected chain.
+
+## v0.7.2-dev HMM long trajectory benchmark (2026-04-23)
+
+The benchmark suite now includes `hmm_match_long_grid_2000`, which builds a
+20-row snake route over a 51-column grid, samples 2000 points along that route,
+and adds a short disconnected alias edge beside every route segment. This keeps
+candidate sets ambiguous throughout a longer trajectory while the correctness
+signal remains simple: every decoded sample must stay on a `route*` edge.
+
+The committed baseline records 0.292 s from a no-warmup suite run
+(`python scripts/run_benchmarks.py --no-warmup --output /tmp/roadgraph_hmm_long_grid_baseline.json`).
+The corresponding unit test requires all 2000 decoded samples to remain on the
+route graph.
 
 ## Regression policy
 

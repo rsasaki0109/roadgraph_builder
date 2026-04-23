@@ -6,7 +6,7 @@
 > このファイル → [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md)（Mermaid 6 枚 + CLI 対応表 +
 > モジュール索引）→ [`CHANGELOG.md`](../CHANGELOG.md) の順。
 
-*最終更新: 2026-04-23 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards polish + README measured-results compacting / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate + manifest policy docs polish / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理 / v0.7.1 release + asset verification / packaging metadata smoke / 0.7.2.dev0 reopen / Actions Node24 update / release+PyPI dry-run / routing hot-path perf / nearest spatial index / cache invalidation hardening / build graph spatial merge perf / T-junction segment index perf / lean near-parallel merge loop / GeoJSON export compact path / compact bundle JSON writer / README quick-start smoke / release readiness dry-run refresh / reachable service-area CLI / reachable docs overlay / reachable benchmark coverage / benchmark baseline JSON / reachability analyzer perf / routing core split / RoutePlanner perf / GitHub star-growth surfaces / launch kit docs / safe A* routing / route explain diagnostics / route explain docs surface / route explain comparison UI / route diagnostics README screenshot / functional shortest_path planner cache + sampled validation / nearest-edge projection index / match-trajectory explain diagnostics / HMM bridge ambiguity benchmark / HMM adjacency reuse perf / HMM tail-cost cache）を反映済み。*
+*最終更新: 2026-04-23 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards polish + README measured-results compacting / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate + manifest policy docs polish / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理 / v0.7.1 release + asset verification / packaging metadata smoke / 0.7.2.dev0 reopen / Actions Node24 update / release+PyPI dry-run / routing hot-path perf / nearest spatial index / cache invalidation hardening / build graph spatial merge perf / T-junction segment index perf / lean near-parallel merge loop / GeoJSON export compact path / compact bundle JSON writer / README quick-start smoke / release readiness dry-run refresh / reachable service-area CLI / reachable docs overlay / reachable benchmark coverage / benchmark baseline JSON / reachability analyzer perf / routing core split / RoutePlanner perf / GitHub star-growth surfaces / launch kit docs / safe A* routing / route explain diagnostics / route explain docs surface / route explain comparison UI / route diagnostics README screenshot / functional shortest_path planner cache + sampled validation / nearest-edge projection index / match-trajectory explain diagnostics / HMM bridge ambiguity benchmark / HMM adjacency reuse perf / HMM tail-cost cache / HMM long trajectory benchmark）を反映済み。*
 
 ---
 
@@ -20,7 +20,7 @@
   最新 main CI run `24751415820` と Release workflow run `24721632168` は green。
   GitHub Release assets (`roadgraph_sample_bundle.tar.gz` / `.sha256`) は download + checksum +
   `validate-manifest` / `validate-sd-nav` / `validate` 済み。`v0.7.0` は shipped (2026-04-20)。
-  最新 full local `pytest` = **646 passed / 3 skipped / 4 deselected**（opt-in marker 除外）。
+  最新 full local `pytest` = **647 passed / 3 skipped / 4 deselected**（opt-in marker 除外）。
 - **直近の sessions (2026-04-21〜2026-04-22) で landed:**
   1. V1 accuracy 実測 — Paris 20e MAE 0.938、Tokyo Ginza MAE 0.903、Berlin Mitte MAE 1.220（lane-count vs OSM `lanes=`、canonical 20 m）
   2. `scripts/measure_lane_accuracy.py` が meter-frame graph を正しく扱う bug fix（`map_origin` 自動検出）
@@ -276,6 +276,10 @@
       candidate pair ループで同じ tail cost を繰り返し再計算しない。node-pair cache は
       profile で dict/hash overhead が勝ったため採用せず、低コストな candidate-local cache に限定。
       `hmm_match_bridge_500` の no-warmup suite baseline は 0.090s → 0.058s。
+  68. HMM long trajectory benchmark。
+      `scripts/run_benchmarks.py` に `hmm_match_long_grid_2000` を追加。20-row x 51-column の
+      snake grid route に 2000 samples を流し、各 route segment 横に disconnected alias edge を置く。
+      count は全 sample が `route*` edge に残ることを検証し、committed baseline は 0.292s。
 - **push 方針:** `git push` は user が `push!` などで明示するまで実行しない。
 - **未着手 (次の AI が触る候補):** ↓ §5 "Open tasks" 参照。
 
@@ -515,7 +519,9 @@
   （55×55 grid 120 service-area queries）/ `nearest_node_grid_2000`
   （300×300 node grid 2000 snaps）/ `map_match_grid_5000`
   （120×120 grid 5000 nearest-edge snaps）/ `hmm_match_bridge_500`
-  （connected boundary HMM 500 samples + disconnected bridge distractors）/ `export_geojson_grid_120_compact`
+  （connected boundary HMM 500 samples + disconnected bridge distractors）/
+  `hmm_match_long_grid_2000`（snake-grid HMM 2000 samples + disconnected alias edges）/
+  `export_geojson_grid_120_compact`
   （120×120 grid compact GeoJSON export）/ `export_bundle_json_grid_120_compact`
   （120×120 grid compact bundle JSON writer）/ `export_bundle_end_to_end` の wall-time を計測。
   `--baseline docs/assets/benchmark_baseline_0.7.2-dev.json` で 3× 劣化時 exit 1。
@@ -673,7 +679,7 @@ code commit `342f61f` の release bundle / package build dry-run は PASS
 ### 6.3 Schema / CI / テスト
 
 - Schema 変更時は対応 `validate_*` と CI の expectation を同時に更新。
-- テスト: `pytest` で 646 passed / 3 skipped / 4 deselected が baseline。
+- テスト: `pytest` で 647 passed / 3 skipped / 4 deselected が baseline。
   `pytest -m slow` / `pytest -m city_scale` は opt-in。
 - 新機能には **必ず** unit test 1 本以上（`tests/test_<feature>_*.py`）。
 - CI が conditional skip している path（LAS laspy / Node.js viewer dijkstra / OpenCV）は
@@ -835,7 +841,7 @@ feedback / project / reference の 4 種、`MEMORY.md` は index）。
 
 新しい機能 / バグ修正を入れる前に:
 
-- [ ] `pytest` が 646 passed / 3 skipped / 4 deselected で通ること（上下 ±1 は OK、大きく減ったら
+- [ ] `pytest` が 647 passed / 3 skipped / 4 deselected で通ること（上下 ±1 は OK、大きく減ったら
       skip 理由を確認）。
 - [ ] `CHANGELOG.md` の `[Unreleased]` にユーザー向け変更を足すこと。
 - [ ] スキーマ変更時は対応する `validate_*` と CI の expectation を同時更新すること。

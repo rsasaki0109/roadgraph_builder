@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Performance benchmarks for roadgraph_builder.
 
-Measures wall-clock time for twelve scenarios:
+Measures wall-clock time for thirteen scenarios:
   polylines_to_graph_paris       — build from OSM public trackpoints CSV
   polylines_to_graph_10k_synth   — build from 50×50 synthetic grid (~25 000 pts)
   shortest_path_paris            — 100 route queries on the Paris graph
@@ -11,6 +11,7 @@ Measures wall-clock time for twelve scenarios:
   nearest_node_grid_2000         — 2000 nearest-node queries on a 300×300 grid
   map_match_grid_5000            — 5000 nearest-edge snaps on a 120×120 grid graph
   hmm_match_bridge_500           — 500 HMM snaps through connected edges with bridge distractors
+  hmm_match_long_grid_2000       — 2000 HMM snaps along a snake grid route with alias edges
   export_geojson_grid_120_compact — compact GeoJSON export on a 120×120 grid
   export_bundle_json_grid_120_compact — compact road_graph/sd_nav/manifest JSON on a 120×120 grid
   export_bundle_end_to_end       — full export-bundle pipeline (sample CSV)
@@ -307,6 +308,90 @@ def run_hmm_match_bridge_500() -> int:
     )
 
 
+def run_hmm_match_long_grid_2000() -> int:
+    """Run 2000 HMM snaps along a long snake grid route with alias edges."""
+    import math
+    import numpy as np
+    from roadgraph_builder.core.graph.edge import Edge
+    from roadgraph_builder.core.graph.graph import Graph
+    from roadgraph_builder.core.graph.node import Node
+    from roadgraph_builder.routing.hmm_match import hmm_match_trajectory
+
+    rows = 20
+    cols = 51
+    spacing = 10.0
+    sample_count = 2000
+    alias_offset_m = 0.7
+
+    route_xy: list[tuple[float, float]] = []
+    for y in range(rows):
+        xs = range(cols) if y % 2 == 0 else range(cols - 1, -1, -1)
+        row_xy = [(float(x) * spacing, float(y) * spacing) for x in xs]
+        if route_xy and route_xy[-1] != row_xy[0]:
+            route_xy.append(row_xy[0])
+            route_xy.extend(row_xy[1:])
+        else:
+            route_xy.extend(row_xy)
+
+    nodes: list[Node] = [Node(f"r{i}", point) for i, point in enumerate(route_xy)]
+    edges: list[Edge] = []
+    segment_lengths: list[float] = []
+    for i in range(len(route_xy) - 1):
+        start = route_xy[i]
+        end = route_xy[i + 1]
+        dx = end[0] - start[0]
+        dy = end[1] - start[1]
+        length = math.hypot(dx, dy)
+        segment_lengths.append(length)
+        edges.append(Edge(f"route{i}", f"r{i}", f"r{i + 1}", [start, end]))
+        if length <= 0.0:
+            continue
+        nx = -dy / length
+        ny = dx / length
+        alias_start = (start[0] + nx * alias_offset_m, start[1] + ny * alias_offset_m)
+        alias_end = (end[0] + nx * alias_offset_m, end[1] + ny * alias_offset_m)
+        nodes.append(Node(f"a{i}0", alias_start))
+        nodes.append(Node(f"a{i}1", alias_end))
+        edges.append(Edge(f"alias{i}", f"a{i}0", f"a{i}1", [alias_start, alias_end]))
+
+    total_length = sum(segment_lengths)
+    xy = np.empty((sample_count, 2), dtype=np.float64)
+    seg_i = 0
+    seg_start_m = 0.0
+    for sample_i in range(sample_count):
+        target_m = min(
+            total_length,
+            (total_length * sample_i) / max(sample_count - 1, 1),
+        )
+        while (
+            seg_i + 1 < len(segment_lengths)
+            and seg_start_m + segment_lengths[seg_i] < target_m
+        ):
+            seg_start_m += segment_lengths[seg_i]
+            seg_i += 1
+        seg_len = segment_lengths[seg_i]
+        start = route_xy[seg_i]
+        end = route_xy[seg_i + 1]
+        t = 0.0 if seg_len <= 0.0 else (target_m - seg_start_m) / seg_len
+        px = start[0] + (end[0] - start[0]) * t
+        py = start[1] + (end[1] - start[1]) * t
+        xy[sample_i] = (px, py)
+
+    graph = Graph(nodes, edges)
+    matched = hmm_match_trajectory(
+        graph,
+        xy,
+        candidate_radius_m=2.0,
+        gps_sigma_m=5.0,
+        transition_limit_m=25.0,
+    )
+    return sum(
+        1
+        for match in matched
+        if match is not None and match.edge_id.startswith("route")
+    )
+
+
 def export_bundle_paris() -> None:
     """Run the full export-bundle pipeline on the sample trajectory."""
     import tempfile
@@ -473,6 +558,7 @@ BENCHMARKS: dict[str, tuple] = {
     "nearest_node_grid_2000": (run_nearest_grid_2000, 1),
     "map_match_grid_5000": (run_map_match_grid_5000, 1),
     "hmm_match_bridge_500": (run_hmm_match_bridge_500, 1),
+    "hmm_match_long_grid_2000": (run_hmm_match_long_grid_2000, 1),
     "export_geojson_grid_120_compact": (export_geojson_grid_120_compact, 1),
     "export_bundle_json_grid_120_compact": (export_bundle_json_grid_120_compact, 1),
     "export_bundle_end_to_end": (export_bundle_paris, 1),
