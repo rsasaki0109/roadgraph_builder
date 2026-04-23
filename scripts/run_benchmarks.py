@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Performance benchmarks for roadgraph_builder.
 
-Measures wall-clock time for ten scenarios:
+Measures wall-clock time for eleven scenarios:
   polylines_to_graph_paris       — build from OSM public trackpoints CSV
   polylines_to_graph_10k_synth   — build from 50×50 synthetic grid (~25 000 pts)
   shortest_path_paris            — 100 route queries on the Paris graph
@@ -9,6 +9,7 @@ Measures wall-clock time for ten scenarios:
   shortest_path_grid_120         — 120 RoutePlanner queries on a 55×55 grid graph
   reachable_grid_120             — 120 reachability queries on a 55×55 grid graph
   nearest_node_grid_2000         — 2000 nearest-node queries on a 300×300 grid
+  map_match_grid_5000            — 5000 nearest-edge snaps on a 120×120 grid graph
   export_geojson_grid_120_compact — compact GeoJSON export on a 120×120 grid
   export_bundle_json_grid_120_compact — compact road_graph/sd_nav/manifest JSON on a 120×120 grid
   export_bundle_end_to_end       — full export-bundle pipeline (sample CSV)
@@ -228,6 +229,28 @@ def run_nearest_grid_2000() -> int:
     return count
 
 
+def run_map_match_grid_5000() -> int:
+    """Run 5000 nearest-edge snaps on a synthetic 120×120 grid graph."""
+    import numpy as np
+    from roadgraph_builder.routing.map_match import snap_trajectory_to_graph
+
+    size = 120
+    spacing = 5.0
+    graph = _grid_graph(size=size, spacing=spacing)
+    max_coord = float((size - 1) * spacing)
+    xy = np.empty((5000, 2), dtype=np.float64)
+    for i in range(len(xy)):
+        if i % 2 == 0:
+            xy[i, 0] = float((i * 13) % int(max_coord)) + 0.2
+            xy[i, 1] = float((i * 7) % size) * spacing + 0.4
+        else:
+            xy[i, 0] = float((i * 11) % size) * spacing + 0.3
+            xy[i, 1] = float((i * 17) % int(max_coord)) + 0.1
+
+    snapped = snap_trajectory_to_graph(graph, xy, max_distance_m=2.0)
+    return sum(1 for sample in snapped if sample is not None)
+
+
 def export_bundle_paris() -> None:
     """Run the full export-bundle pipeline on the sample trajectory."""
     import tempfile
@@ -392,6 +415,7 @@ BENCHMARKS: dict[str, tuple] = {
     "shortest_path_grid_120": (run_grid_routes_120, 1),
     "reachable_grid_120": (run_reachable_grid_120, 1),
     "nearest_node_grid_2000": (run_nearest_grid_2000, 1),
+    "map_match_grid_5000": (run_map_match_grid_5000, 1),
     "export_geojson_grid_120_compact": (export_geojson_grid_120_compact, 1),
     "export_bundle_json_grid_120_compact": (export_bundle_json_grid_120_compact, 1),
     "export_bundle_end_to_end": (export_bundle_paris, 1),

@@ -138,6 +138,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   0.63 s / 0.57 s / 0.59 s locally, and `scripts/run_benchmarks.py` now
   includes `nearest_node_grid_2000`.
 
+- **Map matching now uses a shared nearest-edge spatial index.**
+  `routing.edge_index` caches edge polyline segments into spatial cells and is
+  shared by `snap_trajectory_to_graph` and HMM candidate generation. The
+  nearest-edge matcher still applies exact segment projection and graph-order
+  tie-breaking, but samples query only nearby cells instead of scanning every
+  edge. The new `map_match_grid_5000` benchmark covers 5000 snaps on a 120x120
+  grid graph and records a committed baseline of 1.519 s.
+
 - **Routing caches now detect more graph mutations.**
   `nearest_node` cache signatures now cover every node on small/medium graphs
   and evenly sampled node positions on very large graphs, so middle-node

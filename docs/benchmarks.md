@@ -173,6 +173,7 @@ The committed baseline JSON records:
 | `shortest_path_grid_120` | 0.601 | 120 routes on a 55x55 synthetic graph using one prepared `RoutePlanner` |
 | `reachable_grid_120` | 0.270 | 120 reachability queries, 60 m budget, 36 305 consumed node/span results |
 | `nearest_node_grid_2000` | 0.432 | 2000 snaps on a 300x300 node grid |
+| `map_match_grid_5000` | 1.519 | 5000 nearest-edge snaps on a 120x120 grid graph |
 | `export_geojson_grid_120_compact` | 0.572 | Compact GeoJSON export on a 120x120 grid |
 | `export_bundle_json_grid_120_compact` | 0.441 | Compact road_graph/sd_nav/manifest JSON on a 120x120 grid |
 | `export_bundle_end_to_end` | 0.005 | Full export-bundle pipeline on sample trajectory |
@@ -239,6 +240,21 @@ batch routing. In the same local pass it measured 0.718 / 0.880 / 0.707 /
 1.095 / 0.807 s because it does not need per-call cache validation. The
 benchmark suite now includes `shortest_path_grid_120_functional`; the committed
 baseline records 0.812 s from `python scripts/run_benchmarks.py --no-warmup`.
+
+## v0.7.2-dev nearest-edge projection index (2026-04-23)
+
+`snap_trajectory_to_graph` and `hmm_match_trajectory` now share a graph-local
+edge projection index. The index stores edge polyline segments in spatial hash
+cells, then applies the same exact segment projection and graph-order
+tie-breaking as the previous full scan on only nearby candidates. Very long
+segments that would occupy too many cells are kept in an overflow list so
+queries remain correct for sparse graphs.
+
+The benchmark suite now includes `map_match_grid_5000`, which builds a 120x120
+synthetic grid graph and snaps 5000 samples to the nearest edge with a 2 m
+threshold. On this workstation, direct passes measured 1.178 / 1.012 / 1.122 s;
+the full no-warmup benchmark comparison recorded the committed baseline at
+1.519 s and reported no regressions.
 
 ## Regression policy
 

@@ -20,6 +20,9 @@
   "nearest_node_grid_2000": {
     "elapsed_s": 0.43206897797062993
   },
+  "map_match_grid_5000": {
+    "elapsed_s": 1.5190683228429407
+  },
   "export_geojson_grid_120_compact": {
     "elapsed_s": 0.5724765069317073
   },

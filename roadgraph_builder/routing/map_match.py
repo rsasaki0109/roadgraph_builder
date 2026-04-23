@@ -3,7 +3,8 @@
 Nearest-edge projection per sample: for each input ``(x, y)`` find the edge
 whose polyline lies closest, record the parametric position along that edge
 and the perpendicular distance. Samples farther than ``max_distance_m`` from
-any edge are returned as ``None`` so callers can detect gaps. No HMM yet —
+any edge are returned as ``None`` so callers can detect gaps. A graph-local
+spatial index keeps repeated samples from scanning every edge. No HMM yet —
 samples are independent, which is fine for a graph with short straight-ish
 edges but will snap between parallel streets when lanes run side-by-side.
 
@@ -13,12 +14,15 @@ For trajectories in the same meter frame as the graph; use the graph's
 
 from __future__ import annotations
 
-import math
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Iterable
 
+from roadgraph_builder.routing.edge_index import (
+    get_edge_projection_index,
+    project_point_on_polyline,
+)
+
 if TYPE_CHECKING:
-    from roadgraph_builder.core.graph.edge import Edge
     from roadgraph_builder.core.graph.graph import Graph
 
 
@@ -48,35 +52,9 @@ class SnappedPoint:
 def _project_point_on_polyline(
     px: float, py: float, poly
 ) -> tuple[float, tuple[float, float], float, float]:
-    """Closest point on ``poly`` (list of (x, y)). Returns (distance, projection, arc_length_at_projection, total_length)."""
-    if len(poly) < 2:
-        return (float("inf"), (0.0, 0.0), 0.0, 0.0)
-    best_d = float("inf")
-    best_pt = (0.0, 0.0)
-    best_arc = 0.0
-    cum = 0.0
-    for i in range(len(poly) - 1):
-        ax, ay = poly[i]
-        bx, by = poly[i + 1]
-        abx = bx - ax
-        aby = by - ay
-        ab2 = abx * abx + aby * aby
-        if ab2 < 1e-18:
-            t = 0.0
-            qx, qy = ax, ay
-        else:
-            t = ((px - ax) * abx + (py - ay) * aby) / ab2
-            t = max(0.0, min(1.0, t))
-            qx = ax + t * abx
-            qy = ay + t * aby
-        d = math.hypot(px - qx, py - qy)
-        if d < best_d:
-            best_d = d
-            best_pt = (qx, qy)
-            seg_len = math.hypot(abx, aby)
-            best_arc = cum + t * seg_len
-        cum += math.hypot(abx, aby)
-    return best_d, best_pt, best_arc, cum
+    """Backward-compatible wrapper around the shared projection helper."""
+
+    return project_point_on_polyline(px, py, poly)
 
 
 def snap_trajectory_to_graph(
@@ -88,36 +66,33 @@ def snap_trajectory_to_graph(
     """Project every trajectory sample onto the closest edge within ``max_distance_m``.
 
     Samples that never find an edge inside the threshold return ``None`` in the
-    output list at the same index. Edges are iterated in graph order and scanned
-    per sample — O(N * M) for N points and M edges. Fine for SD demos;
-    medium-city traces will want a spatial index.
+    output list at the same index. The first call per graph builds a spatial
+    segment index; later trajectory samples search only nearby cells while
+    preserving graph-order tie-breaking.
     """
     xy = list(traj_xy) if not hasattr(traj_xy, "shape") else [tuple(row) for row in traj_xy]
-    edges = list(graph.edges)
-    if not edges:
-        return [None] * len(xy)
-
+    edge_index = get_edge_projection_index(graph)
     results: list[SnappedPoint | None] = []
     for idx, pt in enumerate(xy):
         px = float(pt[0])
         py = float(pt[1])
-        best: SnappedPoint | None = None
-        for e in edges:
-            d, proj, arc, edge_len = _project_point_on_polyline(px, py, e.polyline)
-            if d >= max_distance_m:
-                continue
-            if best is None or d < best.distance_m:
-                t = (arc / edge_len) if edge_len > 1e-9 else 0.0
-                best = SnappedPoint(
-                    index=idx,
-                    edge_id=e.id,
-                    projection_xy_m=proj,
-                    distance_m=d,
-                    arc_length_m=arc,
-                    edge_length_m=edge_len,
-                    t=t,
-                )
-        results.append(best)
+        projection = edge_index.nearest_projection(px, py, max_distance_m)
+        if projection is None:
+            results.append(None)
+            continue
+        edge_len = projection.edge_length_m
+        t = (projection.arc_length_m / edge_len) if edge_len > 1e-9 else 0.0
+        results.append(
+            SnappedPoint(
+                index=idx,
+                edge_id=projection.edge_id,
+                projection_xy_m=projection.projection_xy_m,
+                distance_m=projection.distance_m,
+                arc_length_m=projection.arc_length_m,
+                edge_length_m=edge_len,
+                t=t,
+            )
+        )
     return results
 
 

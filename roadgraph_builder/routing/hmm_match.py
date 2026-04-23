@@ -15,7 +15,7 @@ shortest-path distance between the candidate projections, measured in graph
 meters. Candidates on the same edge pay zero transition.
 
 Heavier than ``snap_trajectory_to_graph`` but still O(N · K²) with
-``K = candidate_count``; OK for SD-scale graphs / demos.
+``K = candidate_count`` after a spatial-index candidate lookup.
 """
 
 from __future__ import annotations
@@ -25,8 +25,9 @@ import math
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from roadgraph_builder.routing.edge_index import get_edge_projection_index
+
 if TYPE_CHECKING:
-    from roadgraph_builder.core.graph.edge import Edge
     from roadgraph_builder.core.graph.graph import Graph
 
 
@@ -38,30 +39,6 @@ class HmmMatch:
     edge_id: str
     projection_xy_m: tuple[float, float]
     distance_m: float
-
-
-def _project_point_on_polyline(
-    px: float, py: float, poly
-) -> tuple[float, tuple[float, float]]:
-    best_d = float("inf")
-    best_pt = (0.0, 0.0)
-    for i in range(len(poly) - 1):
-        ax, ay = poly[i]
-        bx, by = poly[i + 1]
-        abx, aby = bx - ax, by - ay
-        ab2 = abx * abx + aby * aby
-        if ab2 < 1e-18:
-            qx, qy = ax, ay
-        else:
-            t = ((px - ax) * abx + (py - ay) * aby) / ab2
-            t = max(0.0, min(1.0, t))
-            qx = ax + t * abx
-            qy = ay + t * aby
-        d = math.hypot(px - qx, py - qy)
-        if d < best_d:
-            best_d = d
-            best_pt = (qx, qy)
-    return best_d, best_pt
 
 
 def _node_distances(graph: "Graph", start_node: str, limit: float) -> dict[str, float]:
@@ -121,18 +98,20 @@ def hmm_match_trajectory(
     # Per-edge endpoint index.
     edge_by_id = {e.id: e for e in edges}
 
+    edge_index = get_edge_projection_index(graph)
+
     # Per-sample candidate list: [(edge_id, distance, projection_xy)].
     candidates: list[list[tuple[str, float, tuple[float, float]]]] = []
     for px, py in xy:
-        cand: list[tuple[str, float, tuple[float, float]]] = []
-        for e in edges:
-            d, proj = _project_point_on_polyline(float(px), float(py), e.polyline)
-            if d < candidate_radius_m:
-                cand.append((e.id, d, proj))
-        cand.sort(key=lambda c: c[1])
-        # Keep top-k to bound cost.
-        if len(cand) > 5:
-            cand = cand[:5]
+        cand = [
+            (projection.edge_id, projection.distance_m, projection.projection_xy_m)
+            for projection in edge_index.candidate_projections(
+                float(px),
+                float(py),
+                candidate_radius_m,
+                limit=5,
+            )
+        ]
         candidates.append(cand)
 
     # Viterbi (min-cost). State score = emission + best transition from prev.

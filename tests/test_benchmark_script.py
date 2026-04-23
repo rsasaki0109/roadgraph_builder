@@ -45,6 +45,7 @@ class TestBenchmarkScript:
             "shortest_path_grid_120",
             "reachable_grid_120",
             "nearest_node_grid_2000",
+            "map_match_grid_5000",
             "export_geojson_grid_120_compact",
             "export_bundle_json_grid_120_compact",
             "export_bundle_end_to_end",

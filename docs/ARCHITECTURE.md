@@ -366,6 +366,7 @@ flowchart TD
 | `roadgraph_builder/routing/shortest_path.py` | `RoutePlanner` prepares routing index / weighted adjacency / turn policy / lane counts for repeated route queries; `shortest_path(...)` remains the one-query wrapper. Safe straight-line A* is used when edge costs preserve node-distance lower bounds, with Dijkstra fallback otherwise. `last_diagnostics` exposes engine choice, fallback reason, and state counts for `route --explain`. Directed-state search honours `no_*` / `only_*` restrictions; 0.6 adds `prefer_observed` / `min_confidence` cost hooks; 0.7 extends the state to `(node, incoming_edge, direction, lane_index)` for `allow_lane_change=True` with `lane_change_cost_m` swap penalty |
 | `roadgraph_builder/routing/reachability.py` | Service-area reachability over the shared routing core; `ReachabilityAnalyzer` reuses prepared topology / weighted adjacency / policy across many queries and emits reachable nodes plus directed edge spans |
 | `roadgraph_builder/routing/nearest.py` | `nearest_node` (xy or lat/lon) |
+| `roadgraph_builder/routing/edge_index.py` | Shared edge-polyline projection index used by nearest-edge and HMM map matching |
 | `roadgraph_builder/routing/geojson_export.py` | Route / reachability → GeoJSON FeatureCollection |
 | `roadgraph_builder/schemas/*.schema.json` | JSON Schemas shipped as package resources |
 | `roadgraph_builder/validation/*.py` | One `validate_*_document` per schema (Draft 2020-12) |
