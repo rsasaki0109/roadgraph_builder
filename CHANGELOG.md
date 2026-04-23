@@ -161,12 +161,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the distance from the next endpoint to the current projection. This removes a
   shortcut that treated connected edge transitions as endpoint-to-endpoint only.
   The benchmark suite now includes `hmm_match_bridge_500`, which covers 500
-  boundary-straddling HMM samples with nearby disconnected bridge distractors and
-  now records a committed baseline of 0.058 s after transition Dijkstra started
-  reusing the routing index's cached base adjacency and candidates started
-  carrying precomputed endpoint tail costs. The new `hmm_match_long_grid_2000`
-  benchmark extends the same correctness signal to a 2000-sample snake-grid
-  trajectory with disconnected alias edges.
+  boundary-straddling HMM samples with nearby disconnected bridge distractors.
+  Transition Dijkstra now reuses the routing index's cached base adjacency and
+  candidates carry precomputed endpoint tail costs. The new
+  `hmm_match_long_grid_2000` benchmark extends the same correctness signal to a
+  2000-sample snake-grid trajectory with disconnected alias edges.
+
+- **Edge projection index cells are tighter for map matching.**
+  The spatial index now sizes cells at 2.0x nominal segment spacing instead of
+  4.0x, reducing candidate segment fan-out while keeping the long-segment
+  overflow fallback. The committed baselines are now `map_match_grid_5000` at
+  0.613 s, `hmm_match_bridge_500` at 0.034 s, and
+  `hmm_match_long_grid_2000` at 0.131 s.
 
 - **Routing caches now detect more graph mutations.**
   `nearest_node` cache signatures now cover every node on small/medium graphs

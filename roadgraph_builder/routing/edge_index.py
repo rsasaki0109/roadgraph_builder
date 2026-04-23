@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from roadgraph_builder.core.graph.graph import Graph
 
 _MAX_SEGMENT_CELL_FOOTPRINT = 1024
+_CELL_SIZE_SPACING_FACTOR = 2.0
 
 
 @dataclass(frozen=True)
@@ -293,7 +294,7 @@ def _build_edge_projection_index(
     height = max_y - min_y
     area = max(width * height, 1.0)
     nominal_spacing = math.sqrt(area / max(len(edge_segments), 1))
-    cell_size_m = max(nominal_spacing * 4.0, 1.0)
+    cell_size_m = max(nominal_spacing * _CELL_SIZE_SPACING_FACTOR, 1.0)
 
     mutable_cells: dict[tuple[int, int], list[int]] = {}
     overflow: list[int] = []

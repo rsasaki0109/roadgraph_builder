@@ -173,9 +173,9 @@ The committed baseline JSON records:
 | `shortest_path_grid_120` | 0.601 | 120 routes on a 55x55 synthetic graph using one prepared `RoutePlanner` |
 | `reachable_grid_120` | 0.270 | 120 reachability queries, 60 m budget, 36 305 consumed node/span results |
 | `nearest_node_grid_2000` | 0.432 | 2000 snaps on a 300x300 node grid |
-| `map_match_grid_5000` | 1.519 | 5000 nearest-edge snaps on a 120x120 grid graph |
-| `hmm_match_bridge_500` | 0.058 | 500 HMM samples across connected edge boundaries with nearby disconnected bridge distractors |
-| `hmm_match_long_grid_2000` | 0.292 | 2000 HMM samples along a snake grid route with disconnected alias edges |
+| `map_match_grid_5000` | 0.613 | 5000 nearest-edge snaps on a 120x120 grid graph |
+| `hmm_match_bridge_500` | 0.034 | 500 HMM samples across connected edge boundaries with nearby disconnected bridge distractors |
+| `hmm_match_long_grid_2000` | 0.131 | 2000 HMM samples along a snake grid route with disconnected alias edges |
 | `export_geojson_grid_120_compact` | 0.572 | Compact GeoJSON export on a 120x120 grid |
 | `export_bundle_json_grid_120_compact` | 0.441 | Compact road_graph/sd_nav/manifest JSON on a 120x120 grid |
 | `export_bundle_end_to_end` | 0.005 | Full export-bundle pipeline on sample trajectory |
@@ -258,6 +258,12 @@ threshold. On this workstation, direct passes measured 1.178 / 1.012 / 1.122 s;
 the full no-warmup benchmark comparison recorded the committed baseline at
 1.519 s and reported no regressions.
 
+After the HMM long-trajectory profile showed candidate projection as the main
+cost, the edge projection index cell size was tightened from 4.0x to 2.0x the
+nominal segment spacing. This reduces per-query candidate segment fan-out while
+keeping long-segment overflow fallback unchanged. The `map_match_grid_5000`
+no-warmup suite baseline dropped from 1.519 s to 0.613 s.
+
 ## v0.7.2-dev HMM bridge ambiguity benchmark (2026-04-23)
 
 The benchmark suite now includes `hmm_match_bridge_500`, which builds a chain of
@@ -271,10 +277,11 @@ performance-and-correctness signal.
 The first committed bridge benchmark baseline was 0.496 s. Reusing the routing
 index's cached base adjacency for transition Dijkstra dropped the no-warmup
 suite measurement to 0.090 s; precomputing candidate endpoint tail costs then
-reduced it to 0.058 s while preserving the same 500/500 connected matches.
+reduced it to 0.058 s; tighter edge-index cells now record 0.034 s while
+preserving the same 500/500 connected matches.
 
-The committed baseline records 0.058 s from a no-warmup suite run
-(`python scripts/run_benchmarks.py --no-warmup --output /tmp/roadgraph_hmm_tail_baseline.json`).
+The committed baseline records 0.034 s from a no-warmup suite run
+(`python scripts/run_benchmarks.py --no-warmup --output /tmp/roadgraph_edge_index_cell_baseline.json`).
 The corresponding unit test requires all 500 decoded samples to remain on the
 connected chain.
 
@@ -286,8 +293,11 @@ and adds a short disconnected alias edge beside every route segment. This keeps
 candidate sets ambiguous throughout a longer trajectory while the correctness
 signal remains simple: every decoded sample must stay on a `route*` edge.
 
-The committed baseline records 0.292 s from a no-warmup suite run
-(`python scripts/run_benchmarks.py --no-warmup --output /tmp/roadgraph_hmm_long_grid_baseline.json`).
+The initial committed baseline was 0.292 s. Tighter edge-index cells reduced the
+no-warmup suite baseline to 0.131 s by cutting candidate projection fan-out.
+
+The committed baseline records 0.131 s from a no-warmup suite run
+(`python scripts/run_benchmarks.py --no-warmup --output /tmp/roadgraph_edge_index_cell_baseline.json`).
 The corresponding unit test requires all 2000 decoded samples to remain on the
 route graph.
 
