@@ -6,7 +6,7 @@
 > このファイル → [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md)（Mermaid 6 枚 + CLI 対応表 +
 > モジュール索引）→ [`CHANGELOG.md`](../CHANGELOG.md) の順。
 
-*最終更新: 2026-04-23 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards polish + README measured-results compacting / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate + manifest policy docs polish / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理 / v0.7.1 release + asset verification / packaging metadata smoke / 0.7.2.dev0 reopen / Actions Node24 update / release+PyPI dry-run / routing hot-path perf / nearest spatial index / cache invalidation hardening / build graph spatial merge perf / T-junction segment index perf / lean near-parallel merge loop / GeoJSON export compact path / compact bundle JSON writer / README quick-start smoke / release readiness dry-run refresh / reachable service-area CLI / reachable docs overlay / reachable benchmark coverage / benchmark baseline JSON / reachability analyzer perf / routing core split / RoutePlanner perf / GitHub star-growth surfaces / launch kit docs / safe A* routing / route explain diagnostics / route explain docs surface / route explain comparison UI / route diagnostics README screenshot / functional shortest_path planner cache + sampled validation / nearest-edge projection index / match-trajectory explain diagnostics / HMM bridge ambiguity benchmark / HMM adjacency reuse perf / HMM tail-cost cache / HMM long trajectory benchmark / edge-index cell tuning）を反映済み。*
+*最終更新: 2026-04-23 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards polish + README measured-results compacting / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate + manifest policy docs polish / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理 / v0.7.1 release + asset verification / packaging metadata smoke / 0.7.2.dev0 reopen / Actions Node24 update / release+PyPI dry-run / routing hot-path perf / nearest spatial index / cache invalidation hardening / build graph spatial merge perf / T-junction segment index perf / lean near-parallel merge loop / GeoJSON export compact path / compact bundle JSON writer / README quick-start smoke / release readiness dry-run refresh / reachable service-area CLI / reachable docs overlay / reachable benchmark coverage / benchmark baseline JSON / reachability analyzer perf / routing core split / RoutePlanner perf / GitHub star-growth surfaces / launch kit docs / safe A* routing / route explain diagnostics / route explain docs surface / route explain comparison UI / route diagnostics README screenshot / functional shortest_path planner cache + sampled validation / nearest-edge projection index / match-trajectory explain diagnostics / HMM bridge ambiguity benchmark / HMM adjacency reuse perf / HMM tail-cost cache / HMM long trajectory benchmark / edge-index cell tuning / 2D/3D map console）を反映済み。*
 
 ---
 
@@ -286,6 +286,10 @@
       long segment overflow fallback は維持しつつ per-query segment fan-out を下げる。
       no-warmup suite baseline は `map_match_grid_5000` 1.519s → 0.613s、
       `hmm_match_bridge_500` 0.058s → 0.034s、`hmm_match_long_grid_2000` 0.292s → 0.131s。
+  70. docs map 2D/3D product console。
+      `docs/map.html` を Leaflet 単体から、2D OSM view + Three.js 3D graph preview + dataset inspector
+      + overlay toggles の product console に拡張。クリックで生成した dynamic route も
+      `scenePayload.route` に同期し、3D view と route metric が同じ状態を読む。
 - **push 方針:** `git push` は user が `push!` などで明示するまで実行しない。
 - **未着手 (次の AI が触る候補):** ↓ §5 "Open tasks" 参照。
 
@@ -541,7 +545,9 @@
 ### 3.11 可視化
 
 - `docs/map.html` (Leaflet + OSM タイル): `paris_grid` (default) / `paris` / `osm` / `toy` の
-  4 データセット切替。
+  4 データセット切替。2D Leaflet view と Three.js 3D graph view を同じ GeoJSON payload から描画し、
+  inspector に nodes / centerlines / lane boundaries / route / reachable spans / turn restrictions を表示。
+  route / reachability / restrictions overlay toggle は 2D/3D 両方に反映される。
 - `docs/images/paris_grid_route.svg`: README / Pages 用の静的 preview。`map_paris_grid.geojson` +
   `route_paris_grid.geojson` + `paris_grid_turn_restrictions.json` から
   `scripts/refresh_docs_assets.py` で再生成。OSM attribution を SVG 内と `docs/assets/ATTRIBUTION.md`
@@ -559,7 +565,8 @@
   `http://127.0.0.1:18765/` の local server smoke で index/CSS/JS/SVG asset load を確認済み。
 - **click-to-route UI:** ノード 2 つをクリックすると JS 側 directed-state binary-heap Dijkstra
   が `(node, incoming_edge, direction)` 状態で `no_*` / `only_*` 制限を honor。"Clear route"
-  button + status 行。各 centerline feature は `start_node_id` / `end_node_id` / `length_m` 保持。
+  button + status 行。生成 route は Leaflet layer だけでなく 3D preview payload にも同期する。
+  各 centerline feature は `start_node_id` / `end_node_id` / `length_m` 保持。
   `tests/test_viewer_js_dijkstra.py` + `tests/js/test_viewer_dijkstra.mjs` が Node subprocess で
   regression。
 

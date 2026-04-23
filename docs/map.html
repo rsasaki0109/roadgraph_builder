@@ -4,29 +4,155 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>roadgraph_builder — map (OSM tiles)</title>
+    <link rel="icon" href="data:," />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
       html,
       body {
         height: 100%;
         margin: 0;
+        display: flex;
+        flex-direction: column;
         font-family: ui-sans-serif, system-ui, sans-serif;
       }
+      * {
+        box-sizing: border-box;
+      }
       #map {
-        height: calc(100% - 52px);
+        height: 100%;
         width: 100%;
       }
+      .workspace {
+        position: relative;
+        flex: 1 1 auto;
+        min-height: 0;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 318px;
+        background: #0b1120;
+      }
+      .stage {
+        position: relative;
+        min-width: 0;
+        min-height: 460px;
+      }
+      .view-pane {
+        position: absolute;
+        inset: 0;
+      }
+      .view-pane[hidden] {
+        display: none;
+      }
+      #scene3d {
+        background: #0b1120;
+      }
+      #scene3d-canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+      .scene-status {
+        position: absolute;
+        left: 16px;
+        bottom: 16px;
+        z-index: 2;
+        max-width: min(460px, calc(100% - 32px));
+        padding: 8px 10px;
+        border: 1px solid rgba(148, 163, 184, 0.35);
+        border-radius: 8px;
+        background: rgba(15, 23, 42, 0.86);
+        color: #e2e8f0;
+        font-size: 12px;
+        line-height: 1.35;
+        pointer-events: none;
+      }
+      .inspector {
+        display: grid;
+        align-content: start;
+        gap: 12px;
+        padding: 14px;
+        border-left: 1px solid #1e293b;
+        background: #111827;
+        color: #e5e7eb;
+        overflow: auto;
+      }
+      .inspector h2 {
+        margin: 0;
+        font-size: 14px;
+        letter-spacing: 0;
+      }
+      .stat-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+      .stat {
+        display: grid;
+        gap: 2px;
+        min-height: 62px;
+        padding: 9px 10px;
+        border: 1px solid #273449;
+        border-radius: 8px;
+        background: #0f172a;
+      }
+      .stat strong {
+        font-size: 17px;
+        line-height: 1.15;
+      }
+      .stat span {
+        color: #94a3b8;
+        font-size: 11px;
+        line-height: 1.25;
+      }
+      .layer-list {
+        display: grid;
+        gap: 7px;
+        padding: 10px;
+        border: 1px solid #273449;
+        border-radius: 8px;
+        background: #0f172a;
+      }
+      .layer-list label {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        color: #dbeafe;
+        font-size: 12px;
+      }
+      .layer-list input {
+        inline-size: 17px;
+        block-size: 17px;
+        accent-color: #38bdf8;
+      }
+      .panel-link {
+        color: #7dd3fc;
+        font-size: 12px;
+      }
       .bar {
+        position: relative;
+        z-index: 10;
+        flex: 0 0 auto;
         display: flex;
         align-items: center;
         gap: 12px;
-        padding: 10px 14px;
+        width: 100%;
+        min-height: 58px;
+        padding: 9px 14px;
         background: #0f172a;
         color: #f8fafc;
         flex-wrap: wrap;
       }
       .bar a {
         color: #7dd3fc;
+      }
+      .tagline {
+        opacity: 0.85;
+      }
+      .bar label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        min-width: 0;
       }
       select,
       button {
@@ -38,9 +164,29 @@
         color: #f8fafc;
         cursor: pointer;
       }
+      select {
+        max-width: min(420px, 68vw);
+      }
       button:disabled {
         opacity: 0.5;
         cursor: default;
+      }
+      .segmented {
+        display: inline-flex;
+        overflow: hidden;
+        border: 1px solid #334155;
+        border-radius: 8px;
+        background: #1e293b;
+      }
+      .segmented button {
+        min-width: 46px;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+      }
+      .segmented button.active {
+        background: #38bdf8;
+        color: #082f49;
       }
       #route-status {
         font-size: 12px;
@@ -81,12 +227,46 @@
         height: 10px;
         border-radius: 50%;
       }
+      @media (max-width: 900px) {
+        .bar {
+          align-items: flex-start;
+          gap: 8px;
+        }
+        .bar strong,
+        .tagline,
+        #route-status {
+          flex: 1 1 100%;
+        }
+        .bar label {
+          flex: 1 1 100%;
+          display: grid;
+          grid-template-columns: auto minmax(0, 1fr);
+          width: 100%;
+        }
+        select {
+          width: 100%;
+          max-width: 100%;
+          min-width: 0;
+        }
+        .workspace {
+          height: auto;
+          min-height: calc(100% - 58px);
+          grid-template-columns: 1fr;
+        }
+        .stage {
+          min-height: 62vh;
+        }
+        .inspector {
+          border-left: 0;
+          border-top: 1px solid #1e293b;
+        }
+      }
     </style>
   </head>
   <body>
     <div class="bar">
       <strong>roadgraph_builder</strong>
-      <span style="opacity: 0.85">Trajectory + centerlines + reachability + HD-lite lane boundaries on OSM (WGS84)</span>
+      <span class="tagline">Trajectory + centerlines + reachability + HD-lite lane boundaries on OSM (WGS84)</span>
       <label>
         Layer
         <select id="dataset">
@@ -97,11 +277,41 @@
         </select>
       </label>
       <button id="clear-route" title="Clear the current route selection">Clear route</button>
+      <span class="segmented" aria-label="View mode">
+        <button type="button" id="view-2d" class="active" title="2D map view">2D</button>
+        <button type="button" id="view-3d" title="3D graph view">3D</button>
+      </span>
       <span id="route-status">Click two graph nodes to route between them.</span>
       <a href="index.html">Diagram viewer</a>
       <a id="repo" href="#">GitHub</a>
     </div>
-    <div id="map"></div>
+    <main class="workspace">
+      <section class="stage" aria-label="Map product viewer">
+        <div id="map" class="view-pane"></div>
+        <div id="scene3d" class="view-pane" hidden>
+          <canvas id="scene3d-canvas"></canvas>
+          <div class="scene-status" id="scene3d-status">Loading 3D view...</div>
+        </div>
+      </section>
+      <aside class="inspector" aria-label="Dataset inspector">
+        <h2 id="inspector-title">Paris grid</h2>
+        <div class="stat-grid" aria-label="Dataset metrics">
+          <div class="stat"><strong id="stat-nodes">-</strong><span>nodes</span></div>
+          <div class="stat"><strong id="stat-edges">-</strong><span>centerlines</span></div>
+          <div class="stat"><strong id="stat-lanes">-</strong><span>lane boundaries</span></div>
+          <div class="stat"><strong id="stat-route">-</strong><span>route overlay</span></div>
+          <div class="stat"><strong id="stat-reach">-</strong><span>reachable spans</span></div>
+          <div class="stat"><strong id="stat-tr">-</strong><span>turn restrictions</span></div>
+        </div>
+        <div class="layer-list" aria-label="Overlay controls">
+          <label>Route overlay <input type="checkbox" id="toggle-route" checked /></label>
+          <label>Reachability <input type="checkbox" id="toggle-reachability" checked /></label>
+          <label>Turn restrictions <input type="checkbox" id="toggle-restrictions" checked /></label>
+        </div>
+        <a class="panel-link" href="assets/map_match_explain_sample.json">Map-matching diagnostics JSON</a>
+        <a class="panel-link" href="assets/route_explain_sample.json">Route diagnostics JSON</a>
+      </aside>
+    </main>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
       const map = L.map("map", { zoomControl: true });
@@ -114,6 +324,18 @@
       const reachabilityOverlayLayer = L.layerGroup().addTo(map);
       const routeOverlayLayer = L.layerGroup().addTo(map);
       const restrictionsOverlayLayer = L.layerGroup().addTo(map);
+      const view2dButton = document.getElementById("view-2d");
+      const view3dButton = document.getElementById("view-3d");
+      const scene3d = document.getElementById("scene3d");
+      const scene3dCanvas = document.getElementById("scene3d-canvas");
+      const scene3dStatus = document.getElementById("scene3d-status");
+      const THREE_URL = "https://unpkg.com/three@0.160.0/build/three.module.js";
+
+      let activeView = "2d";
+      let scenePayload = { base: null, route: null, reachable: null, restrictions: [] };
+      let activeStats = {};
+      let threeModule = null;
+      let threeState = null;
 
       const legend = L.control({ position: "bottomright" });
       legend.onAdd = function () {
@@ -220,6 +442,348 @@
         return res.json();
       }
 
+      async function ensureThree() {
+        if (!threeModule) {
+          scene3dStatus.textContent = "Loading 3D engine...";
+          threeModule = await import(THREE_URL);
+        }
+        return threeModule;
+      }
+
+      function iterLineFeatures(data, include) {
+        const out = [];
+        for (const f of (data && data.features) || []) {
+          const p = f.properties || {};
+          const kind = p.kind || "";
+          if (!include(kind)) continue;
+          if (!f.geometry || f.geometry.type !== "LineString") continue;
+          out.push(f);
+        }
+        return out;
+      }
+
+      function iterPointFeatures(data, include) {
+        const out = [];
+        for (const f of (data && data.features) || []) {
+          const p = f.properties || {};
+          const kind = p.kind || "";
+          if (!include(kind)) continue;
+          if (!f.geometry || f.geometry.type !== "Point") continue;
+          out.push(f);
+        }
+        return out;
+      }
+
+      function geoBounds(payload) {
+        let minLon = Infinity;
+        let minLat = Infinity;
+        let maxLon = -Infinity;
+        let maxLat = -Infinity;
+        function addCoord(c) {
+          if (!Array.isArray(c) || c.length < 2) return;
+          const lon = Number(c[0]);
+          const lat = Number(c[1]);
+          if (!Number.isFinite(lon) || !Number.isFinite(lat)) return;
+          minLon = Math.min(minLon, lon);
+          minLat = Math.min(minLat, lat);
+          maxLon = Math.max(maxLon, lon);
+          maxLat = Math.max(maxLat, lat);
+        }
+        for (const data of [payload.base, payload.route, payload.reachable]) {
+          for (const f of (data && data.features) || []) {
+            if (!f.geometry) continue;
+            if (f.geometry.type === "LineString") {
+              for (const c of f.geometry.coordinates || []) addCoord(c);
+            } else if (f.geometry.type === "Point") {
+              addCoord(f.geometry.coordinates);
+            }
+          }
+        }
+        if (!Number.isFinite(minLon)) {
+          return { minLon: 0, minLat: 0, maxLon: 1, maxLat: 1 };
+        }
+        return { minLon, minLat, maxLon, maxLat };
+      }
+
+      function colorFor3D(kind) {
+        if (kind === "trajectory") return 0x60a5fa;
+        if (kind === "route") return 0xfacc15;
+        if (kind === "reachable_edge") return 0x14b8a6;
+        if (kind === "lane_boundary_left") return 0x22c55e;
+        if (kind === "lane_boundary_right") return 0xa855f7;
+        return 0xf97316;
+      }
+
+      function heightFor3D(kind) {
+        if (kind === "route") return 5.5;
+        if (kind === "trajectory") return 4.0;
+        if (kind === "reachable_edge") return 2.5;
+        if (kind === "lane_boundary_left" || kind === "lane_boundary_right") return 1.0;
+        return 0.0;
+      }
+
+      function initThreeState(THREE) {
+        if (threeState) return threeState;
+        const renderer = new THREE.WebGLRenderer({
+          canvas: scene3dCanvas,
+          antialias: true,
+          alpha: false,
+          preserveDrawingBuffer: true,
+        });
+        renderer.setClearColor(0x0b1120, 1);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 2000);
+        const root = new THREE.Group();
+        scene.add(root);
+        scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+        const key = new THREE.DirectionalLight(0xffffff, 0.7);
+        key.position.set(0.5, 1, 0.7);
+        scene.add(key);
+
+        threeState = {
+          THREE,
+          renderer,
+          scene,
+          camera,
+          root,
+          distance: 270,
+          dragging: false,
+          lastX: 0,
+        };
+
+        scene3dCanvas.addEventListener("pointerdown", (event) => {
+          threeState.dragging = true;
+          threeState.lastX = event.clientX;
+          scene3dCanvas.setPointerCapture(event.pointerId);
+        });
+        scene3dCanvas.addEventListener("pointermove", (event) => {
+          if (!threeState.dragging) return;
+          const dx = event.clientX - threeState.lastX;
+          threeState.root.rotation.y += dx * 0.006;
+          threeState.lastX = event.clientX;
+        });
+        scene3dCanvas.addEventListener("pointerup", () => {
+          threeState.dragging = false;
+        });
+        scene3dCanvas.addEventListener(
+          "wheel",
+          (event) => {
+            event.preventDefault();
+            threeState.distance = Math.max(
+              120,
+              Math.min(620, threeState.distance + event.deltaY * 0.35)
+            );
+            updateThreeCamera();
+          },
+          { passive: false }
+        );
+        window.addEventListener("resize", resizeThree);
+        animateThree();
+        return threeState;
+      }
+
+      function resizeThree() {
+        if (!threeState || activeView !== "3d") return;
+        const w = Math.max(1, scene3d.clientWidth);
+        const h = Math.max(1, scene3d.clientHeight);
+        threeState.renderer.setSize(w, h, false);
+        threeState.camera.aspect = w / h;
+        threeState.camera.updateProjectionMatrix();
+      }
+
+      function updateThreeCamera() {
+        if (!threeState) return;
+        const d = threeState.distance;
+        threeState.camera.position.set(0, d * 0.64, d);
+        threeState.camera.lookAt(0, 0, 0);
+      }
+
+      function animateThree() {
+        requestAnimationFrame(animateThree);
+        if (!threeState || activeView !== "3d") return;
+        if (!threeState.dragging) {
+          threeState.root.rotation.y += 0.0012;
+        }
+        resizeThree();
+        updateThreeCamera();
+        threeState.renderer.render(threeState.scene, threeState.camera);
+      }
+
+      async function render3DScene() {
+        if (!scenePayload.base) return;
+        try {
+          const THREE = await ensureThree();
+          const state = initThreeState(THREE);
+          const root = state.root;
+          while (root.children.length) {
+            const child = root.children[0];
+            root.remove(child);
+            if (child.geometry) child.geometry.dispose();
+            const materials = Array.isArray(child.material)
+              ? child.material
+              : child.material
+                ? [child.material]
+                : [];
+            for (const material of materials) {
+              if (material && material.dispose) material.dispose();
+            }
+          }
+          const bounds = geoBounds(scenePayload);
+          const lat0 = (bounds.minLat + bounds.maxLat) / 2;
+          const cosLat = Math.cos((lat0 * Math.PI) / 180);
+          const meter = (coord) => ({
+            x: Number(coord[0]) * 111320 * cosLat,
+            z: Number(coord[1]) * 110540,
+          });
+          const min = meter([bounds.minLon, bounds.minLat]);
+          const max = meter([bounds.maxLon, bounds.maxLat]);
+          const cx = (min.x + max.x) / 2;
+          const cz = (min.z + max.z) / 2;
+          const span = Math.max(Math.abs(max.x - min.x), Math.abs(max.z - min.z), 1);
+          const scale = 210 / span;
+          const point = (coord, kind) => {
+            const p = meter(coord);
+            return new THREE.Vector3((p.x - cx) * scale, heightFor3D(kind), -(p.z - cz) * scale);
+          };
+
+          const lineSpecs = [
+            { data: scenePayload.base, include: (k) => k === "centerline" || k === "lane_centerline" },
+            { data: scenePayload.base, include: (k) => k === "trajectory" },
+            {
+              data: scenePayload.base,
+              include: (k) => k === "lane_boundary_left" || k === "lane_boundary_right",
+            },
+          ];
+          if (overlayChecked("toggle-route")) {
+            lineSpecs.push({ data: scenePayload.route, include: (k) => k === "route" });
+          }
+          if (overlayChecked("toggle-reachability")) {
+            lineSpecs.push({ data: scenePayload.reachable, include: (k) => k === "reachable_edge" });
+          }
+
+          for (const spec of lineSpecs) {
+            for (const feature of iterLineFeatures(spec.data, spec.include)) {
+              const kind = feature.properties?.kind || "";
+              const pts = (feature.geometry.coordinates || []).map((coord) => point(coord, kind));
+              if (pts.length < 2) continue;
+              const geom = new THREE.BufferGeometry().setFromPoints(pts);
+              const mat = new THREE.LineBasicMaterial({
+                color: colorFor3D(kind),
+                transparent: true,
+                opacity: kind === "reachable_edge" ? 0.68 : 0.95,
+              });
+              root.add(new THREE.Line(geom, mat));
+            }
+          }
+
+          const nodePoints = [];
+          for (const feature of (scenePayload.base.features || [])) {
+            if (feature.properties?.kind !== "node" || feature.geometry?.type !== "Point") continue;
+            nodePoints.push(point(feature.geometry.coordinates, "node"));
+          }
+          if (nodePoints.length) {
+            const geom = new THREE.BufferGeometry().setFromPoints(nodePoints);
+            const mat = new THREE.PointsMaterial({ color: 0xef4444, size: 2.8, sizeAttenuation: true });
+            root.add(new THREE.Points(geom, mat));
+          }
+
+          const markerSpecs = [];
+          if (overlayChecked("toggle-route")) {
+            markerSpecs.push(
+              {
+                data: scenePayload.route,
+                include: (k) => k === "route_start",
+                color: 0x10b981,
+                size: 6.5,
+                heightKind: "route",
+              },
+              {
+                data: scenePayload.route,
+                include: (k) => k === "route_end",
+                color: 0xef4444,
+                size: 6.5,
+                heightKind: "route",
+              }
+            );
+          }
+          if (overlayChecked("toggle-reachability")) {
+            markerSpecs.push(
+              {
+                data: scenePayload.reachable,
+                include: (k) => k === "reachability_start",
+                color: 0x14b8a6,
+                size: 6.0,
+                heightKind: "reachable_edge",
+              },
+              {
+                data: scenePayload.reachable,
+                include: (k) => k === "reachable_node",
+                color: 0x5eead4,
+                size: 3.2,
+                heightKind: "reachable_edge",
+              }
+            );
+          }
+          for (const spec of markerSpecs) {
+            const pts = iterPointFeatures(spec.data, spec.include).map((feature) =>
+              point(feature.geometry.coordinates, spec.heightKind)
+            );
+            if (!pts.length) continue;
+            const geom = new THREE.BufferGeometry().setFromPoints(pts);
+            const mat = new THREE.PointsMaterial({
+              color: spec.color,
+              size: spec.size,
+              sizeAttenuation: true,
+            });
+            root.add(new THREE.Points(geom, mat));
+          }
+
+          if (overlayChecked("toggle-restrictions") && scenePayload.restrictions.length) {
+            const graph = graphCache[document.getElementById("dataset").value];
+            const pts = [];
+            for (const r of scenePayload.restrictions) {
+              const ll = graph && graph.nodes.get(r.junction_node_id);
+              if (!ll) continue;
+              pts.push(point([ll.lon, ll.lat], "route"));
+            }
+            if (pts.length) {
+              const geom = new THREE.BufferGeometry().setFromPoints(pts);
+              const mat = new THREE.PointsMaterial({ color: 0xdc2626, size: 5.5, sizeAttenuation: true });
+              root.add(new THREE.Points(geom, mat));
+            }
+          }
+
+          const grid = new THREE.GridHelper(260, 20, 0x334155, 0x1e293b);
+          grid.position.y = -2.0;
+          root.add(grid);
+          resizeThree();
+          updateThreeCamera();
+          scene3dStatus.textContent =
+            "3D graph view · " +
+            formatCount(activeStats.nodes) +
+            " nodes · " +
+            formatCount(activeStats.edges) +
+            " centerlines";
+        } catch (err) {
+          scene3dStatus.textContent = "3D view unavailable: " + String(err.message || err);
+          console.warn(err);
+        }
+      }
+
+      function setView(mode) {
+        activeView = mode;
+        view2dButton.classList.toggle("active", mode === "2d");
+        view3dButton.classList.toggle("active", mode === "3d");
+        document.getElementById("map").hidden = mode !== "2d";
+        scene3d.hidden = mode !== "3d";
+        if (mode === "2d") {
+          setTimeout(() => map.invalidateSize(), 0);
+        } else {
+          render3DScene();
+        }
+      }
+
       const DATASET_URLS = {
         paris_grid: "assets/map_paris_grid.geojson",
         paris: "assets/map_paris.geojson",
@@ -247,6 +811,94 @@
       function statusText(msg) {
         document.getElementById("route-status").textContent = msg;
       }
+
+      function text(id, value) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = value;
+      }
+
+      function formatCount(n) {
+        return Number.isFinite(n) ? String(n) : "-";
+      }
+
+      function formatMeters(n) {
+        if (!Number.isFinite(n)) return "-";
+        if (n >= 1000) return (n / 1000).toFixed(2) + " km";
+        return n.toFixed(0) + " m";
+      }
+
+      function summarizeBase(data) {
+        const stats = {
+          nodes: 0,
+          edges: 0,
+          lanes: 0,
+          trajectory: 0,
+          routeLength: NaN,
+          reachableEdges: 0,
+          restrictions: 0,
+        };
+        for (const f of data.features || []) {
+          const p = f.properties || {};
+          if (p.kind === "node") stats.nodes += 1;
+          if (p.kind === "centerline" || p.kind === "lane_centerline") stats.edges += 1;
+          if (p.kind === "lane_boundary_left" || p.kind === "lane_boundary_right") stats.lanes += 1;
+          if (p.kind === "trajectory") stats.trajectory += 1;
+        }
+        return stats;
+      }
+
+      function routeLengthFromGeo(data) {
+        let routeLength = NaN;
+        for (const f of data.features || []) {
+          const p = f.properties || {};
+          if (p.kind === "route" && typeof p.total_length_m === "number") {
+            routeLength = p.total_length_m;
+          }
+        }
+        return routeLength;
+      }
+
+      function reachableCountFromGeo(data) {
+        let count = 0;
+        for (const f of data.features || []) {
+          const p = f.properties || {};
+          if (p.kind === "reachable_edge") count += 1;
+        }
+        return count;
+      }
+
+      function updateInspector(which, stats) {
+        activeStats = { ...activeStats, ...stats };
+        const label =
+          document.querySelector('#dataset option[value="' + which + '"]')?.textContent ||
+          "Dataset";
+        text("inspector-title", label);
+        text("stat-nodes", formatCount(activeStats.nodes));
+        text("stat-edges", formatCount(activeStats.edges));
+        text("stat-lanes", formatCount(activeStats.lanes));
+        text("stat-route", formatMeters(activeStats.routeLength));
+        text("stat-reach", formatCount(activeStats.reachableEdges));
+        text("stat-tr", formatCount(activeStats.restrictions));
+      }
+
+      function overlayChecked(id) {
+        const el = document.getElementById(id);
+        return !el || el.checked;
+      }
+
+      function bindOverlayToggle(id, layer) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener("change", () => {
+          if (el.checked) layer.addTo(map);
+          else layer.remove();
+          if (activeView === "3d") render3DScene();
+        });
+      }
+
+      bindOverlayToggle("toggle-route", routeOverlayLayer);
+      bindOverlayToggle("toggle-reachability", reachabilityOverlayLayer);
+      bindOverlayToggle("toggle-restrictions", restrictionsOverlayLayer);
 
       function bindCommonPopups(f, layer) {
         const p = f.properties || {};
@@ -491,6 +1143,22 @@
           else coords.push(...c.slice(1));
         }
         if (!coords.length) return;
+        const routeData = {
+          type: "FeatureCollection",
+          features: [
+            {
+              type: "Feature",
+              properties: {
+                kind: "route",
+                from_node: dij.nodes[0],
+                to_node: dij.nodes[dij.nodes.length - 1],
+                total_length_m: dij.totalLength,
+                edge_count: dij.edges.length,
+              },
+              geometry: { type: "LineString", coordinates: coords },
+            },
+          ],
+        };
         const line = L.polyline(
           coords.map((p) => [p[1], p[0]]),
           { color: "#facc15", weight: 7, opacity: 0.92 }
@@ -511,6 +1179,11 @@
         const startLL = graph.nodes.get(dij.nodes[0]);
         const endLL = graph.nodes.get(dij.nodes[dij.nodes.length - 1]);
         if (startLL) {
+          routeData.features.push({
+            type: "Feature",
+            properties: { kind: "route_start", node_id: dij.nodes[0] },
+            geometry: { type: "Point", coordinates: [startLL.lon, startLL.lat] },
+          });
           routeOverlayLayer.addLayer(
             L.circleMarker([startLL.lat, startLL.lon], {
               radius: 8,
@@ -523,6 +1196,11 @@
           );
         }
         if (endLL) {
+          routeData.features.push({
+            type: "Feature",
+            properties: { kind: "route_end", node_id: dij.nodes[dij.nodes.length - 1] },
+            geometry: { type: "Point", coordinates: [endLL.lon, endLL.lat] },
+          });
           routeOverlayLayer.addLayer(
             L.circleMarker([endLL.lat, endLL.lon], {
               radius: 8,
@@ -534,6 +1212,11 @@
             }).bindPopup("end: " + dij.nodes[dij.nodes.length - 1])
           );
         }
+        scenePayload.route = routeData;
+        updateInspector(document.getElementById("dataset").value, {
+          routeLength: dij.totalLength,
+        });
+        if (activeView === "3d") render3DScene();
       }
 
       function onNodeClick(nodeId) {
@@ -584,6 +1267,9 @@
 
       function clearRoute() {
         routeOverlayLayer.clearLayers();
+        scenePayload.route = null;
+        updateInspector(document.getElementById("dataset").value, { routeLength: NaN });
+        if (activeView === "3d") render3DScene();
         currentRouteSelection = { from: null, to: null };
         statusText("Click two graph nodes to route between them.");
       }
@@ -629,6 +1315,9 @@
         const url = DATASET_URLS[which] || DATASET_URLS.osm;
         const data = await loadGeo(url);
         graphCache[which] = buildGraph(data);
+        scenePayload = { base: data, route: null, reachable: null, restrictions: [] };
+        activeStats = summarizeBase(data);
+        updateInspector(which, activeStats);
 
         const gj = L.geoJSON(data, {
           style: styleLine,
@@ -643,6 +1332,8 @@
             const trData = await loadGeo(restrictionsUrl);
             const list = Array.isArray(trData) ? trData : trData.turn_restrictions || [];
             graphCache[which].restrictions = buildRestrictionIndex(list);
+            scenePayload.restrictions = list;
+            updateInspector(which, { restrictions: list.length });
             drawRestrictionsOverlay(graphCache[which], list);
           } catch (err) {
             console.warn("restrictions overlay failed:", err);
@@ -653,6 +1344,8 @@
         if (reachableUrl) {
           try {
             const reachableData = await loadGeo(reachableUrl);
+            scenePayload.reachable = reachableData;
+            updateInspector(which, { reachableEdges: reachableCountFromGeo(reachableData) });
             const rj = L.geoJSON(reachableData, {
               style: styleLine,
               pointToLayer: pointLayer,
@@ -668,6 +1361,8 @@
         if (routeUrl) {
           try {
             const routeData = await loadGeo(routeUrl);
+            scenePayload.route = routeData;
+            updateInspector(which, { routeLength: routeLengthFromGeo(routeData) });
             const rj = L.geoJSON(routeData, {
               style: styleLine,
               pointToLayer: pointLayer,
@@ -685,12 +1380,17 @@
         } else {
           map.setView([52.52, 13.41], 12);
         }
+        if (activeView === "3d") {
+          render3DScene();
+        }
       }
 
       document.getElementById("dataset").addEventListener("change", (e) => {
         show(e.target.value).catch((err) => alert(String(err)));
       });
       document.getElementById("clear-route").addEventListener("click", clearRoute);
+      view2dButton.addEventListener("click", () => setView("2d"));
+      view3dButton.addEventListener("click", () => setView("3d"));
 
       fetch("assets/site.json")
         .then((r) => r.json())

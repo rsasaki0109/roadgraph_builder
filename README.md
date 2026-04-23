@@ -24,7 +24,7 @@ open for the next patch as `0.7.2.dev0`.
 
 | Signal | Current result | Source |
 | --- | --- | --- |
-| **Routing** | Paris TR-aware route **909 m** vs unrestricted **878 m**; `route --explain` sample compares A* and Dijkstra fallback work | [map](docs/map.html) · [diagnostics compare](docs/index.html) · [JSON](docs/assets/route_explain_sample.json) |
+| **Routing** | Paris TR-aware route **909 m** vs unrestricted **878 m**; the map console has 2D OSM + 3D graph views and `route --explain` compares A* with Dijkstra fallback work | [map](docs/map.html) · [diagnostics compare](docs/index.html) · [JSON](docs/assets/route_explain_sample.json) |
 | **Accuracy** | Lane-count MAE @ 20 m: Paris **0.938** / Tokyo **0.903** / Berlin **1.220** | [accuracy report](docs/accuracy_report.md) |
 | **Tuning** | Conservative cross-city start: `--max-step-m 40 --merge-endpoint-m 8` | [tuning guide](docs/bundle_tuning.md) |
 | **Memory** | Default remains **float64**; float32 is opt-in after replay showed small RSS wins and ID drift | [float32 report](docs/float32_drift_report.md) |
@@ -45,7 +45,7 @@ Use the short description and topics listed in [`.github/ABOUT.md`](.github/ABOU
 | **HD / Lanelet2** | `enrich --lane-width-m` for envelope + offset boundaries; `--lane-markings-json` / `--camera-detections-json` fuse sources into `metadata.hd_refinement`. **`infer-lane-count`** (v0.6) clusters paint-marker offsets into `attributes.hd.lane_count` + `hd.lanes[]` (fallback to `trace_stats.perpendicular_offsets`). `export-lanelet2` emits `roadgraph:*` ways + `lanelet` relations; `--per-lane` expands each multi-lane edge into one lanelet per lane with `lane_change` relations (v0.6); `--camera-detections-json` wires `traffic_light` / `stop_line` regulatory_elements (v0.7). **`validate-lanelet2-tags`** (v0.6) flags missing required Lanelet2 tags; **`validate-lanelet2`** (v0.7) bridges Autoware's `lanelet2_validation` CLI when on PATH. |
 | **Output** | JSON (+ schema), GeoJSON, OSM XML 0.6 (Lanelet2-compatible), SVG. **`export-bundle`** writes nav / sim / lanelet / manifest in one directory. |
 | **Benchmarks** | `make bench` runs a deterministic wall-clock suite (build / shortest path / map matching / reachability / export-bundle); `--baseline` compares against recorded numbers with a 3× regression gate. Baseline JSON in [`docs/assets/benchmark_baseline_0.7.2-dev.json`](docs/assets/benchmark_baseline_0.7.2-dev.json), notes in [`docs/benchmarks.md`](docs/benchmarks.md). Memory profile for v0.7 under [`docs/memory_profile_v0.7.md`](docs/memory_profile_v0.7.md) (Paris peak RSS 61→55 MB after the `export_lanelet2` DOM rewrite). Lane-count accuracy against OSM `lanes=` in [`docs/accuracy_report.md`](docs/accuracy_report.md). |
-| **Demo** | Static viewer in [docs/](docs/) — [diagram](docs/index.html) · **[map](docs/map.html)** (OSM tiles, TR-aware click-to-route when served locally), static previews in [docs/images](docs/images/). |
+| **Demo** | Static viewer in [docs/](docs/) — [diagram](docs/index.html) · **[map](docs/map.html)** (2D OSM tiles, 3D graph preview, inspector metrics, TR-aware click-to-route when served locally), static previews in [docs/images](docs/images/). |
 | **Samples** | [Toy CSV](examples/sample_trajectory.csv), [OSM GPS](examples/osm_public_trackpoints.csv) (ODbL), [camera calibration + pixel detections](examples/demo_camera_calibration.json), [Paris OSM-grid + turn_restrictions](docs/assets/map_paris_grid.geojson) (ODbL). |
 
 ### Current release surface
@@ -230,7 +230,7 @@ Local preview (no GitHub required):
 ```bash
 cd docs && python3 -m http.server 8765
 # http://127.0.0.1:8765/          — diagram viewer
-# http://127.0.0.1:8765/map.html  — OSM map + GeoJSON
+# http://127.0.0.1:8765/map.html  — 2D/3D OSM map console + GeoJSON
 ```
 
 When Pages is available (public repo, Pages-capable private repo plan, or a separate public static mirror):
@@ -238,7 +238,7 @@ When Pages is available (public repo, Pages-capable private repo plan, or a sepa
 1. In the GitHub repo: **Settings → Pages → Build and deployment → Source**: **Deploy from a branch**, branch **`main`**, folder **`/docs`**, Save.
 2. After a minute, open the Pages URL shown by GitHub:
    - site root — diagram viewer (SVG-style pan/zoom)
-   - `map.html` — **real basemap** (OSM tiles + GeoJSON: trajectory, centerlines, nodes, **HD-lite lane boundaries** when `attributes.hd` is filled — bundled assets use `enrich --lane-width-m 3.5` via `scripts/refresh_docs_assets.py`). Click any two nodes to route between them; the JS Dijkstra is **directed-state and TR-aware** when the dataset ships a restrictions overlay. The dropdown selects between four datasets:
+   - `map.html` — **real basemap + 3D graph console** (OSM tiles + GeoJSON: trajectory, centerlines, nodes, **HD-lite lane boundaries** when `attributes.hd` is filled — bundled assets use `enrich --lane-width-m 3.5` via `scripts/refresh_docs_assets.py`). Toggle between 2D Leaflet and a Three.js graph preview, inspect node/edge/lane/route/reachability/restriction counts, and switch route / reachability / restriction overlays without reloading. Click any two nodes to route between them; the JS Dijkstra is **directed-state and TR-aware** when the dataset ships a restrictions overlay, and dynamic routes update the 3D view too. The dropdown selects between four datasets:
      - **Paris grid** (default, 855 nodes / 1081 edges — derived from OSM highway ways, ships with 10 OSM turn restrictions as red-dot markers and a 500 m `reachable` overlay. ODbL.)
      - **Paris** (older, trajectory-derived, 123 edges / 223 nodes; from OSM public GPS, ODbL.)
      - **OSM Berlin sample** (4 edges, smaller).

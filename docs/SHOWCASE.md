@@ -19,7 +19,7 @@ HD-lite geometry, semantics, routing, and provenance.
 
 | Signal | Why it matters | Link |
 | --- | --- | --- |
-| Paris map preview | Real OSM-derived graph with turn restrictions, route overlay, and 500 m reachability overlay | [map](map.html) |
+| Paris map console | Real OSM-derived graph with 2D/3D views, inspector metrics, turn restrictions, route overlay, and 500 m reachability overlay | [map](map.html) |
 | Route diagnostics compare | Generated `route --explain` samples show safe A* vs Dijkstra fallback search work | [viewer](index.html) |
 | Static route preview | Works in the GitHub README without running a server | [SVG](images/paris_grid_route.svg) |
 | Architecture | One-page module map for build, routing, perception, export, schemas, and CLI | [architecture](ARCHITECTURE.md) |
@@ -37,6 +37,7 @@ toy graph. It includes:
 - 10 mapped OSM turn restrictions.
 - A restriction-aware route from `n312` to `n191`.
 - A 500 m service-area overlay from the same start node.
+- A local 2D/3D map console with overlay toggles and live route metrics.
 - ODbL attribution embedded in the committed assets.
 
 The interesting bit is that route and reachability use the same policy layer:
@@ -138,4 +139,4 @@ python3 -m http.server 8765
 Open:
 
 - `http://127.0.0.1:8765/` for the docs landing page.
-- `http://127.0.0.1:8765/map.html` for the OSM basemap viewer.
+- `http://127.0.0.1:8765/map.html` for the 2D/3D OSM map console.

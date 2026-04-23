@@ -26,6 +26,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `scripts/render_route_diagnostics_screenshot.py` through headless Chrome so
   the comparison is visible before opening Pages.
 
+- **The docs map is now a 2D/3D map console.**
+  `docs/map.html` keeps the Leaflet OSM view and adds a Three.js graph preview,
+  dataset inspector metrics, route / reachability / restriction overlay
+  toggles, and dynamic-route synchronization so click-to-route updates both the
+  2D and 3D representations.
+
 - **Reachability / service-area analysis is available from the routing CLI.**
   New `routing.reachability.reachable_within` and `roadgraph_builder reachable`
   report nodes and directed edge spans reachable from a start node within a
