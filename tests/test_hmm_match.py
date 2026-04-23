@@ -7,6 +7,7 @@ from roadgraph_builder.core.graph.graph import Graph
 from roadgraph_builder.core.graph.node import Node
 from roadgraph_builder.routing.hmm_match import (
     _Candidate,
+    _node_distances,
     _transition_graph_distance,
     hmm_match_trajectory,
 )
@@ -110,6 +111,20 @@ def test_hmm_transition_uses_projection_tail_distances():
     )
 
     assert dist == 10.0
+
+
+def test_hmm_node_distances_use_cached_directed_adjacency():
+    adj = {
+        "a": [("e0", "forward", "b", 5.0)],
+        "b": [
+            ("e0", "reverse", "a", 5.0),
+            ("e1", "forward", "c", 6.0),
+        ],
+        "c": [("e1", "reverse", "b", 6.0)],
+    }
+
+    assert _node_distances(adj, "a", 10.0) == {"a": 0.0, "b": 5.0}
+    assert _node_distances(adj, "a", 11.0) == {"a": 0.0, "b": 5.0, "c": 11.0}
 
 
 def test_hmm_prefers_connected_edges_when_projection_tails_match_gps_step():

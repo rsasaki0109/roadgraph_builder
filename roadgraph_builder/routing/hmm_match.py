@@ -25,6 +25,7 @@ import math
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from roadgraph_builder.routing._core import DirectedAdjacency, get_routing_index
 from roadgraph_builder.routing.edge_index import get_edge_projection_index
 
 if TYPE_CHECKING:
@@ -50,17 +51,13 @@ class _Candidate:
     edge_length_m: float
 
 
-def _node_distances(graph: "Graph", start_node: str, limit: float) -> dict[str, float]:
-    """Dijkstra from ``start_node`` on undirected edges, stopping at ``limit``."""
-    adj: dict[str, list[tuple[str, float]]] = {n.id: [] for n in graph.nodes}
-    for e in graph.edges:
-        L = 0.0
-        pl = e.polyline
-        for i in range(len(pl) - 1):
-            L += math.hypot(pl[i + 1][0] - pl[i][0], pl[i + 1][1] - pl[i][1])
-        adj[e.start_node_id].append((e.end_node_id, L))
-        if e.start_node_id != e.end_node_id:
-            adj[e.end_node_id].append((e.start_node_id, L))
+def _node_distances(
+    adj: DirectedAdjacency,
+    start_node: str,
+    limit: float,
+) -> dict[str, float]:
+    """Dijkstra from ``start_node`` over cached base adjacency, stopping at ``limit``."""
+
     dist = {start_node: 0.0}
     heap = [(0.0, start_node)]
     while heap:
@@ -69,7 +66,7 @@ def _node_distances(graph: "Graph", start_node: str, limit: float) -> dict[str, 
             continue
         if d > dist.get(u, math.inf):
             continue
-        for v, w in adj.get(u, []):
+        for _, _, v, w in adj.get(u, []):
             nd = d + w
             if nd <= limit and nd < dist.get(v, math.inf):
                 dist[v] = nd
@@ -187,10 +184,14 @@ def hmm_match_trajectory(
     # Cache node-distance Dijkstra by start_node_id of the candidate edge to
     # amortise across all candidates at the next sample.
     dist_cache: dict[str, dict[str, float]] = {}
+    base_adj: DirectedAdjacency | None = None
 
     def node_dists(node: str) -> dict[str, float]:
+        nonlocal base_adj
         if node not in dist_cache:
-            dist_cache[node] = _node_distances(graph, node, transition_limit_m)
+            if base_adj is None:
+                base_adj = get_routing_index(graph).base_adj
+            dist_cache[node] = _node_distances(base_adj, node, transition_limit_m)
         return dist_cache[node]
 
     for t in range(1, n):
