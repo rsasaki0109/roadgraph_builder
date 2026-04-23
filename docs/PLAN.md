@@ -6,7 +6,7 @@
 > このファイル → [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md)（Mermaid 6 枚 + CLI 対応表 +
 > モジュール索引）→ [`CHANGELOG.md`](../CHANGELOG.md) の順。
 
-*最終更新: 2026-04-23 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards polish + README measured-results compacting / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate + manifest policy docs polish / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理 / v0.7.1 release + asset verification / packaging metadata smoke / 0.7.2.dev0 reopen / Actions Node24 update / release+PyPI dry-run / routing hot-path perf / nearest spatial index / cache invalidation hardening / build graph spatial merge perf / T-junction segment index perf / lean near-parallel merge loop / GeoJSON export compact path / compact bundle JSON writer / README quick-start smoke / release readiness dry-run refresh / reachable service-area CLI / reachable docs overlay / reachable benchmark coverage / benchmark baseline JSON / reachability analyzer perf / routing core split / RoutePlanner perf / GitHub star-growth surfaces / launch kit docs / safe A* routing / route explain diagnostics / route explain docs surface / route explain comparison UI / route diagnostics README screenshot / functional shortest_path planner cache + sampled validation / nearest-edge projection index / match-trajectory explain diagnostics / HMM bridge ambiguity benchmark / HMM adjacency reuse perf / HMM tail-cost cache / HMM long trajectory benchmark / edge-index cell tuning / 2D/3D map console）を反映済み。*
+*最終更新: 2026-04-23 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards polish + README measured-results compacting / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate + manifest policy docs polish / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理 / v0.7.1 release + asset verification / packaging metadata smoke / 0.7.2.dev0 reopen / Actions Node24 update / release+PyPI dry-run / routing hot-path perf / nearest spatial index / cache invalidation hardening / build graph spatial merge perf / T-junction segment index perf / lean near-parallel merge loop / GeoJSON export compact path / compact bundle JSON writer / README quick-start smoke / release readiness dry-run refresh / reachable service-area CLI / reachable docs overlay / reachable benchmark coverage / benchmark baseline JSON / reachability analyzer perf / routing core split / RoutePlanner perf / GitHub star-growth surfaces / launch kit docs / safe A* routing / route explain diagnostics / route explain docs surface / route explain comparison UI / route diagnostics README screenshot / functional shortest_path planner cache + sampled validation / nearest-edge projection index / match-trajectory explain diagnostics / HMM bridge ambiguity benchmark / HMM adjacency reuse perf / HMM tail-cost cache / HMM long trajectory benchmark / edge-index cell tuning / 2D/3D map console / PLAN handoff expansion）を反映済み。*
 
 ---
 
@@ -21,6 +21,17 @@
   GitHub Release assets (`roadgraph_sample_bundle.tar.gz` / `.sha256`) は download + checksum +
   `validate-manifest` / `validate-sd-nav` / `validate` 済み。`v0.7.0` は shipped (2026-04-20)。
   最新 full local `pytest` = **647 passed / 3 skipped / 4 deselected**（opt-in marker 除外）。
+- **current local git:** 2026-04-23 時点で origin/main より local commit が進んでいる。
+  少なくとも `f6045a2 feat: add 2d 3d map console` は未push。user が `push!` と言うまで push しない。
+  この PLAN 更新は、その map-console commit の引き継ぎ文脈を厚くするための追記で、
+  commit する場合は map-console commit とは別 topic にする。
+- **latest local checks for map console:** `git diff --check` PASS。
+  `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 .venv/bin/pytest tests/test_viewer_js_dijkstra.py tests/test_map_match_explain_asset.py`
+  は **3 passed**。さらに `cd docs && python3 -m http.server 18765` を立て、
+  `npx -y -p @playwright/test` + system Chrome (`test.use({ channel: "chrome" })`) で desktop
+  1366×900 / mobile 390×844 の browser smoke を実行し **2 passed**。
+  smoke は 2D map load、dynamic route (`n312 → n191`)、3D mode、canvas pixel nonblank、
+  overlay toggle、horizontal overflow なしを確認。スクリーンショットは `/tmp/roadgraph-map-*.png`。
 - **直近の sessions (2026-04-21〜2026-04-22) で landed:**
   1. V1 accuracy 実測 — Paris 20e MAE 0.938、Tokyo Ginza MAE 0.903、Berlin Mitte MAE 1.220（lane-count vs OSM `lanes=`、canonical 20 m）
   2. `scripts/measure_lane_accuracy.py` が meter-frame graph を正しく扱う bug fix（`map_origin` 自動検出）
@@ -290,6 +301,10 @@
       `docs/map.html` を Leaflet 単体から、2D OSM view + Three.js 3D graph preview + dataset inspector
       + overlay toggles の product console に拡張。クリックで生成した dynamic route も
       `scenePayload.route` に同期し、3D view と route metric が同じ状態を読む。
+  71. PLAN handoff expansion。
+      2D/3D map console の内部構造、検証済み手順、既知制約、次にやる価値が高い候補をこの PLAN に追記。
+      次の AI / Cursor が「何を push すべきか」「何を追加検証すべきか」「まだ product として足りない
+      体験は何か」を cold-start で読める状態にする。
 - **push 方針:** `git push` は user が `push!` などで明示するまで実行しない。
 - **未着手 (次の AI が触る候補):** ↓ §5 "Open tasks" 参照。
 
@@ -548,6 +563,49 @@
   4 データセット切替。2D Leaflet view と Three.js 3D graph view を同じ GeoJSON payload から描画し、
   inspector に nodes / centerlines / lane boundaries / route / reachable spans / turn restrictions を表示。
   route / reachability / restrictions overlay toggle は 2D/3D 両方に反映される。
+- **map console layout:** `body` は flex column、top `.bar` は wrap 可能な操作列、
+  `.workspace` は map stage + inspector の 2-column grid。mobile (`max-width: 900px`) では
+  top bar が縦に折り返し、dataset select は横幅内に閉じ、stage と inspector が 1-column で積まれる。
+  mobile 390×844 で horizontal overflow が無いことを Playwright で確認済み。
+- **2D view:** `#map` は既存 Leaflet instance。base layer、route overlay、
+  reachability overlay、turn-restriction overlay は別 `L.layerGroup()` のまま維持。
+  Overlay checkbox は Leaflet layer の add/remove と 3D rerender の両方を行う。
+- **3D view:** `#scene3d` + `#scene3d-canvas` は hidden toggle で 2D と排他表示。
+  Three.js は `https://unpkg.com/three@0.160.0/build/three.module.js` から dynamic import。
+  3D state は `scenePayload = { base, route, reachable, restrictions }` と `activeStats` を読む。
+  `render3DScene()` は centerline / trajectory / lane boundaries / route / reachable spans / graph nodes /
+  route start/end / reachability start/nodes / restriction junctions / grid helper を同じ coordinate transform
+  で描画する。`preserveDrawingBuffer: true` は browser smoke の WebGL pixel readback 用。
+- **3D interaction:** canvas drag で yaw 回転、wheel で camera distance zoom。非 drag 中はゆっくり auto-rotate。
+  resize は active 3D view の時だけ renderer/camera を更新する。status text は node/centerline 数を表示。
+- **dynamic route sync:** `drawDynamicRoute(graph, dij)` は Leaflet polyline だけでなく
+  `scenePayload.route` の GeoJSON FeatureCollection も作る。これにより node click routing 後に
+  3D view へ切り替えても同じ route が表示され、inspector の route metric も `dij.totalLength` で更新される。
+  `clearRoute()` は Leaflet overlay と `scenePayload.route` の両方を clear し、active 3D view なら rerender。
+- **CDN / network caveat:** local preview でも Leaflet CSS/JS、Three.js module、OSM tiles は外部 fetch。
+  private repo のローカル demo としては許容。public launch で安定性を上げるなら、Leaflet / Three.js を
+  vendored asset にするか、3D smoke を CDN 非依存の最小 harness に切り出す。
+- **committed regression boundary:** JS Dijkstra は `tests/test_viewer_js_dijkstra.py` +
+  `tests/js/test_viewer_dijkstra.mjs` が `docs/map.html` から `buildRestrictionIndex` / `dijkstra` を抽出する。
+  そのためこの 2 関数名と抽出しやすい top-level function shape は維持すること。
+  Full browser smoke はまだ committed test ではなく手動 one-off。理由は system Chrome / Playwright /
+  external CDN に依存するため。必要なら optional browser test として `pytest` skip-on-missing 方式で追加する。
+- **manual browser smoke recipe:** 8765 が埋まっていたら別 port を使う。
+  2026-04-23 は 8765 が使用中だったため 18765 を使用した。
+
+  ```bash
+  cd docs
+  python3 -m http.server 18765
+  # 別 shell:
+  MAP_URL=http://127.0.0.1:18765/map.html \
+    npx -y -p @playwright/test \
+    sh -c 'export NODE_PATH=$(dirname $(dirname $(which playwright))); playwright test <tmp-spec> --browser=chromium --workers=1'
+  ```
+
+  `<tmp-spec>` では `test.use({ channel: "chrome" })` を使う。専用 Playwright Chromium が
+  `~/.cache/ms-playwright` に無くても `/usr/bin/google-chrome` で動く。検証項目は
+  desktop/mobile、2D load、dynamic route、3D status、canvas pixel nonblank、overlay toggle、
+  horizontal overflow なし。
 - `docs/images/paris_grid_route.svg`: README / Pages 用の静的 preview。`map_paris_grid.geojson` +
   `route_paris_grid.geojson` + `paris_grid_turn_restrictions.json` から
   `scripts/refresh_docs_assets.py` で再生成。OSM attribution を SVG 内と `docs/assets/ATTRIBUTION.md`
@@ -661,13 +719,53 @@ cards、release byte gates、manifest policy docs polish、README measured-resul
 repeated shortest path は `RoutePlanner` 化、repeated reachability は analyzer 化済み。
 routing / reachability の core cost-policy layer も分離済み。
 code commit `342f61f` の release bundle / package build dry-run は PASS
-（ただし `Metadata-Version: 2.4` 対応のため `twine>=6` で確認する）。次に触るなら以下の順が現実的。
+（ただし `Metadata-Version: 2.4` 対応のため `twine>=6` で確認する）。
+2026-04-23 の map console 作業で「初見が触れる product surface」はかなり改善したが、
+README/SHOWCASE に埋め込む静的 hero 画像はまだ旧 `paris_grid_route.svg` 中心。
+次に触るなら以下の順が現実的。
 
-1. **True large real-world memory / export benchmark** — raw 500k+ 実走 trajectory が手元に来た時だけ実行。
-   今の `/tmp` OSM public replay では default flip の根拠にならない。
-2. **Public launch** — user が repo public 化を明示した時だけ、visibility / Pages / launch post を実行。
-   投稿文は `docs/LAUNCH.md`、showcase 導線は `docs/SHOWCASE.md`。
-3. **Push / PR / tag prep** — user が `push!` / release tag を明示した時だけ実行。
+1. **Push current local commits** — user が `push!` と言った時だけ実行。
+   少なくとも `f6045a2 feat: add 2d 3d map console` は未push。PLAN handoff 追記が commit 済みなら
+   それも一緒に push 対象。push 前に
+   `git status --short --branch` と `git log --oneline origin/main..HEAD` を確認し、
+   PLAN だけが未commitなら `docs: expand plan handoff for map console` のように分けて commit する。
+2. **README / Showcase に map-console screenshot を載せる** — star-growth / product clarity の次の一手。
+   既存 `docs/images/paris_grid_route.svg` は静的な route preview として優秀だが、2D/3D console の価値
+   （inspector、overlay toggles、3D graph）を README 上で直接見せられていない。
+   Playwright で `/tmp/roadgraph-map-desktop-3d.png` 相当を再生成し、`docs/images/map_console_3d.png`
+   として committed asset にする候補。生成 script 化するなら `scripts/render_map_console_screenshot.py`
+   か Node/Playwright helper を追加し、外部 OSM tiles / CDN に依存することを明記する。
+3. **Optional browser smoke をテスト化** — 現状の browser smoke は one-off。
+   価値は高いが external CDN / OSM tiles / Chrome availability に依存するため、通常 CI には入れず、
+   `pytest` の skip-on-missing または `make viewer-smoke` の opt-in が現実的。
+   最小検証は 2D load、dynamic route、3D status、WebGL pixel nonblank、mobile horizontal overflow なし。
+4. **3D viewer の product interaction を深める** — 3D は現状「graph preview」。
+   次の本質的な改善は、3D canvas 上の edge/node picking、route step highlight、inspector detail sync、
+   route replay / cost coloring。これをやるなら `docs/map.html` が肥大化しているため、
+   `docs/js/map_console.js` への分離も同時に検討する。
+5. **Viewer asset vendoring / offline stability** — public launch 前の安定化候補。
+   Leaflet / Three.js / OSM tiles は現状 network 依存。private local demo では許容だが、
+   release-quality demo としては vendored Leaflet/Three、または static screenshot fallback を検討。
+   OSM tiles の大量同梱は license / attribution / size の問題があるため、tile vendoring は原則避ける。
+6. **True large real-world memory / export benchmark** — raw 500k+ 実走 trajectory が手元に来た時だけ実行。
+   今の `/tmp` OSM public replay では default float32 flip の根拠にならない。
+7. **Public launch** — user が repo public 化を明示した時だけ、visibility / Pages / launch post を実行。
+   投稿文は `docs/LAUNCH.md`、showcase 導線は `docs/SHOWCASE.md`。private repo のまま Pages を再試行しない。
+8. **Release tag prep** — user が release tag を明示した時だけ実行。
+   `v0.7.2.dev0` のまま tag を切らない。release 前は version bump、CHANGELOG cut、release bundle、
+   package build、twine>=6 check、manifest/sd_nav/road_graph validation をやり直す。
+
+### 5c. 2D/3D map product の現状評価
+
+- **できている:** Paris OSM-grid graph を 2D OSM 上で inspection できる。TR-aware click-to-route、
+  500 m reachability、turn restriction markers、route/reachability/restriction toggles、dataset metrics、
+  3D graph preview が同じ `docs/map.html` で動く。mobile でも操作面は破綻しない。
+- **まだ「完成プロダクト」ではない:** 3D view は geometry preview であり、3D 上で edge/node を選択する
+  picking は無い。route step の個別 inspect、edge cost coloring、lane-level view、camera pose 保存、
+  permalink、offline demo、committed browser smoke は未実装。
+- **価値判断:** いま star を増やす目的なら、次は algorithmic core より screenshot / demo narrative の方が効く。
+  ただし user が「性能・本質価値」を求める時は、3D picking や route replay のように graph semantics が
+  見える機能へ進むのが自然。単なる色替えや landing page 追加は優先度低い。
 
 ---
 
