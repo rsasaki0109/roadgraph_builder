@@ -146,6 +146,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   edge. The new `map_match_grid_5000` benchmark covers 5000 snaps on a 120x120
   grid graph and records a committed baseline of 1.519 s.
 
+- **Map matching can explain its projection hot path.**
+  `roadgraph_builder match-trajectory --explain` keeps the normal stats and
+  sample JSON shape, then adds a `stats.diagnostics` object with elapsed
+  milliseconds, projection/candidate query counts, and edge-index details such
+  as segment count, cell count, cell size, and overflow segment count.
+
 - **Routing caches now detect more graph mutations.**
   `nearest_node` cache signatures now cover every node on small/medium graphs
   and evenly sampled node positions on very large graphs, so middle-node

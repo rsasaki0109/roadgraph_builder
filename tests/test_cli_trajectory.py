@@ -8,8 +8,10 @@ from pathlib import Path
 from types import SimpleNamespace
 
 from roadgraph_builder.cli.trajectory import (
+    add_match_diagnostics,
     fuse_trace_summary,
     hmm_matches_to_document,
+    match_trajectory_diagnostics,
     road_class_counts_document,
     run_fuse_traces,
     run_infer_road_class,
@@ -135,6 +137,53 @@ def test_match_serializers_keep_hmm_and_nearest_shapes():
     assert snap_doc["samples"][1] == {"index": 1, "unmatched": True}
 
 
+def test_add_match_diagnostics_is_optional_and_nested_in_stats():
+    doc = {"stats": {"algorithm": "nearest_edge"}, "samples": []}
+
+    assert add_match_diagnostics(doc, None) is doc
+    add_match_diagnostics(doc, {"elapsed_ms": 1.25, "edge_index": {"enabled": True}})
+
+    assert doc["stats"]["diagnostics"] == {
+        "elapsed_ms": 1.25,
+        "edge_index": {"enabled": True},
+    }
+
+
+def test_match_trajectory_diagnostics_reports_edge_index_stats():
+    from roadgraph_builder.core.graph.edge import Edge
+    from roadgraph_builder.core.graph.graph import Graph
+    from roadgraph_builder.core.graph.node import Node
+
+    graph = Graph(
+        nodes=[
+            Node(id="a", position=(0.0, 0.0)),
+            Node(id="b", position=(10.0, 0.0)),
+        ],
+        edges=[
+            Edge(
+                id="e0",
+                start_node_id="a",
+                end_node_id="b",
+                polyline=[(0.0, 0.0), (10.0, 0.0)],
+            )
+        ],
+    )
+
+    diag = match_trajectory_diagnostics(
+        graph,
+        algorithm="nearest_edge",
+        sample_count=3,
+        matched_count=2,
+        max_distance_m=5.0,
+        elapsed_s=0.012,
+    )
+
+    assert diag["projection_queries"] == 3
+    assert diag["elapsed_ms"] == 12.0
+    assert diag["edge_index"]["enabled"] is True
+    assert diag["edge_index"]["segment_count"] == 1
+
+
 def test_run_reconstruct_trips_injects_logic_and_writes_output(tmp_path: Path):
     output = tmp_path / "trips.json"
     stdout = io.StringIO()
@@ -253,6 +302,47 @@ def test_run_match_trajectory_injects_nearest_path(tmp_path: Path):
     assert rc == 0
     assert json.loads(stdout.getvalue())["algorithm"] == "nearest_edge"
     assert json.loads(output.read_text(encoding="utf-8"))["samples"][0]["edge_id"] == "e0"
+
+
+def test_run_match_trajectory_explain_includes_diagnostics(tmp_path: Path):
+    output = tmp_path / "match.json"
+    stdout = io.StringIO()
+    traj = SimpleNamespace(xy=[(0.0, 0.0), (1.0, 0.0)])
+    calls: list[dict[str, object]] = []
+
+    rc = run_match_trajectory(
+        argparse.Namespace(
+            input_json="graph.json",
+            input_csv="trace.csv",
+            output=str(output),
+            explain=True,
+            hmm=False,
+            max_distance_m=6.0,
+            gps_sigma_m=5.0,
+            transition_limit_m=200.0,
+        ),
+        load_graph=lambda path: "graph",  # type: ignore[return-value]
+        load_trajectory_csv_func=lambda path: traj,
+        snap_trajectory_to_graph_func=lambda graph, xy, **kwargs: [
+            _SnapHit(0, "e0", 0.5, 1.0, 2.0, 0.5, (1.0, 0.0)),
+            None,
+        ],
+        coverage_stats_func=lambda snapped: {"samples": 2, "matched": 1},
+        match_trajectory_diagnostics_func=lambda graph, **kwargs: calls.append(kwargs)
+        or {
+            "projection_queries": kwargs["sample_count"],
+            "edge_index": {"enabled": True},
+        },
+        stdout=stdout,
+    )
+
+    assert rc == 0
+    stats_stdout = json.loads(stdout.getvalue())
+    stats_file = json.loads(output.read_text(encoding="utf-8"))["stats"]
+    assert stats_stdout["diagnostics"]["projection_queries"] == 2
+    assert stats_file["diagnostics"]["edge_index"] == {"enabled": True}
+    assert calls[0]["algorithm"] == "nearest_edge"
+    assert calls[0]["matched_count"] == 1
 
 
 def test_run_stats_injects_graph_and_junction_stats():

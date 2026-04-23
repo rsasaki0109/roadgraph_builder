@@ -379,11 +379,11 @@ Given a road graph and a new trajectory CSV in the same meter frame, `match-traj
 
 ```bash
 roadgraph_builder match-trajectory /tmp/rg_bundle/sim/road_graph.json \
-  examples/sample_trajectory.csv --max-distance-m 5 --output /tmp/match.json
+  examples/sample_trajectory.csv --max-distance-m 5 --explain --output /tmp/match.json
 # Summary on stdout; per-sample snap details in /tmp/match.json
 ```
 
-Samples farther than `--max-distance-m` from any edge are reported as unmatched in both the summary and the detailed JSON.
+Samples farther than `--max-distance-m` from any edge are reported as unmatched in both the summary and the detailed JSON. `--explain` keeps the normal fields intact and adds edge-index diagnostics such as indexed segment count, cell count, overflow segment count, query count, and elapsed milliseconds.
 
 ### Shortest path (routing)
 

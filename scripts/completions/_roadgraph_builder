@@ -128,6 +128,16 @@ _roadgraph_builder() {
                         '--origin-lon[WGS84 origin longitude]:float:' \
                         '*:file:_files'
                     ;;
+                match-trajectory)
+                    _arguments \
+                        '--max-distance-m[Maximum snap distance from any edge]:float:' \
+                        '--output[Map-match JSON output path]:file:_files' \
+                        '--explain[Include edge-index and timing diagnostics]' \
+                        '--hmm[Use HMM/Viterbi map matching]' \
+                        '--gps-sigma-m[HMM GPS-noise sigma in meters]:float:' \
+                        '--transition-limit-m[HMM transition Dijkstra cap in meters]:float:' \
+                        '*:file:_files'
+                    ;;
                 export-bundle)
                     _arguments \
                         '--origin-json[Origin JSON path]:file:_files' \

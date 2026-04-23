@@ -66,6 +66,22 @@ class EdgeProjectionIndex:
     overflow_segments: tuple[int, ...]
     segments: tuple[_EdgeSegment, ...]
 
+    def stats(self) -> dict[str, object]:
+        """Return stable, JSON-friendly index diagnostics."""
+
+        cell_segment_refs = sum(len(segment_indices) for segment_indices in self.cells.values())
+        max_cell_segments = max((len(segment_indices) for segment_indices in self.cells.values()), default=0)
+        return {
+            "enabled": True,
+            "segment_count": len(self.segments),
+            "cell_count": len(self.cells),
+            "cell_size_m": self.cell_size_m,
+            "cell_segment_refs": cell_segment_refs,
+            "mean_cell_segments": (cell_segment_refs / len(self.cells)) if self.cells else 0.0,
+            "max_cell_segments": max_cell_segments,
+            "overflow_segment_count": len(self.overflow_segments),
+        }
+
     def nearest_projection(
         self,
         x_m: float,

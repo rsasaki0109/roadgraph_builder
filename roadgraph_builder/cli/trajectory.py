@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import time
 from pathlib import Path
 from typing import Callable, TextIO, TYPE_CHECKING
 
@@ -126,6 +127,11 @@ def add_trajectory_parsers(sub) -> None:  # type: ignore[no-untyped-def]
         default=None,
         metavar="PATH",
         help="Optional JSON path to write the per-sample snap details.",
+    )
+    mt.add_argument(
+        "--explain",
+        action="store_true",
+        help="Include edge-index and timing diagnostics in the stats block.",
     )
     mt.add_argument(
         "--hmm",
@@ -256,6 +262,19 @@ def hmm_matches_to_document(hmm_result: list[object | None]) -> dict[str, object
     }
 
 
+def add_match_diagnostics(
+    document: dict[str, object],
+    diagnostics: dict[str, object] | None,
+) -> dict[str, object]:
+    """Attach optional map-matching diagnostics without changing the normal shape."""
+
+    if diagnostics:
+        stats = document.get("stats")
+        if isinstance(stats, dict):
+            stats["diagnostics"] = diagnostics
+    return document
+
+
 def snapped_matches_to_document(
     snapped: list[object | None],
     *,
@@ -280,6 +299,36 @@ def snapped_matches_to_document(
             for i, s in enumerate(snapped)
         ],
     }
+
+
+def match_trajectory_diagnostics(
+    graph: "Graph",
+    *,
+    algorithm: str,
+    sample_count: int,
+    matched_count: int,
+    max_distance_m: float,
+    elapsed_s: float,
+) -> dict[str, object]:
+    """Build JSON-friendly diagnostics for ``match-trajectory --explain``."""
+
+    from roadgraph_builder.routing.edge_index import get_edge_projection_index
+
+    diag: dict[str, object] = {
+        "algorithm": algorithm,
+        "sample_count": sample_count,
+        "matched_count": matched_count,
+        "max_distance_m": max_distance_m,
+        "elapsed_ms": elapsed_s * 1000.0,
+        "edge_index": get_edge_projection_index(graph).stats(),
+    }
+    if algorithm == "hmm_viterbi":
+        diag["candidate_radius_m"] = max_distance_m
+        diag["candidate_queries"] = sample_count
+        diag["candidate_limit_per_sample"] = 5
+    else:
+        diag["projection_queries"] = sample_count
+    return diag
 
 
 def write_optional_json(path: str | None, document: dict[str, object]) -> None:
@@ -466,6 +515,7 @@ def run_match_trajectory(
     hmm_match_trajectory_func: Callable[..., list[object | None]] | None = None,
     snap_trajectory_to_graph_func: Callable[..., list[object | None]] | None = None,
     coverage_stats_func: Callable[[list[object | None]], dict[str, object]] | None = None,
+    match_trajectory_diagnostics_func: Callable[..., dict[str, object]] | None = None,
     stdout: TextIO | None = None,
     stderr: TextIO | None = None,
 ) -> int:
@@ -479,6 +529,8 @@ def run_match_trajectory(
         from roadgraph_builder.routing.map_match import snap_trajectory_to_graph as snap_trajectory_to_graph_func
     if coverage_stats_func is None:
         from roadgraph_builder.routing.map_match import coverage_stats as coverage_stats_func
+    if match_trajectory_diagnostics_func is None:
+        match_trajectory_diagnostics_func = match_trajectory_diagnostics
 
     out = stdout if stdout is not None else sys.stdout
     err = stderr if stderr is not None else sys.stderr
@@ -488,7 +540,10 @@ def run_match_trajectory(
     except FileNotFoundError as exc:
         print(f"File not found: {exc.filename}", file=err)
         return 1
+    explain = bool(getattr(args, "explain", False))
+    t0 = time.perf_counter()
     if args.hmm:
+        algorithm = "hmm_viterbi"
         doc = hmm_matches_to_document(
             hmm_match_trajectory_func(
                 graph,
@@ -499,9 +554,25 @@ def run_match_trajectory(
             )
         )
     else:
+        algorithm = "nearest_edge"
         doc = snapped_matches_to_document(
             snap_trajectory_to_graph_func(graph, traj.xy, max_distance_m=args.max_distance_m),
             coverage_stats_func=coverage_stats_func,
+        )
+    elapsed_s = time.perf_counter() - t0
+    if explain:
+        stats = doc["stats"]
+        matched_count = int(stats.get("matched", 0)) if isinstance(stats, dict) else 0
+        doc = add_match_diagnostics(
+            doc,
+            match_trajectory_diagnostics_func(
+                graph,
+                algorithm=algorithm,
+                sample_count=len(traj.xy),
+                matched_count=matched_count,
+                max_distance_m=args.max_distance_m,
+                elapsed_s=elapsed_s,
+            ),
         )
     write_optional_json(args.output, doc)
     print(json.dumps(doc["stats"], ensure_ascii=False, indent=2), file=out)

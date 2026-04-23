@@ -148,11 +148,13 @@ def test_match_trajectory_cli_writes_output(tmp_path: Path, capsys):
         encoding="utf-8",
     )
     out_json = tmp_path / "match.json"
-    rc = main(["match-trajectory", str(gjson), str(csv), "--output", str(out_json)])
+    rc = main(["match-trajectory", str(gjson), str(csv), "--output", str(out_json), "--explain"])
     assert rc == 0
     doc = json.loads(out_json.read_text(encoding="utf-8"))
     assert doc["stats"]["samples"] == 5
     # All 5 samples land within 0.5 m of the x-axis, default max 15 m → all matched.
     assert doc["stats"]["matched"] == 5
     assert doc["stats"]["edges_touched"] == 1
+    assert doc["stats"]["diagnostics"]["projection_queries"] == 5
+    assert doc["stats"]["diagnostics"]["edge_index"]["segment_count"] == 4
     assert all(s["edge_id"] == "e0" for s in doc["samples"])

@@ -109,7 +109,7 @@ validate-lane-markings guidance validate-guidance update-graph process-dataset"
 --observed-bonus --unobserved-penalty --uphill-penalty --downhill-bonus" -- "$cur"))
                 ;;
             match-trajectory)
-                COMPREPLY=($(compgen -W "--max-distance-m --output --hmm --gps-sigma-m --transition-limit-m" -- "$cur"))
+                COMPREPLY=($(compgen -W "--max-distance-m --output --explain --hmm --gps-sigma-m --transition-limit-m" -- "$cur"))
                 ;;
             infer-road-class)
                 COMPREPLY=($(compgen -W "--max-distance-m --min-samples --highway-mps --arterial-mps" -- "$cur"))
