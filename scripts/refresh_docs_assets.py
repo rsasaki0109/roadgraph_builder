@@ -219,6 +219,44 @@ def _point_to_polyline_distance_m(
     return best ** 0.5 if best < float("inf") else best
 
 
+def _widen_hd_envelope_for_osm_lanes(graph, base_lane_width_m: float = 3.5) -> int:
+    """Widen the HD-lite ``hd.lane_boundaries`` envelope on edges that carry
+    an OSM ``lanes`` tag so the outermost paint lines reflect the real road
+    width (``osm_lanes * base_lane_width_m``). This runs after
+    :func:`enrich_sd_to_hd` which always uses a single-lane envelope. Returns
+    the number of edges whose envelope was widened.
+    """
+    from roadgraph_builder.hd.boundaries import (
+        centerline_lane_boundaries,
+        polyline_to_json_points,
+    )
+
+    widened = 0
+    for edge in graph.edges:
+        attrs = dict(edge.attributes)
+        lanes_n = attrs.get("osm_lanes")
+        if not isinstance(lanes_n, int) or lanes_n < 2:
+            continue
+        total_width = base_lane_width_m * float(lanes_n)
+        left, right = centerline_lane_boundaries(edge.polyline, total_width)
+        if not left or not right:
+            continue
+        hd = dict(attrs.get("hd") or {})
+        hd["lane_boundaries"] = {
+            "left": polyline_to_json_points(left),
+            "right": polyline_to_json_points(right),
+        }
+        hd["quality"] = "osm_lanes_offset_hd_lite"
+        hd["note"] = (
+            f"Outer paint envelope offset by {lanes_n}x {base_lane_width_m} m "
+            "from centerline (OSM lanes tag); HD-lite, not survey-grade."
+        )
+        attrs["hd"] = hd
+        edge.attributes = attrs
+        widened += 1
+    return widened
+
+
 def _inject_osm_tags_into_graph_edges(
     graph,
     origin_lat: float,
@@ -1212,6 +1250,10 @@ def main() -> None:
         # purple dashed lines. Without this the 3D / 2D views only show the
         # orange centerlines for the Paris grid.
         enrich_sd_to_hd(grid, SDToHDConfig(lane_width_m=3.5))
+        # Multi-lane OSM roads (``lanes>=2``) need a wider envelope than the
+        # default single-lane 3.5 m offset; recompute lane_boundaries for them
+        # so the paint lines hug the true road width.
+        _widen_hd_envelope_for_osm_lanes(grid, base_lane_width_m=3.5)
         # Apply hand-authored synthetic camera detections (traffic lights,
         # stop lines, crosswalks, speed limits) so the viewer surfaces
         # regulatory elements on top of the OSM grid. The inputs live under
@@ -1365,6 +1407,7 @@ def main() -> None:
             berlin_way_specs,
         )
         enrich_sd_to_hd(berlin_graph, SDToHDConfig(lane_width_m=3.5))
+        _widen_hd_envelope_for_osm_lanes(berlin_graph, base_lane_width_m=3.5)
         berlin_geo_tmp = ASSETS / "_map_berlin_mitte.tmp.geojson"
         export_map_geojson(
             berlin_graph,

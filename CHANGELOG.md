@@ -82,6 +82,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   browser smoke covers the `n312 → n191` deep link, asserting the card is
   visible, multiple steps render, and the URL retains `from` / `to`.
 
+- **OSM `lanes=` tag promotes HD-lite output to real multi-lane Lanelet2.**
+  `infer_lane_counts` gained an "OSM lanes tag" source between lane
+  markings and trace_stats so `build-osm-graph` edges stamped with
+  `osm_lanes` get their lane count from OpenStreetMap directly (instead
+  of defaulting to 1). `scripts/refresh_docs_assets.py` now also calls a
+  new `_widen_hd_envelope_for_osm_lanes()` after `enrich_sd_to_hd`, which
+  rewrites `hd.lane_boundaries` on every multi-lane edge using
+  `osm_lanes * 3.5 m` as the total road width so the HD-lite paint lines
+  hug the real road. Paris grid widens 239 edges, and
+  `docs/assets/map_paris_grid.lanelet.osm` now ships 1 485 lanelets
+  (842 single-lane + 228 + 273 + 112 + 30 for 2 / 3 / 4 / 5-lane roads,
+  one per lane) instead of 1 081. `validate-lanelet2-tags` still reports
+  `result: ok` with zero errors.
+
 - **Lanelet2 export emits Autoware-spec lanelet tags.**
   Every `type=lanelet` relation now carries `one_way=yes|no`,
   `participant:vehicle=yes`, `speed_limit=<N> km/h`, and an OSM street

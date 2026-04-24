@@ -264,6 +264,24 @@ def infer_lane_counts(
                 n_obs = len(offsets)
                 per_lane_confidence = round(min(1.0, 1.0 - math.exp(-n_obs / 5.0)), 4)
 
+        # --- Source 1.5: OSM ``lanes=`` tag (stamped by upstream builds). ---
+        # This is the deterministic OSM-tag path: when the ``build-osm-graph``
+        # pipeline (or the docs refresh step) has put the raw OSM ``lanes``
+        # value on the edge, use it directly instead of falling back to the
+        # trace_stats heuristic. We also widen ``road_half_width`` so the
+        # per-lane offsets span the real road width rather than a single
+        # ``base_lane_width_m`` envelope.
+        if not sources_used:
+            osm_lanes = attrs.get("osm_lanes")
+            if isinstance(osm_lanes, int) and osm_lanes > 0:
+                inferred = max(min_lanes, min(max_lanes, osm_lanes))
+                lane_count = inferred
+                sources_used.append("osm_lanes_tag")
+                per_lane_confidence = 0.6
+                road_half_width = max(
+                    road_half_width, (inferred * base_lane_width_m) / 2.0
+                )
+
         # --- Source 2: trace_stats fallback ---
         if not sources_used:
             trace_stats = attrs.get("trace_stats")
