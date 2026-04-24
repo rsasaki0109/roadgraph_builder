@@ -391,6 +391,13 @@
         background: #0f766e;
         color: #ecfeff;
       }
+      .mode-ctrl {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: #cbd5e1;
+        font-size: 12px;
+      }
       .bar {
         position: relative;
         z-index: 10;
@@ -538,6 +545,15 @@
           <option value="paris">Paris (OSM public GPS traces, ODbL)</option>
           <option value="osm">OSM sample (Berlin area, GPS-derived)</option>
           <option value="toy">Toy (synthetic meters → map)</option>
+        </select>
+      </label>
+      <label class="mode-ctrl">
+        Mode
+        <select id="map-mode" title="Reveal the SD / HD layer tier">
+          <option value="basic">Basic (centerlines + nodes)</option>
+          <option value="sd">SD (+ route + turn restrictions)</option>
+          <option value="hd">HD (+ lanes + semantics + reachability)</option>
+          <option value="full" selected>Full (everything)</option>
         </select>
       </label>
       <button id="clear-route" title="Clear the current route selection">Clear route</button>

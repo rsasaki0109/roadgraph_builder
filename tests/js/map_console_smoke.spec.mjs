@@ -196,6 +196,47 @@ test("deep-link restores the Paris TR-aware route", async ({ page }) => {
   expect(routeFeature.properties.to_node).toBe("n191");
 });
 
+test("Mode select gates SD / HD overlay tiers", async ({ page }) => {
+  await page.setViewportSize({ width: 1366, height: 900 });
+  await page.goto(`${MAP_URL}?dataset=paris_grid&view=2d&from=n312&to=n191`, {
+    waitUntil: "domcontentloaded",
+  });
+  await page.waitForSelector("body[data-ready='2d']", {
+    timeout: READY_TIMEOUT_MS,
+  });
+
+  // Helper: count SVG paths that Leaflet renders for each layer group. Paths
+  // belong to the SVG overlay pane (.leaflet-overlay-pane svg path).
+  const leafletPathCount = async () =>
+    await page.evaluate(
+      () => document.querySelectorAll(".leaflet-overlay-pane svg path").length,
+    );
+  const fullCount = await leafletPathCount();
+  expect(fullCount, "Full mode should render every layer tier").toBeGreaterThan(
+    1000,
+  );
+
+  // Basic mode hides lane boundaries + semantic markers + reachability + route.
+  await page.selectOption("#map-mode", "basic");
+  await page.waitForTimeout(200);
+  const basicCount = await leafletPathCount();
+  expect(
+    basicCount,
+    "Basic mode should render far fewer features than Full",
+  ).toBeLessThan(fullCount / 2);
+
+  // The Route steps card stays populated (scenePayload.route is preserved).
+  await expect(page.locator("#steps-card")).toBeVisible();
+
+  // HD mode restores the semantic / lane / reachability layers.
+  await page.selectOption("#map-mode", "hd");
+  await page.waitForTimeout(200);
+  const hdCount = await leafletPathCount();
+  expect(hdCount, "HD mode should re-add the HD tier").toBeGreaterThan(
+    basicCount + 100,
+  );
+});
+
 test("2D hover sync updates the hover card on centerline / node features", async ({ page }) => {
   await page.setViewportSize({ width: 1366, height: 900 });
   await openReady(page, "2d");

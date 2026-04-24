@@ -24,6 +24,110 @@ const scene3dStatus = document.getElementById("scene3d-status");
 const THREE_URL = "https://unpkg.com/three@0.160.0/build/three.module.js";
 
 let activeView = "2d";
+// SD / HD layer tier visibility. Each mode is a superset of the previous one.
+// basic = pure graph (centerlines + nodes + trajectory)
+// sd    = + route + turn restrictions
+// hd    = + lane boundaries + semantic markers + reachability
+// full  = everything (default)
+const MAP_MODE_ORDER = ["basic", "sd", "hd", "full"];
+const MAP_MODE_KINDS = {
+  basic: new Set(["centerline", "lane_centerline", "node", "trajectory"]),
+  sd: new Set([
+    "centerline",
+    "lane_centerline",
+    "node",
+    "trajectory",
+    "route",
+    "route_edge",
+    "route_start",
+    "route_end",
+  ]),
+  hd: null, // filled below after MAP_MODE_KINDS.sd is declared
+};
+MAP_MODE_KINDS.hd = new Set([
+  ...MAP_MODE_KINDS.sd,
+  "lane_boundary_left",
+  "lane_boundary_right",
+  "traffic_light",
+  "stop_line",
+  "crosswalk",
+  "speed_limit",
+  "reachable_edge",
+  "reachable_node",
+  "reachability_start",
+]);
+let mapMode = "full";
+
+function isKindVisibleForMode(kind) {
+  if (mapMode === "full") return true;
+  const set = MAP_MODE_KINDS[mapMode];
+  return set ? set.has(String(kind || "")) : true;
+}
+
+function showRouteOverlayForMode() {
+  return mapMode !== "basic";
+}
+
+function showReachabilityForMode() {
+  return mapMode === "hd" || mapMode === "full";
+}
+
+function showRestrictionsForMode() {
+  return mapMode !== "basic";
+}
+
+// Rebuild every Leaflet layer from the current scenePayload snapshot so a
+// mode change takes effect without re-fetching any GeoJSON. The base graph is
+// always drawn with its per-mode filter; route / reachability / restrictions
+// layers are gated by the mode tier (route needs SD+, reachability needs HD+,
+// restrictions need SD+).
+function rebuildLeafletLayers() {
+  baseLayer.clearLayers();
+  routeOverlayLayer.clearLayers();
+  reachabilityOverlayLayer.clearLayers();
+  restrictionsOverlayLayer.clearLayers();
+  if (scenePayload.base) {
+    const gj = L.geoJSON(scenePayload.base, {
+      style: styleLine,
+      pointToLayer: pointLayer,
+      onEachFeature: bindCommonPopups,
+      filter: (feat) => isKindVisibleForMode(feat.properties?.kind),
+    });
+    baseLayer.addLayer(gj);
+  }
+  if (scenePayload.route && showRouteOverlayForMode()) {
+    const rj = L.geoJSON(scenePayload.route, {
+      style: styleLine,
+      pointToLayer: pointLayer,
+      onEachFeature: bindCommonPopups,
+      filter: (feat) => isKindVisibleForMode(feat.properties?.kind),
+    });
+    routeOverlayLayer.addLayer(rj);
+  }
+  if (scenePayload.reachable && showReachabilityForMode()) {
+    const rj = L.geoJSON(scenePayload.reachable, {
+      style: styleLine,
+      pointToLayer: pointLayer,
+      onEachFeature: bindCommonPopups,
+      filter: (feat) => isKindVisibleForMode(feat.properties?.kind),
+    });
+    reachabilityOverlayLayer.addLayer(rj);
+  }
+  if (showRestrictionsForMode() && scenePayload.restrictions.length) {
+    const which = document.getElementById("dataset").value;
+    const graph = graphCache[which];
+    if (graph) drawRestrictionsOverlay(graph, scenePayload.restrictions);
+  }
+}
+
+function setMapMode(mode) {
+  if (!MAP_MODE_ORDER.includes(mode)) return;
+  mapMode = mode;
+  const sel = document.getElementById("map-mode");
+  if (sel && sel.value !== mode) sel.value = mode;
+  rebuildLeafletLayers();
+  if (activeView === "3d") render3DScene();
+}
 let scenePayload = { base: null, route: null, reachable: null, restrictions: [] };
 let activeStats = {};
 let threeModule = null;
@@ -739,19 +843,36 @@ async function render3DScene() {
       return new THREE.Vector3((p.x - cx) * scale, heightFor3D(kind), -(p.z - cz) * scale);
     };
 
+    // Wrap include predicates with the SD / HD mode filter so the 3D scene
+    // mirrors what the 2D view shows.
+    const modeInclude = (base) => (k) => base(k) && isKindVisibleForMode(k);
     const lineSpecs = [
-      { data: scenePayload.base, include: (k) => k === "centerline" || k === "lane_centerline" },
-      { data: scenePayload.base, include: (k) => k === "trajectory" },
       {
         data: scenePayload.base,
-        include: (k) => k === "lane_boundary_left" || k === "lane_boundary_right",
+        include: modeInclude((k) => k === "centerline" || k === "lane_centerline"),
+      },
+      {
+        data: scenePayload.base,
+        include: modeInclude((k) => k === "trajectory"),
+      },
+      {
+        data: scenePayload.base,
+        include: modeInclude(
+          (k) => k === "lane_boundary_left" || k === "lane_boundary_right"
+        ),
       },
     ];
-    if (overlayChecked("toggle-route")) {
-      lineSpecs.push({ data: scenePayload.route, include: (k) => k === "route" });
+    if (overlayChecked("toggle-route") && showRouteOverlayForMode()) {
+      lineSpecs.push({
+        data: scenePayload.route,
+        include: modeInclude((k) => k === "route"),
+      });
     }
-    if (overlayChecked("toggle-reachability")) {
-      lineSpecs.push({ data: scenePayload.reachable, include: (k) => k === "reachable_edge" });
+    if (overlayChecked("toggle-reachability") && showReachabilityForMode()) {
+      lineSpecs.push({
+        data: scenePayload.reachable,
+        include: modeInclude((k) => k === "reachable_edge"),
+      });
     }
 
     threeState.pickableLines = [];
@@ -831,36 +952,36 @@ async function render3DScene() {
     }
 
     const markerSpecs = [];
-    if (overlayChecked("toggle-route")) {
+    if (overlayChecked("toggle-route") && showRouteOverlayForMode()) {
       markerSpecs.push(
         {
           data: scenePayload.route,
-          include: (k) => k === "route_start",
+          include: modeInclude((k) => k === "route_start"),
           color: 0x10b981,
           size: 6.5,
           heightKind: "route",
         },
         {
           data: scenePayload.route,
-          include: (k) => k === "route_end",
+          include: modeInclude((k) => k === "route_end"),
           color: 0xef4444,
           size: 6.5,
           heightKind: "route",
         }
       );
     }
-    if (overlayChecked("toggle-reachability")) {
+    if (overlayChecked("toggle-reachability") && showReachabilityForMode()) {
       markerSpecs.push(
         {
           data: scenePayload.reachable,
-          include: (k) => k === "reachability_start",
+          include: modeInclude((k) => k === "reachability_start"),
           color: 0x14b8a6,
           size: 6.0,
           heightKind: "reachable_edge",
         },
         {
           data: scenePayload.reachable,
-          include: (k) => k === "reachable_node",
+          include: modeInclude((k) => k === "reachable_node"),
           color: 0x5eead4,
           size: 3.2,
           heightKind: "reachable_edge",
@@ -881,7 +1002,11 @@ async function render3DScene() {
       root.add(new THREE.Points(geom, mat));
     }
 
-    if (overlayChecked("toggle-restrictions") && scenePayload.restrictions.length) {
+    if (
+      overlayChecked("toggle-restrictions") &&
+      showRestrictionsForMode() &&
+      scenePayload.restrictions.length
+    ) {
       const graph = graphCache[document.getElementById("dataset").value];
       const pts = [];
       for (const r of scenePayload.restrictions) {
@@ -1706,12 +1831,15 @@ function drawDynamicReachability(which, startNode, budgetM) {
   scenePayload.reachable = data;
   const spans = data.features.filter((f) => f.properties.kind === "reachable_edge").length;
   const reachedNodes = data.features.filter((f) => f.properties.kind === "reachable_node").length;
-  const gj = L.geoJSON(data, {
-    style: styleLine,
-    pointToLayer: pointLayer,
-    onEachFeature: bindCommonPopups,
-  });
-  reachabilityOverlayLayer.addLayer(gj);
+  if (showReachabilityForMode()) {
+    const gj = L.geoJSON(data, {
+      style: styleLine,
+      pointToLayer: pointLayer,
+      onEachFeature: bindCommonPopups,
+      filter: (feat) => isKindVisibleForMode(feat.properties?.kind),
+    });
+    reachabilityOverlayLayer.addLayer(gj);
+  }
   updateInspector(which, { reachableEdges: spans });
   const hintParts = [
     "reach " + startNode + " (" + Number(budgetM) + " m)",
@@ -1752,23 +1880,6 @@ function drawDynamicRoute(graph, dij) {
       },
     ],
   };
-  const line = L.polyline(
-    coords.map((p) => [p[1], p[0]]),
-    { color: "#facc15", weight: 7, opacity: 0.92 }
-  );
-  line.bindPopup(
-    "route " +
-      dij.nodes[0] +
-      " → " +
-      dij.nodes[dij.nodes.length - 1] +
-      "<br>" +
-      dij.totalLength.toFixed(1) +
-      " m<br>" +
-      dij.edges.length +
-      " edges"
-  );
-  routeOverlayLayer.addLayer(line);
-
   const startLL = graph.nodes.get(dij.nodes[0]);
   const endLL = graph.nodes.get(dij.nodes[dij.nodes.length - 1]);
   if (startLL) {
@@ -1777,16 +1888,6 @@ function drawDynamicRoute(graph, dij) {
       properties: { kind: "route_start", node_id: dij.nodes[0] },
       geometry: { type: "Point", coordinates: [startLL.lon, startLL.lat] },
     });
-    routeOverlayLayer.addLayer(
-      L.circleMarker([startLL.lat, startLL.lon], {
-        radius: 8,
-        fillColor: "#10b981",
-        color: "#fff",
-        weight: 3,
-        opacity: 1,
-        fillOpacity: 1,
-      }).bindPopup("start: " + dij.nodes[0])
-    );
   }
   if (endLL) {
     routeData.features.push({
@@ -1794,18 +1895,17 @@ function drawDynamicRoute(graph, dij) {
       properties: { kind: "route_end", node_id: dij.nodes[dij.nodes.length - 1] },
       geometry: { type: "Point", coordinates: [endLL.lon, endLL.lat] },
     });
-    routeOverlayLayer.addLayer(
-      L.circleMarker([endLL.lat, endLL.lon], {
-        radius: 8,
-        fillColor: "#ef4444",
-        color: "#fff",
-        weight: 3,
-        opacity: 1,
-        fillOpacity: 1,
-      }).bindPopup("end: " + dij.nodes[dij.nodes.length - 1])
-    );
   }
   scenePayload.route = routeData;
+  if (showRouteOverlayForMode()) {
+    const rj = L.geoJSON(routeData, {
+      style: styleLine,
+      pointToLayer: pointLayer,
+      onEachFeature: bindCommonPopups,
+      filter: (feat) => isKindVisibleForMode(feat.properties?.kind),
+    });
+    routeOverlayLayer.addLayer(rj);
+  }
   updateInspector(document.getElementById("dataset").value, {
     routeLength: dij.totalLength,
   });
@@ -2096,6 +2196,7 @@ async function show(which) {
     style: styleLine,
     pointToLayer: pointLayer,
     onEachFeature: bindCommonPopups,
+    filter: (feat) => isKindVisibleForMode(feat.properties?.kind),
   });
   baseLayer.addLayer(gj);
 
@@ -2107,7 +2208,9 @@ async function show(which) {
       graphCache[which].restrictions = buildRestrictionIndex(list);
       scenePayload.restrictions = list;
       updateInspector(which, { restrictions: list.length });
-      drawRestrictionsOverlay(graphCache[which], list);
+      if (showRestrictionsForMode()) {
+        drawRestrictionsOverlay(graphCache[which], list);
+      }
     } catch (err) {
       console.warn("restrictions overlay failed:", err);
     }
@@ -2119,12 +2222,15 @@ async function show(which) {
       const reachableData = await loadGeo(reachableUrl);
       scenePayload.reachable = reachableData;
       updateInspector(which, { reachableEdges: reachableCountFromGeo(reachableData) });
-      const rj = L.geoJSON(reachableData, {
-        style: styleLine,
-        pointToLayer: pointLayer,
-        onEachFeature: bindCommonPopups,
-      });
-      reachabilityOverlayLayer.addLayer(rj);
+      if (showReachabilityForMode()) {
+        const rj = L.geoJSON(reachableData, {
+          style: styleLine,
+          pointToLayer: pointLayer,
+          onEachFeature: bindCommonPopups,
+          filter: (feat) => isKindVisibleForMode(feat.properties?.kind),
+        });
+        reachabilityOverlayLayer.addLayer(rj);
+      }
     } catch (err) {
       console.warn("reachability overlay failed:", err);
     }
@@ -2136,12 +2242,15 @@ async function show(which) {
       const routeData = await loadGeo(routeUrl);
       scenePayload.route = routeData;
       updateInspector(which, { routeLength: routeLengthFromGeo(routeData) });
-      const rj = L.geoJSON(routeData, {
-        style: styleLine,
-        pointToLayer: pointLayer,
-        onEachFeature: bindCommonPopups,
-      });
-      routeOverlayLayer.addLayer(rj);
+      if (showRouteOverlayForMode()) {
+        const rj = L.geoJSON(routeData, {
+          style: styleLine,
+          pointToLayer: pointLayer,
+          onEachFeature: bindCommonPopups,
+          filter: (feat) => isKindVisibleForMode(feat.properties?.kind),
+        });
+        routeOverlayLayer.addLayer(rj);
+      }
     } catch (err) {
       console.warn("route overlay failed:", err);
     }
@@ -2171,6 +2280,10 @@ if (reachFromClickBtn) {
   reachFromClickBtn.addEventListener("click", () => {
     setReachSelectionMode(!reachSelectionMode);
   });
+}
+const mapModeSelect = document.getElementById("map-mode");
+if (mapModeSelect) {
+  mapModeSelect.addEventListener("change", (e) => setMapMode(e.target.value));
 }
 view2dButton.addEventListener("click", () => setView("2d"));
 view3dButton.addEventListener("click", () => setView("3d"));

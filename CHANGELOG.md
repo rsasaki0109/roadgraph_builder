@@ -82,6 +82,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   browser smoke covers the `n312 → n191` deep link, asserting the card is
   visible, multiple steps render, and the URL retains `from` / `to`.
 
+- **SD / HD layer tier toggle in the map console.**
+  A new `Mode` select in the toolbar switches between four layer tiers:
+  **Basic** (centerlines + nodes + trajectory), **SD** (+ route + turn
+  restrictions), **HD** (+ lane boundaries + semantic markers + reachability),
+  and **Full** (everything, the default). Both the 2D Leaflet layers and
+  the 3D Three.js scene honour the active tier — a single `MAP_MODE_KINDS`
+  set drives a `filter:` on every `L.geoJSON(...)` call and wraps each
+  `render3DScene` include predicate, while `drawDynamicRoute` /
+  `drawDynamicReachability` gate on the tier without dropping
+  `scenePayload.*` data. A `rebuildLeafletLayers()` helper rebuilds all
+  Leaflet layers from the current snapshot on mode change (no re-fetch).
+  Browser smoke walks Full → Basic → HD and asserts the SVG path count
+  collapses, then grows again, as tiers disappear and come back.
+
 - **Hover card updates when you mouse over 2D Leaflet features.**
   Previously the inspector's `#hover-card` only reacted to the 3D
   raycaster. A new `hoverHitFromProps()` helper turns a feature property
