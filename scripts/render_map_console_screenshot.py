@@ -148,6 +148,22 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--height", type=int, default=900)
     parser.add_argument("--dataset", default="paris_grid")
     parser.add_argument(
+        "--from-node",
+        dest="from_node",
+        default="n312",
+        help=(
+            "Deep-link ?from=<node>. Default n312 lands on the Paris TR-aware "
+            "route so the hero screenshots show an active route. Pass an empty "
+            "string to render without a deep-link route."
+        ),
+    )
+    parser.add_argument(
+        "--to-node",
+        dest="to_node",
+        default="n191",
+        help="Deep-link ?to=<node>. See --from-node.",
+    )
+    parser.add_argument(
         "--channel",
         default="chrome",
         help="Playwright Chromium distribution channel (default: chrome).",
@@ -172,8 +188,11 @@ def main(argv: list[str] | None = None) -> int:
     with _docs_server() as base:
         preflight = f"{base}map.html"
         _wait_for_http(preflight)
-        url_2d = f"{base}map.html?dataset={args.dataset}&view=2d"
-        url_3d = f"{base}map.html?dataset={args.dataset}&view=3d"
+        deep_link = ""
+        if args.from_node and args.to_node:
+            deep_link = f"&from={args.from_node}&to={args.to_node}"
+        url_2d = f"{base}map.html?dataset={args.dataset}&view=2d{deep_link}"
+        url_3d = f"{base}map.html?dataset={args.dataset}&view=3d{deep_link}"
         if args.only != "3d":
             _screenshot(
                 url=url_2d,

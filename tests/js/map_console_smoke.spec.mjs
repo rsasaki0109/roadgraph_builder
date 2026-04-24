@@ -111,6 +111,29 @@ test("deep-link restores the Paris TR-aware route", async ({ page }) => {
   const url = page.url();
   expect(url).toContain("from=n312");
   expect(url).toContain("to=n191");
+
+  // Download button should become enabled once a route is drawn; clicking it
+  // triggers a browser download carrying a valid GeoJSON FeatureCollection.
+  const downloadBtn = page.locator("#download-route");
+  await expect(downloadBtn).toBeEnabled();
+  const [download] = await Promise.all([
+    page.waitForEvent("download"),
+    downloadBtn.click(),
+  ]);
+  expect(download.suggestedFilename()).toMatch(/^route_paris_grid_n312_n191\.geojson$/);
+  const path = await download.path();
+  expect(path, "downloaded file path should be available").toBeTruthy();
+  const fs = await import("node:fs");
+  const body = JSON.parse(fs.readFileSync(path, "utf-8"));
+  expect(body.type).toBe("FeatureCollection");
+  const routeFeature = (body.features || []).find(
+    (f) => f?.properties?.kind === "route",
+  );
+  expect(routeFeature, "downloaded payload must carry a kind=route feature").toBeTruthy();
+  expect(routeFeature.geometry.type).toBe("LineString");
+  expect(routeFeature.geometry.coordinates.length).toBeGreaterThan(1);
+  expect(routeFeature.properties.from_node).toBe("n312");
+  expect(routeFeature.properties.to_node).toBe("n191");
 });
 
 test("3D hover picks an edge or node and click routes", async ({ page }) => {

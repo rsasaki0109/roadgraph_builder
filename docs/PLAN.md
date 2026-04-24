@@ -6,7 +6,7 @@
 > このファイル → [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md)（Mermaid 6 枚 + CLI 対応表 +
 > モジュール索引）→ [`CHANGELOG.md`](../CHANGELOG.md) の順。
 
-*最終更新: 2026-04-24 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards polish + README measured-results compacting / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate + manifest policy docs polish / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理 / v0.7.1 release + asset verification / packaging metadata smoke / 0.7.2.dev0 reopen / Actions Node24 update / release+PyPI dry-run / routing hot-path perf / nearest spatial index / cache invalidation hardening / build graph spatial merge perf / T-junction segment index perf / lean near-parallel merge loop / GeoJSON export compact path / compact bundle JSON writer / README quick-start smoke / release readiness dry-run refresh / reachable service-area CLI / reachable docs overlay / reachable benchmark coverage / benchmark baseline JSON / reachability analyzer perf / routing core split / RoutePlanner perf / GitHub star-growth surfaces / launch kit docs / safe A* routing / route explain diagnostics / route explain docs surface / route explain comparison UI / route diagnostics README screenshot / functional shortest_path planner cache + sampled validation / nearest-edge projection index / match-trajectory explain diagnostics / HMM bridge ambiguity benchmark / HMM adjacency reuse perf / HMM tail-cost cache / HMM long trajectory benchmark / edge-index cell tuning / 2D/3D map console / PLAN handoff expansion / map console pushed + CI green / Claude handoff refresh / map console hero screenshots / map console browser smoke opt-in pytest / map console JS split + 3D raycaster picking / map console deep link + route steps inspector）を反映済み。*
+*最終更新: 2026-04-24 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards polish + README measured-results compacting / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate + manifest policy docs polish / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理 / v0.7.1 release + asset verification / packaging metadata smoke / 0.7.2.dev0 reopen / Actions Node24 update / release+PyPI dry-run / routing hot-path perf / nearest spatial index / cache invalidation hardening / build graph spatial merge perf / T-junction segment index perf / lean near-parallel merge loop / GeoJSON export compact path / compact bundle JSON writer / README quick-start smoke / release readiness dry-run refresh / reachable service-area CLI / reachable docs overlay / reachable benchmark coverage / benchmark baseline JSON / reachability analyzer perf / routing core split / RoutePlanner perf / GitHub star-growth surfaces / launch kit docs / safe A* routing / route explain diagnostics / route explain docs surface / route explain comparison UI / route diagnostics README screenshot / functional shortest_path planner cache + sampled validation / nearest-edge projection index / match-trajectory explain diagnostics / HMM bridge ambiguity benchmark / HMM adjacency reuse perf / HMM tail-cost cache / HMM long trajectory benchmark / edge-index cell tuning / 2D/3D map console / PLAN handoff expansion / map console pushed + CI green / Claude handoff refresh / map console hero screenshots / map console browser smoke opt-in pytest / map console JS split + 3D raycaster picking / map console deep link + route steps inspector / map console route export + deep-link 自動 fit + hero screenshot refresh）を反映済み。*
 
 ---
 
@@ -341,6 +341,16 @@
       `clearRouteSteps()` で populate / hide。browser smoke に Paris `n312 → n191` deep link ケース
       を追加し、`#steps-card` 非 hidden + `li` が 3 本以上 + status に `deep link n312` + URL 末尾に
       `from=n312&to=n191` が残ることまで assert。
+  76. map console route export + deep-link 自動 fit + hero screenshot refresh。
+      `.bar` に `Download route GeoJSON` ボタンを追加し、route が draw された時のみ enable に切替、
+      `scenePayload.route` を Blob 化して `route_<dataset>_<from>_<to>.geojson` として download
+      させる。`applyDeepLinkRoute()` は `fitMapToRoute()` で 2D 地図を route bounds に自動 fit
+      （click-to-route 経由は今まで通り fit 無し）。`scripts/render_map_console_screenshot.py` に
+      `--from-node / --to-node` を追加し、default で `n312 → n191` deep link を焼き込んだ hero
+      screenshot を生成するよう変更、README / SHOWCASE の committed PNG を route が見える状態へ更新。
+      browser smoke の deep-link テストに `#download-route` enable 確認 + click → downloaded
+      GeoJSON が `FeatureCollection` / `kind=route` LineString / `from_node` / `to_node` を保持する
+      ことを assert する subprocess 追加。
 - **push 方針:** `git push` は user が `push!` などで明示するまで実行しない。
 - **未着手 (次の AI が触る候補):** ↓ §5 "Open tasks" 参照。
 
@@ -627,6 +637,13 @@
   inspector 右側の `#steps-card` には `renderRouteSteps(graph, dij)` が edge_id / direction /
   length / cumulative_m + 合計 edges / m を埋めるので、routing 結果を 3D 視覚と JSON 以外の第三の形で
   読み取れる。`clearRouteSteps()` は `Clear route` または dataset 切替で自動実行。
+  `applyDeepLinkRoute()` は 2D 地図を route bounds に自動 `map.fitBounds`（padding 48、maxZoom 17）。
+- **Route export:** `.bar` の `Download route GeoJSON` ボタン（route drawn 時のみ enable）が
+  `scenePayload.route` を `application/geo+json` Blob でクライアント download。
+  filename は `route_<dataset>_<from>_<to>.geojson`。ナビ診断 / route diff / CI サンプルに使える。
+- **Hero screenshot deep-link bake:** `scripts/render_map_console_screenshot.py --from-node / --to-node`
+  default が `n312 → n191` なので、README / SHOWCASE の committed PNG は常に Paris TR-aware route が
+  見えた状態で再生成される。
 - **dynamic route sync:** `drawDynamicRoute(graph, dij)` は Leaflet polyline だけでなく
   `scenePayload.route` の GeoJSON FeatureCollection も作る。これにより node click routing 後に
   3D view へ切り替えても同じ route が表示され、inspector の route metric も `dij.totalLength` で更新される。
@@ -784,12 +801,13 @@ code commit `342f61f` の release bundle / package build dry-run は PASS
 ただし README/SHOWCASE に埋め込む静的 hero 画像はまだ旧 `paris_grid_route.svg` 中心。
 次に触るなら以下の順が現実的。
 
-1. **README / Showcase に map-console screenshot を載せる** — ~~DONE 2026-04-24~~。
-   `docs/map.html` に `?view=2d|3d` と `?dataset=…` URL param + `body[data-ready]` ready signal を追加。
-   `scripts/render_map_console_screenshot.py` が local http.server + Playwright CLI (system Chrome)
-   で `docs/images/map_console_2d.png` (667 KB) / `map_console_3d.png` (77 KB) を PIL 256-color quantize
-   で圧縮して生成する。README "Visualization results" と `docs/SHOWCASE.md` に両 PNG を embed 済み。
-   再生成は OSM tiles / Leaflet / Three.js 外部 fetch 必要な点を両方の docstring/本文で明記。
+1. **README / Showcase に map-console screenshot を載せる** — ~~DONE 2026-04-24~~ (refresh: deep-link bake)。
+   `docs/map.html` に `?view=2d|3d` / `?dataset=…` / `?from=nXXX&to=nYYY` URL param + `body[data-ready]`
+   ready signal を追加。`scripts/render_map_console_screenshot.py` は default `--from-node n312
+   --to-node n191` を焼き込んで、committed PNG には Paris TR-aware route + Route steps card +
+   Download route GeoJSON ボタンが常に載る。PIL 256-color quantize で圧縮（2D ≈ 400 KB、3D ≈ 85 KB）。
+   README "Visualization results" と `docs/SHOWCASE.md` に両 PNG を embed 済み。再生成は OSM tiles /
+   Leaflet / Three.js 外部 fetch 必要な点を docstring / README に明記。
 2. **Optional browser smoke をテスト化** — ~~DONE 2026-04-24~~。
    `tests/js/map_console_smoke.spec.mjs` + `tests/test_map_console_browser_smoke.py` が
    `@pytest.mark.browser_smoke` で opt-in。`make viewer-smoke` = `pytest -m browser_smoke`。

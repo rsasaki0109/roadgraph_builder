@@ -1100,7 +1100,45 @@ function drawDynamicRoute(graph, dij) {
   });
   renderRouteSteps(graph, dij);
   syncRouteDeepLink(dij);
+  setDownloadRouteEnabled(true);
   if (activeView === "3d") render3DScene();
+}
+
+function setDownloadRouteEnabled(enabled) {
+  const btn = document.getElementById("download-route");
+  if (btn) btn.disabled = !enabled;
+}
+
+function fitMapToRoute(coords) {
+  if (!coords || !coords.length) return;
+  try {
+    const latlngs = coords.map((c) => [c[1], c[0]]);
+    const bounds = L.latLngBounds(latlngs);
+    if (bounds.isValid()) {
+      map.fitBounds(bounds, { padding: [48, 48], maxZoom: 17 });
+    }
+  } catch (_err) {
+    // best-effort; never break routing because of a fit hiccup.
+  }
+}
+
+function downloadRouteGeoJSON() {
+  const route = scenePayload.route;
+  if (!route) return;
+  const json = JSON.stringify(route, null, 2);
+  const blob = new Blob([json], { type: "application/geo+json" });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  const which = document.getElementById("dataset").value || "route";
+  const mainFeature = (route.features || []).find((f) => f.properties?.kind === "route");
+  const from = mainFeature?.properties?.from_node || "from";
+  const to = mainFeature?.properties?.to_node || "to";
+  anchor.href = url;
+  anchor.download = `route_${which}_${from}_${to}.geojson`;
+  document.body.appendChild(anchor);
+  anchor.click();
+  document.body.removeChild(anchor);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 function renderRouteSteps(graph, dij) {
@@ -1216,6 +1254,7 @@ function clearRoute() {
   updateInspector(document.getElementById("dataset").value, { routeLength: NaN });
   clearRouteSteps();
   syncRouteDeepLink(null);
+  setDownloadRouteEnabled(false);
   if (activeView === "3d") render3DScene();
   currentRouteSelection = { from: null, to: null };
   statusText("Click two graph nodes to route between them.");
@@ -1341,6 +1380,10 @@ document.getElementById("dataset").addEventListener("change", (e) => {
   show(e.target.value).catch((err) => alert(String(err)));
 });
 document.getElementById("clear-route").addEventListener("click", clearRoute);
+const downloadRouteBtn = document.getElementById("download-route");
+if (downloadRouteBtn) {
+  downloadRouteBtn.addEventListener("click", downloadRouteGeoJSON);
+}
 view2dButton.addEventListener("click", () => setView("2d"));
 view3dButton.addEventListener("click", () => setView("3d"));
 
@@ -1386,6 +1429,13 @@ function applyDeepLinkRoute(which, fromId, toId) {
     return;
   }
   drawDynamicRoute(graph, dij);
+  // Deep-link entry: zoom 2D to the route so users land on the full polyline
+  // rather than the dataset-wide view. Click-to-route keeps the current zoom
+  // because the user is already oriented.
+  const routeFeature = scenePayload.route?.features?.find(
+    (f) => f.properties?.kind === "route"
+  );
+  if (routeFeature) fitMapToRoute(routeFeature.geometry.coordinates);
   const trCount = graph.restrictions
     ? graph.restrictions.noT.size + graph.restrictions.onlyT.size
     : 0;

@@ -82,6 +82,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   browser smoke covers the `n312 → n191` deep link, asserting the card is
   visible, multiple steps render, and the URL retains `from` / `to`.
 
+- **Route export, deep-link auto-fit, and route-aware hero screenshots.**
+  A new `Download route GeoJSON` button next to `Clear route` becomes
+  enabled once a route is drawn and streams the current
+  `scenePayload.route` FeatureCollection as
+  `route_<dataset>_<from>_<to>.geojson`. Opening the console through a
+  deep link now re-fits the 2D map to the route polyline's bounds
+  (padding 48, max zoom 17) so users land on the route rather than the
+  dataset-wide view. `scripts/render_map_console_screenshot.py` picked
+  up `--from-node` / `--to-node`, defaulting to `n312 → n191`, so the
+  committed `docs/images/map_console_{2d,3d}.png` hero shots now show
+  the Paris TR-aware route, the populated Route steps card, the
+  deep-link status line, and the enabled download button. Browser
+  smoke asserts the download produces a valid GeoJSON FeatureCollection
+  with a `kind=route` LineString and preserved `from_node` / `to_node`.
+
 - **Reachability / service-area analysis is available from the routing CLI.**
   New `routing.reachability.reachable_within` and `roadgraph_builder reachable`
   report nodes and directed edge spans reachable from a start node within a
