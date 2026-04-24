@@ -82,6 +82,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   browser smoke covers the `n312 → n191` deep link, asserting the card is
   visible, multiple steps render, and the URL retains `from` / `to`.
 
+- **GitHub Pages entry point lands on the 2D / 3D map console.**
+  Visitors opening `https://rsasaki0109.github.io/roadgraph_builder/` used
+  to hit the SVG diagram viewer and see no map — the console lived at
+  `/map.html`, one extra hop away. The old `docs/index.html` is now
+  renamed to `docs/diagram.html` (keeping the diagram + route-explain
+  diagnostics panel intact), and `docs/index.html` is a small
+  landing page that shows the animated hero + tier table + explicit
+  buttons for both entry points and redirects to `map.html` after three
+  seconds via `<meta http-equiv="refresh">`. `docs/map.html`, README,
+  Showcase, `tests/test_route_explain_asset.py`, and the `viewer.js`
+  comment all moved from `index.html` to `diagram.html` where the
+  diagnostics panel actually lives.
+
 - **README and Showcase reorganised around the map console.**
   `README.md` and `docs/SHOWCASE.md` now lead with the animated map-console
   hero and a **From SD to HD** tier table that walks visitors through

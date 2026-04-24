@@ -55,7 +55,7 @@ committed Paris TR-aware route.
 | Signal | Why it matters | Link |
 | --- | --- | --- |
 | Paris + Berlin map console | Real OSM-derived SD / HD-lite graphs with 2D/3D views, inspector metrics, turn restrictions, route, reachability, semantic overlays | [map](map.html) |
-| Route diagnostics compare | Generated `route --explain` samples show safe A* vs Dijkstra fallback search work | [viewer](index.html) |
+| Route diagnostics compare | Generated `route --explain` samples show safe A* vs Dijkstra fallback search work | [viewer](diagram.html) |
 | Static route preview | Works in the GitHub README without running a server | [SVG](images/paris_grid_route.svg) |
 | Architecture | One-page module map for build, routing, perception, export, schemas, and CLI | [architecture](ARCHITECTURE.md) |
 | Benchmarks | Deterministic build / routing / map matching / reachability / export timings with a committed baseline | [benchmarks](benchmarks.md) |

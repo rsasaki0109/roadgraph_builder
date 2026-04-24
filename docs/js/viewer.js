@@ -6,7 +6,7 @@
   "use strict";
 
   const W = 960;
-  const H = 640; // must match docs/index.html viewBox
+  const H = 640; // must match docs/diagram.html viewBox
   const MARGIN = 0.08;
 
   const svg = document.getElementById("svg-root");

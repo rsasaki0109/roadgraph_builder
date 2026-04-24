@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>roadgraph_builder — viewer</title>
+    <link rel="stylesheet" href="css/viewer.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <h1>roadgraph_builder</h1>
+        <span class="sub">Interactive preview · drag to pan · wheel to zoom</span>
+        <div class="controls">
+          <label for="dataset">Dataset</label>
+          <select id="dataset"></select>
+          <button type="button" id="btn-fit">Fit</button>
+          <button type="button" id="btn-reset">Reset view</button>
+        </div>
+      </header>
+
+      <div class="stage-wrap">
+        <svg
+          id="svg-root"
+          viewBox="0 0 960 640"
+          preserveAspectRatio="xMidYMid meet"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%">
+              <feGaussianBlur stdDeviation="1.2" result="b" />
+              <feMerge>
+                <feMergeNode in="b" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+          <rect width="100%" height="100%" fill="#101214" />
+          <g id="layer-grid"></g>
+          <g id="panzoom">
+            <g id="layer-trajectory"></g>
+            <g id="layer-edges"></g>
+            <g id="layer-nodes"></g>
+          </g>
+        </svg>
+
+        <div class="legend" aria-hidden="true">
+          <div class="legend-row">
+            <span class="swatch" style="background: #60a5fa"></span>
+            Centerline
+          </div>
+          <div class="legend-row">
+            <span class="swatch dot" style="background: #94a3b8"></span>
+            Trajectory
+          </div>
+          <div class="legend-row">
+            <span class="swatch dot" style="background: #f87171; border: 1px solid #fff"></span>
+            Node
+          </div>
+        </div>
+
+        <div class="hud" id="hud">Loading…</div>
+      </div>
+
+      <section class="results" aria-label="Visualization results">
+        <div class="results-inner">
+          <div class="section-heading">
+            <span class="eyebrow">Validation Surface</span>
+            <h2>Post-release results</h2>
+            <p>
+              Current main combines the Paris turn-restriction map preview,
+              lane-count baselines, cross-city tuning, and float32 dtype checks.
+            </p>
+          </div>
+
+          <a class="result-card" href="map.html">
+            <span class="result-media">
+              <img
+                src="images/paris_grid_route.svg"
+                alt="Paris road graph with a highlighted route, reachability overlay, and turn-restriction junctions"
+              />
+            </span>
+            <span class="result-copy">
+              <span class="eyebrow">Interactive Map</span>
+              <strong>Paris grid route + reachability</strong>
+              <span>OSM-highway graph · 10 mapped turn restrictions · 500 m service-area overlay</span>
+              <span class="result-meta">855 nodes · 1081 edges · ODbL assets</span>
+            </span>
+          </a>
+
+          <div class="metric-grid" aria-label="Measured results">
+            <a class="metric-card route" href="map.html">
+              <span class="metric-kicker">Routing</span>
+              <strong>909 m</strong>
+              <span>Paris TR-aware route; unrestricted baseline is 878 m, with explain diagnostics.</span>
+            </a>
+            <a class="metric-card accuracy" href="accuracy_report.md">
+              <span class="metric-kicker">Accuracy</span>
+              <strong>0.938 MAE</strong>
+              <span>Paris 20e lane-count baseline at 20 m matching.</span>
+            </a>
+            <a class="metric-card tuning" href="bundle_tuning.md">
+              <span class="metric-kicker">Tuning</span>
+              <strong>40 / 8</strong>
+              <span>Conservative max-step / merge-endpoint start across 3 cities.</span>
+            </a>
+            <a class="metric-card memory" href="float32_drift_report.md">
+              <span class="metric-kicker">Memory</span>
+              <strong>float64</strong>
+              <span>Default retained after float32 replay showed small RSS wins and ID drift.</span>
+            </a>
+          </div>
+
+          <div class="diagnostics-panel" aria-label="Route explain diagnostics">
+            <div class="diagnostics-copy">
+              <span class="eyebrow">Observable Routing</span>
+              <strong>Route search work is visible, not guessed</strong>
+              <span>
+                <code>route --explain</code> emits engine choice, fallback reason,
+                expanded states, queued states, route edge count, and total length.
+                This panel loads the generated sample and compares safe A* against
+                the Paris turn-restriction fallback.
+              </span>
+              <a href="assets/route_explain_sample.json">Open generated diagnostics JSON</a>
+            </div>
+            <div class="diagnostics-compare" id="route-diagnostics-compare" aria-live="polite">
+              <div class="diagnostics-loading">Loading route diagnostics…</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="footer">
+        Open source · graph JSON + trajectory CSV ·
+        <a id="footer-repo" href="#">Repository</a>
+        ·
+        <a id="footer-pages" href="#">GitHub Pages</a>
+        ·
+        <a href="map.html">Map (OSM tiles)</a>
+      </footer>
+    </div>
+    <script src="js/route_diagnostics.js"></script>
+    <script src="js/viewer.js"></script>
+  </body>
+</html>

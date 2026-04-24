@@ -38,16 +38,26 @@ def test_route_explain_sample_asset_has_expected_diagnostics():
 
 
 def test_route_explain_sample_is_linked_from_pages_index():
+    # The Pages entrypoint `docs/index.html` is a redirect to the map console
+    # so first-time visitors land on the 2D/3D map. The diagnostics panel and
+    # the SVG diagram viewer live at `docs/diagram.html`; the redirect stub
+    # still needs to advertise both entry points so search engines / visitors
+    # with no-JS can reach them.
     index = (ROOT / "docs" / "index.html").read_text(encoding="utf-8")
+    diagram = (ROOT / "docs" / "diagram.html").read_text(encoding="utf-8")
     diagnostics_js = (ROOT / "docs" / "js" / "route_diagnostics.js").read_text(
         encoding="utf-8"
     )
 
-    assert "assets/route_explain_sample.json" in index
-    assert "route --explain" in index
-    assert 'id="route-diagnostics-compare"' in index
-    assert 'src="js/route_diagnostics.js"' in index
-    assert "Route search work is visible" in index
+    assert 'http-equiv="refresh"' in index
+    assert "map.html" in index
+    assert "diagram.html" in index
+
+    assert "assets/route_explain_sample.json" in diagram
+    assert "route --explain" in diagram
+    assert 'id="route-diagnostics-compare"' in diagram
+    assert 'src="js/route_diagnostics.js"' in diagram
+    assert "Route search work is visible" in diagram
     assert 'fetch("assets/route_explain_sample.json")' in diagnostics_js
     assert "renderDiagnosticsComparison" in diagnostics_js
 
