@@ -1074,6 +1074,13 @@ const REACHABLE_URLS = {
   paris_grid: "assets/reachable_paris_grid.geojson",
 };
 // Optional turn_restrictions JSON overlay (drawn as markers).
+// Per-dataset Lanelet2 OSM download (HD-lite, Autoware-compatible tags). The
+// toolbar link flips between these as the dataset changes; unsupported
+// datasets hide the link entirely.
+const LANELET_URLS = {
+  paris_grid: "assets/map_paris_grid.lanelet.osm",
+  berlin_mitte: "assets/map_berlin_mitte.lanelet.osm",
+};
 const RESTRICTIONS_URLS = {
   paris_grid: "assets/paris_grid_turn_restrictions.json",
 };
@@ -2191,6 +2198,24 @@ async function show(which) {
     activeStats.highwayTagged,
     activeStats.edges
   );
+  const laneletUrl = LANELET_URLS[which];
+  const laneletLink = document.getElementById("lanelet-download");
+  if (laneletLink) {
+    if (laneletUrl) {
+      laneletLink.href = laneletUrl;
+      laneletLink.hidden = false;
+      laneletLink.textContent =
+        "Lanelet2 OSM (" +
+        (which === "paris_grid"
+          ? "Paris"
+          : which === "berlin_mitte"
+            ? "Berlin"
+            : which) +
+        ")";
+    } else {
+      laneletLink.hidden = true;
+    }
+  }
 
   const gj = L.geoJSON(data, {
     style: styleLine,

@@ -1565,6 +1565,26 @@ def main() -> None:
             json.dumps(raw, separators=(",", ":")), encoding="utf-8"
         )
         berlin_geo_tmp.unlink(missing_ok=True)
+        try:
+            from roadgraph_builder.cli.hd import apply_lane_inferences
+            from roadgraph_builder.hd.lane_inference import infer_lane_counts
+            from roadgraph_builder.io.export.lanelet2 import (
+                export_lanelet2_per_lane,
+            )
+
+            berlin_inferences = infer_lane_counts(
+                berlin_graph.to_dict(),
+                base_lane_width_m=3.5,
+            )
+            apply_lane_inferences(berlin_graph, berlin_inferences)
+            export_lanelet2_per_lane(
+                berlin_graph,
+                ASSETS / "map_berlin_mitte.lanelet.osm",
+                origin_lat=berlin_origin["latitude"],
+                origin_lon=berlin_origin["longitude"],
+            )
+        except Exception as exc:  # pragma: no cover - best-effort docs refresh
+            print(f"berlin_mitte Lanelet2 export skipped: {exc}")
 
     _write_paris_grid_reachability_asset()
     _write_route_explain_sample_asset()

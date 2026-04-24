@@ -82,6 +82,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   browser smoke covers the `n312 → n191` deep link, asserting the card is
   visible, multiple steps render, and the URL retains `from` / `to`.
 
+- **Berlin Mitte ships a per-lane Lanelet2 OSM + the viewer picks it automatically.**
+  The Berlin Mitte refresh path now runs the same
+  `infer_lane_counts` + `export_lanelet2_per_lane` pipeline as Paris, so
+  `docs/assets/map_berlin_mitte.lanelet.osm` (≈5 MB, Autoware-spec tags
+  including `one_way` / `participant:vehicle` / `speed_limit` / `name`)
+  is committed alongside the GeoJSON. `validate-lanelet2-tags` reports
+  `result: ok` with 0 errors. The map console's `Lanelet2 OSM` toolbar
+  link now consults a per-dataset `LANELET_URLS` map and flips between
+  the Paris and Berlin outputs as the user switches datasets; unsupported
+  datasets hide the link entirely.
+
 - **Paris regulatory overlay switches from synthetic samples to real OSM nodes.**
   A new `scripts/fetch_osm_regulatory_nodes.py` fetches
   `highway=traffic_signals | stop | crossing | give_way | speed_camera` from
