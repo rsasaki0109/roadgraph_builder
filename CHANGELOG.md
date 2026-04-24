@@ -82,6 +82,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   browser smoke covers the `n312 → n191` deep link, asserting the card is
   visible, multiple steps render, and the URL retains `from` / `to`.
 
+- **README and Showcase reorganised around the map console.**
+  `README.md` and `docs/SHOWCASE.md` now lead with the animated map-console
+  hero and a **From SD to HD** tier table that walks visitors through
+  Basic / SD / HD / Full with the matching pipeline step for each tier
+  (`build-osm-graph`, `convert-osm-restrictions` + `route`,
+  `enrich --lane-width-m` + `apply-camera` + `reachable`). The older
+  "Visualization results" section is consolidated into the top so every
+  GitHub reader sees the animated + static previews, inspector
+  explanation, and local-run snippet before the feature table. No code
+  changes.
+
 - **SD / HD layer tier toggle in the map console.**
   A new `Mode` select in the toolbar switches between four layer tiers:
   **Basic** (centerlines + nodes + trajectory), **SD** (+ route + turn
