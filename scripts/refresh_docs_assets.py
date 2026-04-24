@@ -1171,6 +1171,34 @@ def main() -> None:
                     apply_camera_detections_to_graph,
                 )
                 apply_camera_detections_to_graph(grid, paris_camera_observations)
+        # Infer a per-edge lane count (defaults to 1 lane when no lane_markings
+        # or trace_stats are available — which is the Paris-grid case) and
+        # emit a committed per-lane Lanelet2 OSM so the docs can demonstrate
+        # Autoware-compatible output without a CLI run.
+        try:
+            from roadgraph_builder.cli.hd import apply_lane_inferences
+            from roadgraph_builder.hd.lane_inference import infer_lane_counts
+            from roadgraph_builder.io.export.lanelet2 import (
+                export_lanelet2_per_lane,
+            )
+
+            inferences = infer_lane_counts(
+                grid.to_dict(),
+                base_lane_width_m=3.5,
+            )
+            apply_lane_inferences(grid, inferences)
+            if paris_camera_observations:
+                # Re-apply semantic rules so lane inference did not shadow them.
+                apply_camera_detections_to_graph(grid, paris_camera_observations)
+            paris_lanelet_path = ASSETS / "map_paris_grid.lanelet.osm"
+            export_lanelet2_per_lane(
+                grid,
+                paris_lanelet_path,
+                origin_lat=lat0,
+                origin_lon=lon0,
+            )
+        except Exception as exc:  # pragma: no cover - best-effort docs refresh
+            print(f"paris_grid Lanelet2 export skipped: {exc}")
         tr_raw = load_overpass_json(paris_tr_raw)
         conv = convert_osm_restrictions_to_graph(grid, tr_raw, max_snap_distance_m=15.0)
         cleaned = strip_private_fields(conv.restrictions)

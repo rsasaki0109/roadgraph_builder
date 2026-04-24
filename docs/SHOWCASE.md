@@ -5,6 +5,15 @@ graph from GPS trajectories or OSM highway ways, inspect it in a real map
 console, route and reach on it, enrich it with lane boundaries and regulatory
 overlays, and export to navigation JSON / simulation GeoJSON / Lanelet2 OSM.
 
+> **Scope reminder — HD-lite, not survey-grade.** The committed
+> [`map_paris_grid.lanelet.osm`](assets/map_paris_grid.lanelet.osm) is valid
+> Lanelet2 OSM XML that Autoware's `lanelet2_validation` can load, but lane
+> widths are centerline-offset envelopes (3.5 m default), lane counts fall
+> back to 1 without real markings, regulatory markers on the Paris grid are
+> synthetic, and elevation is absent without a `z`-bearing trajectory.
+> Autonomous vehicle deployment still needs cm-class survey, calibrated
+> sensors, and per-area QA — this toolkit does not replace those steps.
+
 ![Map console animated hero: Paris deep-link route in 2D, then 3D auto-rotate with road-class + junction colour coding](images/map_console_hero.gif)
 
 ## From SD to HD in the map console

@@ -8,6 +8,8 @@
 
 Build once; get a graph you can **inspect in 2D and 3D**, **route and reach** on, **enrich to HD-lite lanes + regulatory overlays**, and export to **navigation JSON / simulation GeoJSON / Lanelet2 OSM XML**. The repository ships the pipeline, the schemas, the CLI, and a static map console that visualises every one of those layers from the committed sample data.
 
+> **Scope — HD-lite, not survey-grade.** The pipeline produces Lanelet2-compatible OSM XML that Autoware's `lanelet2_validation` can load (see the committed [`docs/assets/map_paris_grid.lanelet.osm`](docs/assets/map_paris_grid.lanelet.osm)), but it is **not** a survey-grade HD map for autonomous vehicle deployment. Lane widths are centerline-offset envelopes (default 3.5 m), lane counts fall back to 1 when real markings are absent, regulatory overlays are hand-authored synthetic samples, and elevation is only populated when a trajectory carries a `z` column. Real vehicle deployment still requires calibrated sensors, cm-class validation, and per-area QA beyond what this tool guarantees.
+
 [![Map console animated hero: Paris deep-link route in 2D, then 3D auto-rotate with road-class + junction colour coding](docs/images/map_console_hero.gif)](docs/map.html)
 
 > The animation above is the `docs/` map console running against the committed Paris OSM-highway sample — the same graph the pipeline produces, coloured by OSM `highway` class, decorated with HD-lite lane boundaries and synthetic regulatory markers, and walked end-to-end by the JS Dijkstra that mirrors the CLI's `route --explain` diagnostics.
@@ -24,6 +26,7 @@ The toolbar's **Mode** select walks through the pipeline tiers on any committed 
 | **SD** | + directed-state **route** (JS Dijkstra honouring OSM `no_*` / `only_*`) + **turn restriction** markers | The committed `n312 → n191` route is **909 m** with restrictions vs **878 m** without — 31 m detour, 11 edges, 8 TR honoured, matching the CLI. |
 | **HD** | + HD-lite **lane boundaries** (green / purple dashes from `enrich --lane-width-m 3.5`) + synthetic **traffic lights / stop lines / crosswalks / speed limits** + 500 m **reachability** spans | 2 162 lane boundaries, 9 regulatory markers, 279 reachable edges / 96 reachable nodes in the committed Paris sample — same overlays `apply-camera` and `reachable` produce from the CLI. |
 | **Full** | Everything above | Default when the viewer opens; click **Reach from click** to pick any node and recompute reachability live in the browser. |
+| **Lanelet2** | Downloadable per-lane OSM XML for Autoware tooling | [`docs/assets/map_paris_grid.lanelet.osm`](docs/assets/map_paris_grid.lanelet.osm) — 1 081 `type=lanelet` relations with left/right boundary ways, emitted by `export_lanelet2_per_lane()` after `infer_lane_counts`. HD-lite envelopes, not survey-grade. |
 
 [![2D map console: Paris OSM grid with road-class colours, HD-lite lanes, regulatory markers, and inspector cards](docs/images/map_console_2d.png)](docs/map.html)
 

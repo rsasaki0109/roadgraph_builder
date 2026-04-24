@@ -146,6 +146,15 @@
         </li>
       </ul>
       <p class="small">
+        <strong>Scope:</strong> HD-lite, not survey-grade. The pipeline exports
+        <a href="assets/map_paris_grid.lanelet.osm">Lanelet2 OSM XML</a>
+        (Autoware's <code>lanelet2_validation</code> can load it), but lane
+        widths are 3.5&nbsp;m offsets, lane counts fall back to 1 without real
+        markings, regulatory markers on this dataset are synthetic, and
+        elevation is absent. Autonomous vehicle deployment still needs
+        cm-class survey, calibrated sensors, and per-area QA.
+      </p>
+      <p class="small">
         Source on
         <a href="https://github.com/rsasaki0109/roadgraph_builder">GitHub</a>.
         The same console is served by <code>cd docs &amp;&amp; python3 -m

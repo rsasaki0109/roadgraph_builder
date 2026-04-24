@@ -82,6 +82,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   browser smoke covers the `n312 → n191` deep link, asserting the card is
   visible, multiple steps render, and the URL retains `from` / `to`.
 
+- **Paris grid ships a per-lane Lanelet2 OSM artifact + an HD-lite scope notice.**
+  `scripts/refresh_docs_assets.py` now runs
+  `infer_lane_counts(base_lane_width_m=3.5)` on the committed Paris OSM grid
+  and exports a committed
+  [`docs/assets/map_paris_grid.lanelet.osm`](docs/assets/map_paris_grid.lanelet.osm)
+  (1 081 `type=lanelet` relations + 2 162 boundary ways) via
+  `export_lanelet2_per_lane()`. Camera detections are re-applied after the
+  inference so the committed `semantic_rules` survive, and the map console
+  toolbar gained a `Lanelet2 OSM` download link. README, Showcase, the
+  Pages landing page, and `docs/assets/ATTRIBUTION.md` all now carry an
+  honest "**HD-lite, not survey-grade**" scope notice that names the real
+  gaps (3.5 m envelope lane widths, 1-lane fallback without markings,
+  synthetic regulatory overlays, elevation absent without `z`), so
+  visitors understand that Autoware can load the export but autonomous
+  vehicle deployment still needs calibrated sensors and cm-class QA.
+
 - **GitHub Pages entry point lands on the 2D / 3D map console.**
   Visitors opening `https://rsasaki0109.github.io/roadgraph_builder/` used
   to hit the SVG diagram viewer and see no map — the console lived at
