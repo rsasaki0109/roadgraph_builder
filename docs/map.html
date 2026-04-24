@@ -261,6 +261,59 @@
         color: #94a3b8;
         font-variant-numeric: tabular-nums;
       }
+      .classes-card {
+        display: grid;
+        gap: 6px;
+        padding: 10px;
+        border: 1px solid #273449;
+        border-radius: 8px;
+        background: #0f172a;
+        font-size: 12px;
+        color: #e5e7eb;
+        max-height: 220px;
+        overflow: auto;
+      }
+      .classes-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        color: #dbeafe;
+      }
+      .classes-head strong {
+        font-size: 12px;
+      }
+      .classes-head span {
+        color: #94a3b8;
+        font-size: 11px;
+      }
+      .classes-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: 3px;
+      }
+      .classes-list li {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        line-height: 1.25;
+      }
+      .classes-list .cdot {
+        display: inline-block;
+        width: 14px;
+        height: 4px;
+        border-radius: 2px;
+        flex: 0 0 auto;
+      }
+      .classes-list .clabel {
+        flex: 1 1 auto;
+        color: #e5e7eb;
+      }
+      .classes-list .ccount {
+        color: #94a3b8;
+        font-variant-numeric: tabular-nums;
+      }
       .bar {
         position: relative;
         z-index: 10;
@@ -442,6 +495,13 @@
           <label>Route overlay <input type="checkbox" id="toggle-route" checked /></label>
           <label>Reachability <input type="checkbox" id="toggle-reachability" checked /></label>
           <label>Turn restrictions <input type="checkbox" id="toggle-restrictions" checked /></label>
+        </div>
+        <div class="classes-card" id="classes-card" hidden aria-label="Road classes">
+          <div class="classes-head">
+            <strong>Road classes</strong>
+            <span id="classes-total">—</span>
+          </div>
+          <ul class="classes-list" id="classes-list"></ul>
         </div>
         <div class="junctions-card" id="junctions-card" aria-label="Junction types">
           <div class="junctions-head">

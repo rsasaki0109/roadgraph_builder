@@ -40,6 +40,176 @@ def _coords(line: object) -> list[tuple[float, float]]:
     return out
 
 
+def _collect_osm_way_polylines(
+    overpass_json: dict,
+    origin_lat: float,
+    origin_lon: float,
+    wanted: frozenset[str],
+) -> list[dict]:
+    """Return per-way OSM metadata + meter-frame polyline for nearest-edge
+    matching. One OSM way may map to many graph edges (because X/T
+    junction splitting subdivides a way), so we attach tags back per edge
+    rather than per way.
+    """
+    from roadgraph_builder.utils.geo import lonlat_to_meters
+
+    nodes_ll: dict[int, tuple[float, float]] = {}
+    ways: list[dict] = []
+    for el in overpass_json.get("elements") or []:
+        kind = el.get("type")
+        if kind == "node":
+            nid = el.get("id")
+            lat = el.get("lat")
+            lon = el.get("lon")
+            if isinstance(nid, int) and isinstance(lat, (int, float)) and isinstance(lon, (int, float)):
+                nodes_ll[int(nid)] = (float(lon), float(lat))
+        elif kind == "way":
+            ways.append(el)
+    out: list[dict] = []
+    for way in ways:
+        tags = way.get("tags") or {}
+        if not isinstance(tags, dict):
+            tags = {}
+        hwy = tags.get("highway")
+        if not isinstance(hwy, str) or hwy not in wanted:
+            continue
+        refs = way.get("nodes") or []
+        coords_m: list[tuple[float, float]] = []
+        for r in refs:
+            if not isinstance(r, int):
+                continue
+            ll = nodes_ll.get(r)
+            if ll is None:
+                continue
+            x, y = lonlat_to_meters(ll[0], ll[1], origin_lat, origin_lon)
+            coords_m.append((x, y))
+        if len(coords_m) < 2:
+            continue
+        out.append(
+            {
+                "tags": {
+                    "highway": hwy,
+                    "lanes": tags.get("lanes"),
+                    "maxspeed": tags.get("maxspeed"),
+                    "oneway": tags.get("oneway"),
+                    "name": tags.get("name"),
+                },
+                "coords_m": coords_m,
+            }
+        )
+    return out
+
+
+def _point_to_polyline_distance_m(
+    px: float, py: float, polyline: list[tuple[float, float]]
+) -> float:
+    best = float("inf")
+    if len(polyline) < 2:
+        return best
+    for i in range(len(polyline) - 1):
+        x1, y1 = polyline[i]
+        x2, y2 = polyline[i + 1]
+        dx = x2 - x1
+        dy = y2 - y1
+        denom = dx * dx + dy * dy
+        if denom <= 0:
+            ex = px - x1
+            ey = py - y1
+        else:
+            t = ((px - x1) * dx + (py - y1) * dy) / denom
+            if t < 0.0:
+                t = 0.0
+            elif t > 1.0:
+                t = 1.0
+            qx = x1 + t * dx
+            qy = y1 + t * dy
+            ex = px - qx
+            ey = py - qy
+        d2 = ex * ex + ey * ey
+        if d2 < best:
+            best = d2
+    return best ** 0.5 if best < float("inf") else best
+
+
+def _inject_osm_tags_into_geojson(
+    geojson: dict,
+    origin_lat: float,
+    origin_lon: float,
+    way_specs: list[dict],
+    max_match_distance_m: float = 8.0,
+) -> dict:
+    """Stamp OSM highway / lanes / maxspeed / oneway / name tags onto every
+    centerline / lane_centerline feature by nearest point-to-polyline match
+    in the shared meter frame. Mutates ``geojson["features"]`` in place and
+    returns ``geojson`` for chaining.
+    """
+    from roadgraph_builder.utils.geo import lonlat_to_meters
+
+    for feature in geojson.get("features", []):
+        props = feature.get("properties") or {}
+        kind = props.get("kind")
+        if kind not in ("centerline", "lane_centerline"):
+            continue
+        geom = feature.get("geometry") or {}
+        if geom.get("type") != "LineString":
+            continue
+        coords = geom.get("coordinates") or []
+        if len(coords) < 2:
+            continue
+        mid = coords[len(coords) // 2]
+        if not isinstance(mid, list) or len(mid) < 2:
+            continue
+        px, py = lonlat_to_meters(float(mid[0]), float(mid[1]), origin_lat, origin_lon)
+        best = None
+        best_d = max_match_distance_m
+        for spec in way_specs:
+            d = _point_to_polyline_distance_m(px, py, spec["coords_m"])
+            if d < best_d:
+                best_d = d
+                best = spec
+        if best is None:
+            continue
+        tags = best["tags"]
+        if tags.get("highway"):
+            props["highway"] = str(tags["highway"])
+        if tags.get("lanes"):
+            lanes_raw = str(tags["lanes"]).strip()
+            try:
+                lanes_int = int(lanes_raw)
+            except ValueError:
+                lanes_int = None
+            if lanes_int is not None and lanes_int > 0:
+                props["osm_lanes"] = lanes_int
+        if tags.get("maxspeed"):
+            props["osm_maxspeed"] = str(tags["maxspeed"])
+        if tags.get("oneway"):
+            props["osm_oneway"] = str(tags["oneway"])
+        if tags.get("name"):
+            props["osm_name"] = str(tags["name"])
+    return geojson
+
+
+_OSM_WANTED_HIGHWAYS = frozenset(
+    {
+        "motorway",
+        "motorway_link",
+        "trunk",
+        "trunk_link",
+        "primary",
+        "primary_link",
+        "secondary",
+        "secondary_link",
+        "tertiary",
+        "tertiary_link",
+        "unclassified",
+        "residential",
+        "living_street",
+        "service",
+        "road",
+    }
+)
+
+
 def _graph_from_map_geojson(path: Path):
     """Rebuild a meter-frame Graph from a committed map GeoJSON asset."""
 
@@ -929,6 +1099,13 @@ def main() -> None:
             p = f["properties"]
             for k in ("source", "direction_observed"):
                 p.pop(k, None)
+        # Stamp OSM highway / lanes tags onto centerlines so the viewer can
+        # colour-code by road class and surface lane counts. Match by
+        # nearest point-to-polyline in the shared meter frame.
+        paris_way_specs = _collect_osm_way_polylines(
+            hovp, lat0, lon0, _OSM_WANTED_HIGHWAYS
+        )
+        _inject_osm_tags_into_geojson(raw, lat0, lon0, paris_way_specs)
         (ASSETS / "map_paris_grid.geojson").write_text(
             json.dumps(raw, separators=(",", ":")), encoding="utf-8"
         )
@@ -999,6 +1176,18 @@ def main() -> None:
             pp = f["properties"]
             for k in ("source", "direction_observed"):
                 pp.pop(k, None)
+        berlin_way_specs = _collect_osm_way_polylines(
+            hovp,
+            berlin_origin["latitude"],
+            berlin_origin["longitude"],
+            _OSM_WANTED_HIGHWAYS,
+        )
+        _inject_osm_tags_into_geojson(
+            raw,
+            berlin_origin["latitude"],
+            berlin_origin["longitude"],
+            berlin_way_specs,
+        )
         (ASSETS / "map_berlin_mitte.geojson").write_text(
             json.dumps(raw, separators=(",", ":")), encoding="utf-8"
         )

@@ -49,6 +49,16 @@ test("2D desktop loads Paris grid with overlays", async ({ page }) => {
   ).toBeGreaterThanOrEqual(4);
   const totalText = (await page.textContent("#junctions-total")) || "";
   expect(totalText).toMatch(/\d+ types · \d+ nodes/);
+
+  // Road classes breakdown exists when OSM highway tags are injected.
+  await expect(page.locator("#classes-card")).toBeVisible();
+  const classesCount = await page.locator("#classes-list li").count();
+  expect(
+    classesCount,
+    "paris_grid should have multiple OSM highway classes",
+  ).toBeGreaterThanOrEqual(4);
+  const classesTotal = (await page.textContent("#classes-total")) || "";
+  expect(classesTotal).toMatch(/\d+ classes · \d+\/\d+ tagged/);
 });
 
 test("3D desktop renders a non-blank WebGL canvas", async ({ page }) => {

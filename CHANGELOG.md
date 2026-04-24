@@ -82,6 +82,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   browser smoke covers the `n312 → n191` deep link, asserting the card is
   visible, multiple steps render, and the URL retains `from` / `to`.
 
+- **Centerlines are coloured by OSM road class with OSM lane counts exposed.**
+  `scripts/refresh_docs_assets.py` now re-reads the raw Overpass highways JSON
+  after graph construction and stamps `highway` / `osm_lanes` / `osm_maxspeed`
+  / `osm_name` / `osm_oneway` onto every centerline feature via a
+  point-to-polyline nearest-way match. For the Paris grid, 1 080 of 1 081
+  centerlines end up tagged (residential 429, service 172, living_street 140,
+  secondary 138, tertiary 99, primary 68, unclassified 31, primary_link 3);
+  Berlin Mitte runs through the same helper. The map console added a
+  `HIGHWAY_COLORS` / `HIGHWAY_LABELS` palette so both the 2D Leaflet polylines
+  and the 3D Three.js lines draw every centerline in its road-class colour
+  (motorway → red through residential → cyan), the Leaflet popups and
+  `#hover-card` now show `Edge · Primary · 3 lanes` plus maxspeed / street
+  name when known, and a new `#classes-card` in the inspector lists the
+  active dataset's class counts with matching colour swatches. Browser smoke
+  asserts the card is populated (≥ 4 classes with the expected `N classes ·
+  N/N tagged` header). Hero screenshots were regenerated so the committed 2D
+  and 3D captures carry the road-class palette.
+
 - **Graph nodes in the map console are coloured by junction type.**
   `docs/js/map_console.js` now reads `junction_type` / `junction_hint` from
   every node feature and paints markers with a shared palette across the 2D

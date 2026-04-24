@@ -82,6 +82,81 @@ function junctionColor(props) {
   return JUNCTION_COLORS[junctionCategory(props)];
 }
 
+// OSM-highway road-class palette for centerlines. Higher-class ways run warmer
+// (red → amber → yellow), lower-class cool down to cyan / slate. Link
+// variants get a lighter tint of the parent colour. Must be declared before
+// the Leaflet legend because legend.onAdd is called synchronously on
+// legend.addTo() and references these constants.
+const HIGHWAY_COLORS = {
+  motorway: "#ef4444",
+  motorway_link: "#fca5a5",
+  trunk: "#f97316",
+  trunk_link: "#fdba74",
+  primary: "#f59e0b",
+  primary_link: "#fcd34d",
+  secondary: "#facc15",
+  secondary_link: "#fef08a",
+  tertiary: "#84cc16",
+  tertiary_link: "#bef264",
+  unclassified: "#22c55e",
+  residential: "#06b6d4",
+  living_street: "#3b82f6",
+  service: "#64748b",
+  road: "#94a3b8",
+  other: "#ea580c",
+};
+const HIGHWAY_ORDER = [
+  "motorway",
+  "motorway_link",
+  "trunk",
+  "trunk_link",
+  "primary",
+  "primary_link",
+  "secondary",
+  "secondary_link",
+  "tertiary",
+  "tertiary_link",
+  "unclassified",
+  "residential",
+  "living_street",
+  "service",
+  "road",
+  "other",
+];
+const HIGHWAY_LABELS = {
+  motorway: "Motorway",
+  motorway_link: "Motorway link",
+  trunk: "Trunk",
+  trunk_link: "Trunk link",
+  primary: "Primary",
+  primary_link: "Primary link",
+  secondary: "Secondary",
+  secondary_link: "Secondary link",
+  tertiary: "Tertiary",
+  tertiary_link: "Tertiary link",
+  unclassified: "Unclassified",
+  residential: "Residential",
+  living_street: "Living street",
+  service: "Service",
+  road: "Road",
+  other: "Other",
+};
+
+function highwayCategory(props) {
+  const raw = (props && props.highway) || null;
+  if (raw && HIGHWAY_COLORS[raw]) return raw;
+  return "other";
+}
+
+function highwayColor(props) {
+  return HIGHWAY_COLORS[highwayCategory(props)];
+}
+
+function highwayColorHexInt(props) {
+  const hex = highwayColor(props);
+  return parseInt(hex.slice(1), 16);
+}
+
 const legend = L.control({ position: "bottomright" });
 legend.onAdd = function () {
   const div = L.DomUtil.create("div", "map-legend");
@@ -103,10 +178,30 @@ legend.onAdd = function () {
         "</div>"
     )
     .join("");
+  const highwayRows = [
+    "motorway",
+    "trunk",
+    "primary",
+    "secondary",
+    "tertiary",
+    "unclassified",
+    "residential",
+    "living_street",
+    "service",
+  ]
+    .map(
+      (cat) =>
+        '<div class="lg"><span class="sw" style="background:' +
+        HIGHWAY_COLORS[cat] +
+        '"></span> ' +
+        HIGHWAY_LABELS[cat] +
+        "</div>"
+    )
+    .join("");
   div.innerHTML =
     "<strong>Legend</strong>" +
     '<div class="lg"><span class="sw" style="background:#2563eb"></span> GPS trajectory</div>' +
-    '<div class="lg"><span class="sw" style="background:#ea580c"></span> Centerline</div>' +
+    highwayRows +
     '<div class="lg"><span class="sw" style="background:#16a34a"></span> Lane boundary (L)</div>' +
     '<div class="lg"><span class="sw" style="background:#9333ea"></span> Lane boundary (R)</div>' +
     '<div class="lg"><span class="sw" style="background:#0f766e"></span> Reachable span</div>' +
@@ -121,13 +216,22 @@ legend.onAdd = function () {
 };
 legend.addTo(map);
 
+// Road-class palette keyed off OSM highway=*. Higher-class ways are warmer
+// (red → amber → yellow) and lower-class ways cool down to slate; the
+// `*_link` variants get a slightly brighter tint so motorway ramps and link
+// roads still read against their parent. Defined before styleLine because
+// the function uses it for every centerline feature.
 function styleLine(f) {
   const k = f.properties && f.properties.kind;
   if (k === "trajectory") {
     return { color: "#2563eb", weight: 4, opacity: 0.75 };
   }
   if (k === "centerline" || k === "lane_centerline") {
-    return { color: "#ea580c", weight: 5, opacity: 0.9 };
+    return {
+      color: highwayColor(f.properties || {}),
+      weight: 5,
+      opacity: 0.92,
+    };
   }
   if (k === "lane_boundary_left") {
     return { color: "#16a34a", weight: 3, opacity: 0.88, dashArray: "8 6" };
@@ -505,7 +609,14 @@ function setHoverCard(hit) {
     if (hintEl) hintEl.textContent = "Click a second node to route between them.";
     return;
   }
-  kindEl.textContent = labelForKind(hit.kind) || "Edge";
+  const kindPieces = [labelForKind(hit.kind) || "Edge"];
+  if (hit.highway) {
+    kindPieces.push(HIGHWAY_LABELS[hit.highway] || hit.highway);
+  }
+  if (typeof hit.osmLanes === "number") {
+    kindPieces.push(hit.osmLanes + " lane" + (hit.osmLanes === 1 ? "" : "s"));
+  }
+  kindEl.textContent = kindPieces.join(" · ");
   labelEl.textContent = "Edge ID";
   idEl.textContent = hit.edgeId || "—";
   lenEl.textContent = Number.isFinite(hit.lengthM)
@@ -513,9 +624,17 @@ function setHoverCard(hit) {
     : "—";
   endEl.textContent = (hit.startNode || "?") + " → " + (hit.endNode || "?");
   if (hintEl) {
-    hintEl.textContent = hit.kind === "route"
-      ? "Current dynamic / prebuilt route; click Clear route to reset."
-      : "Edge centerline. Click a node marker (red) to start routing.";
+    const extras = [];
+    if (hit.osmMaxspeed) extras.push(hit.osmMaxspeed);
+    if (hit.osmName) extras.push(hit.osmName);
+    if (hit.kind === "route") {
+      hintEl.textContent =
+        "Current dynamic / prebuilt route; click Clear route to reset.";
+    } else if (extras.length) {
+      hintEl.textContent = extras.join(" · ");
+    } else {
+      hintEl.textContent = "Edge centerline. Click a node marker to start routing.";
+    }
   }
 }
 
@@ -600,8 +719,12 @@ async function render3DScene() {
         const pts = (feature.geometry.coordinates || []).map((coord) => point(coord, kind));
         if (pts.length < 2) continue;
         const geom = new THREE.BufferGeometry().setFromPoints(pts);
+        const lineColor =
+          kind === "centerline" || kind === "lane_centerline"
+            ? highwayColorHexInt(props)
+            : colorFor3D(kind);
         const mat = new THREE.LineBasicMaterial({
-          color: colorFor3D(kind),
+          color: lineColor,
           transparent: true,
           opacity: kind === "reachable_edge" ? 0.68 : 0.95,
         });
@@ -618,6 +741,11 @@ async function render3DScene() {
           startNode: props.start_node_id || props.from_node || null,
           endNode: props.end_node_id || props.to_node || null,
           direction: props.direction || null,
+          highway: props.highway || null,
+          osmLanes:
+            typeof props.osm_lanes === "number" ? props.osm_lanes : null,
+          osmMaxspeed: props.osm_maxspeed || null,
+          osmName: props.osm_name || null,
         };
         root.add(line);
         if (kind === "centerline" || kind === "lane_centerline") {
@@ -815,6 +943,8 @@ function summarizeBase(data) {
     reachableEdges: 0,
     restrictions: 0,
     junctionCounts: {},
+    highwayCounts: {},
+    highwayTagged: 0,
   };
   for (const f of data.features || []) {
     const p = f.properties || {};
@@ -823,11 +953,56 @@ function summarizeBase(data) {
       const cat = junctionCategory(p);
       stats.junctionCounts[cat] = (stats.junctionCounts[cat] || 0) + 1;
     }
-    if (p.kind === "centerline" || p.kind === "lane_centerline") stats.edges += 1;
+    if (p.kind === "centerline" || p.kind === "lane_centerline") {
+      stats.edges += 1;
+      if (p.highway) stats.highwayTagged += 1;
+      const hcat = highwayCategory(p);
+      stats.highwayCounts[hcat] = (stats.highwayCounts[hcat] || 0) + 1;
+    }
     if (p.kind === "lane_boundary_left" || p.kind === "lane_boundary_right") stats.lanes += 1;
     if (p.kind === "trajectory") stats.trajectory += 1;
   }
   return stats;
+}
+
+function renderClassesBreakdown(counts, taggedEdges, totalEdges) {
+  const list = document.getElementById("classes-list");
+  const total = document.getElementById("classes-total");
+  const card = document.getElementById("classes-card");
+  if (!list || !total || !card) return;
+  list.innerHTML = "";
+  let shown = 0;
+  // Hide the card entirely when no edge carries a highway tag (e.g. toy).
+  const hasAnyTag = taggedEdges > 0;
+  if (!hasAnyTag) {
+    total.textContent = "—";
+    card.hidden = true;
+    return;
+  }
+  for (const cat of HIGHWAY_ORDER) {
+    const n = counts?.[cat] || 0;
+    if (!n) continue;
+    shown += 1;
+    const li = document.createElement("li");
+    const dot = document.createElement("span");
+    dot.className = "cdot";
+    dot.style.background = HIGHWAY_COLORS[cat];
+    const label = document.createElement("span");
+    label.className = "clabel";
+    label.textContent = HIGHWAY_LABELS[cat] || cat;
+    const count = document.createElement("span");
+    count.className = "ccount";
+    count.textContent = String(n);
+    li.appendChild(dot);
+    li.appendChild(label);
+    li.appendChild(count);
+    list.appendChild(li);
+  }
+  total.textContent =
+    shown > 0
+      ? `${shown} classes · ${taggedEdges}/${totalEdges} tagged`
+      : `${totalEdges} edges`;
+  card.hidden = !shown;
 }
 
 function renderJunctionsBreakdown(counts, totalNodes) {
@@ -928,6 +1103,20 @@ function bindCommonPopups(f, layer) {
     });
   } else if ((p.kind === "centerline" || p.kind === "lane_centerline") && p.edge_id) {
     let txt = String(p.edge_id);
+    if (p.highway) {
+      txt +=
+        "<br/>" +
+        (HIGHWAY_LABELS[p.highway] || p.highway) +
+        (typeof p.osm_lanes === "number"
+          ? " · " + p.osm_lanes + " lane" + (p.osm_lanes === 1 ? "" : "s")
+          : "");
+    }
+    if (p.osm_maxspeed) {
+      txt += "<br/>maxspeed: " + p.osm_maxspeed;
+    }
+    if (p.osm_name) {
+      txt += "<br/>" + p.osm_name;
+    }
     if (p.semantic_summary) {
       txt += "<br/>" + String(p.semantic_summary);
     }
@@ -1442,6 +1631,11 @@ async function show(which) {
   activeStats = summarizeBase(data);
   updateInspector(which, activeStats);
   renderJunctionsBreakdown(activeStats.junctionCounts, activeStats.nodes);
+  renderClassesBreakdown(
+    activeStats.highwayCounts,
+    activeStats.highwayTagged,
+    activeStats.edges
+  );
 
   const gj = L.geoJSON(data, {
     style: styleLine,
