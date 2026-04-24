@@ -82,6 +82,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   browser smoke covers the `n312 → n191` deep link, asserting the card is
   visible, multiple steps render, and the URL retains `from` / `to`.
 
+- **Synthetic camera / regulatory overlay on the Paris grid viewer.**
+  A committed, hand-authored
+  `docs/assets/paris_grid_camera_detections.json` carries nine synthetic
+  detections (three `traffic_light`, two `stop_line`, two `crosswalk`, two
+  `speed_limit`) placed along the committed Paris TR route.
+  `scripts/refresh_docs_assets.py` applies them through
+  `apply_camera_detections_to_graph` before exporting, then post-processes
+  the GeoJSON to add one Point feature per detection at a sensible
+  position along the owning centerline (traffic lights at 0.92 of the
+  polyline length, stop lines at 0.85, crosswalks / speed limits at the
+  midpoint). The viewer renders each kind with a distinct colour-coded
+  marker, popups show the kind / edge id / confidence / source, the
+  Leaflet legend documents the palette, and a new `#stat-semantics`
+  inspector tile surfaces the count. Browser smoke asserts the count is
+  populated on Paris grid. Labels are synthetic repo-licensed data and
+  not real perception output; the JSON's `notes` field spells this out.
+
 - **Route engine diagnostics surface inside the map console.**
   The viewer's directed-state JS Dijkstra now counts expanded states,
   queued states, and heap pops during its heap loop and returns them on

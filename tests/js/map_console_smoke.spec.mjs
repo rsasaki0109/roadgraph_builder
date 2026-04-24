@@ -59,6 +59,13 @@ test("2D desktop loads Paris grid with overlays", async ({ page }) => {
   ).toBeGreaterThanOrEqual(4);
   const classesTotal = (await page.textContent("#classes-total")) || "";
   expect(classesTotal).toMatch(/\d+ classes · \d+\/\d+ tagged/);
+
+  // Synthetic camera / regulatory overlay populates the inspector count.
+  const semantics = countText(await page.textContent("#stat-semantics"));
+  expect(
+    semantics,
+    "paris_grid ships synthetic traffic-light / stop-line / crosswalk / speed_limit markers",
+  ).toBeGreaterThanOrEqual(4);
 });
 
 test("3D desktop renders a non-blank WebGL canvas", async ({ page }) => {

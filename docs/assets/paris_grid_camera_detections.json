@@ -1,0 +1,63 @@
+{
+  "format_version": 1,
+  "license": "MIT (synthetic labels authored for the docs viewer — no real camera imagery)",
+  "notes": "Hand-authored synthetic camera detections placed along the committed Paris TR-aware route (n312 → n191). They mirror the shape produced by scripts/generate_camera_demo.py so the viewer can render HD-like regulatory overlays without shipping any real-world perception output.",
+  "observations": [
+    {
+      "edge_id": "e224",
+      "kind": "traffic_light",
+      "confidence": 0.92,
+      "source": "synthetic_demo"
+    },
+    {
+      "edge_id": "e657",
+      "kind": "speed_limit",
+      "value_kmh": 50,
+      "confidence": 0.88,
+      "source": "synthetic_demo"
+    },
+    {
+      "edge_id": "e576",
+      "kind": "crosswalk",
+      "confidence": 0.81,
+      "source": "synthetic_demo"
+    },
+    {
+      "edge_id": "e1062",
+      "kind": "stop_line",
+      "confidence": 0.78,
+      "source": "synthetic_demo"
+    },
+    {
+      "edge_id": "e1061",
+      "kind": "speed_limit",
+      "value_kmh": 30,
+      "confidence": 0.82,
+      "source": "synthetic_demo"
+    },
+    {
+      "edge_id": "e513",
+      "kind": "traffic_light",
+      "confidence": 0.9,
+      "source": "synthetic_demo"
+    },
+    {
+      "edge_id": "e9",
+      "kind": "stop_line",
+      "confidence": 0.73,
+      "source": "synthetic_demo"
+    },
+    {
+      "edge_id": "e337",
+      "kind": "crosswalk",
+      "confidence": 0.76,
+      "source": "synthetic_demo"
+    },
+    {
+      "edge_id": "e129",
+      "kind": "traffic_light",
+      "confidence": 0.87,
+      "source": "synthetic_demo"
+    }
+  ]
+}

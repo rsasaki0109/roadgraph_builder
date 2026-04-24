@@ -40,6 +40,94 @@ def _coords(line: object) -> list[tuple[float, float]]:
     return out
 
 
+def _point_along_lonlat_polyline(
+    coords: list[list[float]], fraction: float
+) -> list[float] | None:
+    if not coords:
+        return None
+    if len(coords) < 2:
+        return list(coords[0])
+    fraction = max(0.0, min(1.0, float(fraction)))
+    total = 0.0
+    segs: list[tuple[float, float, list[float], list[float]]] = []
+    for a, b in zip(coords[:-1], coords[1:]):
+        dx = float(b[0]) - float(a[0])
+        dy = float(b[1]) - float(a[1])
+        d = (dx * dx + dy * dy) ** 0.5
+        segs.append((total, d, list(a), list(b)))
+        total += d
+    if total <= 0:
+        return list(coords[0])
+    target = total * fraction
+    for start, length, a, b in segs:
+        if start + length >= target:
+            f = (target - start) / length if length > 0 else 0.0
+            return [a[0] + f * (b[0] - a[0]), a[1] + f * (b[1] - a[1])]
+    return list(coords[-1])
+
+
+_SEMANTIC_KIND_FRACTIONS = {
+    "traffic_light": 0.92,
+    "stop_line": 0.85,
+    "crosswalk": 0.5,
+    "speed_limit": 0.5,
+}
+
+
+def _append_semantic_overlay_points(
+    geojson: dict,
+    detections_observations: list[dict],
+    dataset_name: str,
+) -> int:
+    """Emit one Point feature per detection observation so the viewer can
+    render a visible marker (traffic light / stop line / crosswalk / speed
+    limit) at a sensible spot along the owning centerline. Returns the
+    number of markers added.
+    """
+    edge_lookup: dict[str, list[list[float]]] = {}
+    for feat in geojson.get("features", []):
+        props = feat.get("properties") or {}
+        if props.get("kind") not in ("centerline", "lane_centerline"):
+            continue
+        eid = props.get("edge_id")
+        geom = feat.get("geometry") or {}
+        if not eid or geom.get("type") != "LineString":
+            continue
+        coords = geom.get("coordinates") or []
+        if len(coords) >= 2:
+            edge_lookup[str(eid)] = coords
+    added = 0
+    for obs in detections_observations:
+        eid = obs.get("edge_id")
+        kind = obs.get("kind")
+        if not eid or not kind:
+            continue
+        coords = edge_lookup.get(str(eid))
+        if not coords:
+            continue
+        fraction = _SEMANTIC_KIND_FRACTIONS.get(str(kind), 0.5)
+        pos = _point_along_lonlat_polyline(coords, fraction)
+        if pos is None:
+            continue
+        props: dict[str, object] = {
+            "kind": str(kind),
+            "dataset": dataset_name,
+            "edge_id": str(eid),
+        }
+        for k in ("value_kmh", "confidence", "source"):
+            if k in obs and obs[k] is not None:
+                props[k] = obs[k]
+        geojson["features"].append(
+            {
+                "type": "Feature",
+                "properties": props,
+                "geometry": {"type": "Point", "coordinates": pos},
+            }
+        )
+        added += 1
+    return added
+
+
 def _collect_osm_way_polylines(
     overpass_json: dict,
     origin_lat: float,
@@ -1065,6 +1153,24 @@ def main() -> None:
         # purple dashed lines. Without this the 3D / 2D views only show the
         # orange centerlines for the Paris grid.
         enrich_sd_to_hd(grid, SDToHDConfig(lane_width_m=3.5))
+        # Apply hand-authored synthetic camera detections (traffic lights,
+        # stop lines, crosswalks, speed limits) so the viewer surfaces
+        # regulatory elements on top of the OSM grid. The inputs live under
+        # docs/assets and are loaded below so export_map_geojson already sees
+        # edge.hd.semantic_rules.
+        paris_camera_json = ASSETS / "paris_grid_camera_detections.json"
+        paris_camera_observations: list[dict] = []
+        if paris_camera_json.is_file():
+            paris_camera_raw = json.loads(paris_camera_json.read_text(encoding="utf-8"))
+            paris_camera_observations = [
+                o for o in (paris_camera_raw.get("observations") or [])
+                if isinstance(o, dict) and o.get("edge_id") and o.get("kind")
+            ]
+            if paris_camera_observations:
+                from roadgraph_builder.io.camera.detections import (
+                    apply_camera_detections_to_graph,
+                )
+                apply_camera_detections_to_graph(grid, paris_camera_observations)
         tr_raw = load_overpass_json(paris_tr_raw)
         conv = convert_osm_restrictions_to_graph(grid, tr_raw, max_snap_distance_m=15.0)
         cleaned = strip_private_fields(conv.restrictions)
@@ -1106,6 +1212,10 @@ def main() -> None:
             hovp, lat0, lon0, _OSM_WANTED_HIGHWAYS
         )
         _inject_osm_tags_into_geojson(raw, lat0, lon0, paris_way_specs)
+        if paris_camera_observations:
+            _append_semantic_overlay_points(
+                raw, paris_camera_observations, "paris_grid"
+            )
         (ASSETS / "map_paris_grid.geojson").write_text(
             json.dumps(raw, separators=(",", ":")), encoding="utf-8"
         )

@@ -207,6 +207,10 @@ legend.onAdd = function () {
     '<div class="lg"><span class="sw" style="background:#0f766e"></span> Reachable span</div>' +
     '<div class="lg"><span class="sw" style="background:#facc15"></span> Route (Dijkstra)</div>' +
     junctionRows +
+    '<div class="lg"><span class="sw dot" style="background:#ef4444;border:2px solid #fef9c3;box-sizing:border-box"></span> Traffic light</div>' +
+    '<div class="lg"><span class="sw dot" style="background:#fafafa;border:2px solid #0f172a;box-sizing:border-box"></span> Stop line</div>' +
+    '<div class="lg"><span class="sw dot" style="background:#3b82f6;border:2px solid #fafafa;box-sizing:border-box"></span> Crosswalk</div>' +
+    '<div class="lg"><span class="sw dot" style="background:#fde047;border:2px solid #0f172a;box-sizing:border-box"></span> Speed limit</div>' +
     '<div class="lg"><span class="sw dot" style="background:#0f766e;border:2px solid #fff;box-sizing:border-box"></span> Reachability start</div>' +
     '<div class="lg"><span class="sw dot" style="background:#10b981;border:2px solid #fff;box-sizing:border-box"></span> Route start</div>' +
     '<div class="lg"><span class="sw dot" style="background:#ef4444;border:2px solid #fff;box-sizing:border-box"></span> Route end</div>' +
@@ -296,6 +300,46 @@ function pointLayer(f, latlng) {
       fillColor: junctionColor(f.properties || {}),
       color: "#0f172a",
       weight: 1.5,
+      opacity: 1,
+      fillOpacity: 0.95,
+    });
+  }
+  if (k === "traffic_light") {
+    return L.circleMarker(latlng, {
+      radius: 8,
+      fillColor: "#ef4444",
+      color: "#fef9c3",
+      weight: 2.5,
+      opacity: 1,
+      fillOpacity: 0.95,
+    });
+  }
+  if (k === "stop_line") {
+    return L.circleMarker(latlng, {
+      radius: 6,
+      fillColor: "#fafafa",
+      color: "#0f172a",
+      weight: 2.5,
+      opacity: 1,
+      fillOpacity: 0.95,
+    });
+  }
+  if (k === "crosswalk") {
+    return L.circleMarker(latlng, {
+      radius: 6,
+      fillColor: "#3b82f6",
+      color: "#fafafa",
+      weight: 2,
+      opacity: 1,
+      fillOpacity: 0.9,
+    });
+  }
+  if (k === "speed_limit") {
+    return L.circleMarker(latlng, {
+      radius: 7,
+      fillColor: "#fde047",
+      color: "#0f172a",
+      weight: 2,
       opacity: 1,
       fillOpacity: 0.95,
     });
@@ -933,6 +977,13 @@ function formatMeters(n) {
   return n.toFixed(0) + " m";
 }
 
+const SEMANTIC_KINDS = new Set([
+  "traffic_light",
+  "stop_line",
+  "crosswalk",
+  "speed_limit",
+]);
+
 function summarizeBase(data) {
   const stats = {
     nodes: 0,
@@ -942,6 +993,7 @@ function summarizeBase(data) {
     routeLength: NaN,
     reachableEdges: 0,
     restrictions: 0,
+    semantics: 0,
     junctionCounts: {},
     highwayCounts: {},
     highwayTagged: 0,
@@ -961,6 +1013,7 @@ function summarizeBase(data) {
     }
     if (p.kind === "lane_boundary_left" || p.kind === "lane_boundary_right") stats.lanes += 1;
     if (p.kind === "trajectory") stats.trajectory += 1;
+    if (SEMANTIC_KINDS.has(p.kind)) stats.semantics += 1;
   }
   return stats;
 }
@@ -1068,6 +1121,7 @@ function updateInspector(which, stats) {
   text("stat-route", formatMeters(activeStats.routeLength));
   text("stat-reach", formatCount(activeStats.reachableEdges));
   text("stat-tr", formatCount(activeStats.restrictions));
+  text("stat-semantics", formatCount(activeStats.semantics));
 }
 
 function overlayChecked(id) {
@@ -1143,6 +1197,21 @@ function bindCommonPopups(f, layer) {
     layer.bindPopup(
       (p.kind === "route_start" ? "start: " : "end: ") + String(p.node_id)
     );
+  } else if (
+    p.kind === "traffic_light" ||
+    p.kind === "stop_line" ||
+    p.kind === "crosswalk" ||
+    p.kind === "speed_limit"
+  ) {
+    const parts = [
+      p.kind === "speed_limit" && p.value_kmh
+        ? "speed_limit " + p.value_kmh + " km/h"
+        : String(p.kind).replace(/_/g, " "),
+    ];
+    if (p.edge_id) parts.push("edge " + p.edge_id);
+    if (typeof p.confidence === "number") parts.push("conf " + p.confidence.toFixed(2));
+    if (p.source) parts.push("src: " + p.source);
+    layer.bindPopup(parts.join("<br>"));
   } else if (p.kind === "reachable_edge") {
     let txt = "reachable " + String(p.edge_id) + " (" + String(p.direction) + ")";
     if (p.reachable_fraction != null) {
