@@ -241,22 +241,69 @@ function initThreeState(THREE) {
     root,
     distance: 270,
     dragging: false,
+    pressed: false,
+    pressX: 0,
+    pressY: 0,
     lastX: 0,
+    pressTime: 0,
+    raycaster: new THREE.Raycaster(),
+    pointer: new THREE.Vector2(-1, -1),
+    pointerActive: false,
+    pickableLines: [],
+    pickableNodePoints: null,
+    nodeIds: [],
+    nodePositions: [],
+    hoverVersion: 0,
+    lastHoverKey: null,
   };
 
+  const DRAG_PX = 4;
+
+  function updatePointer(event) {
+    const rect = scene3dCanvas.getBoundingClientRect();
+    const px = event.clientX - rect.left;
+    const py = event.clientY - rect.top;
+    threeState.pointer.x = (px / Math.max(1, rect.width)) * 2 - 1;
+    threeState.pointer.y = -(py / Math.max(1, rect.height)) * 2 + 1;
+    threeState.pointerActive = true;
+  }
+
   scene3dCanvas.addEventListener("pointerdown", (event) => {
-    threeState.dragging = true;
+    threeState.pressed = true;
+    threeState.dragging = false;
+    threeState.pressX = event.clientX;
+    threeState.pressY = event.clientY;
     threeState.lastX = event.clientX;
+    threeState.pressTime = performance.now();
     scene3dCanvas.setPointerCapture(event.pointerId);
   });
   scene3dCanvas.addEventListener("pointermove", (event) => {
-    if (!threeState.dragging) return;
-    const dx = event.clientX - threeState.lastX;
-    threeState.root.rotation.y += dx * 0.006;
-    threeState.lastX = event.clientX;
+    updatePointer(event);
+    if (!threeState.pressed) return;
+    const total =
+      Math.abs(event.clientX - threeState.pressX) +
+      Math.abs(event.clientY - threeState.pressY);
+    if (!threeState.dragging && total > DRAG_PX) threeState.dragging = true;
+    if (threeState.dragging) {
+      const dx = event.clientX - threeState.lastX;
+      threeState.root.rotation.y += dx * 0.006;
+      threeState.lastX = event.clientX;
+    }
   });
-  scene3dCanvas.addEventListener("pointerup", () => {
+  scene3dCanvas.addEventListener("pointerup", (event) => {
+    const wasDragging = threeState.dragging;
+    threeState.pressed = false;
     threeState.dragging = false;
+    if (!wasDragging) {
+      updatePointer(event);
+      handleScenePick();
+    }
+  });
+  scene3dCanvas.addEventListener("pointerleave", () => {
+    threeState.pressed = false;
+    threeState.dragging = false;
+    threeState.pointerActive = false;
+    setHoverCard(null);
   });
   scene3dCanvas.addEventListener(
     "wheel",
@@ -294,12 +341,123 @@ function updateThreeCamera() {
 function animateThree() {
   requestAnimationFrame(animateThree);
   if (!threeState || activeView !== "3d") return;
-  if (!threeState.dragging) {
+  if (!threeState.dragging && !threeState.hoverFreeze) {
     threeState.root.rotation.y += 0.0012;
   }
   resizeThree();
   updateThreeCamera();
+  runHoverPick();
   threeState.renderer.render(threeState.scene, threeState.camera);
+}
+
+function pickSceneHit() {
+  if (!threeState || !threeState.pointerActive) return null;
+  const s = threeState;
+  s.raycaster.setFromCamera(s.pointer, s.camera);
+  // Node points first — they sit above edges and want priority.
+  if (s.pickableNodePoints) {
+    s.raycaster.params.Points = s.raycaster.params.Points || {};
+    s.raycaster.params.Points.threshold = 2.6;
+    const inters = s.raycaster.intersectObject(s.pickableNodePoints, false);
+    if (inters.length) {
+      const index = inters[0].index || 0;
+      const nodeId = s.nodeIds[index] || null;
+      return { kind: "node", nodeId, distance: inters[0].distance };
+    }
+  }
+  if (s.pickableLines.length) {
+    s.raycaster.params.Line = s.raycaster.params.Line || {};
+    s.raycaster.params.Line.threshold = 1.8;
+    const inters = s.raycaster.intersectObjects(s.pickableLines, false);
+    if (inters.length) {
+      const obj = inters[0].object;
+      return { kind: "edge", ...obj.userData, distance: inters[0].distance };
+    }
+  }
+  return null;
+}
+
+function runHoverPick() {
+  const hit = pickSceneHit();
+  threeState.hoverFreeze = !!hit;
+  const key = hit ? (hit.kind + "|" + (hit.nodeId || hit.edgeId || "")) : "none";
+  if (threeState.lastHoverKey === key) return;
+  threeState.lastHoverKey = key;
+  setHoverCard(hit);
+}
+
+function handleScenePick() {
+  const hit = pickSceneHit();
+  if (!hit) return;
+  setHoverCard(hit);
+  if (hit.kind === "node" && hit.nodeId) {
+    onNodeClick(hit.nodeId);
+  }
+}
+
+function setHoverCard(hit) {
+  const kindEl = document.getElementById("hover-kind");
+  const labelEl = document.getElementById("hover-label-id");
+  const idEl = document.getElementById("hover-id");
+  const lenEl = document.getElementById("hover-length");
+  const endEl = document.getElementById("hover-endpoints");
+  const hintEl = document.getElementById("hover-hint");
+  if (!kindEl) return;
+  if (!hit) {
+    kindEl.textContent = "—";
+    labelEl.textContent = "ID";
+    idEl.textContent = "—";
+    lenEl.textContent = "—";
+    endEl.textContent = "—";
+    if (hintEl) {
+      hintEl.textContent = activeView === "3d"
+        ? "Hover an edge or node in the 3D view; click a node to set route endpoints."
+        : "Switch to 3D to hover or click graph elements.";
+    }
+    return;
+  }
+  if (hit.kind === "node") {
+    kindEl.textContent = "Node";
+    labelEl.textContent = "Node ID";
+    idEl.textContent = hit.nodeId || "—";
+    lenEl.textContent = "—";
+    endEl.textContent = "—";
+    if (hintEl) hintEl.textContent = "Click a second node to route between them.";
+    return;
+  }
+  kindEl.textContent = labelForKind(hit.kind) || "Edge";
+  labelEl.textContent = "Edge ID";
+  idEl.textContent = hit.edgeId || "—";
+  lenEl.textContent = Number.isFinite(hit.lengthM)
+    ? Number(hit.lengthM).toFixed(1) + " m"
+    : "—";
+  endEl.textContent = (hit.startNode || "?") + " → " + (hit.endNode || "?");
+  if (hintEl) {
+    hintEl.textContent = hit.kind === "route"
+      ? "Current dynamic / prebuilt route; click Clear route to reset."
+      : "Edge centerline. Click a node marker (red) to start routing.";
+  }
+}
+
+function labelForKind(kind) {
+  switch (kind) {
+    case "centerline":
+      return "Centerline";
+    case "lane_centerline":
+      return "Lane centerline";
+    case "route":
+      return "Route";
+    case "trajectory":
+      return "Trajectory";
+    case "reachable_edge":
+      return "Reachable edge";
+    case "lane_boundary_left":
+      return "Lane boundary (L)";
+    case "lane_boundary_right":
+      return "Lane boundary (R)";
+    default:
+      return kind || "";
+  }
 }
 
 async function render3DScene() {
@@ -354,9 +512,11 @@ async function render3DScene() {
       lineSpecs.push({ data: scenePayload.reachable, include: (k) => k === "reachable_edge" });
     }
 
+    threeState.pickableLines = [];
     for (const spec of lineSpecs) {
       for (const feature of iterLineFeatures(spec.data, spec.include)) {
-        const kind = feature.properties?.kind || "";
+        const props = feature.properties || {};
+        const kind = props.kind || "";
         const pts = (feature.geometry.coordinates || []).map((coord) => point(coord, kind));
         if (pts.length < 2) continue;
         const geom = new THREE.BufferGeometry().setFromPoints(pts);
@@ -365,19 +525,43 @@ async function render3DScene() {
           transparent: true,
           opacity: kind === "reachable_edge" ? 0.68 : 0.95,
         });
-        root.add(new THREE.Line(geom, mat));
+        const line = new THREE.Line(geom, mat);
+        line.userData = {
+          kind,
+          edgeId: props.edge_id || null,
+          lengthM:
+            typeof props.length_m === "number"
+              ? props.length_m
+              : typeof props.total_length_m === "number"
+                ? props.total_length_m
+                : null,
+          startNode: props.start_node_id || props.from_node || null,
+          endNode: props.end_node_id || props.to_node || null,
+          direction: props.direction || null,
+        };
+        root.add(line);
+        if (kind === "centerline" || kind === "lane_centerline") {
+          threeState.pickableLines.push(line);
+        }
       }
     }
 
     const nodePoints = [];
+    const nodeIds = [];
     for (const feature of (scenePayload.base.features || [])) {
       if (feature.properties?.kind !== "node" || feature.geometry?.type !== "Point") continue;
       nodePoints.push(point(feature.geometry.coordinates, "node"));
+      nodeIds.push(String(feature.properties.node_id || ""));
     }
+    threeState.pickableNodePoints = null;
+    threeState.nodeIds = nodeIds;
+    threeState.nodePositions = nodePoints;
     if (nodePoints.length) {
       const geom = new THREE.BufferGeometry().setFromPoints(nodePoints);
       const mat = new THREE.PointsMaterial({ color: 0xef4444, size: 2.8, sizeAttenuation: true });
-      root.add(new THREE.Points(geom, mat));
+      const pts = new THREE.Points(geom, mat);
+      root.add(pts);
+      threeState.pickableNodePoints = pts;
     }
 
     const markerSpecs = [];
@@ -451,6 +635,7 @@ async function render3DScene() {
     root.add(grid);
     resizeThree();
     updateThreeCamera();
+    threeState.lastHoverKey = null;
     scene3dStatus.textContent =
       "3D graph view · " +
       formatCount(activeStats.nodes) +
@@ -469,6 +654,11 @@ function setView(mode) {
   view3dButton.classList.toggle("active", mode === "3d");
   document.getElementById("map").hidden = mode !== "2d";
   scene3d.hidden = mode !== "3d";
+  if (threeState) {
+    threeState.pointerActive = false;
+    threeState.lastHoverKey = null;
+  }
+  setHoverCard(null);
   if (mode === "2d") {
     setTimeout(() => map.invalidateSize(), 0);
   } else {
@@ -1004,6 +1194,11 @@ async function show(which) {
   reachabilityOverlayLayer.clearLayers();
   restrictionsOverlayLayer.clearLayers();
   clearRoute();
+  if (threeState) {
+    threeState.pointerActive = false;
+    threeState.lastHoverKey = null;
+  }
+  setHoverCard(null);
   const url = DATASET_URLS[which] || DATASET_URLS.osm;
   const data = await loadGeo(url);
   graphCache[which] = buildGraph(data);

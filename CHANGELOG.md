@@ -52,6 +52,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `make viewer-smoke` or `pytest -m browser_smoke`; the test skips when
   `node`, `npx`, or a system Chrome/Chromium is missing.
 
+- **Map console JS moved to `docs/js/map_console.js`.**
+  `docs/map.html` is now markup plus a single external script tag; the ~1100
+  lines of viewer code (Leaflet 2D + Three.js 3D bootstrap, JS Dijkstra,
+  inspector metrics, overlay toggles, URL-param / ready-signal bootstrap) live
+  in `docs/js/map_console.js`. `tests/js/test_viewer_dijkstra.mjs` extracts
+  `buildRestrictionIndex` and `dijkstra` from the new location; behaviour and
+  committed regression tests are unchanged.
+
+- **3D map console supports raycaster-based hover and click picking.**
+  The Three.js preview now tracks each centerline `Line` and the graph node
+  `Points` cloud as pickables. Hovering the 3D canvas updates a new
+  `#hover-card` in the inspector (kind, ID, length, endpoints) and pauses the
+  auto-rotate while the pointer is over a pickable target. Clicking without
+  dragging feeds node hits into the existing `onNodeClick` flow, so the JS
+  Dijkstra click-to-route works from the 3D view too and updates the 2D map
+  / route metric in lockstep. The opt-in browser smoke gained a 3D hover +
+  click assertion covering the new path.
+
 - **Reachability / service-area analysis is available from the routing CLI.**
   New `routing.reachability.reachable_within` and `roadgraph_builder reachable`
   report nodes and directed edge spans reachable from a start node within a

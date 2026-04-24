@@ -83,3 +83,51 @@ test("mobile viewport has no horizontal overflow", async ({ page }) => {
     `body should fit the mobile viewport (scrollWidth - clientWidth = ${overflowBy})`,
   ).toBeLessThanOrEqual(1);
 });
+
+test("3D hover picks an edge or node and click routes", async ({ page }) => {
+  await page.setViewportSize({ width: 1366, height: 900 });
+  await openReady(page, "3d");
+
+  // Initial hover card shows placeholders until a ray hits something.
+  expect(await page.textContent("#hover-kind")).toBe("—");
+
+  // Park the cursor over the densest part of the Paris grid, which is near the
+  // center of the canvas. The scene keeps rotating slowly until a pickable
+  // object ends up under the pointer — then the hover card updates and
+  // auto-rotate pauses.
+  const canvas = page.locator("#scene3d-canvas");
+  const box = await canvas.boundingBox();
+  if (!box) throw new Error("scene3d-canvas has no bounding box");
+  const cx = box.x + box.width / 2;
+  const cy = box.y + box.height / 2;
+  await page.mouse.move(cx, cy);
+
+  await expect
+    .poll(async () => (await page.textContent("#hover-kind"))?.trim(), {
+      timeout: 8000,
+      message: "expected hover card to report something other than —",
+    })
+    .not.toBe("—");
+
+  // The hover card should carry either an edge id (for centerlines) or a node
+  // id — both indicate picking is producing meaningful userData.
+  const id = (await page.textContent("#hover-id"))?.trim() || "";
+  expect(id, "hover card ID should be populated").not.toBe("—");
+  expect(id.length, "hover card ID should be non-empty").toBeGreaterThan(0);
+
+  // Click at the same spot. Pointerup without drag triggers the pick; a node
+  // hit kicks off click-to-route and updates #route-status, while an edge hit
+  // keeps the hover card populated. Either outcome proves picking is wired up.
+  await page.mouse.down();
+  await page.mouse.up();
+  const statusAfter = (await page.textContent("#route-status")) || "";
+  const hoverAfter = (await page.textContent("#hover-id"))?.trim() || "";
+  expect(
+    statusAfter.length,
+    "route_status should remain populated after a 3D click",
+  ).toBeGreaterThan(0);
+  expect(
+    statusAfter.startsWith("from = ") || hoverAfter !== "—",
+    `expected node-click status or edge hover; got status="${statusAfter}", hover="${hoverAfter}"`,
+  ).toBe(true);
+});
