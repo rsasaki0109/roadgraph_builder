@@ -70,6 +70,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   / route metric in lockstep. The opt-in browser smoke gained a 3D hover +
   click assertion covering the new path.
 
+- **Map console deep-links via `?from=&to=` plus a route steps inspector.**
+  `docs/map.html?from=nXXX&to=nYYY[&dataset=...&view=3d]` now restores a
+  turn-restriction-aware route at bootstrap by running the same JS Dijkstra
+  the click-to-route UI uses. Drawing or clearing a dynamic route mirrors the
+  selection into the URL via `history.replaceState()`, so any Paris-grid
+  route (or future dataset route) is copy-pasteable. The inspector gained a
+  `#steps-card` that lists each route edge with direction, per-edge length,
+  cumulative distance, edge count, and total length; the card appears after
+  a route is drawn and clears with `Clear route` or dataset switch. The
+  browser smoke covers the `n312 → n191` deep link, asserting the card is
+  visible, multiple steps render, and the URL retains `from` / `to`.
+
 - **Reachability / service-area analysis is available from the routing CLI.**
   New `routing.reachability.reachable_within` and `roadgraph_builder reachable`
   report nodes and directed edge spans reachable from a start node within a

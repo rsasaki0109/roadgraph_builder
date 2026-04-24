@@ -6,7 +6,7 @@
 > このファイル → [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md)（Mermaid 6 枚 + CLI 対応表 +
 > モジュール索引）→ [`CHANGELOG.md`](../CHANGELOG.md) の順。
 
-*最終更新: 2026-04-24 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards polish + README measured-results compacting / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate + manifest policy docs polish / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理 / v0.7.1 release + asset verification / packaging metadata smoke / 0.7.2.dev0 reopen / Actions Node24 update / release+PyPI dry-run / routing hot-path perf / nearest spatial index / cache invalidation hardening / build graph spatial merge perf / T-junction segment index perf / lean near-parallel merge loop / GeoJSON export compact path / compact bundle JSON writer / README quick-start smoke / release readiness dry-run refresh / reachable service-area CLI / reachable docs overlay / reachable benchmark coverage / benchmark baseline JSON / reachability analyzer perf / routing core split / RoutePlanner perf / GitHub star-growth surfaces / launch kit docs / safe A* routing / route explain diagnostics / route explain docs surface / route explain comparison UI / route diagnostics README screenshot / functional shortest_path planner cache + sampled validation / nearest-edge projection index / match-trajectory explain diagnostics / HMM bridge ambiguity benchmark / HMM adjacency reuse perf / HMM tail-cost cache / HMM long trajectory benchmark / edge-index cell tuning / 2D/3D map console / PLAN handoff expansion / map console pushed + CI green / Claude handoff refresh / map console hero screenshots / map console browser smoke opt-in pytest / map console JS split + 3D raycaster picking）を反映済み。*
+*最終更新: 2026-04-24 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards polish + README measured-results compacting / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate + manifest policy docs polish / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理 / v0.7.1 release + asset verification / packaging metadata smoke / 0.7.2.dev0 reopen / Actions Node24 update / release+PyPI dry-run / routing hot-path perf / nearest spatial index / cache invalidation hardening / build graph spatial merge perf / T-junction segment index perf / lean near-parallel merge loop / GeoJSON export compact path / compact bundle JSON writer / README quick-start smoke / release readiness dry-run refresh / reachable service-area CLI / reachable docs overlay / reachable benchmark coverage / benchmark baseline JSON / reachability analyzer perf / routing core split / RoutePlanner perf / GitHub star-growth surfaces / launch kit docs / safe A* routing / route explain diagnostics / route explain docs surface / route explain comparison UI / route diagnostics README screenshot / functional shortest_path planner cache + sampled validation / nearest-edge projection index / match-trajectory explain diagnostics / HMM bridge ambiguity benchmark / HMM adjacency reuse perf / HMM tail-cost cache / HMM long trajectory benchmark / edge-index cell tuning / 2D/3D map console / PLAN handoff expansion / map console pushed + CI green / Claude handoff refresh / map console hero screenshots / map console browser smoke opt-in pytest / map console JS split + 3D raycaster picking / map console deep link + route steps inspector）を反映済み。*
 
 ---
 
@@ -332,6 +332,15 @@
       `handleScenePick` → node 当たれば既存 `onNodeClick(nodeId)` で 2D/3D 両方に route を反映。
       inspector 右側に `#hover-card` (Hovered / ID / Length / Endpoints / hint) を追加。
       browser smoke spec に 3D hover + click ケースを追加し、5 連続 run で flake 無し（7–9s）。
+  75. map console deep link + route steps inspector。
+      `docs/map.html?from=nXXX&to=nYYY` で bootstrap 時に既存 graph + restrictions から
+      `dijkstra()` を再計算して `drawDynamicRoute` に流す deep link を追加。`drawDynamicRoute` /
+      `clearRoute` は `history.replaceState()` で URL の `from` / `to` を同期するので、
+      任意の route を URL コピペで共有できる。inspector 右側に `#steps-card`（edge_id / direction /
+      length / cumulative_m + edge 数 + 総距離）を追加し、`renderRouteSteps(graph, dij)` /
+      `clearRouteSteps()` で populate / hide。browser smoke に Paris `n312 → n191` deep link ケース
+      を追加し、`#steps-card` 非 hidden + `li` が 3 本以上 + status に `deep link n312` + URL 末尾に
+      `from=n312&to=n191` が残ることまで assert。
 - **push 方針:** `git push` は user が `push!` などで明示するまで実行しない。
 - **未着手 (次の AI が触る候補):** ↓ §5 "Open tasks" 参照。
 
@@ -612,6 +621,12 @@
   扱いで `handleScenePick()` を呼び、node なら既存 `onNodeClick(nodeId)` にチェーンして 2D と 3D の route
   overlay / inspector を同期。setView / show / render3DScene リビルド時に `setHoverCard(null)` +
   `lastHoverKey = null` で古い hover 状態をリセット。
+- **Deep link + route steps:** `docs/map.html?from=nXXX&to=nYYY[&dataset=...][&view=3d]` で bootstrap 時に
+  `dijkstra()` を直接再計算して `drawDynamicRoute` に流す。`drawDynamicRoute` / `clearRoute` は
+  `history.replaceState()` で URL の `from` / `to` を同期、任意の route を URL コピペで共有できる。
+  inspector 右側の `#steps-card` には `renderRouteSteps(graph, dij)` が edge_id / direction /
+  length / cumulative_m + 合計 edges / m を埋めるので、routing 結果を 3D 視覚と JSON 以外の第三の形で
+  読み取れる。`clearRouteSteps()` は `Clear route` または dataset 切替で自動実行。
 - **dynamic route sync:** `drawDynamicRoute(graph, dij)` は Leaflet polyline だけでなく
   `scenePayload.route` の GeoJSON FeatureCollection も作る。これにより node click routing 後に
   3D view へ切り替えても同じ route が表示され、inspector の route metric も `dij.totalLength` で更新される。
@@ -787,9 +802,11 @@ code commit `342f61f` の release bundle / package build dry-run は PASS
    centerline edge / graph node の hover + click picking を実装。inspector 右側の `#hover-card` に
    kind / id / length / endpoints を表示、auto-rotate はポインタが pickable に乗ると pause、
    pointerup (drag 無し) は既存 `onNodeClick(nodeId)` を呼ぶので 2D/3D 両方に route が同期する。
-   まだ未実装: route step highlight（経路上の edge を順番に強調）、edge cost coloring（observed /
-   slope / confidence などを 3D 上で色分け）、camera pose の保存 / deep link、lane-level 表示、
-   同じ raycaster を 2D 側の Leaflet layer にも拡張する仕組み。
+   deep link `?from=nXXX&to=nYYY` + `history.replaceState` による URL 同期、`#steps-card` に
+   route edge list (edge_id / direction / length / cumulative) を表示する機能も追加済み。
+   まだ未実装: route step highlight（経路上の edge を順番に強調 / 動画化）、edge cost coloring
+   （observed / slope / confidence などを 3D 上で色分け）、camera pose の保存 / pose deep link、
+   lane-level 表示、同じ raycaster を 2D Leaflet layer に拡張する仕組み。
 4. **Viewer asset vendoring / offline stability** — public launch 前の安定化候補。
    Leaflet / Three.js / OSM tiles は現状 network 依存。private local demo では許容だが、
    release-quality demo としては vendored Leaflet/Three、または static screenshot fallback を検討。

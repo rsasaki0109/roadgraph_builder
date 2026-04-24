@@ -66,7 +66,7 @@ The docs map ships a Paris OSM-highway graph with 10 mapped turn restrictions, a
 
 [![Paris OSM-highway grid with a TR-aware route and 500 m reachability overlay](docs/images/paris_grid_route.svg)](docs/map.html)
 
-Open the interactive version locally: `cd docs && python3 -m http.server 8765`, then visit **`http://127.0.0.1:8765/map.html`** (add `?view=3d` for the 3D graph preview, `?dataset=paris` to switch to the public-GPS sample).
+Open the interactive version locally: `cd docs && python3 -m http.server 8765`, then visit **`http://127.0.0.1:8765/map.html`** (add `?view=3d` for the 3D graph preview, `?dataset=paris` to switch to the public-GPS sample, `?from=n312&to=n191` to restore the Paris turn-restriction-aware route — the inspector's **Route steps** card lists each edge, direction, and cumulative length).
 
 ### Quick start
 
@@ -242,7 +242,7 @@ When Pages is available (public repo, Pages-capable private repo plan, or a sepa
 1. In the GitHub repo: **Settings → Pages → Build and deployment → Source**: **Deploy from a branch**, branch **`main`**, folder **`/docs`**, Save.
 2. After a minute, open the Pages URL shown by GitHub:
    - site root — diagram viewer (SVG-style pan/zoom)
-   - `map.html` — **real basemap + 3D graph console** (OSM tiles + GeoJSON: trajectory, centerlines, nodes, **HD-lite lane boundaries** when `attributes.hd` is filled — bundled assets use `enrich --lane-width-m 3.5` via `scripts/refresh_docs_assets.py`). Toggle between 2D Leaflet and a Three.js graph preview, inspect node/edge/lane/route/reachability/restriction counts, and switch route / reachability / restriction overlays without reloading. Click any two nodes to route between them; the JS Dijkstra is **directed-state and TR-aware** when the dataset ships a restrictions overlay, and dynamic routes update the 3D view too. The dropdown selects between four datasets:
+   - `map.html` — **real basemap + 3D graph console** (OSM tiles + GeoJSON: trajectory, centerlines, nodes, **HD-lite lane boundaries** when `attributes.hd` is filled — bundled assets use `enrich --lane-width-m 3.5` via `scripts/refresh_docs_assets.py`). Toggle between 2D Leaflet and a Three.js graph preview, inspect node/edge/lane/route/reachability/restriction counts, and switch route / reachability / restriction overlays without reloading. Click any two nodes to route between them; the JS Dijkstra is **directed-state and TR-aware** when the dataset ships a restrictions overlay, and dynamic routes update the 3D view and the **Route steps** inspector card (per-edge id, direction, length, cumulative) in lockstep. In 3D, hovering pauses auto-rotate and a `THREE.Raycaster` fills the **Hovered** card (kind, id, length, endpoints); clicking a node drives the same click-to-route as the 2D map. URL parameters are honoured and mirrored: `?view=3d`, `?dataset=…`, and `?from=nXXX&to=nYYY` all restore state, and drawing a route rewrites `from` / `to` via `history.replaceState` so the current route is copy-pasteable. The dropdown selects between four datasets:
      - **Paris grid** (default, 855 nodes / 1081 edges — derived from OSM highway ways, ships with 10 OSM turn restrictions as red-dot markers and a 500 m `reachable` overlay. ODbL.)
      - **Paris** (older, trajectory-derived, 123 edges / 223 nodes; from OSM public GPS, ODbL.)
      - **OSM Berlin sample** (4 edges, smaller).

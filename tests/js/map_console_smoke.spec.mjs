@@ -84,6 +84,35 @@ test("mobile viewport has no horizontal overflow", async ({ page }) => {
   ).toBeLessThanOrEqual(1);
 });
 
+test("deep-link restores the Paris TR-aware route", async ({ page }) => {
+  await page.setViewportSize({ width: 1366, height: 900 });
+  await page.goto(`${MAP_URL}?dataset=paris_grid&view=2d&from=n312&to=n191`, {
+    waitUntil: "domcontentloaded",
+  });
+  await page.waitForSelector("body[data-ready='2d']", {
+    timeout: READY_TIMEOUT_MS,
+  });
+
+  // The route steps card must be shown with the full edge list.
+  await expect(page.locator("#steps-card")).toBeVisible();
+  const stepCount = await page.locator("#steps-list li").count();
+  expect(stepCount, "paris_grid TR route must have multiple edges").toBeGreaterThanOrEqual(3);
+
+  const countText = (await page.textContent("#steps-count")) || "";
+  expect(countText).toMatch(/\d+ edges ·/);
+  expect(countText).toMatch(/m$/);
+
+  const status = (await page.textContent("#route-status")) || "";
+  expect(status).toContain("deep link");
+  expect(status).toContain("n312");
+  expect(status).toContain("n191");
+
+  // URL sync preserves the deep link (replaceState after draw).
+  const url = page.url();
+  expect(url).toContain("from=n312");
+  expect(url).toContain("to=n191");
+});
+
 test("3D hover picks an edge or node and click routes", async ({ page }) => {
   await page.setViewportSize({ width: 1366, height: 900 });
   await openReady(page, "3d");

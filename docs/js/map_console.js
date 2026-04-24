@@ -1098,7 +1098,70 @@ function drawDynamicRoute(graph, dij) {
   updateInspector(document.getElementById("dataset").value, {
     routeLength: dij.totalLength,
   });
+  renderRouteSteps(graph, dij);
+  syncRouteDeepLink(dij);
   if (activeView === "3d") render3DScene();
+}
+
+function renderRouteSteps(graph, dij) {
+  const card = document.getElementById("steps-card");
+  const list = document.getElementById("steps-list");
+  const count = document.getElementById("steps-count");
+  if (!card || !list || !count) return;
+  list.innerHTML = "";
+  let cum = 0;
+  for (let i = 0; i < dij.edges.length; i++) {
+    const eid = dij.edges[i];
+    const dir = dij.directions[i] || "forward";
+    const edge = graph.edges.get(eid);
+    const len = edge ? Number(edge.length) || 0 : 0;
+    cum += len;
+    const li = document.createElement("li");
+    const addSpan = (cls, text) => {
+      const s = document.createElement("span");
+      s.className = cls;
+      s.textContent = text;
+      li.appendChild(s);
+    };
+    addSpan("step-id", eid);
+    addSpan("step-dir", " · " + dir);
+    addSpan("step-len", " · " + len.toFixed(1) + " m");
+    addSpan("step-cum", " (" + cum.toFixed(1) + " m)");
+    list.appendChild(li);
+  }
+  count.textContent =
+    dij.edges.length + " edges · " + dij.totalLength.toFixed(1) + " m";
+  card.hidden = false;
+}
+
+function clearRouteSteps() {
+  const card = document.getElementById("steps-card");
+  const list = document.getElementById("steps-list");
+  const count = document.getElementById("steps-count");
+  if (!card) return;
+  if (list) list.innerHTML = "";
+  if (count) count.textContent = "—";
+  card.hidden = true;
+}
+
+// Mirror the current route endpoints into the URL so the page can be
+// copy-pasted and restored elsewhere. Uses history.replaceState so there is
+// no new browsing history entry per click.
+function syncRouteDeepLink(dij) {
+  if (!window.history || !window.history.replaceState) return;
+  try {
+    const url = new URL(window.location.href);
+    if (dij && dij.nodes && dij.nodes.length >= 2) {
+      url.searchParams.set("from", dij.nodes[0]);
+      url.searchParams.set("to", dij.nodes[dij.nodes.length - 1]);
+    } else {
+      url.searchParams.delete("from");
+      url.searchParams.delete("to");
+    }
+    window.history.replaceState(null, "", url.toString());
+  } catch (_err) {
+    // best-effort; deep-link sync must never break routing.
+  }
 }
 
 function onNodeClick(nodeId) {
@@ -1151,6 +1214,8 @@ function clearRoute() {
   routeOverlayLayer.clearLayers();
   scenePayload.route = null;
   updateInspector(document.getElementById("dataset").value, { routeLength: NaN });
+  clearRouteSteps();
+  syncRouteDeepLink(null);
   if (activeView === "3d") render3DScene();
   currentRouteSelection = { from: null, to: null };
   statusText("Click two graph nodes to route between them.");
@@ -1293,6 +1358,8 @@ async function bootstrap() {
   const requested = params.get("dataset");
   const initialDataset = allowed.has(requested) ? requested : "paris_grid";
   const initialView = params.get("view") === "3d" ? "3d" : "2d";
+  const fromParam = params.get("from");
+  const toParam = params.get("to");
   const datasetSel = document.getElementById("dataset");
   if (datasetSel.value !== initialDataset) datasetSel.value = initialDataset;
   await show(initialDataset);
@@ -1300,7 +1367,40 @@ async function bootstrap() {
     setView("3d");
     await render3DScene();
   }
+  if (fromParam && toParam && fromParam !== toParam) {
+    applyDeepLinkRoute(initialDataset, fromParam, toParam);
+  }
   document.body.dataset.ready = initialView;
+}
+
+function applyDeepLinkRoute(which, fromId, toId) {
+  const graph = graphCache[which];
+  if (!graph) return;
+  if (!graph.adj.has(fromId) || !graph.adj.has(toId)) {
+    statusText("deep link skipped: unknown node " + (graph.adj.has(fromId) ? toId : fromId));
+    return;
+  }
+  const dij = dijkstra(graph, fromId, toId, graph.restrictions);
+  if (!dij) {
+    statusText("deep link skipped: no path " + fromId + " → " + toId);
+    return;
+  }
+  drawDynamicRoute(graph, dij);
+  const trCount = graph.restrictions
+    ? graph.restrictions.noT.size + graph.restrictions.onlyT.size
+    : 0;
+  statusText(
+    "deep link " +
+      fromId +
+      " → " +
+      toId +
+      ": " +
+      dij.totalLength.toFixed(1) +
+      " m · " +
+      dij.edges.length +
+      " edges" +
+      (trCount ? " · " + trCount + " TR honoured" : "")
+  );
 }
 
 bootstrap().catch((err) => {

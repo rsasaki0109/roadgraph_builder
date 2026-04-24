@@ -157,6 +157,56 @@
         font-size: 11px;
         margin-top: 2px;
       }
+      .steps-card {
+        display: grid;
+        gap: 6px;
+        padding: 10px;
+        border: 1px solid #273449;
+        border-radius: 8px;
+        background: #0f172a;
+        font-size: 12px;
+        color: #e5e7eb;
+        max-height: 220px;
+        overflow: auto;
+      }
+      .steps-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 10px;
+        color: #dbeafe;
+      }
+      .steps-head strong {
+        font-size: 12px;
+      }
+      .steps-head span {
+        color: #94a3b8;
+        font-size: 11px;
+      }
+      .steps-list {
+        margin: 0;
+        padding-left: 18px;
+        display: grid;
+        gap: 3px;
+      }
+      .steps-list li {
+        line-height: 1.35;
+        word-break: break-all;
+      }
+      .steps-list .step-id {
+        color: #facc15;
+        font-weight: 600;
+      }
+      .steps-list .step-dir {
+        color: #94a3b8;
+      }
+      .steps-list .step-len {
+        color: #e5e7eb;
+      }
+      .steps-list .step-cum {
+        color: #64748b;
+        font-size: 11px;
+      }
       .bar {
         position: relative;
         z-index: 10;
@@ -343,6 +393,13 @@
           <div class="hover-row"><span>Length</span><strong id="hover-length">—</strong></div>
           <div class="hover-row"><span>Endpoints</span><strong id="hover-endpoints">—</strong></div>
           <div class="hover-hint" id="hover-hint">Hover an edge or node in the 3D view; click a node to set route endpoints.</div>
+        </div>
+        <div class="steps-card" id="steps-card" hidden aria-label="Route steps">
+          <div class="steps-head">
+            <strong>Route steps</strong>
+            <span id="steps-count">—</span>
+          </div>
+          <ol class="steps-list" id="steps-list"></ol>
         </div>
         <a class="panel-link" href="assets/map_match_explain_sample.json">Map-matching diagnostics JSON</a>
         <a class="panel-link" href="assets/route_explain_sample.json">Route diagnostics JSON</a>
