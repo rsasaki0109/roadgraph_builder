@@ -1281,8 +1281,12 @@ function dijkstra(graph, fromNode, toNode, restrictions) {
 
   let bestGoalKey = null;
   let bestGoalDist = Infinity;
+  let popCount = 0;
+  let expandedCount = 0;
+  let pushCount = 1; // initial entry on the heap
   while (heap.length) {
     const [d, u, inEdge, inDir] = popMin();
+    popCount += 1;
     const key = stateKey(u, inEdge, inDir);
     if (d > (dist.get(key) ?? Infinity)) continue;
     if (u === toNode && d < bestGoalDist) {
@@ -1291,6 +1295,7 @@ function dijkstra(graph, fromNode, toNode, restrictions) {
       continue;
     }
     if (d >= bestGoalDist) continue;
+    expandedCount += 1;
     const outs = graph.adj.get(u) || [];
     for (const out of outs) {
       const outDir = out.reverse ? "reverse" : "forward";
@@ -1308,9 +1313,11 @@ function dijkstra(graph, fromNode, toNode, restrictions) {
         dist.set(nkey, nd);
         prev.set(nkey, { fromKey: key, edge_id: out.edge_id, direction: outDir, node: u });
         push([nd, out.neighbor, out.edge_id, outDir]);
+        pushCount += 1;
       }
     }
   }
+  const trCount = rx.noT.size + rx.onlyT.size;
   if (bestGoalKey === null) return null;
 
   const nodesSeq = [toNode];
@@ -1332,6 +1339,16 @@ function dijkstra(graph, fromNode, toNode, restrictions) {
     nodes: nodesSeq,
     edges: edgesSeq,
     directions: dirSeq,
+    diagnostics: {
+      engine: "dijkstra",
+      heuristicEnabled: false,
+      fallbackReason: null,
+      expandedStates: expandedCount,
+      queuedStates: pushCount,
+      popCount: popCount,
+      edgeCount: edgesSeq.length,
+      restrictionsIndexed: trCount,
+    },
   };
 }
 
@@ -1420,9 +1437,61 @@ function drawDynamicRoute(graph, dij) {
     routeLength: dij.totalLength,
   });
   renderRouteSteps(graph, dij);
+  renderRouteEngine(dij);
   syncRouteDeepLink(dij);
   setDownloadRouteEnabled(true);
   if (activeView === "3d") render3DScene();
+}
+
+function renderRouteEngine(dij) {
+  const card = document.getElementById("engine-card");
+  const badge = document.getElementById("engine-badge");
+  const expanded = document.getElementById("engine-expanded");
+  const queued = document.getElementById("engine-queued");
+  const pops = document.getElementById("engine-pops");
+  const trEl = document.getElementById("engine-tr");
+  const hint = document.getElementById("engine-hint");
+  if (!card) return;
+  const diag = dij && dij.diagnostics;
+  if (!diag) {
+    card.hidden = true;
+    return;
+  }
+  const engine = String(diag.engine || "dijkstra");
+  badge.textContent = engine;
+  badge.className = "engine-badge " + (engine === "safe_astar" ? "safe_astar" : "dijkstra");
+  if (diag.fallbackReason) badge.classList.add("fallback");
+  expanded.textContent = Number(diag.expandedStates || 0).toLocaleString();
+  queued.textContent = Number(diag.queuedStates || 0).toLocaleString();
+  pops.textContent = Number(diag.popCount || 0).toLocaleString();
+  trEl.textContent = Number(diag.restrictionsIndexed || 0).toLocaleString();
+  if (hint) {
+    if (diag.fallbackReason) {
+      hint.innerHTML =
+        "Fallback: <code>" + String(diag.fallbackReason) + "</code>.";
+    } else if (engine === "dijkstra") {
+      hint.innerHTML =
+        "Same directed-state Dijkstra the CLI <code>route</code> falls back to.";
+    } else {
+      hint.textContent = "Safe A* over the directed-state graph.";
+    }
+  }
+  card.hidden = false;
+}
+
+function clearRouteEngine() {
+  const card = document.getElementById("engine-card");
+  if (!card) return;
+  card.hidden = true;
+  const badge = document.getElementById("engine-badge");
+  if (badge) {
+    badge.textContent = "—";
+    badge.className = "engine-badge";
+  }
+  for (const id of ["engine-expanded", "engine-queued", "engine-pops", "engine-tr"]) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = "—";
+  }
 }
 
 function setDownloadRouteEnabled(enabled) {
@@ -1574,6 +1643,7 @@ function clearRoute() {
   scenePayload.route = null;
   updateInspector(document.getElementById("dataset").value, { routeLength: NaN });
   clearRouteSteps();
+  clearRouteEngine();
   syncRouteDeepLink(null);
   setDownloadRouteEnabled(false);
   if (activeView === "3d") render3DScene();

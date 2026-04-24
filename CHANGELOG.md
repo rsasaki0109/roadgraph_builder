@@ -82,6 +82,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   browser smoke covers the `n312 → n191` deep link, asserting the card is
   visible, multiple steps render, and the URL retains `from` / `to`.
 
+- **Route engine diagnostics surface inside the map console.**
+  The viewer's directed-state JS Dijkstra now counts expanded states,
+  queued states, and heap pops during its heap loop and returns them on
+  a `diagnostics` field that matches the shape the CLI's `route --explain`
+  emits. `drawDynamicRoute()` pipes the numbers into a new
+  `#engine-card` inspector block (engine badge, expanded / queued /
+  pops / TR indexed, plus a hint that identifies the engine as the
+  Dijkstra fallback the CLI also uses when safe A* is unavailable).
+  `clearRoute()` hides the card. The opt-in browser smoke asserts the
+  card appears for the Paris TR deep link with the `dijkstra` badge and
+  a non-zero expanded-state count.
+
 - **Animated map-console hero GIF for the README and Showcase.**
   `scripts/record_map_console_hero.py` serves `docs/`, drives system Chrome
   through Playwright's `recordVideo` context for a scripted demo (Paris

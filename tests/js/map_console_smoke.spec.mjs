@@ -140,9 +140,9 @@ test("deep-link restores the Paris TR-aware route", async ({ page }) => {
   const stepCount = await page.locator("#steps-list li").count();
   expect(stepCount, "paris_grid TR route must have multiple edges").toBeGreaterThanOrEqual(3);
 
-  const countText = (await page.textContent("#steps-count")) || "";
-  expect(countText).toMatch(/\d+ edges ·/);
-  expect(countText).toMatch(/m$/);
+  const stepsTotalText = (await page.textContent("#steps-count")) || "";
+  expect(stepsTotalText).toMatch(/\d+ edges ·/);
+  expect(stepsTotalText).toMatch(/m$/);
 
   const status = (await page.textContent("#route-status")) || "";
   expect(status).toContain("deep link");
@@ -153,6 +153,17 @@ test("deep-link restores the Paris TR-aware route", async ({ page }) => {
   const url = page.url();
   expect(url).toContain("from=n312");
   expect(url).toContain("to=n191");
+
+  // Route engine card must be populated with Dijkstra diagnostics.
+  await expect(page.locator("#engine-card")).toBeVisible();
+  expect((await page.textContent("#engine-badge"))?.trim().toLowerCase()).toBe(
+    "dijkstra",
+  );
+  const expanded = countText(await page.textContent("#engine-expanded"));
+  expect(
+    expanded,
+    "route engine should report some expanded states",
+  ).toBeGreaterThan(0);
 
   // Download button should become enabled once a route is drawn; clicking it
   // triggers a browser download carrying a valid GeoJSON FeatureCollection.
