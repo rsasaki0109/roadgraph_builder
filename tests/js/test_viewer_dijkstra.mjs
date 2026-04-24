@@ -1,30 +1,29 @@
-// Extract the two JS functions from docs/map.html and smoke-test them against
-// a tiny fixture that exercises a no_left_turn restriction.
+// Extract the two JS functions from docs/js/map_console.js and smoke-test them
+// against a tiny fixture that exercises a no_left_turn restriction.
 import fs from 'node:fs';
 import path from 'node:path';
 import url from 'node:url';
 
 const thisDir = path.dirname(url.fileURLToPath(import.meta.url));
-const html = fs.readFileSync(
-  path.resolve(thisDir, '..', '..', 'docs', 'map.html'),
+const src = fs.readFileSync(
+  path.resolve(thisDir, '..', '..', 'docs', 'js', 'map_console.js'),
   'utf-8',
 );
 
-// Extract function sources by naive slicing. Matches the new code we just
-// wrote — if the viewer is refactored, this file can be rebuilt.
+// Extract function sources by naive slicing. Matches the top-level function
+// shapes in docs/js/map_console.js — if the viewer is refactored, adjust here.
 function extractFn(name) {
   const re = new RegExp(`function ${name}\\([^\\)]*\\)\\s*\\{`);
-  const m = html.search(re);
+  const m = src.search(re);
   if (m < 0) throw new Error('cannot find ' + name);
   let depth = 0;
-  let i = html.indexOf('{', m);
-  let start = i;
-  for (; i < html.length; i++) {
-    if (html[i] === '{') depth++;
-    else if (html[i] === '}') {
+  let i = src.indexOf('{', m);
+  for (; i < src.length; i++) {
+    if (src[i] === '{') depth++;
+    else if (src[i] === '}') {
       depth--;
       if (depth === 0) {
-        return 'function ' + name + html.slice(m + 'function '.length + name.length, i + 1);
+        return 'function ' + name + src.slice(m + 'function '.length + name.length, i + 1);
       }
     }
   }
