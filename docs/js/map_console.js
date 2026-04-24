@@ -635,9 +635,8 @@ function setHoverCard(hit) {
     lenEl.textContent = "—";
     endEl.textContent = "—";
     if (hintEl) {
-      hintEl.textContent = activeView === "3d"
-        ? "Hover an edge or node in the 3D view; click a node to set route endpoints."
-        : "Switch to 3D to hover or click graph elements.";
+      hintEl.textContent =
+        "Hover an edge or node (2D or 3D) to see its metadata; click a node to route.";
     }
     return;
   }
@@ -1153,8 +1152,66 @@ bindOverlayToggle("toggle-route", routeOverlayLayer);
 bindOverlayToggle("toggle-reachability", reachabilityOverlayLayer);
 bindOverlayToggle("toggle-restrictions", restrictionsOverlayLayer);
 
+// Translate a GeoJSON feature's property bag into the shape setHoverCard()
+// accepts so 2D Leaflet hover mirrors the 3D raycaster hover.
+function hoverHitFromProps(p) {
+  if (!p || !p.kind) return null;
+  if (p.kind === "node" && p.node_id) {
+    return {
+      kind: "node",
+      nodeId: String(p.node_id),
+      category: junctionCategory(p),
+    };
+  }
+  if ((p.kind === "centerline" || p.kind === "lane_centerline") && p.edge_id) {
+    return {
+      kind: p.kind,
+      edgeId: String(p.edge_id),
+      lengthM: typeof p.length_m === "number" ? p.length_m : null,
+      startNode: p.start_node_id || null,
+      endNode: p.end_node_id || null,
+      highway: p.highway || null,
+      osmLanes:
+        typeof p.osm_lanes === "number" ? p.osm_lanes : null,
+      osmMaxspeed: p.osm_maxspeed || null,
+      osmName: p.osm_name || null,
+    };
+  }
+  if (p.kind === "route") {
+    return {
+      kind: "route",
+      edgeId: null,
+      lengthM: typeof p.total_length_m === "number" ? p.total_length_m : null,
+      startNode: p.from_node || null,
+      endNode: p.to_node || null,
+    };
+  }
+  if (p.kind === "reachable_edge") {
+    const cost =
+      typeof p.end_cost_m === "number" && typeof p.start_cost_m === "number"
+        ? p.end_cost_m - p.start_cost_m
+        : null;
+    return {
+      kind: "reachable_edge",
+      edgeId: p.edge_id ? String(p.edge_id) : null,
+      lengthM: cost,
+      startNode: p.from_node || null,
+      endNode: p.to_node || null,
+    };
+  }
+  return null;
+}
+
+function bindHoverSync(f, layer) {
+  const hit = hoverHitFromProps(f.properties || {});
+  if (!hit) return;
+  layer.on("mouseover", () => setHoverCard(hit));
+  layer.on("mouseout", () => setHoverCard(null));
+}
+
 function bindCommonPopups(f, layer) {
   const p = f.properties || {};
+  bindHoverSync(f, layer);
   if (p.kind === "node" && p.node_id) {
     let txt = String(p.node_id);
     if (p.degree != null) txt += "<br>degree: " + p.degree;

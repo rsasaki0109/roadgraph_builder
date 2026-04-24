@@ -196,6 +196,64 @@ test("deep-link restores the Paris TR-aware route", async ({ page }) => {
   expect(routeFeature.properties.to_node).toBe("n191");
 });
 
+test("2D hover sync updates the hover card on centerline / node features", async ({ page }) => {
+  await page.setViewportSize({ width: 1366, height: 900 });
+  await openReady(page, "2d");
+
+  // Placeholders before any hover.
+  expect(await page.textContent("#hover-kind")).toBe("—");
+
+  // Drive the module helper directly (available on window because it is
+  // declared with `function hoverHitFromProps(...)` at top level). This is
+  // deterministic across browsers — locating a specific SVG path rendered
+  // by Leaflet from the Paris grid would be flaky.
+  const probes = await page.evaluate(() => {
+    const node = window.hoverHitFromProps({
+      kind: "node",
+      node_id: "nTest",
+      junction_type: "crossroads",
+    });
+    const edge = window.hoverHitFromProps({
+      kind: "centerline",
+      edge_id: "eTest",
+      length_m: 123.4,
+      start_node_id: "a",
+      end_node_id: "b",
+      highway: "primary",
+      osm_lanes: 3,
+    });
+    const reach = window.hoverHitFromProps({
+      kind: "reachable_edge",
+      edge_id: "eReach",
+      from_node: "a",
+      to_node: "b",
+      start_cost_m: 10,
+      end_cost_m: 42,
+    });
+    window.setHoverCard(node);
+    return {
+      node,
+      edge,
+      reach,
+      liveKind: document.getElementById("hover-kind").textContent,
+      liveId: document.getElementById("hover-id").textContent,
+    };
+  });
+  expect(probes.node.kind).toBe("node");
+  expect(probes.node.category).toBe("crossroads");
+  expect(probes.edge.highway).toBe("primary");
+  expect(probes.edge.osmLanes).toBe(3);
+  expect(probes.reach.kind).toBe("reachable_edge");
+  expect(probes.reach.lengthM).toBe(32);
+  // setHoverCard(node) should have populated the DOM.
+  expect(probes.liveKind).toContain("Crossroads");
+  expect(probes.liveId).toBe("nTest");
+
+  // setHoverCard(null) resets placeholders.
+  await page.evaluate(() => window.setHoverCard(null));
+  expect((await page.textContent("#hover-kind"))?.trim()).toBe("—");
+});
+
 test("live reachability from click computes reachable spans", async ({ page }) => {
   await page.setViewportSize({ width: 1366, height: 900 });
   await openReady(page, "2d");

@@ -82,6 +82,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   browser smoke covers the `n312 → n191` deep link, asserting the card is
   visible, multiple steps render, and the URL retains `from` / `to`.
 
+- **Hover card updates when you mouse over 2D Leaflet features.**
+  Previously the inspector's `#hover-card` only reacted to the 3D
+  raycaster. A new `hoverHitFromProps()` helper turns a feature property
+  bag into the shape `setHoverCard()` already accepts, and
+  `bindHoverSync(feature, layer)` wires `mouseover` / `mouseout` on every
+  Leaflet layer so the 2D map surfaces the same edge / node metadata
+  (Edge ID, Primary · 3 lanes, Node · T-junction, reachable spans, etc.)
+  as the 3D view. The empty-card hint now reads "Hover an edge or node
+  (2D or 3D) …". Browser smoke asserts the helper produces the expected
+  shapes for node / centerline / reachable_edge and that
+  `setHoverCard(null)` resets the card.
+
 - **Live reachability-from-click in the map console.**
   `docs/map.html` gains a `Reach` budget select (250 / 500 / 1000 / 2000 m,
   default 500) and a `Reach from click` toggle button. Activating the toggle
