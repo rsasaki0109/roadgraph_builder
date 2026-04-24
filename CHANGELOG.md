@@ -82,6 +82,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   browser smoke covers the `n312 → n191` deep link, asserting the card is
   visible, multiple steps render, and the URL retains `from` / `to`.
 
+- **Live reachability-from-click in the map console.**
+  `docs/map.html` gains a `Reach` budget select (250 / 500 / 1000 / 2000 m,
+  default 500) and a `Reach from click` toggle button. Activating the toggle
+  flips the next node click from routing to reachability: a new JS
+  `reachableWithin(graph, start, budgetM, restrictions)` runs a directed-
+  state Dijkstra with a metre cap (mirroring the CLI `reachable`
+  semantics) and returns per-edge spans including a `reachable_fraction`
+  for partial edges. `buildReachableFeatures()` emits a FeatureCollection
+  that matches the committed `reachable_paris_grid.geojson` shape, with
+  `clipLineToFraction()` trimming partial edges to their reachable length.
+  `drawDynamicReachability()` replaces the prebaked overlay on the 2D
+  Leaflet layer, refreshes the 3D scene payload, and updates
+  `#stat-reach`. Browser smoke asserts the flow end-to-end (button toggles
+  active, `onNodeClick('n191')` produces a `reach n191 (500 m) …` status
+  with a populated span count, and the button returns to inactive).
+
 - **Synthetic camera / regulatory overlay on the Paris grid viewer.**
   A committed, hand-authored
   `docs/assets/paris_grid_camera_detections.json` carries nine synthetic

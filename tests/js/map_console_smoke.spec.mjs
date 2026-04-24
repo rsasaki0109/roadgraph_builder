@@ -196,6 +196,35 @@ test("deep-link restores the Paris TR-aware route", async ({ page }) => {
   expect(routeFeature.properties.to_node).toBe("n191");
 });
 
+test("live reachability from click computes reachable spans", async ({ page }) => {
+  await page.setViewportSize({ width: 1366, height: 900 });
+  await openReady(page, "2d");
+
+  // Activate reach-from-click mode; the button should flip to .active.
+  await page.click("#reach-from-click");
+  await expect(page.locator("#reach-from-click")).toHaveClass(/active/);
+
+  // Trigger a node click programmatically so the test does not depend on the
+  // exact pixel position of a dynamic marker. onNodeClick is a top-level
+  // function declared in docs/js/map_console.js and therefore on window.
+  await page.evaluate(() => window.onNodeClick("n191"));
+
+  await expect
+    .poll(async () => (await page.textContent("#route-status"))?.trim() || "", {
+      timeout: 8000,
+    })
+    .toMatch(/^reach n191 \(500 m\)/);
+
+  const reach = countText(await page.textContent("#stat-reach"));
+  expect(
+    reach,
+    "reachable span count should be populated by live reachability",
+  ).toBeGreaterThan(0);
+
+  // The reach-from-click button exits its active state after the pick.
+  await expect(page.locator("#reach-from-click")).not.toHaveClass(/active/);
+});
+
 test("3D hover picks an edge or node and click routes", async ({ page }) => {
   await page.setViewportSize({ width: 1366, height: 900 });
   await openReady(page, "3d");

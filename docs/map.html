@@ -380,6 +380,17 @@
         border-radius: 4px;
         font-size: 10px;
       }
+      .reach-ctrl {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: #cbd5e1;
+        font-size: 12px;
+      }
+      #reach-from-click.active {
+        background: #0f766e;
+        color: #ecfeff;
+      }
       .bar {
         position: relative;
         z-index: 10;
@@ -531,6 +542,16 @@
       </label>
       <button id="clear-route" title="Clear the current route selection">Clear route</button>
       <button id="download-route" disabled title="Download the current route as GeoJSON">Download route GeoJSON</button>
+      <label class="reach-ctrl">
+        Reach
+        <select id="reach-budget" title="Reachability budget in metres">
+          <option value="250">250 m</option>
+          <option value="500" selected>500 m</option>
+          <option value="1000">1000 m</option>
+          <option value="2000">2000 m</option>
+        </select>
+      </label>
+      <button id="reach-from-click" title="Click a graph node to compute reachable spans from it">Reach from click</button>
       <span class="segmented" aria-label="View mode">
         <button type="button" id="view-2d" class="active" title="2D map view">2D</button>
         <button type="button" id="view-3d" title="3D graph view">3D</button>

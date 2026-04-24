@@ -957,6 +957,16 @@ const RESTRICTIONS_URLS = {
 // Per-dataset graph cached for JS Dijkstra.
 const graphCache = {};
 let currentRouteSelection = { from: null, to: null };
+let reachSelectionMode = false;
+
+function setReachSelectionMode(enabled) {
+  reachSelectionMode = !!enabled;
+  const btn = document.getElementById("reach-from-click");
+  if (btn) btn.classList.toggle("active", reachSelectionMode);
+  if (reachSelectionMode) {
+    statusText("Click a graph node to compute reachable spans — press the button again to cancel.");
+  }
+}
 
 function statusText(msg) {
   document.getElementById("route-status").textContent = msg;
@@ -1421,6 +1431,243 @@ function dijkstra(graph, fromNode, toNode, restrictions) {
   };
 }
 
+// Clip a lon/lat polyline to a fraction of its Euclidean path length. Good
+// enough at the Paris-bbox scale (sub-km extents) and identical to how the
+// committed `reachable_paris_grid.geojson` clips partial edges.
+function clipLineToFraction(coords, fraction) {
+  if (!Array.isArray(coords) || coords.length === 0) return [];
+  if (fraction <= 0) return [coords[0].slice()];
+  if (fraction >= 1) return coords.map((c) => c.slice());
+  const cum = [0];
+  for (let i = 1; i < coords.length; i++) {
+    const dx = coords[i][0] - coords[i - 1][0];
+    const dy = coords[i][1] - coords[i - 1][1];
+    cum.push(cum[i - 1] + Math.sqrt(dx * dx + dy * dy));
+  }
+  const total = cum[cum.length - 1];
+  if (total <= 0) return [coords[0].slice()];
+  const target = total * fraction;
+  const out = [coords[0].slice()];
+  for (let i = 1; i < coords.length; i++) {
+    if (cum[i] >= target) {
+      const prev = cum[i - 1];
+      const f = (target - prev) / (cum[i] - prev);
+      const x = coords[i - 1][0] + f * (coords[i][0] - coords[i - 1][0]);
+      const y = coords[i - 1][1] + f * (coords[i][1] - coords[i - 1][1]);
+      out.push([x, y]);
+      break;
+    }
+    out.push(coords[i].slice());
+  }
+  return out;
+}
+
+// Directed-state Dijkstra capped at a metre budget. Shares the turn-
+// restriction handling with dijkstra() above. Returns reachable nodes (min
+// cost seen) and directed edge spans with a reachable_fraction for edges
+// whose far endpoint is beyond the budget.
+function reachableWithin(graph, startNode, budgetM, restrictions) {
+  if (!graph || !graph.adj || !graph.adj.has(startNode)) return null;
+  const budget = Number(budgetM);
+  if (!Number.isFinite(budget) || budget <= 0) return null;
+  const rx = restrictions || { noT: new Map(), onlyT: new Map() };
+  const stateKey = (node, inEdge, inDir) =>
+    node + "|" + (inEdge || "") + "|" + (inDir || "");
+
+  const nodeCost = new Map();
+  nodeCost.set(startNode, 0);
+  const edgeSpans = new Map();
+
+  const dist = new Map();
+  dist.set(stateKey(startNode, null, null), 0);
+  const heap = [[0, startNode, null, null]];
+  const popMin = () => {
+    const top = heap[0];
+    const last = heap.pop();
+    if (heap.length) {
+      heap[0] = last;
+      let i = 0;
+      for (;;) {
+        const l = 2 * i + 1;
+        const r = 2 * i + 2;
+        let best = i;
+        if (l < heap.length && heap[l][0] < heap[best][0]) best = l;
+        if (r < heap.length && heap[r][0] < heap[best][0]) best = r;
+        if (best === i) break;
+        [heap[i], heap[best]] = [heap[best], heap[i]];
+        i = best;
+      }
+    }
+    return top;
+  };
+  const push = (entry) => {
+    heap.push(entry);
+    let i = heap.length - 1;
+    while (i > 0) {
+      const parent = (i - 1) >> 1;
+      if (heap[parent][0] <= heap[i][0]) break;
+      [heap[i], heap[parent]] = [heap[parent], heap[i]];
+      i = parent;
+    }
+  };
+
+  let popCount = 0;
+  let expandedCount = 0;
+  while (heap.length) {
+    const [d, u, inEdge, inDir] = popMin();
+    popCount += 1;
+    const key = stateKey(u, inEdge, inDir);
+    if (d > (dist.get(key) ?? Infinity)) continue;
+    if (d > budget) continue;
+    if (!nodeCost.has(u) || nodeCost.get(u) > d) nodeCost.set(u, d);
+    expandedCount += 1;
+    const outs = graph.adj.get(u) || [];
+    for (const out of outs) {
+      const outDir = out.reverse ? "reverse" : "forward";
+      if (inEdge) {
+        const fromKey = u + "|" + inEdge + "|" + inDir;
+        const outKey = out.edge_id + "|" + outDir;
+        if (rx.onlyT.has(fromKey) && rx.onlyT.get(fromKey) !== outKey) continue;
+        const banned = rx.noT.get(fromKey);
+        if (banned && banned.has(outKey)) continue;
+      }
+      const startCost = d;
+      const endCost = d + out.length;
+      const reachableEnd = Math.min(endCost, budget);
+      const reachableCost = reachableEnd - startCost;
+      if (reachableCost <= 0) continue;
+      const fraction = out.length > 0 ? reachableCost / out.length : 0;
+      const spanKey = out.edge_id + "|" + outDir;
+      const existing = edgeSpans.get(spanKey);
+      if (!existing || existing.reachable_fraction < fraction) {
+        edgeSpans.set(spanKey, {
+          edge_id: out.edge_id,
+          from_node: u,
+          to_node: out.neighbor,
+          direction: outDir,
+          start_cost_m: startCost,
+          end_cost_m: endCost,
+          reachable_cost_m: reachableEnd,
+          reachable_fraction: Math.max(0, Math.min(1, fraction)),
+          complete: endCost <= budget,
+        });
+      }
+      if (endCost <= budget) {
+        const nkey = stateKey(out.neighbor, out.edge_id, outDir);
+        if (endCost < (dist.get(nkey) ?? Infinity)) {
+          dist.set(nkey, endCost);
+          push([endCost, out.neighbor, out.edge_id, outDir]);
+        }
+      }
+    }
+  }
+  return {
+    nodeCost,
+    edgeSpans,
+    diagnostics: {
+      engine: "dijkstra",
+      heuristicEnabled: false,
+      fallbackReason: null,
+      expandedStates: expandedCount,
+      popCount,
+      budget_m: budget,
+    },
+  };
+}
+
+function buildReachableFeatures(graph, result, startNode, budgetM) {
+  const features = [];
+  const startLL = graph.nodes.get(startNode);
+  if (startLL) {
+    features.push({
+      type: "Feature",
+      properties: {
+        kind: "reachability_start",
+        node_id: startNode,
+        cost_m: 0,
+        budget_m: Number(budgetM),
+      },
+      geometry: { type: "Point", coordinates: [startLL.lon, startLL.lat] },
+    });
+  }
+  for (const span of result.edgeSpans.values()) {
+    const edge = graph.edges.get(span.edge_id);
+    if (!edge) continue;
+    let coords = edge.coords.map((c) => c.slice());
+    if (span.direction === "reverse") coords.reverse();
+    if (!span.complete && span.reachable_fraction < 1) {
+      coords = clipLineToFraction(coords, span.reachable_fraction);
+    }
+    if (coords.length < 2) continue;
+    features.push({
+      type: "Feature",
+      properties: {
+        kind: "reachable_edge",
+        edge_id: span.edge_id,
+        from_node: span.from_node,
+        to_node: span.to_node,
+        direction: span.direction,
+        start_cost_m: span.start_cost_m,
+        end_cost_m: span.end_cost_m,
+        reachable_cost_m: span.reachable_cost_m,
+        reachable_fraction: span.reachable_fraction,
+        complete: !!span.complete,
+      },
+      geometry: { type: "LineString", coordinates: coords },
+    });
+  }
+  for (const [nid, cost] of result.nodeCost) {
+    if (nid === startNode) continue;
+    const ll = graph.nodes.get(nid);
+    if (!ll) continue;
+    features.push({
+      type: "Feature",
+      properties: { kind: "reachable_node", node_id: nid, cost_m: cost },
+      geometry: { type: "Point", coordinates: [ll.lon, ll.lat] },
+    });
+  }
+  return { type: "FeatureCollection", features };
+}
+
+function drawDynamicReachability(which, startNode, budgetM) {
+  const graph = graphCache[which];
+  if (!graph) {
+    statusText("dataset graph not loaded yet");
+    return;
+  }
+  if (!graph.adj.has(startNode)) {
+    statusText("unknown node " + startNode + " — click another");
+    return;
+  }
+  const result = reachableWithin(graph, startNode, budgetM, graph.restrictions);
+  if (!result) {
+    statusText("reachable failed: bad budget or node");
+    return;
+  }
+  const data = buildReachableFeatures(graph, result, startNode, budgetM);
+  reachabilityOverlayLayer.clearLayers();
+  scenePayload.reachable = data;
+  const spans = data.features.filter((f) => f.properties.kind === "reachable_edge").length;
+  const reachedNodes = data.features.filter((f) => f.properties.kind === "reachable_node").length;
+  const gj = L.geoJSON(data, {
+    style: styleLine,
+    pointToLayer: pointLayer,
+    onEachFeature: bindCommonPopups,
+  });
+  reachabilityOverlayLayer.addLayer(gj);
+  updateInspector(which, { reachableEdges: spans });
+  const hintParts = [
+    "reach " + startNode + " (" + Number(budgetM) + " m)",
+    spans + " spans",
+    reachedNodes + " nodes",
+  ];
+  if (result.diagnostics) {
+    hintParts.push(result.diagnostics.expandedStates + " expanded");
+  }
+  statusText(hintParts.join(" · "));
+  if (activeView === "3d") render3DScene();
+}
+
 function drawDynamicRoute(graph, dij) {
   routeOverlayLayer.clearLayers();
   const coords = [];
@@ -1662,6 +1909,17 @@ function syncRouteDeepLink(dij) {
 }
 
 function onNodeClick(nodeId) {
+  // When reach-from-click mode is active, the next node click computes a live
+  // reachability overlay from that node with the currently selected budget,
+  // instead of routing.
+  if (reachSelectionMode) {
+    const which = document.getElementById("dataset").value;
+    const budgetSel = document.getElementById("reach-budget");
+    const budget = Number(budgetSel ? budgetSel.value : 500) || 500;
+    setReachSelectionMode(false);
+    drawDynamicReachability(which, nodeId, budget);
+    return;
+  }
   const sel = currentRouteSelection;
   if (!sel.from) {
     sel.from = nodeId;
@@ -1758,6 +2016,7 @@ async function show(which) {
   reachabilityOverlayLayer.clearLayers();
   restrictionsOverlayLayer.clearLayers();
   clearRoute();
+  setReachSelectionMode(false);
   if (threeState) {
     threeState.pointerActive = false;
     threeState.lastHoverKey = null;
@@ -1849,6 +2108,12 @@ document.getElementById("clear-route").addEventListener("click", clearRoute);
 const downloadRouteBtn = document.getElementById("download-route");
 if (downloadRouteBtn) {
   downloadRouteBtn.addEventListener("click", downloadRouteGeoJSON);
+}
+const reachFromClickBtn = document.getElementById("reach-from-click");
+if (reachFromClickBtn) {
+  reachFromClickBtn.addEventListener("click", () => {
+    setReachSelectionMode(!reachSelectionMode);
+  });
 }
 view2dButton.addEventListener("click", () => setView("2d"));
 view3dButton.addEventListener("click", () => setView("3d"));
