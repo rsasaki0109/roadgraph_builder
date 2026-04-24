@@ -891,6 +891,10 @@ def main() -> None:
                 merge_endpoint_m=2.0,
             ),
         )
+        # Populate HD-lite lane boundaries so the viewer can render the green /
+        # purple dashed lines. Without this the 3D / 2D views only show the
+        # orange centerlines for the Paris grid.
+        enrich_sd_to_hd(grid, SDToHDConfig(lane_width_m=3.5))
         tr_raw = load_overpass_json(paris_tr_raw)
         conv = convert_osm_restrictions_to_graph(grid, tr_raw, max_snap_distance_m=15.0)
         cleaned = strip_private_fields(conv.restrictions)
@@ -946,6 +950,59 @@ def main() -> None:
             license_name="ODbL-1.0",
             license_url="https://opendatacommons.org/licenses/odbl/1-0/",
         )
+
+    # OSM-highway-derived Berlin Mitte HD-lite sample
+    # Same inputs shape as the Paris grid block; shipped so the committed
+    # viewer can switch between European and (future) Asian demos without a
+    # live Overpass fetch. Leaves turn restrictions unshipped for now — add
+    # later when the raw relation dump is available.
+    berlin_raw = Path("/tmp/berlin_mitte_raw.json")
+    if berlin_raw.is_file():
+        from roadgraph_builder.io.osm import (
+            build_graph_from_overpass_highways,
+            load_overpass_json,
+        )
+        from roadgraph_builder.pipeline.build_graph import BuildParams
+        import numpy as np
+
+        # Berlin Mitte bbox roughly lat 52.506–52.526, lon 13.367–13.401.
+        berlin_origin = {"latitude": 52.5160, "longitude": 13.3840}
+        (ASSETS / "berlin_mitte_origin.json").write_text(
+            json.dumps(berlin_origin, indent=2) + "\n", encoding="utf-8"
+        )
+        hovp = load_overpass_json(berlin_raw)
+        berlin_graph = build_graph_from_overpass_highways(
+            hovp,
+            origin_lat=berlin_origin["latitude"],
+            origin_lon=berlin_origin["longitude"],
+            params=BuildParams(
+                simplify_tolerance_m=0.0,
+                post_simplify_tolerance_m=0.0,
+                merge_endpoint_m=2.0,
+            ),
+        )
+        enrich_sd_to_hd(berlin_graph, SDToHDConfig(lane_width_m=3.5))
+        berlin_geo_tmp = ASSETS / "_map_berlin_mitte.tmp.geojson"
+        export_map_geojson(
+            berlin_graph,
+            np.zeros((0, 2)),
+            berlin_geo_tmp,
+            origin_lat=berlin_origin["latitude"],
+            origin_lon=berlin_origin["longitude"],
+            dataset_name="berlin_mitte",
+            attribution="© OpenStreetMap contributors",
+            license_name="ODbL-1.0",
+            license_url="https://opendatacommons.org/licenses/odbl/1-0/",
+        )
+        raw = json.loads(berlin_geo_tmp.read_text(encoding="utf-8"))
+        for f in raw["features"]:
+            pp = f["properties"]
+            for k in ("source", "direction_observed"):
+                pp.pop(k, None)
+        (ASSETS / "map_berlin_mitte.geojson").write_text(
+            json.dumps(raw, separators=(",", ":")), encoding="utf-8"
+        )
+        berlin_geo_tmp.unlink(missing_ok=True)
 
     _write_paris_grid_reachability_asset()
     _write_route_explain_sample_asset()

@@ -11,7 +11,9 @@ from — and credits OpenStreetMap contributors.
 | `map_osm.geojson` | OSM public GPS trackpoints API, Berlin bbox `13.40,52.51,13.42,52.52`, ~800 points (committed as `examples/osm_public_trackpoints.csv`). | **© OpenStreetMap contributors, ODbL 1.0** |
 | `map_paris.geojson` | OSM public GPS trackpoints API, Paris bbox `2.3370,48.8570,2.3570,48.8770`, pages 0-4 merged to ~6634 deduped points. **Raw CSV is not committed**; only the derived centerlines / boundaries / nodes are shipped here. Built with `export-bundle --max-step-m 40 --merge-endpoint-m 8 --lane-width-m 3.5`. | **© OpenStreetMap contributors, ODbL 1.0** |
 | `route_paris.geojson` | Shortest path produced by `roadgraph_builder route /tmp/paris_bundle/sim/road_graph.json n111 n53 --output ...` on the same Paris bundle above: 3 edges, ~1268 m. Loaded as a yellow overlay on top of `map_paris.geojson` in the Leaflet viewer. | **© OpenStreetMap contributors, ODbL 1.0** |
-| `map_paris_grid.geojson` | Same Paris bbox, but built from OSM highway ways (Overpass `way["highway"~"^(motorway\|...\|service)$"]`) via `roadgraph_builder build-osm-graph`. 855 nodes / 1081 edges — the trajectory-agnostic topology used to map OSM turn restrictions onto real graph junctions. Written as compact (no-indent) JSON to keep the payload small. | **© OpenStreetMap contributors, ODbL 1.0** |
+| `map_paris_grid.geojson` | Same Paris bbox, but built from OSM highway ways (Overpass `way["highway"~"^(motorway\|...\|service)$"]`) via `roadgraph_builder build-osm-graph` followed by `enrich_sd_to_hd(lane_width_m=3.5)`. 855 nodes / 1081 edges / 2162 HD-lite lane boundaries — the trajectory-agnostic topology used to map OSM turn restrictions onto real graph junctions, now with green / purple paint envelopes running alongside every centerline. Written as compact (no-indent) JSON to keep the payload small. | **© OpenStreetMap contributors, ODbL 1.0** |
+| `map_berlin_mitte.geojson` | Berlin Mitte bbox `13.3667,52.5061,13.4013,52.5262` fetched via `scripts/fetch_osm_highways.py` and built through the same `build-osm-graph` + `enrich_sd_to_hd(lane_width_m=3.5)` path. 1883 nodes / 2063 edges / 4126 HD-lite lane boundaries. Turn restrictions are not yet shipped for this sample. | **© OpenStreetMap contributors, ODbL 1.0** |
+| `berlin_mitte_origin.json` | WGS84 origin (`52.5160, 13.3840`) used when projecting `map_berlin_mitte.geojson` back to lat/lon. Repo-local, synthesised from the bbox centre. | Repo license |
 | `paris_grid_turn_restrictions.json` | 10 of 11 OSM `type=restriction` relations in the Paris bbox, mapped onto `map_paris_grid.geojson` via `roadgraph_builder convert-osm-restrictions`. One way-classified cycleway drop means one relation (`9635734`) didn't map. Schema: `roadgraph_builder/schemas/turn_restrictions.schema.json`. Drawn as red dots in the viewer with from/to-edge popups. | **© OpenStreetMap contributors, ODbL 1.0** |
 | `route_paris_grid.geojson` | Shortest path `n312 → n191` through `map_paris_grid.geojson` **honouring** `paris_grid_turn_restrictions.json`: 11 edges / 909 m. Without the restrictions the same pair routes in 13 edges / 878 m — so the restriction forces a 31 m detour, which is what the viewer's yellow overlay shows by default on this dataset. | **© OpenStreetMap contributors, ODbL 1.0** |
 | `reachable_paris_grid.geojson` | Service-area style reachability overlay from start node `n312` on `map_paris_grid.geojson`, with a 500 m cost budget and the same `paris_grid_turn_restrictions.json` transition rules. Edge spans are clipped when the budget ends mid-edge. | **© OpenStreetMap contributors, ODbL 1.0** |
@@ -60,4 +62,16 @@ roadgraph_builder convert-osm-restrictions \
 
 # Then regenerate the map.geojson and the demo route via the Python snippet
 # in scripts/refresh_docs_assets.py (see the paris_grid block).
+```
+
+For the Berlin Mitte demo:
+
+```bash
+python scripts/fetch_osm_highways.py \
+  --bbox "13.3667,52.5061,13.4013,52.5262" \
+  -o /tmp/berlin_mitte_raw.json
+
+# refresh_docs_assets.py picks up /tmp/berlin_mitte_raw.json automatically
+# and writes docs/assets/map_berlin_mitte.geojson + berlin_mitte_origin.json.
+python scripts/refresh_docs_assets.py
 ```

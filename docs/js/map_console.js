@@ -668,6 +668,7 @@ function setView(mode) {
 
 const DATASET_URLS = {
   paris_grid: "assets/map_paris_grid.geojson",
+  berlin_mitte: "assets/map_berlin_mitte.geojson",
   paris: "assets/map_paris.geojson",
   osm: "assets/map_osm.geojson",
   toy: "assets/map_toy.geojson",

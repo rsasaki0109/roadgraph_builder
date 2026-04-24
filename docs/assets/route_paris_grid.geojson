@@ -6,7 +6,7 @@
     "origin_lon": 2.347,
     "from_node": "n312",
     "to_node": "n191",
-    "total_length_m": 909.4485603259116,
+    "total_length_m": 909.4485603259117,
     "edge_count": 11,
     "attribution": "© OpenStreetMap contributors",
     "license": "ODbL-1.0",
@@ -19,7 +19,7 @@
         "kind": "route",
         "from_node": "n312",
         "to_node": "n191",
-        "total_length_m": 909.4485603259116,
+        "total_length_m": 909.4485603259117,
         "edge_count": 11
       },
       "geometry": {

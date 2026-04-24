@@ -82,6 +82,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   browser smoke covers the `n312 → n191` deep link, asserting the card is
   visible, multiple steps render, and the URL retains `from` / `to`.
 
+- **Paris grid and new Berlin Mitte viewer datasets ship HD-lite lanes.**
+  `scripts/refresh_docs_assets.py` now runs `enrich_sd_to_hd(lane_width_m=
+  3.5)` on the OSM-highway Paris grid, so `docs/assets/map_paris_grid.geojson`
+  carries 2 162 `lane_boundary_{left,right}` features alongside its 1 081
+  centerlines. The 2D and 3D map console views finally show the green /
+  purple paint envelopes the legend advertised. When
+  `/tmp/berlin_mitte_raw.json` is present, the refresh step also writes
+  `docs/assets/map_berlin_mitte.geojson` (1 883 nodes / 2 063 centerlines /
+  4 126 HD-lite lane boundaries) plus `berlin_mitte_origin.json`, and the
+  viewer dropdown grows a **Berlin Mitte (OSM highways, HD-lite lanes,
+  ODbL)** option. ATTRIBUTION.md documents the Berlin source / refetch
+  recipe and the lane-boundary provenance. The opt-in browser smoke gains
+  a Berlin switch case asserting `#stat-lanes` exceeds 1 000 after the
+  dropdown change, and the committed hero screenshots were refreshed so
+  the HD-lite paint lines are visible in both 2D and 3D captures.
+
 - **Route export, deep-link auto-fit, and route-aware hero screenshots.**
   A new `Download route GeoJSON` button next to `Clear route` becomes
   enabled once a route is drawn and streams the current

@@ -70,6 +70,28 @@ test("3D desktop renders a non-blank WebGL canvas", async ({ page }) => {
   expect(statusText.toLowerCase()).toContain("node");
 });
 
+test("Berlin Mitte dataset switch populates inspector + lane boundaries", async ({ page }) => {
+  await page.setViewportSize({ width: 1366, height: 900 });
+  await openReady(page, "2d");
+
+  // Switch the dropdown; show() should fetch and re-render without reload.
+  await page.selectOption("#dataset", "berlin_mitte");
+  // Wait for the stats to reflect the new dataset. Berlin Mitte ships with
+  // thousands of lane boundaries (2 per centerline) which paris_grid did not
+  // historically surface — asserting > 1000 exercises both the dataset switch
+  // and the HD-lite enrich path.
+  await expect
+    .poll(async () => countText(await page.textContent("#stat-lanes")), {
+      timeout: 15_000,
+      message: "expected berlin_mitte to report many HD-lite lane boundaries",
+    })
+    .toBeGreaterThan(1000);
+  const nodes = countText(await page.textContent("#stat-nodes"));
+  const edges = countText(await page.textContent("#stat-edges"));
+  expect(nodes, "berlin_mitte should have many nodes").toBeGreaterThan(500);
+  expect(edges, "berlin_mitte should have many centerlines").toBeGreaterThan(500);
+});
+
 test("mobile viewport has no horizontal overflow", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await openReady(page, "2d");
