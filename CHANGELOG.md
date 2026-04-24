@@ -82,6 +82,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   browser smoke covers the `n312 → n191` deep link, asserting the card is
   visible, multiple steps render, and the URL retains `from` / `to`.
 
+- **Animated map-console hero GIF for the README and Showcase.**
+  `scripts/record_map_console_hero.py` serves `docs/`, drives system Chrome
+  through Playwright's `recordVideo` context for a scripted demo (Paris
+  `n312 → n191` deep link → 2D soak → 3D toggle with auto-rotate), and pipes
+  the resulting WebM through ffmpeg's two-pass `palettegen` / `paletteuse`
+  to produce a committed `docs/images/map_console_hero.gif`
+  (720×420, 8 fps, 64 colours, ~4.2 MB). README "Visualization results" and
+  `docs/SHOWCASE.md` lead with the GIF so the map-console motion is visible
+  before anyone runs the viewer locally. Requires Playwright's bundled
+  ffmpeg (`npx playwright install ffmpeg`) in addition to system Chrome
+  and system ffmpeg.
+
 - **Centerlines are coloured by OSM road class with OSM lane counts exposed.**
   `scripts/refresh_docs_assets.py` now re-reads the raw Overpass highways JSON
   after graph construction and stamps `highway` / `osm_lanes` / `osm_maxspeed`

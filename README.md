@@ -56,7 +56,9 @@ v0.7.1 adds post-v0.7.0 validation and release-hardening work: canonical lane-co
 
 ### Visualization results
 
-The docs map ships a Paris OSM-highway graph with 10 mapped turn restrictions, a restriction-aware route overlay, and a 500 m reachability overlay from the same start node. The docs landing page also loads the generated `route --explain` sample and compares safe A* against the Paris Dijkstra fallback using expanded / queued state counts. These static assets are regenerated from committed GeoJSON / JSON inputs by `scripts/refresh_docs_assets.py`; the diagnostics screenshot below is rendered with `scripts/render_route_diagnostics_screenshot.py`, and the map-console screenshots with `scripts/render_map_console_screenshot.py` (uses system Chrome via Playwright and pulls OSM tiles / Leaflet / Three.js over the network). OSM-derived asset attribution is tracked in [`docs/assets/ATTRIBUTION.md`](docs/assets/ATTRIBUTION.md).
+The docs map ships a Paris OSM-highway graph with 10 mapped turn restrictions, a restriction-aware route overlay, and a 500 m reachability overlay from the same start node. The docs landing page also loads the generated `route --explain` sample and compares safe A* against the Paris Dijkstra fallback using expanded / queued state counts. These static assets are regenerated from committed GeoJSON / JSON inputs by `scripts/refresh_docs_assets.py`; the diagnostics screenshot below is rendered with `scripts/render_route_diagnostics_screenshot.py`, the map-console screenshots with `scripts/render_map_console_screenshot.py`, and the animated hero with `scripts/record_map_console_hero.py` (all three use system Chrome via Playwright and pull OSM tiles / Leaflet / Three.js over the network). OSM-derived asset attribution is tracked in [`docs/assets/ATTRIBUTION.md`](docs/assets/ATTRIBUTION.md).
+
+[![Map console animated hero: Paris deep-link route in 2D, then 3D auto-rotate with road-class + junction colour coding](docs/images/map_console_hero.gif)](docs/map.html)
 
 [![2D map console: Paris OSM grid with route, reachability, turn restrictions, and inspector metrics](docs/images/map_console_2d.png)](docs/map.html)
 
