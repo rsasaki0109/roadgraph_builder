@@ -219,6 +219,58 @@ def _point_to_polyline_distance_m(
     return best ** 0.5 if best < float("inf") else best
 
 
+def _inject_osm_tags_into_graph_edges(
+    graph,
+    origin_lat: float,
+    origin_lon: float,
+    way_specs: list[dict],
+    max_match_distance_m: float = 8.0,
+) -> int:
+    """Stamp OSM highway / lanes / maxspeed / name tags onto ``edge.attributes``
+    by nearest point-to-polyline match. Because
+    :func:`export_map_geojson` spreads ``edge.attributes`` into the exported
+    feature properties, downstream Lanelet2 / GeoJSON / sd_nav exporters all
+    see the same stamped values. Returns the number of matched edges.
+    """
+    stamped = 0
+    for edge in graph.edges:
+        poly = edge.polyline
+        if len(poly) < 2:
+            continue
+        mid = poly[len(poly) // 2]
+        px, py = float(mid[0]), float(mid[1])
+        best = None
+        best_d = max_match_distance_m
+        for spec in way_specs:
+            d = _point_to_polyline_distance_m(px, py, spec["coords_m"])
+            if d < best_d:
+                best_d = d
+                best = spec
+        if best is None:
+            continue
+        tags = best["tags"]
+        attrs = dict(edge.attributes)
+        if tags.get("highway"):
+            attrs["highway"] = str(tags["highway"])
+        if tags.get("lanes"):
+            lanes_raw = str(tags["lanes"]).strip()
+            try:
+                lanes_int = int(lanes_raw)
+            except ValueError:
+                lanes_int = None
+            if lanes_int is not None and lanes_int > 0:
+                attrs["osm_lanes"] = lanes_int
+        if tags.get("maxspeed"):
+            attrs["osm_maxspeed"] = str(tags["maxspeed"])
+        if tags.get("oneway"):
+            attrs["osm_oneway"] = str(tags["oneway"])
+        if tags.get("name"):
+            attrs["osm_name"] = str(tags["name"])
+        edge.attributes = attrs
+        stamped += 1
+    return stamped
+
+
 def _inject_osm_tags_into_geojson(
     geojson: dict,
     origin_lat: float,
@@ -1149,6 +1201,13 @@ def main() -> None:
                 merge_endpoint_m=2.0,
             ),
         )
+        # Stamp OSM highway / lanes / maxspeed / oneway / name tags onto the
+        # graph edge attributes so every downstream export (GeoJSON for the
+        # viewer, Lanelet2 OSM for Autoware) picks them up.
+        paris_way_specs = _collect_osm_way_polylines(
+            hovp, lat0, lon0, _OSM_WANTED_HIGHWAYS
+        )
+        _inject_osm_tags_into_graph_edges(grid, lat0, lon0, paris_way_specs)
         # Populate HD-lite lane boundaries so the viewer can render the green /
         # purple dashed lines. Without this the 3D / 2D views only show the
         # orange centerlines for the Paris grid.
@@ -1233,13 +1292,10 @@ def main() -> None:
             p = f["properties"]
             for k in ("source", "direction_observed"):
                 p.pop(k, None)
-        # Stamp OSM highway / lanes tags onto centerlines so the viewer can
-        # colour-code by road class and surface lane counts. Match by
-        # nearest point-to-polyline in the shared meter frame.
-        paris_way_specs = _collect_osm_way_polylines(
-            hovp, lat0, lon0, _OSM_WANTED_HIGHWAYS
-        )
-        _inject_osm_tags_into_geojson(raw, lat0, lon0, paris_way_specs)
+        # The OSM highway / lanes / maxspeed / oneway / name tags are already
+        # on every edge.attributes from the earlier graph-level stamp, so
+        # export_map_geojson has already spread them into the feature
+        # properties via **e.attributes. No GeoJSON-level re-injection needed.
         if paris_camera_observations:
             _append_semantic_overlay_points(
                 raw, paris_camera_observations, "paris_grid"
@@ -1296,6 +1352,18 @@ def main() -> None:
                 merge_endpoint_m=2.0,
             ),
         )
+        berlin_way_specs = _collect_osm_way_polylines(
+            hovp,
+            berlin_origin["latitude"],
+            berlin_origin["longitude"],
+            _OSM_WANTED_HIGHWAYS,
+        )
+        _inject_osm_tags_into_graph_edges(
+            berlin_graph,
+            berlin_origin["latitude"],
+            berlin_origin["longitude"],
+            berlin_way_specs,
+        )
         enrich_sd_to_hd(berlin_graph, SDToHDConfig(lane_width_m=3.5))
         berlin_geo_tmp = ASSETS / "_map_berlin_mitte.tmp.geojson"
         export_map_geojson(
@@ -1314,18 +1382,6 @@ def main() -> None:
             pp = f["properties"]
             for k in ("source", "direction_observed"):
                 pp.pop(k, None)
-        berlin_way_specs = _collect_osm_way_polylines(
-            hovp,
-            berlin_origin["latitude"],
-            berlin_origin["longitude"],
-            _OSM_WANTED_HIGHWAYS,
-        )
-        _inject_osm_tags_into_geojson(
-            raw,
-            berlin_origin["latitude"],
-            berlin_origin["longitude"],
-            berlin_way_specs,
-        )
         (ASSETS / "map_berlin_mitte.geojson").write_text(
             json.dumps(raw, separators=(",", ":")), encoding="utf-8"
         )

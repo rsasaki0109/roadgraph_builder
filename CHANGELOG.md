@@ -82,6 +82,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   browser smoke covers the `n312 → n191` deep link, asserting the card is
   visible, multiple steps render, and the URL retains `from` / `to`.
 
+- **Lanelet2 export emits Autoware-spec lanelet tags.**
+  Every `type=lanelet` relation now carries `one_way=yes|no`,
+  `participant:vehicle=yes`, `speed_limit=<N> km/h`, and an OSM street
+  `name` alongside the existing `subtype=road` / `location=urban`. A new
+  `_autoware_lanelet_tags_from_attributes()` helper reads edge
+  `osm_oneway` / `osm_maxspeed` / `osm_name` (plus `hd.semantic_rules`
+  for speed limits) and is used from both `export_lanelet2` and
+  `export_lanelet2_per_lane`. The OSM tags land on the graph earlier
+  now: `scripts/refresh_docs_assets.py` calls the new
+  `_inject_osm_tags_into_graph_edges()` on the Paris grid and Berlin
+  Mitte graphs before `export_map_geojson`, so the GeoJSON spreads them
+  into feature properties at the same time the Lanelet2 exporter picks
+  them up. The committed `docs/assets/map_paris_grid.lanelet.osm` now
+  reports "result: ok" from `validate-lanelet2-tags`, the frozen sample
+  bundle's `lanelet/map.osm` was refreshed to carry the same new tags,
+  and the byte-gate test reports no drift.
+
 - **Paris grid ships a per-lane Lanelet2 OSM artifact + an HD-lite scope notice.**
   `scripts/refresh_docs_assets.py` now runs
   `infer_lane_counts(base_lane_width_m=3.5)` on the committed Paris OSM grid

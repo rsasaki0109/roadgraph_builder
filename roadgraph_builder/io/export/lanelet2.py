@@ -130,6 +130,65 @@ def _emit_regulatory_elements_for_lanelet(
 # ---------------------------------------------------------------------------
 
 
+def _autoware_lanelet_tags_from_attributes(attrs: dict) -> list[tuple[str, str]]:
+    """Derive Autoware-spec lanelet tags from road-graph edge attributes.
+
+    Autoware expects every vehicle-accessible lanelet to carry at minimum:
+
+    - ``one_way`` (``yes`` / ``no``), otherwise a warning / routing ambiguity
+    - ``participant:vehicle`` so the autoware_planning stack knows the lanelet
+      is for cars (pedestrian lanelets get ``participant:vehicle=no``)
+    - ``speed_limit`` with a unit so the behaviour planner has a cap
+
+    This helper looks at OSM-derived attributes we stamp via
+    ``scripts/refresh_docs_assets.py`` (``osm_oneway``, ``osm_maxspeed``,
+    ``osm_lanes``) plus the ``hd.semantic_rules`` speed-limit fallback.
+    Returns a list of (key, value) tuples to extend the lanelet tag list.
+    """
+    if not isinstance(attrs, dict):
+        return []
+    extra: list[tuple[str, str]] = []
+
+    # one_way from OSM tag values. OSM convention:
+    #   yes / true / 1 → one-way forward
+    #   -1 / reverse    → one-way reverse (treat as one_way=yes; direction
+    #                     handling is up to the routing consumer)
+    #   no / false / 0 → bidirectional
+    #   missing        → default no (bidirectional) to avoid silent routing
+    one_way = "no"
+    raw = attrs.get("osm_oneway")
+    if isinstance(raw, str):
+        token = raw.strip().lower()
+        if token in {"yes", "true", "1", "-1", "reverse"}:
+            one_way = "yes"
+        elif token in {"no", "false", "0"}:
+            one_way = "no"
+    extra.append(("one_way", one_way))
+    extra.append(("participant:vehicle", "yes"))
+
+    # speed_limit from the OSM ``maxspeed`` tag. Autoware reads the unit, so
+    # we emit ``<N> km/h`` rather than a bare number. Semantic-rules speed
+    # limits are handled separately by ``_lanelet_tags_from_semantic_rules``
+    # (which still emits a bare number to preserve 0.5.0 byte-for-byte
+    # behaviour) and by the regulatory-element tagging mode, so we stay out
+    # of that path to avoid duplicating or colliding with either.
+    maxspeed = attrs.get("osm_maxspeed")
+    if isinstance(maxspeed, str):
+        try:
+            value = float(maxspeed.strip().split()[0])
+            if value > 0:
+                extra.append(("speed_limit", f"{int(value)} km/h"))
+        except (TypeError, ValueError):
+            pass
+
+    # OSM name helps humans read the map in RViz; purely informational.
+    name = attrs.get("osm_name")
+    if isinstance(name, str) and name:
+        extra.append(("name", name))
+
+    return extra
+
+
 def _speed_limit_tags(semantic_rules: list[dict]) -> list[tuple[str, str]]:
     """Extract speed limit tags from semantic_rules for regulatory_element export.
 
@@ -437,6 +496,7 @@ def export_lanelet2_per_lane(
                     ("roadgraph:edge_id", str(e.id)),
                     ("roadgraph:lane_index", str(lane_idx)),
                 ]
+                lanelet_tags.extend(_autoware_lanelet_tags_from_attributes(e.attributes))
                 conf = lane.get("confidence")
                 if conf is not None:
                     try:
@@ -529,6 +589,7 @@ def export_lanelet2_per_lane(
                     ("location", "urban"),
                     ("roadgraph:edge_id", str(e.id)),
                 ]
+                ll_tags.extend(_autoware_lanelet_tags_from_attributes(e.attributes))
                 ll_tags.extend(_lanelet_tags_from_semantic_rules(hd_use.get("semantic_rules")))
                 new_relation(members, ll_tags)
 
@@ -771,6 +832,7 @@ def export_lanelet2(
                 ("location", "urban"),
                 ("roadgraph:edge_id", str(e.id)),
             ]
+            lanelet_tags.extend(_autoware_lanelet_tags_from_attributes(e.attributes))
             # δ: speed_limit tagging mode.
             if speed_limit_tagging == "regulatory-element":
                 # Emit a separate speed_limit regulatory_element; omit inline tag.

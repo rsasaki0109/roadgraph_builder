@@ -120,6 +120,8 @@
     <tag k="subtype" v="road"/>
     <tag k="location" v="urban"/>
     <tag k="roadgraph:edge_id" v="e0"/>
+    <tag k="one_way" v="no"/>
+    <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="50"/>
   </relation>
   <relation id="29">
@@ -137,5 +139,7 @@
     <tag k="subtype" v="road"/>
     <tag k="location" v="urban"/>
     <tag k="roadgraph:edge_id" v="e1"/>
+    <tag k="one_way" v="no"/>
+    <tag k="participant:vehicle" v="yes"/>
   </relation>
 </osm>
