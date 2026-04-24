@@ -39,6 +39,16 @@ test("2D desktop loads Paris grid with overlays", async ({ page }) => {
   expect(nodes, "paris_grid should have hundreds of nodes").toBeGreaterThan(500);
   expect(centerlines, "paris_grid should have hundreds of centerlines").toBeGreaterThan(500);
   expect(restrictions, "paris_grid ships 10 mapped turn restrictions").toBeGreaterThanOrEqual(5);
+
+  // Junctions breakdown card must be populated after show() resolves.
+  await expect(page.locator("#junctions-card")).toBeVisible();
+  const junctionItems = await page.locator("#junctions-list li").count();
+  expect(
+    junctionItems,
+    "paris_grid has t/y/crossroads/x/complex/through/dead subtypes",
+  ).toBeGreaterThanOrEqual(4);
+  const totalText = (await page.textContent("#junctions-total")) || "";
+  expect(totalText).toMatch(/\d+ types · \d+ nodes/);
 });
 
 test("3D desktop renders a non-blank WebGL canvas", async ({ page }) => {

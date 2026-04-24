@@ -6,7 +6,7 @@
 > このファイル → [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md)（Mermaid 6 枚 + CLI 対応表 +
 > モジュール索引）→ [`CHANGELOG.md`](../CHANGELOG.md) の順。
 
-*最終更新: 2026-04-24 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards polish + README measured-results compacting / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate + manifest policy docs polish / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理 / v0.7.1 release + asset verification / packaging metadata smoke / 0.7.2.dev0 reopen / Actions Node24 update / release+PyPI dry-run / routing hot-path perf / nearest spatial index / cache invalidation hardening / build graph spatial merge perf / T-junction segment index perf / lean near-parallel merge loop / GeoJSON export compact path / compact bundle JSON writer / README quick-start smoke / release readiness dry-run refresh / reachable service-area CLI / reachable docs overlay / reachable benchmark coverage / benchmark baseline JSON / reachability analyzer perf / routing core split / RoutePlanner perf / GitHub star-growth surfaces / launch kit docs / safe A* routing / route explain diagnostics / route explain docs surface / route explain comparison UI / route diagnostics README screenshot / functional shortest_path planner cache + sampled validation / nearest-edge projection index / match-trajectory explain diagnostics / HMM bridge ambiguity benchmark / HMM adjacency reuse perf / HMM tail-cost cache / HMM long trajectory benchmark / edge-index cell tuning / 2D/3D map console / PLAN handoff expansion / map console pushed + CI green / Claude handoff refresh / map console hero screenshots / map console browser smoke opt-in pytest / map console JS split + 3D raycaster picking / map console deep link + route steps inspector / map console route export + deep-link 自動 fit + hero screenshot refresh / Paris grid + Berlin Mitte HD-lite lanes & committed viewer dataset）を反映済み。*
+*最終更新: 2026-04-24 session（V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards polish + README measured-results compacting / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate + manifest policy docs polish / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理 / v0.7.1 release + asset verification / packaging metadata smoke / 0.7.2.dev0 reopen / Actions Node24 update / release+PyPI dry-run / routing hot-path perf / nearest spatial index / cache invalidation hardening / build graph spatial merge perf / T-junction segment index perf / lean near-parallel merge loop / GeoJSON export compact path / compact bundle JSON writer / README quick-start smoke / release readiness dry-run refresh / reachable service-area CLI / reachable docs overlay / reachable benchmark coverage / benchmark baseline JSON / reachability analyzer perf / routing core split / RoutePlanner perf / GitHub star-growth surfaces / launch kit docs / safe A* routing / route explain diagnostics / route explain docs surface / route explain comparison UI / route diagnostics README screenshot / functional shortest_path planner cache + sampled validation / nearest-edge projection index / match-trajectory explain diagnostics / HMM bridge ambiguity benchmark / HMM adjacency reuse perf / HMM tail-cost cache / HMM long trajectory benchmark / edge-index cell tuning / 2D/3D map console / PLAN handoff expansion / map console pushed + CI green / Claude handoff refresh / map console hero screenshots / map console browser smoke opt-in pytest / map console JS split + 3D raycaster picking / map console deep link + route steps inspector / map console route export + deep-link 自動 fit + hero screenshot refresh / Paris grid + Berlin Mitte HD-lite lanes & committed viewer dataset / junction topology color coding）を反映済み。*
 
 ---
 
@@ -360,6 +360,20 @@
       viewer dropdown と `DATASET_URLS` に Berlin Mitte を追加、`ATTRIBUTION.md` に由来 / refetch
       レシピを明記。hero screenshots（2D / 3D）を再生成して緑・紫の lane boundary dash が見える状態に。
       browser smoke に `selectOption('#dataset','berlin_mitte') → #stat-lanes > 1000` アサートを追加。
+  78. junction topology の viewer 可視化。
+      `docs/js/map_console.js` に `JUNCTION_ORDER` / `JUNCTION_COLORS` / `JUNCTION_LABELS` +
+      `junctionCategory(props)` / `junctionColor(props)` を追加（`junction_type` 優先、fallback
+      `junction_hint`、unknown は `other`）。2D は `pointLayer()` が `kind=node` の fillColor を
+      category 色に、3D は node `Points` cloud が per-vertex `THREE.Float32BufferAttribute('color')`
+      + `vertexColors: true` で同じ色を使う。`threeState.nodeCategories[]` を `pickSceneHit()` と
+      `setHoverCard()` に渡し、hover card の "Node" 行を `Node · T-junction` 等に拡張。
+      inspector 右側に `#junctions-card`（色付き swatch + ラベル + カウント、types / nodes の
+      合計）を追加、`renderJunctionsBreakdown()` を `show()` で populate。Leaflet legend も
+      junction 種別ごとの swatch を含むよう拡張。JUNCTION 定数は legend onAdd より上に宣言する必要
+      あり（const は TDZ 中アクセス不可、legend.addTo が即時 onAdd を呼ぶため）。
+      browser smoke に `#junctions-card` / `#junctions-list li >= 4` / `N types · N nodes` assert
+      を追加し、hero screenshots を再生成。Paris grid で 7 categories (t/y/crossroads/x/complex/
+      through/dead) が色分け表示される状態。
 - **push 方針:** `git push` は user が `push!` などで明示するまで実行しない。
 - **未着手 (次の AI が触る候補):** ↓ §5 "Open tasks" 参照。
 

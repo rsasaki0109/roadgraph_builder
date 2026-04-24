@@ -82,6 +82,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   browser smoke covers the `n312 → n191` deep link, asserting the card is
   visible, multiple steps render, and the URL retains `from` / `to`.
 
+- **Graph nodes in the map console are coloured by junction type.**
+  `docs/js/map_console.js` now reads `junction_type` / `junction_hint` from
+  every node feature and paints markers with a shared palette across the 2D
+  Leaflet view (per-marker fill) and the 3D Three.js scene (per-vertex
+  `THREE.Float32BufferAttribute('color')` + `vertexColors: true`). T / Y /
+  crossroads / X / complex junctions, through-or-corner spans, dead ends,
+  self-loops, and cul-de-sacs each get a distinct colour. A new
+  `#junctions-card` in the inspector lists the active dataset's category
+  counts with matching swatches, the hover card renders as `Node · T-junction`
+  (etc.) when picking in 3D, and the Leaflet legend grew colour rows for the
+  same palette. Browser smoke asserts the junctions breakdown is populated
+  (≥ 4 categories with the expected `N types · N nodes` header) on Paris grid.
+
 - **Paris grid and new Berlin Mitte viewer datasets ship HD-lite lanes.**
   `scripts/refresh_docs_assets.py` now runs `enrich_sd_to_hd(lane_width_m=
   3.5)` on the OSM-highway Paris grid, so `docs/assets/map_paris_grid.geojson`

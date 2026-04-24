@@ -29,9 +29,80 @@ let activeStats = {};
 let threeModule = null;
 let threeState = null;
 
+// Graph node colouring keyed off pipeline.junction_topology classification.
+// junction_type (subtype of multi_branch: t/y/crossroads/x/complex) wins over
+// junction_hint; "other" is the fallback for anything unexpected so the viewer
+// always paints something. Order here doubles as display order in the legend
+// and the inspector breakdown. Defined before the Leaflet legend so the
+// legend's onAdd (called synchronously by legend.addTo) can reference them.
+const JUNCTION_ORDER = [
+  "t_junction",
+  "y_junction",
+  "crossroads",
+  "x_junction",
+  "complex_junction",
+  "through_or_corner",
+  "dead_end",
+  "self_loop",
+  "cul_de_sac",
+  "other",
+];
+const JUNCTION_COLORS = {
+  t_junction: "#f59e0b",
+  y_junction: "#eab308",
+  crossroads: "#10b981",
+  x_junction: "#06b6d4",
+  complex_junction: "#8b5cf6",
+  through_or_corner: "#64748b",
+  dead_end: "#ec4899",
+  self_loop: "#f43f5e",
+  cul_de_sac: "#d946ef",
+  other: "#b91c1c",
+};
+const JUNCTION_LABELS = {
+  t_junction: "T-junction",
+  y_junction: "Y-junction",
+  crossroads: "Crossroads",
+  x_junction: "X-junction",
+  complex_junction: "Complex",
+  through_or_corner: "Through / corner",
+  dead_end: "Dead end",
+  self_loop: "Self-loop",
+  cul_de_sac: "Cul-de-sac",
+  other: "Other",
+};
+
+function junctionCategory(props) {
+  const raw =
+    (props && (props.junction_type || props.junction_hint)) || "other";
+  return JUNCTION_COLORS[raw] ? raw : "other";
+}
+
+function junctionColor(props) {
+  return JUNCTION_COLORS[junctionCategory(props)];
+}
+
 const legend = L.control({ position: "bottomright" });
 legend.onAdd = function () {
   const div = L.DomUtil.create("div", "map-legend");
+  const junctionRows = [
+    "t_junction",
+    "y_junction",
+    "crossroads",
+    "x_junction",
+    "complex_junction",
+    "through_or_corner",
+    "dead_end",
+  ]
+    .map(
+      (cat) =>
+        '<div class="lg"><span class="sw dot" style="background:' +
+        JUNCTION_COLORS[cat] +
+        ';border:2px solid #fff;box-sizing:border-box"></span> Node · ' +
+        JUNCTION_LABELS[cat] +
+        "</div>"
+    )
+    .join("");
   div.innerHTML =
     "<strong>Legend</strong>" +
     '<div class="lg"><span class="sw" style="background:#2563eb"></span> GPS trajectory</div>' +
@@ -40,7 +111,7 @@ legend.onAdd = function () {
     '<div class="lg"><span class="sw" style="background:#9333ea"></span> Lane boundary (R)</div>' +
     '<div class="lg"><span class="sw" style="background:#0f766e"></span> Reachable span</div>' +
     '<div class="lg"><span class="sw" style="background:#facc15"></span> Route (Dijkstra)</div>' +
-    '<div class="lg"><span class="sw dot" style="background:#b91c1c;border:2px solid #fff;box-sizing:border-box"></span> Graph node</div>' +
+    junctionRows +
     '<div class="lg"><span class="sw dot" style="background:#0f766e;border:2px solid #fff;box-sizing:border-box"></span> Reachability start</div>' +
     '<div class="lg"><span class="sw dot" style="background:#10b981;border:2px solid #fff;box-sizing:border-box"></span> Route start</div>' +
     '<div class="lg"><span class="sw dot" style="background:#ef4444;border:2px solid #fff;box-sizing:border-box"></span> Route end</div>' +
@@ -118,9 +189,9 @@ function pointLayer(f, latlng) {
   if (k === "node") {
     return L.circleMarker(latlng, {
       radius: 6,
-      fillColor: "#b91c1c",
-      color: "#fff",
-      weight: 2,
+      fillColor: junctionColor(f.properties || {}),
+      color: "#0f172a",
+      weight: 1.5,
       opacity: 1,
       fillOpacity: 0.95,
     });
@@ -362,7 +433,13 @@ function pickSceneHit() {
     if (inters.length) {
       const index = inters[0].index || 0;
       const nodeId = s.nodeIds[index] || null;
-      return { kind: "node", nodeId, distance: inters[0].distance };
+      const category = s.nodeCategories ? s.nodeCategories[index] || null : null;
+      return {
+        kind: "node",
+        nodeId,
+        category,
+        distance: inters[0].distance,
+      };
     }
   }
   if (s.pickableLines.length) {
@@ -417,7 +494,10 @@ function setHoverCard(hit) {
     return;
   }
   if (hit.kind === "node") {
-    kindEl.textContent = "Node";
+    const categoryLabel = hit.category
+      ? JUNCTION_LABELS[hit.category] || hit.category
+      : "Node";
+    kindEl.textContent = "Node · " + categoryLabel;
     labelEl.textContent = "Node ID";
     idEl.textContent = hit.nodeId || "—";
     lenEl.textContent = "—";
@@ -548,17 +628,32 @@ async function render3DScene() {
 
     const nodePoints = [];
     const nodeIds = [];
+    const nodeColors = [];
+    const nodeCategories = [];
     for (const feature of (scenePayload.base.features || [])) {
       if (feature.properties?.kind !== "node" || feature.geometry?.type !== "Point") continue;
       nodePoints.push(point(feature.geometry.coordinates, "node"));
       nodeIds.push(String(feature.properties.node_id || ""));
+      const category = junctionCategory(feature.properties);
+      nodeCategories.push(category);
+      const col = new THREE.Color(JUNCTION_COLORS[category]);
+      nodeColors.push(col.r, col.g, col.b);
     }
     threeState.pickableNodePoints = null;
     threeState.nodeIds = nodeIds;
+    threeState.nodeCategories = nodeCategories;
     threeState.nodePositions = nodePoints;
     if (nodePoints.length) {
       const geom = new THREE.BufferGeometry().setFromPoints(nodePoints);
-      const mat = new THREE.PointsMaterial({ color: 0xef4444, size: 2.8, sizeAttenuation: true });
+      geom.setAttribute(
+        "color",
+        new THREE.Float32BufferAttribute(nodeColors, 3)
+      );
+      const mat = new THREE.PointsMaterial({
+        vertexColors: true,
+        size: 3.4,
+        sizeAttenuation: true,
+      });
       const pts = new THREE.Points(geom, mat);
       root.add(pts);
       threeState.pickableNodePoints = pts;
@@ -719,15 +814,51 @@ function summarizeBase(data) {
     routeLength: NaN,
     reachableEdges: 0,
     restrictions: 0,
+    junctionCounts: {},
   };
   for (const f of data.features || []) {
     const p = f.properties || {};
-    if (p.kind === "node") stats.nodes += 1;
+    if (p.kind === "node") {
+      stats.nodes += 1;
+      const cat = junctionCategory(p);
+      stats.junctionCounts[cat] = (stats.junctionCounts[cat] || 0) + 1;
+    }
     if (p.kind === "centerline" || p.kind === "lane_centerline") stats.edges += 1;
     if (p.kind === "lane_boundary_left" || p.kind === "lane_boundary_right") stats.lanes += 1;
     if (p.kind === "trajectory") stats.trajectory += 1;
   }
   return stats;
+}
+
+function renderJunctionsBreakdown(counts, totalNodes) {
+  const list = document.getElementById("junctions-list");
+  const total = document.getElementById("junctions-total");
+  const card = document.getElementById("junctions-card");
+  if (!list || !total || !card) return;
+  list.innerHTML = "";
+  let shown = 0;
+  for (const cat of JUNCTION_ORDER) {
+    const n = counts?.[cat] || 0;
+    if (!n) continue;
+    shown += 1;
+    const li = document.createElement("li");
+    const dot = document.createElement("span");
+    dot.className = "jdot";
+    dot.style.background = JUNCTION_COLORS[cat];
+    const label = document.createElement("span");
+    label.className = "jlabel";
+    label.textContent = JUNCTION_LABELS[cat] || cat;
+    const count = document.createElement("span");
+    count.className = "jcount";
+    count.textContent = String(n);
+    li.appendChild(dot);
+    li.appendChild(label);
+    li.appendChild(count);
+    list.appendChild(li);
+  }
+  total.textContent =
+    shown > 0 ? `${shown} types · ${totalNodes} nodes` : `${totalNodes} nodes`;
+  card.hidden = !shown;
 }
 
 function routeLengthFromGeo(data) {
@@ -1310,6 +1441,7 @@ async function show(which) {
   scenePayload = { base: data, route: null, reachable: null, restrictions: [] };
   activeStats = summarizeBase(data);
   updateInspector(which, activeStats);
+  renderJunctionsBreakdown(activeStats.junctionCounts, activeStats.nodes);
 
   const gj = L.geoJSON(data, {
     style: styleLine,
