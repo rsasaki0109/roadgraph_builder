@@ -10,7 +10,11 @@
       "source": "osm_node",
       "osm_id": 361074,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 474.485,
+        "y": -641.839
+      }
     },
     {
       "edge_id": "e91",
@@ -18,7 +22,11 @@
       "source": "osm_node",
       "osm_id": 361075,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 532.364,
+        "y": -475.681
+      }
     },
     {
       "edge_id": "e214",
@@ -26,7 +34,11 @@
       "source": "osm_node",
       "osm_id": 361093,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 573.881,
+        "y": 78.971
+      }
     },
     {
       "edge_id": "e9",
@@ -34,7 +46,11 @@
       "source": "osm_node",
       "osm_id": 361098,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 66.577,
+        "y": 408.708
+      }
     },
     {
       "edge_id": "e269",
@@ -42,7 +58,11 @@
       "source": "osm_node",
       "osm_id": 361100,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 660.741,
+        "y": 1041.374
+      }
     },
     {
       "edge_id": "e351",
@@ -50,7 +70,11 @@
       "source": "osm_node",
       "osm_id": 361104,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -508.161,
+        "y": 555.774
+      }
     },
     {
       "edge_id": "e18",
@@ -58,7 +82,11 @@
       "source": "osm_node",
       "osm_id": 361105,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -636.376,
+        "y": 582.906
+      }
     },
     {
       "edge_id": "e754",
@@ -66,7 +94,11 @@
       "source": "osm_node",
       "osm_id": 367934,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -521.539,
+        "y": 988.301
+      }
     },
     {
       "edge_id": "e775",
@@ -74,7 +106,11 @@
       "source": "osm_node",
       "osm_id": 368182,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 16.187,
+        "y": -1001.455
+      }
     },
     {
       "edge_id": "e830",
@@ -82,7 +118,11 @@
       "source": "osm_node",
       "osm_id": 398708,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 325.686,
+        "y": -301.071
+      }
     },
     {
       "edge_id": "e478",
@@ -90,7 +130,11 @@
       "source": "osm_node",
       "osm_id": 398709,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 465.385,
+        "y": -238.624
+      }
     },
     {
       "edge_id": "e327",
@@ -98,7 +142,11 @@
       "source": "osm_node",
       "osm_id": 398745,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 148.733,
+        "y": -348.629
+      }
     },
     {
       "edge_id": "e518",
@@ -106,7 +154,11 @@
       "source": "osm_node",
       "osm_id": 398747,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -275.837,
+        "y": -193.791
+      }
     },
     {
       "edge_id": "e1028",
@@ -114,7 +166,11 @@
       "source": "osm_node",
       "osm_id": 470144,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -718.46,
+        "y": -1036.704
+      }
     },
     {
       "edge_id": "e244",
@@ -122,7 +178,11 @@
       "source": "osm_node",
       "osm_id": 470203,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 495.353,
+        "y": -115.776
+      }
     },
     {
       "edge_id": "e505",
@@ -130,7 +190,11 @@
       "source": "osm_node",
       "osm_id": 15643098,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -704.928,
+        "y": -39.93
+      }
     },
     {
       "edge_id": "e422",
@@ -138,7 +202,11 @@
       "source": "osm_node",
       "osm_id": 25207301,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -505.169,
+        "y": 211.259
+      }
     },
     {
       "edge_id": "e547",
@@ -146,7 +214,11 @@
       "source": "osm_node",
       "osm_id": 25207303,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -383.887,
+        "y": 174.142
+      }
     },
     {
       "edge_id": "e167",
@@ -154,7 +226,11 @@
       "source": "osm_node",
       "osm_id": 25207313,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -287.614,
+        "y": 498.331
+      }
     },
     {
       "edge_id": "e510",
@@ -162,7 +238,11 @@
       "source": "osm_node",
       "osm_id": 25207319,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -14.892,
+        "y": -289.118
+      }
     },
     {
       "edge_id": "e806",
@@ -170,7 +250,11 @@
       "source": "osm_node",
       "osm_id": 25207321,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -400.279,
+        "y": -522.85
+      }
     },
     {
       "edge_id": "e76",
@@ -178,7 +262,11 @@
       "source": "osm_node",
       "osm_id": 25207325,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -331.267,
+        "y": -353.611
+      }
     },
     {
       "edge_id": "e914",
@@ -186,7 +274,11 @@
       "source": "osm_node",
       "osm_id": 25207333,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -628.506,
+        "y": 210.125
+      }
     },
     {
       "edge_id": "e237",
@@ -194,7 +286,11 @@
       "source": "osm_node",
       "osm_id": 25207350,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -721.788,
+        "y": 1007.504
+      }
     },
     {
       "edge_id": "e834",
@@ -202,7 +298,11 @@
       "source": "osm_node",
       "osm_id": 25207352,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 439.902,
+        "y": 2.469
+      }
     },
     {
       "edge_id": "e159",
@@ -210,7 +310,11 @@
       "source": "osm_node",
       "osm_id": 25207356,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 365.557,
+        "y": -194.624
+      }
     },
     {
       "edge_id": "e829",
@@ -218,7 +322,11 @@
       "source": "osm_node",
       "osm_id": 25207375,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 250.712,
+        "y": -508.45
+      }
     },
     {
       "edge_id": "e210",
@@ -226,7 +334,11 @@
       "source": "osm_node",
       "osm_id": 25207379,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 153.451,
+        "y": -771.059
+      }
     },
     {
       "edge_id": "e201",
@@ -234,7 +346,11 @@
       "source": "osm_node",
       "osm_id": 25207381,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 372.974,
+        "y": -923.118
+      }
     },
     {
       "edge_id": "e196",
@@ -242,7 +358,11 @@
       "source": "osm_node",
       "osm_id": 25273429,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -689.963,
+        "y": -74.79
+      }
     },
     {
       "edge_id": "e491",
@@ -250,7 +370,11 @@
       "source": "osm_node",
       "osm_id": 25273878,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -653.068,
+        "y": 516.356
+      }
     },
     {
       "edge_id": "e712",
@@ -258,7 +382,11 @@
       "source": "osm_node",
       "osm_id": 25273879,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -558.784,
+        "y": 393.919
+      }
     },
     {
       "edge_id": "e511",
@@ -266,7 +394,11 @@
       "source": "osm_node",
       "osm_id": 25273882,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -650.464,
+        "y": 119.657
+      }
     },
     {
       "edge_id": "e639",
@@ -274,7 +406,11 @@
       "source": "osm_node",
       "osm_id": 25273883,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -644.781,
+        "y": 133.979
+      }
     },
     {
       "edge_id": "e752",
@@ -282,7 +418,11 @@
       "source": "osm_node",
       "osm_id": 25554308,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -362.69,
+        "y": -732.53
+      }
     },
     {
       "edge_id": "e210",
@@ -290,7 +430,11 @@
       "source": "osm_node",
       "osm_id": 25554525,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 130.893,
+        "y": -832.194
+      }
     },
     {
       "edge_id": "e826",
@@ -298,7 +442,11 @@
       "source": "osm_node",
       "osm_id": 25554592,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -44.063,
+        "y": -761.897
+      }
     },
     {
       "edge_id": "e212",
@@ -306,7 +454,11 @@
       "source": "osm_node",
       "osm_id": 25554674,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 229.668,
+        "y": -564.537
+      }
     },
     {
       "edge_id": "e629",
@@ -314,7 +466,11 @@
       "source": "osm_node",
       "osm_id": 25554699,
       "confidence": 1.0,
-      "match_distance_m": 3.816
+      "match_distance_m": 3.816,
+      "world_xy_m": {
+        "x": 152.91,
+        "y": -975.435
+      }
     },
     {
       "edge_id": "e779",
@@ -322,7 +478,11 @@
       "source": "osm_node",
       "osm_id": 25554701,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 233.391,
+        "y": -1014.665
+      }
     },
     {
       "edge_id": "e202",
@@ -330,7 +490,11 @@
       "source": "osm_node",
       "osm_id": 25554703,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 358.996,
+        "y": -961.636
+      }
     },
     {
       "edge_id": "e360",
@@ -338,7 +502,11 @@
       "source": "osm_node",
       "osm_id": 25554705,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 391.604,
+        "y": -1080.492
+      }
     },
     {
       "edge_id": "e1003",
@@ -346,7 +514,11 @@
       "source": "osm_node",
       "osm_id": 25581040,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -517.318,
+        "y": -388.637
+      }
     },
     {
       "edge_id": "e1006",
@@ -354,7 +526,11 @@
       "source": "osm_node",
       "osm_id": 25581042,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -492.946,
+        "y": -282.024
+      }
     },
     {
       "edge_id": "e65",
@@ -362,7 +538,11 @@
       "source": "osm_node",
       "osm_id": 25581047,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -386.579,
+        "y": -316.539
+      }
     },
     {
       "edge_id": "e672",
@@ -370,7 +550,11 @@
       "source": "osm_node",
       "osm_id": 25581051,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -385.621,
+        "y": -434.605
+      }
     },
     {
       "edge_id": "e169",
@@ -378,7 +562,11 @@
       "source": "osm_node",
       "osm_id": 25581530,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -132.788,
+        "y": -259.24
+      }
     },
     {
       "edge_id": "e479",
@@ -386,7 +574,11 @@
       "source": "osm_node",
       "osm_id": 25581534,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 211.748,
+        "y": -371.547
+      }
     },
     {
       "edge_id": "e424",
@@ -394,7 +586,11 @@
       "source": "osm_node",
       "osm_id": 25581536,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 227.335,
+        "y": -321.287
+      }
     },
     {
       "edge_id": "e434",
@@ -402,7 +598,11 @@
       "source": "osm_node",
       "osm_id": 25581570,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 179.513,
+        "y": -12.142
+      }
     },
     {
       "edge_id": "e776",
@@ -410,7 +610,11 @@
       "source": "osm_node",
       "osm_id": 25670833,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -22.997,
+        "y": -1073.42
+      }
     },
     {
       "edge_id": "e738",
@@ -418,7 +622,11 @@
       "source": "osm_node",
       "osm_id": 25670856,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 43.477,
+        "y": -1100.774
+      }
     },
     {
       "edge_id": "e9",
@@ -426,7 +634,11 @@
       "source": "osm_node",
       "osm_id": 25701659,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -19.53,
+        "y": 430.78
+      }
     },
     {
       "edge_id": "e346",
@@ -434,7 +646,11 @@
       "source": "osm_node",
       "osm_id": 26039523,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 394.376,
+        "y": 249.799
+      }
     },
     {
       "edge_id": "e246",
@@ -442,7 +658,11 @@
       "source": "osm_node",
       "osm_id": 26039860,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -307.494,
+        "y": 325.49
+      }
     },
     {
       "edge_id": "e10",
@@ -450,7 +670,11 @@
       "source": "osm_node",
       "osm_id": 26039984,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -74.63,
+        "y": 444.657
+      }
     },
     {
       "edge_id": "e20",
@@ -458,7 +682,11 @@
       "source": "osm_node",
       "osm_id": 26040013,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 384.933,
+        "y": -434.205
+      }
     },
     {
       "edge_id": "e174",
@@ -466,7 +694,11 @@
       "source": "osm_node",
       "osm_id": 26400916,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 596.505,
+        "y": -705.554
+      }
     },
     {
       "edge_id": "e101",
@@ -474,7 +706,11 @@
       "source": "osm_node",
       "osm_id": 26401021,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 723.229,
+        "y": -770.725
+      }
     },
     {
       "edge_id": "e204",
@@ -482,7 +718,11 @@
       "source": "osm_node",
       "osm_id": 26401417,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 604.471,
+        "y": -945.335
+      }
     },
     {
       "edge_id": "e918",
@@ -490,7 +730,11 @@
       "source": "osm_node",
       "osm_id": 26401478,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 458.897,
+        "y": -680.669
+      }
     },
     {
       "edge_id": "e143",
@@ -498,7 +742,11 @@
       "source": "osm_node",
       "osm_id": 26401482,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 437.802,
+        "y": -746.418
+      }
     },
     {
       "edge_id": "e91",
@@ -506,7 +754,11 @@
       "source": "osm_node",
       "osm_id": 26401984,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 725.116,
+        "y": -567.606
+      }
     },
     {
       "edge_id": "e100",
@@ -514,7 +766,11 @@
       "source": "osm_node",
       "osm_id": 26402096,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 574.357,
+        "y": -359.415
+      }
     },
     {
       "edge_id": "e97",
@@ -522,7 +778,11 @@
       "source": "osm_node",
       "osm_id": 26402126,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 544.141,
+        "y": -211.582
+      }
     },
     {
       "edge_id": "e504",
@@ -530,7 +790,11 @@
       "source": "osm_node",
       "osm_id": 94157762,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -241.466,
+        "y": 978.337
+      }
     },
     {
       "edge_id": "e171",
@@ -538,7 +802,11 @@
       "source": "osm_node",
       "osm_id": 94158481,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -283.386,
+        "y": 632.666
+      }
     },
     {
       "edge_id": "e162",
@@ -546,7 +814,11 @@
       "source": "osm_node",
       "osm_id": 94159488,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -122.401,
+        "y": 782.112
+      }
     },
     {
       "edge_id": "e649",
@@ -554,7 +826,11 @@
       "source": "osm_node",
       "osm_id": 94159491,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -104.261,
+        "y": 1031.533
+      }
     },
     {
       "edge_id": "e134",
@@ -562,7 +838,11 @@
       "source": "osm_node",
       "osm_id": 94161171,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -458.89,
+        "y": 787.527
+      }
     },
     {
       "edge_id": "e173",
@@ -570,7 +850,11 @@
       "source": "osm_node",
       "osm_id": 94161172,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -529.643,
+        "y": 790.396
+      }
     },
     {
       "edge_id": "e352",
@@ -578,7 +862,11 @@
       "source": "osm_node",
       "osm_id": 94168454,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 670.572,
+        "y": 1064.269
+      }
     },
     {
       "edge_id": "e132",
@@ -586,7 +874,11 @@
       "source": "osm_node",
       "osm_id": 94169547,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -28.461,
+        "y": 1061.122
+      }
     },
     {
       "edge_id": "e130",
@@ -594,7 +886,11 @@
       "source": "osm_node",
       "osm_id": 94169980,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -416.788,
+        "y": 1062.367
+      }
     },
     {
       "edge_id": "e582",
@@ -602,7 +898,11 @@
       "source": "osm_node",
       "osm_id": 94169987,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -191.655,
+        "y": 1066.092
+      }
     },
     {
       "edge_id": "e131",
@@ -610,7 +910,11 @@
       "source": "osm_node",
       "osm_id": 94170757,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 22.58,
+        "y": 1081.949
+      }
     },
     {
       "edge_id": "e692",
@@ -618,7 +922,11 @@
       "source": "osm_node",
       "osm_id": 94172432,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -499.076,
+        "y": 1004.535
+      }
     },
     {
       "edge_id": "e618",
@@ -626,7 +934,11 @@
       "source": "osm_node",
       "osm_id": 94172434,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -484.893,
+        "y": 981.518
+      }
     },
     {
       "edge_id": "e472",
@@ -634,7 +946,11 @@
       "source": "osm_node",
       "osm_id": 94173211,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -605.297,
+        "y": 691.655
+      }
     },
     {
       "edge_id": "e257",
@@ -642,7 +958,11 @@
       "source": "osm_node",
       "osm_id": 94173545,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -603.191,
+        "y": 996.696
+      }
     },
     {
       "edge_id": "e4",
@@ -650,7 +970,11 @@
       "source": "osm_node",
       "osm_id": 94173784,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -547.659,
+        "y": 897.243
+      }
     },
     {
       "edge_id": "e137",
@@ -658,7 +982,11 @@
       "source": "osm_node",
       "osm_id": 94212488,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -560.145,
+        "y": 1081.182
+      }
     },
     {
       "edge_id": "e137",
@@ -666,7 +994,11 @@
       "source": "osm_node",
       "osm_id": 94212490,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -581.298,
+        "y": 994.705
+      }
     },
     {
       "edge_id": "e498",
@@ -674,7 +1006,11 @@
       "source": "osm_node",
       "osm_id": 94213772,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -547.688,
+        "y": 1074.855
+      }
     },
     {
       "edge_id": "e240",
@@ -682,7 +1018,11 @@
       "source": "osm_node",
       "osm_id": 94215152,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -388.576,
+        "y": 919.893
+      }
     },
     {
       "edge_id": "e148",
@@ -690,7 +1030,11 @@
       "source": "osm_node",
       "osm_id": 169318293,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -286.546,
+        "y": 661.955
+      }
     },
     {
       "edge_id": "e592",
@@ -698,7 +1042,11 @@
       "source": "osm_node",
       "osm_id": 175015374,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 656.031,
+        "y": 214.028
+      }
     },
     {
       "edge_id": "e272",
@@ -706,7 +1054,11 @@
       "source": "osm_node",
       "osm_id": 175026491,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 517.421,
+        "y": 213.305
+      }
     },
     {
       "edge_id": "e457",
@@ -714,7 +1066,11 @@
       "source": "osm_node",
       "osm_id": 175026494,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 613.087,
+        "y": 183.405
+      }
     },
     {
       "edge_id": "e406",
@@ -722,7 +1078,11 @@
       "source": "osm_node",
       "osm_id": 175037213,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 583.471,
+        "y": 102.733
+      }
     },
     {
       "edge_id": "e187",
@@ -730,7 +1090,11 @@
       "source": "osm_node",
       "osm_id": 202818262,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 124.595,
+        "y": 391.362
+      }
     },
     {
       "edge_id": "e188",
@@ -738,7 +1102,11 @@
       "source": "osm_node",
       "osm_id": 202818444,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 153.239,
+        "y": 382.622
+      }
     },
     {
       "edge_id": "e517",
@@ -746,7 +1114,11 @@
       "source": "osm_node",
       "osm_id": 207782331,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -378.174,
+        "y": -458.179
+      }
     },
     {
       "edge_id": "e717",
@@ -754,7 +1126,11 @@
       "source": "osm_node",
       "osm_id": 207782428,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -367.122,
+        "y": -425.076
+      }
     },
     {
       "edge_id": "e199",
@@ -762,7 +1138,11 @@
       "source": "osm_node",
       "osm_id": 224146062,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 421.286,
+        "y": -791.552
+      }
     },
     {
       "edge_id": "e175",
@@ -770,7 +1150,11 @@
       "source": "osm_node",
       "osm_id": 247175821,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 671.062,
+        "y": -742.604
+      }
     },
     {
       "edge_id": "e223",
@@ -778,7 +1162,11 @@
       "source": "osm_node",
       "osm_id": 250218405,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -266.877,
+        "y": 197.516
+      }
     },
     {
       "edge_id": "e224",
@@ -786,7 +1174,11 @@
       "source": "osm_node",
       "osm_id": 250218824,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -279.56,
+        "y": 238.302
+      }
     },
     {
       "edge_id": "e293",
@@ -794,7 +1186,11 @@
       "source": "osm_node",
       "osm_id": 250219135,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 201.302,
+        "y": 367.811
+      }
     },
     {
       "edge_id": "e478",
@@ -802,7 +1198,11 @@
       "source": "osm_node",
       "osm_id": 251543658,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 473.197,
+        "y": -247.464
+      }
     },
     {
       "edge_id": "e575",
@@ -810,7 +1210,11 @@
       "source": "osm_node",
       "osm_id": 253963376,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -574.284,
+        "y": 23.64
+      }
     },
     {
       "edge_id": "e221",
@@ -818,7 +1222,11 @@
       "source": "osm_node",
       "osm_id": 260685773,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 552.567,
+        "y": -220.01
+      }
     },
     {
       "edge_id": "e97",
@@ -826,7 +1234,11 @@
       "source": "osm_node",
       "osm_id": 260685824,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 537.382,
+        "y": -204.632
+      }
     },
     {
       "edge_id": "e243",
@@ -834,7 +1246,11 @@
       "source": "osm_node",
       "osm_id": 268105655,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 256.841,
+        "y": 349.808
+      }
     },
     {
       "edge_id": "e85",
@@ -842,7 +1258,11 @@
       "source": "osm_node",
       "osm_id": 268408320,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 529.343,
+        "y": -483.887
+      }
     },
     {
       "edge_id": "e318",
@@ -850,7 +1270,11 @@
       "source": "osm_node",
       "osm_id": 327330756,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -111.758,
+        "y": 83.708
+      }
     },
     {
       "edge_id": "e318",
@@ -858,7 +1282,11 @@
       "source": "osm_node",
       "osm_id": 327337307,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -98.014,
+        "y": 90.257
+      }
     },
     {
       "edge_id": "e1045",
@@ -866,7 +1294,11 @@
       "source": "osm_node",
       "osm_id": 327337530,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -116.703,
+        "y": 96.751
+      }
     },
     {
       "edge_id": "e1040",
@@ -874,7 +1306,11 @@
       "source": "osm_node",
       "osm_id": 327412773,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -68.259,
+        "y": 68.952
+      }
     },
     {
       "edge_id": "e836",
@@ -882,7 +1318,11 @@
       "source": "osm_node",
       "osm_id": 330165643,
       "confidence": 1.0,
-      "match_distance_m": 13.793
+      "match_distance_m": 13.793,
+      "world_xy_m": {
+        "x": 462.277,
+        "y": 103.278
+      }
     },
     {
       "edge_id": "e590",
@@ -890,7 +1330,11 @@
       "source": "osm_node",
       "osm_id": 338478426,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 448.269,
+        "y": -169.283
+      }
     },
     {
       "edge_id": "e450",
@@ -898,7 +1342,11 @@
       "source": "osm_node",
       "osm_id": 338495966,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 505.257,
+        "y": -553.239
+      }
     },
     {
       "edge_id": "e285",
@@ -906,7 +1354,11 @@
       "source": "osm_node",
       "osm_id": 338496057,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 603.703,
+        "y": 156.496
+      }
     },
     {
       "edge_id": "e667",
@@ -914,7 +1366,11 @@
       "source": "osm_node",
       "osm_id": 355692484,
       "confidence": 1.0,
-      "match_distance_m": 6.952
+      "match_distance_m": 6.952,
+      "world_xy_m": {
+        "x": 607.038,
+        "y": 187.052
+      }
     },
     {
       "edge_id": "e160",
@@ -922,7 +1378,11 @@
       "source": "osm_node",
       "osm_id": 430692965,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 533.82,
+        "y": 647.933
+      }
     },
     {
       "edge_id": "e887",
@@ -930,7 +1390,11 @@
       "source": "osm_node",
       "osm_id": 430693106,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 551.25,
+        "y": 647.154
+      }
     },
     {
       "edge_id": "e341",
@@ -938,7 +1402,11 @@
       "source": "osm_node",
       "osm_id": 431175315,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 615.567,
+        "y": 228.294
+      }
     },
     {
       "edge_id": "e902",
@@ -946,7 +1414,11 @@
       "source": "osm_node",
       "osm_id": 439922652,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 403.073,
+        "y": -417.192
+      }
     },
     {
       "edge_id": "e727",
@@ -954,7 +1426,11 @@
       "source": "osm_node",
       "osm_id": 583017733,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 372.25,
+        "y": -61.513
+      }
     },
     {
       "edge_id": "e269",
@@ -962,7 +1438,11 @@
       "source": "osm_node",
       "osm_id": 583023059,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 681.002,
+        "y": 1052.327
+      }
     },
     {
       "edge_id": "e482",
@@ -970,7 +1450,11 @@
       "source": "osm_node",
       "osm_id": 583023082,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 654.056,
+        "y": 1055.407
+      }
     },
     {
       "edge_id": "e72",
@@ -978,7 +1462,11 @@
       "source": "osm_node",
       "osm_id": 602545917,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -370.889,
+        "y": 183.227
+      }
     },
     {
       "edge_id": "e789",
@@ -986,7 +1474,11 @@
       "source": "osm_node",
       "osm_id": 602549548,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -551.762,
+        "y": 392.018
+      }
     },
     {
       "edge_id": "e27",
@@ -994,7 +1486,11 @@
       "source": "osm_node",
       "osm_id": 602551166,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -681.822,
+        "y": 489.936
+      }
     },
     {
       "edge_id": "e507",
@@ -1002,7 +1498,11 @@
       "source": "osm_node",
       "osm_id": 602568228,
       "confidence": 1.0,
-      "match_distance_m": 8.215
+      "match_distance_m": 8.215,
+      "world_xy_m": {
+        "x": 298.534,
+        "y": -60.423
+      }
     },
     {
       "edge_id": "e169",
@@ -1010,7 +1510,11 @@
       "source": "osm_node",
       "osm_id": 602600218,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -133.76,
+        "y": -256.693
+      }
     },
     {
       "edge_id": "e79",
@@ -1018,7 +1522,11 @@
       "source": "osm_node",
       "osm_id": 602600220,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -154.036,
+        "y": -248.443
+      }
     },
     {
       "edge_id": "e42",
@@ -1026,7 +1534,11 @@
       "source": "osm_node",
       "osm_id": 602626803,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -253.031,
+        "y": -559.955
+      }
     },
     {
       "edge_id": "e141",
@@ -1034,7 +1546,11 @@
       "source": "osm_node",
       "osm_id": 626937838,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 214.198,
+        "y": -1097.383
+      }
     },
     {
       "edge_id": "e550",
@@ -1042,7 +1558,11 @@
       "source": "osm_node",
       "osm_id": 652026059,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 634.753,
+        "y": 1057.397
+      }
     },
     {
       "edge_id": "e362",
@@ -1050,7 +1570,11 @@
       "source": "osm_node",
       "osm_id": 652026102,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 686.452,
+        "y": 972.144
+      }
     },
     {
       "edge_id": "e977",
@@ -1058,7 +1582,11 @@
       "source": "osm_node",
       "osm_id": 652026133,
       "confidence": 1.0,
-      "match_distance_m": 5.955
+      "match_distance_m": 5.955,
+      "world_xy_m": {
+        "x": 630.993,
+        "y": 1067.594
+      }
     },
     {
       "edge_id": "e323",
@@ -1066,7 +1594,11 @@
       "source": "osm_node",
       "osm_id": 652028889,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 721.781,
+        "y": 950.728
+      }
     },
     {
       "edge_id": "e269",
@@ -1074,7 +1606,11 @@
       "source": "osm_node",
       "osm_id": 652028925,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 670.981,
+        "y": 1046.233
+      }
     },
     {
       "edge_id": "e339",
@@ -1082,7 +1618,11 @@
       "source": "osm_node",
       "osm_id": 663249339,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 623.825,
+        "y": 212.749
+      }
     },
     {
       "edge_id": "e346",
@@ -1090,7 +1630,11 @@
       "source": "osm_node",
       "osm_id": 668635735,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 400.111,
+        "y": 265.912
+      }
     },
     {
       "edge_id": "e916",
@@ -1098,7 +1642,11 @@
       "source": "osm_node",
       "osm_id": 676788942,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -401.603,
+        "y": -1100.885
+      }
     },
     {
       "edge_id": "e384",
@@ -1106,7 +1654,11 @@
       "source": "osm_node",
       "osm_id": 676821309,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -307.933,
+        "y": -956.888
+      }
     },
     {
       "edge_id": "e16",
@@ -1114,7 +1666,11 @@
       "source": "osm_node",
       "osm_id": 676821350,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 8.463,
+        "y": -1086.063
+      }
     },
     {
       "edge_id": "e716",
@@ -1122,7 +1678,11 @@
       "source": "osm_node",
       "osm_id": 676872480,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -83.393,
+        "y": -959.534
+      }
     },
     {
       "edge_id": "e397",
@@ -1130,7 +1690,11 @@
       "source": "osm_node",
       "osm_id": 676890544,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 13.407,
+        "y": -1012.708
+      }
     },
     {
       "edge_id": "e395",
@@ -1138,7 +1702,11 @@
       "source": "osm_node",
       "osm_id": 676890545,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 56.863,
+        "y": -1031.4
+      }
     },
     {
       "edge_id": "e377",
@@ -1146,7 +1714,11 @@
       "source": "osm_node",
       "osm_id": 677017619,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -342.721,
+        "y": -967.529
+      }
     },
     {
       "edge_id": "e296",
@@ -1154,7 +1726,11 @@
       "source": "osm_node",
       "osm_id": 677770395,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -9.275,
+        "y": -823.298
+      }
     },
     {
       "edge_id": "e517",
@@ -1162,7 +1738,11 @@
       "source": "osm_node",
       "osm_id": 679495414,
       "confidence": 1.0,
-      "match_distance_m": 5.782
+      "match_distance_m": 5.782,
+      "world_xy_m": {
+        "x": -382.827,
+        "y": -453.753
+      }
     },
     {
       "edge_id": "e190",
@@ -1170,7 +1750,11 @@
       "source": "osm_node",
       "osm_id": 681369441,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -365.776,
+        "y": -316.283
+      }
     },
     {
       "edge_id": "e197",
@@ -1178,7 +1762,11 @@
       "source": "osm_node",
       "osm_id": 681555438,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -588.642,
+        "y": -107.281
+      }
     },
     {
       "edge_id": "e854",
@@ -1186,7 +1774,11 @@
       "source": "osm_node",
       "osm_id": 681842204,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -719.923,
+        "y": -164.335
+      }
     },
     {
       "edge_id": "e545",
@@ -1194,7 +1786,11 @@
       "source": "osm_node",
       "osm_id": 683598757,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -666.659,
+        "y": -861.26
+      }
     },
     {
       "edge_id": "e298",
@@ -1202,7 +1798,11 @@
       "source": "osm_node",
       "osm_id": 687065765,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -394.164,
+        "y": 67.762
+      }
     },
     {
       "edge_id": "e750",
@@ -1210,7 +1810,11 @@
       "source": "osm_node",
       "osm_id": 687066197,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -487.417,
+        "y": -786.504
+      }
     },
     {
       "edge_id": "e609",
@@ -1218,7 +1822,11 @@
       "source": "osm_node",
       "osm_id": 687096618,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -730.646,
+        "y": 482.553
+      }
     },
     {
       "edge_id": "e675",
@@ -1226,7 +1834,11 @@
       "source": "osm_node",
       "osm_id": 687720866,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -500.846,
+        "y": 222.245
+      }
     },
     {
       "edge_id": "e1010",
@@ -1234,7 +1846,11 @@
       "source": "osm_node",
       "osm_id": 687720946,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -509.397,
+        "y": 201.496
+      }
     },
     {
       "edge_id": "e600",
@@ -1242,7 +1858,11 @@
       "source": "osm_node",
       "osm_id": 687993927,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -478.493,
+        "y": -86.799
+      }
     },
     {
       "edge_id": "e1009",
@@ -1250,7 +1870,11 @@
       "source": "osm_node",
       "osm_id": 687994232,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -374.744,
+        "y": 162.767
+      }
     },
     {
       "edge_id": "e301",
@@ -1258,7 +1882,11 @@
       "source": "osm_node",
       "osm_id": 689178384,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -77.717,
+        "y": 240.203
+      }
     },
     {
       "edge_id": "e246",
@@ -1266,7 +1894,11 @@
       "source": "osm_node",
       "osm_id": 689178412,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -299.397,
+        "y": 323.244
+      }
     },
     {
       "edge_id": "e112",
@@ -1274,7 +1906,11 @@
       "source": "osm_node",
       "osm_id": 689178471,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -88.864,
+        "y": 246.23
+      }
     },
     {
       "edge_id": "e69",
@@ -1282,7 +1918,11 @@
       "source": "osm_node",
       "osm_id": 689347003,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -236.076,
+        "y": 30.812
+      }
     },
     {
       "edge_id": "e839",
@@ -1290,7 +1930,11 @@
       "source": "osm_node",
       "osm_id": 690459409,
       "confidence": 1.0,
-      "match_distance_m": 2.701
+      "match_distance_m": 2.701,
+      "world_xy_m": {
+        "x": 519.988,
+        "y": 212.46
+      }
     },
     {
       "edge_id": "e479",
@@ -1298,7 +1942,11 @@
       "source": "osm_node",
       "osm_id": 690459465,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 274.543,
+        "y": -394.397
+      }
     },
     {
       "edge_id": "e94",
@@ -1306,7 +1954,11 @@
       "source": "osm_node",
       "osm_id": 690459476,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 235.33,
+        "y": -558.732
+      }
     },
     {
       "edge_id": "e515",
@@ -1314,7 +1966,11 @@
       "source": "osm_node",
       "osm_id": 690982009,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 54.405,
+        "y": 207.534
+      }
     },
     {
       "edge_id": "e601",
@@ -1322,7 +1978,11 @@
       "source": "osm_node",
       "osm_id": 691083046,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 47.976,
+        "y": 108.304
+      }
     },
     {
       "edge_id": "e372",
@@ -1330,7 +1990,11 @@
       "source": "osm_node",
       "osm_id": 691721507,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 292.28,
+        "y": -278.221
+      }
     },
     {
       "edge_id": "e839",
@@ -1338,7 +2002,11 @@
       "source": "osm_node",
       "osm_id": 692364452,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 533.798,
+        "y": 257.839
+      }
     },
     {
       "edge_id": "e438",
@@ -1346,7 +2014,11 @@
       "source": "osm_node",
       "osm_id": 693255276,
       "confidence": 1.0,
-      "match_distance_m": 1.646
+      "match_distance_m": 1.646,
+      "world_xy_m": {
+        "x": 572.85,
+        "y": -358.748
+      }
     },
     {
       "edge_id": "e628",
@@ -1354,7 +2026,11 @@
       "source": "osm_node",
       "osm_id": 693550585,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 194.032,
+        "y": -995.773
+      }
     },
     {
       "edge_id": "e629",
@@ -1362,7 +2038,11 @@
       "source": "osm_node",
       "osm_id": 693550587,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 154.57,
+        "y": -971.999
+      }
     },
     {
       "edge_id": "e544",
@@ -1370,7 +2050,11 @@
       "source": "osm_node",
       "osm_id": 693639500,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -455.796,
+        "y": -689.264
+      }
     },
     {
       "edge_id": "e311",
@@ -1378,7 +2062,11 @@
       "source": "osm_node",
       "osm_id": 693639501,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -446.953,
+        "y": -661.654
+      }
     },
     {
       "edge_id": "e694",
@@ -1386,7 +2074,11 @@
       "source": "osm_node",
       "osm_id": 693647624,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -471.376,
+        "y": -667.492
+      }
     },
     {
       "edge_id": "e443",
@@ -1394,7 +2086,11 @@
       "source": "osm_node",
       "osm_id": 697179487,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 443.734,
+        "y": -1007.648
+      }
     },
     {
       "edge_id": "e356",
@@ -1402,7 +2098,11 @@
       "source": "osm_node",
       "osm_id": 697179490,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 394.259,
+        "y": -1076.422
+      }
     },
     {
       "edge_id": "e623",
@@ -1410,7 +2110,11 @@
       "source": "osm_node",
       "osm_id": 697183816,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -87.599,
+        "y": -852.487
+      }
     },
     {
       "edge_id": "e623",
@@ -1418,7 +2122,11 @@
       "source": "osm_node",
       "osm_id": 697183821,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -27.034,
+        "y": -882.665
+      }
     },
     {
       "edge_id": "e343",
@@ -1426,7 +2134,11 @@
       "source": "osm_node",
       "osm_id": 697183823,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 84.475,
+        "y": -956.043
+      }
     },
     {
       "edge_id": "e399",
@@ -1434,7 +2146,11 @@
       "source": "osm_node",
       "osm_id": 697183828,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -91.329,
+        "y": -842.313
+      }
     },
     {
       "edge_id": "e623",
@@ -1442,7 +2158,11 @@
       "source": "osm_node",
       "osm_id": 697183831,
       "confidence": 1.0,
-      "match_distance_m": 3.607
+      "match_distance_m": 3.607,
+      "world_xy_m": {
+        "x": -28.468,
+        "y": -885.979
+      }
     },
     {
       "edge_id": "e629",
@@ -1450,7 +2170,11 @@
       "source": "osm_node",
       "osm_id": 697183834,
       "confidence": 1.0,
-      "match_distance_m": 3.876
+      "match_distance_m": 3.876,
+      "world_xy_m": {
+        "x": 103.632,
+        "y": -951.295
+      }
     },
     {
       "edge_id": "e689",
@@ -1458,7 +2182,11 @@
       "source": "osm_node",
       "osm_id": 697183836,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -34.839,
+        "y": -869.956
+      }
     },
     {
       "edge_id": "e623",
@@ -1466,7 +2194,11 @@
       "source": "osm_node",
       "osm_id": 697183838,
       "confidence": 1.0,
-      "match_distance_m": 4.61
+      "match_distance_m": 4.61,
+      "world_xy_m": {
+        "x": -89.544,
+        "y": -856.668
+      }
     },
     {
       "edge_id": "e303",
@@ -1474,7 +2206,11 @@
       "source": "osm_node",
       "osm_id": 697868062,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 717.706,
+        "y": -775.573
+      }
     },
     {
       "edge_id": "e218",
@@ -1482,7 +2218,11 @@
       "source": "osm_node",
       "osm_id": 697868073,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 727.274,
+        "y": -766.889
+      }
     },
     {
       "edge_id": "e95",
@@ -1490,7 +2230,11 @@
       "source": "osm_node",
       "osm_id": 699225064,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 536.007,
+        "y": -1058.342
+      }
     },
     {
       "edge_id": "e629",
@@ -1498,7 +2242,11 @@
       "source": "osm_node",
       "osm_id": 699947715,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 104.546,
+        "y": -947.425
+      }
     },
     {
       "edge_id": "e931",
@@ -1506,7 +2254,11 @@
       "source": "osm_node",
       "osm_id": 702916029,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 611.251,
+        "y": -1108.536
+      }
     },
     {
       "edge_id": "e440",
@@ -1514,7 +2266,11 @@
       "source": "osm_node",
       "osm_id": 706127981,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 534.939,
+        "y": -467.942
+      }
     },
     {
       "edge_id": "e660",
@@ -1522,7 +2278,11 @@
       "source": "osm_node",
       "osm_id": 706245866,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 620.131,
+        "y": -184.717
+      }
     },
     {
       "edge_id": "e440",
@@ -1530,7 +2290,11 @@
       "source": "osm_node",
       "osm_id": 706350383,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 549.59,
+        "y": -426.488
+      }
     },
     {
       "edge_id": "e439",
@@ -1538,7 +2302,11 @@
       "source": "osm_node",
       "osm_id": 706350841,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 554.235,
+        "y": -414.568
+      }
     },
     {
       "edge_id": "e213",
@@ -1546,7 +2314,11 @@
       "source": "osm_node",
       "osm_id": 706621165,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 578.204,
+        "y": 77.759
+      }
     },
     {
       "edge_id": "e461",
@@ -1554,7 +2326,11 @@
       "source": "osm_node",
       "osm_id": 706621241,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 496.231,
+        "y": -104.979
+      }
     },
     {
       "edge_id": "e928",
@@ -1562,7 +2338,11 @@
       "source": "osm_node",
       "osm_id": 706621382,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 502.09,
+        "y": -107.614
+      }
     },
     {
       "edge_id": "e406",
@@ -1570,7 +2350,11 @@
       "source": "osm_node",
       "osm_id": 706621392,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 588.24,
+        "y": 102.11
+      }
     },
     {
       "edge_id": "e342",
@@ -1578,7 +2362,11 @@
       "source": "osm_node",
       "osm_id": 706685413,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 601.457,
+        "y": 241.515
+      }
     },
     {
       "edge_id": "e442",
@@ -1586,7 +2374,11 @@
       "source": "osm_node",
       "osm_id": 708253753,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 662.862,
+        "y": -170.884
+      }
     },
     {
       "edge_id": "e523",
@@ -1594,7 +2386,11 @@
       "source": "osm_node",
       "osm_id": 777218446,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -613.102,
+        "y": -1093.869
+      }
     },
     {
       "edge_id": "e476",
@@ -1602,7 +2398,11 @@
       "source": "osm_node",
       "osm_id": 777218474,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -651.503,
+        "y": -1060.644
+      }
     },
     {
       "edge_id": "e453",
@@ -1610,7 +2410,11 @@
       "source": "osm_node",
       "osm_id": 796920910,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 476.394,
+        "y": -636.324
+      }
     },
     {
       "edge_id": "e825",
@@ -1618,7 +2422,11 @@
       "source": "osm_node",
       "osm_id": 902847624,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -253.828,
+        "y": -770.247
+      }
     },
     {
       "edge_id": "e625",
@@ -1626,7 +2434,11 @@
       "source": "osm_node",
       "osm_id": 902847629,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -267.916,
+        "y": -763.587
+      }
     },
     {
       "edge_id": "e825",
@@ -1634,7 +2446,11 @@
       "source": "osm_node",
       "osm_id": 902847637,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -230.502,
+        "y": -781.622
+      }
     },
     {
       "edge_id": "e737",
@@ -1642,7 +2458,11 @@
       "source": "osm_node",
       "osm_id": 902847657,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -151.6,
+        "y": -821.53
+      }
     },
     {
       "edge_id": "e737",
@@ -1650,7 +2470,11 @@
       "source": "osm_node",
       "osm_id": 902847666,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -148.697,
+        "y": -822.954
+      }
     },
     {
       "edge_id": "e629",
@@ -1658,7 +2482,11 @@
       "source": "osm_node",
       "osm_id": 902847677,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 102.33,
+        "y": -946.347
+      }
     },
     {
       "edge_id": "e761",
@@ -1666,7 +2494,11 @@
       "source": "osm_node",
       "osm_id": 1055820771,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 189.277,
+        "y": -1006.859
+      }
     },
     {
       "edge_id": "e641",
@@ -1674,7 +2506,11 @@
       "source": "osm_node",
       "osm_id": 1055820788,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 28.768,
+        "y": -929.979
+      }
     },
     {
       "edge_id": "e880",
@@ -1682,7 +2518,11 @@
       "source": "osm_node",
       "osm_id": 1084405425,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -722.739,
+        "y": 1018.123
+      }
     },
     {
       "edge_id": "e322",
@@ -1690,7 +2530,11 @@
       "source": "osm_node",
       "osm_id": 1160283808,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 508.307,
+        "y": -120.28
+      }
     },
     {
       "edge_id": "e322",
@@ -1699,6 +2543,10 @@
       "osm_id": 1160283849,
       "confidence": 1.0,
       "match_distance_m": 5.582,
+      "world_xy_m": {
+        "x": 512.037,
+        "y": -127.363
+      },
       "value_kmh": 50
     },
     {
@@ -1707,7 +2555,11 @@
       "source": "osm_node",
       "osm_id": 1160283855,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 415.917,
+        "y": -90.646
+      }
     },
     {
       "edge_id": "e472",
@@ -1715,7 +2567,11 @@
       "source": "osm_node",
       "osm_id": 1232772702,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -554.388,
+        "y": 674.52
+      }
     },
     {
       "edge_id": "e470",
@@ -1723,7 +2579,11 @@
       "source": "osm_node",
       "osm_id": 1232772703,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -472.312,
+        "y": 649.234
+      }
     },
     {
       "edge_id": "e4",
@@ -1731,7 +2591,11 @@
       "source": "osm_node",
       "osm_id": 1233136959,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -524.713,
+        "y": 977.048
+      }
     },
     {
       "edge_id": "e818",
@@ -1739,7 +2603,11 @@
       "source": "osm_node",
       "osm_id": 1234212754,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -567.028,
+        "y": 1098.762
+      }
     },
     {
       "edge_id": "e236",
@@ -1747,7 +2615,11 @@
       "source": "osm_node",
       "osm_id": 1234212886,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -578.877,
+        "y": 1098.484
+      }
     },
     {
       "edge_id": "e614",
@@ -1755,7 +2627,11 @@
       "source": "osm_node",
       "osm_id": 1242286070,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -71.909,
+        "y": 1075.889
+      }
     },
     {
       "edge_id": "e144",
@@ -1763,7 +2639,11 @@
       "source": "osm_node",
       "osm_id": 1242438904,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -156.443,
+        "y": 763.097
+      }
     },
     {
       "edge_id": "e532",
@@ -1771,7 +2651,11 @@
       "source": "osm_node",
       "osm_id": 1242439449,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -266.562,
+        "y": 679.912
+      }
     },
     {
       "edge_id": "e147",
@@ -1779,7 +2663,11 @@
       "source": "osm_node",
       "osm_id": 1242439622,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -164.335,
+        "y": 771.292
+      }
     },
     {
       "edge_id": "e239",
@@ -1787,7 +2675,11 @@
       "source": "osm_node",
       "osm_id": 1342011467,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -64.463,
+        "y": 1059.065
+      }
     },
     {
       "edge_id": "e1022",
@@ -1795,7 +2687,11 @@
       "source": "osm_node",
       "osm_id": 1350142505,
       "confidence": 1.0,
-      "match_distance_m": 4.607
+      "match_distance_m": 4.607,
+      "world_xy_m": {
+        "x": -356.136,
+        "y": 980.016
+      }
     },
     {
       "edge_id": "e751",
@@ -1803,7 +2699,11 @@
       "source": "osm_node",
       "osm_id": 1376133927,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -514.97,
+        "y": -866.876
+      }
     },
     {
       "edge_id": "e549",
@@ -1811,7 +2711,11 @@
       "source": "osm_node",
       "osm_id": 1380981630,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 561.578,
+        "y": -423.53
+      }
     },
     {
       "edge_id": "e616",
@@ -1819,7 +2723,11 @@
       "source": "osm_node",
       "osm_id": 1542715847,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -289.442,
+        "y": -199.017
+      }
     },
     {
       "edge_id": "e518",
@@ -1827,7 +2735,11 @@
       "source": "osm_node",
       "osm_id": 1542715852,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -277.717,
+        "y": -193.023
+      }
     },
     {
       "edge_id": "e6",
@@ -1835,7 +2747,11 @@
       "source": "osm_node",
       "osm_id": 1542715878,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -295.974,
+        "y": -186.385
+      }
     },
     {
       "edge_id": "e345",
@@ -1843,7 +2759,11 @@
       "source": "osm_node",
       "osm_id": 1542715881,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -283.196,
+        "y": -180.136
+      }
     },
     {
       "edge_id": "e848",
@@ -1851,7 +2771,11 @@
       "source": "osm_node",
       "osm_id": 1542715919,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -214.783,
+        "y": 40.097
+      }
     },
     {
       "edge_id": "e298",
@@ -1859,7 +2783,11 @@
       "source": "osm_node",
       "osm_id": 1542715941,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -241.452,
+        "y": 86.788
+      }
     },
     {
       "edge_id": "e313",
@@ -1867,7 +2795,11 @@
       "source": "osm_node",
       "osm_id": 1542715944,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -244.597,
+        "y": 116.388
+      }
     },
     {
       "edge_id": "e581",
@@ -1875,7 +2807,11 @@
       "source": "osm_node",
       "osm_id": 1542715952,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -260.338,
+        "y": 132.333
+      }
     },
     {
       "edge_id": "e644",
@@ -1883,7 +2819,11 @@
       "source": "osm_node",
       "osm_id": 1542715957,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -251.282,
+        "y": 140.906
+      }
     },
     {
       "edge_id": "e788",
@@ -1891,7 +2831,11 @@
       "source": "osm_node",
       "osm_id": 1548644140,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -564.409,
+        "y": 395.62
+      }
     },
     {
       "edge_id": "e27",
@@ -1899,7 +2843,11 @@
       "source": "osm_node",
       "osm_id": 1548644144,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -680.454,
+        "y": 495.707
+      }
     },
     {
       "edge_id": "e711",
@@ -1907,7 +2855,11 @@
       "source": "osm_node",
       "osm_id": 1548644145,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -513.683,
+        "y": 537.45
+      }
     },
     {
       "edge_id": "e326",
@@ -1915,7 +2867,11 @@
       "source": "osm_node",
       "osm_id": 1712034543,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 87.24,
+        "y": -380.387
+      }
     },
     {
       "edge_id": "e692",
@@ -1923,7 +2879,11 @@
       "source": "osm_node",
       "osm_id": 1754658053,
       "confidence": 1.0,
-      "match_distance_m": 4.488
+      "match_distance_m": 4.488,
+      "world_xy_m": {
+        "x": -506.368,
+        "y": 993.393
+      }
     },
     {
       "edge_id": "e895",
@@ -1931,7 +2891,11 @@
       "source": "osm_node",
       "osm_id": 1754658055,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -490.54,
+        "y": 991.77
+      }
     },
     {
       "edge_id": "e692",
@@ -1939,7 +2903,11 @@
       "source": "osm_node",
       "osm_id": 1754658065,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -513.646,
+        "y": 993.516
+      }
     },
     {
       "edge_id": "e30",
@@ -1947,7 +2915,11 @@
       "source": "osm_node",
       "osm_id": 1757649347,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -700.466,
+        "y": 596.249
+      }
     },
     {
       "edge_id": "e529",
@@ -1955,7 +2927,11 @@
       "source": "osm_node",
       "osm_id": 1757654927,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -185.979,
+        "y": 1061.7
+      }
     },
     {
       "edge_id": "e127",
@@ -1963,7 +2939,11 @@
       "source": "osm_node",
       "osm_id": 1786279607,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 302.886,
+        "y": 1022.215
+      }
     },
     {
       "edge_id": "e531",
@@ -1971,7 +2951,11 @@
       "source": "osm_node",
       "osm_id": 1786279609,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 118.853,
+        "y": 1071.385
+      }
     },
     {
       "edge_id": "e266",
@@ -1979,7 +2963,11 @@
       "source": "osm_node",
       "osm_id": 1786279646,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 313.302,
+        "y": 1051.081
+      }
     },
     {
       "edge_id": "e178",
@@ -1987,7 +2975,11 @@
       "source": "osm_node",
       "osm_id": 1786279650,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 122.386,
+        "y": 1058.62
+      }
     },
     {
       "edge_id": "e602",
@@ -1995,7 +2987,11 @@
       "source": "osm_node",
       "osm_id": 1787868140,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 122.313,
+        "y": 141.629
+      }
     },
     {
       "edge_id": "e981",
@@ -2003,7 +2999,11 @@
       "source": "osm_node",
       "osm_id": 1804446166,
       "confidence": 1.0,
-      "match_distance_m": 5.101
+      "match_distance_m": 5.101,
+      "world_xy_m": {
+        "x": 658.291,
+        "y": 1017.967
+      }
     },
     {
       "edge_id": "e813",
@@ -2011,7 +3011,11 @@
       "source": "osm_node",
       "osm_id": 1821290262,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -503.999,
+        "y": 568.673
+      }
     },
     {
       "edge_id": "e691",
@@ -2019,7 +3023,11 @@
       "source": "osm_node",
       "osm_id": 1821304263,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -290.656,
+        "y": 485.01
+      }
     },
     {
       "edge_id": "e634",
@@ -2027,7 +3035,11 @@
       "source": "osm_node",
       "osm_id": 1821304276,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -276.532,
+        "y": 495.54
+      }
     },
     {
       "edge_id": "e167",
@@ -2035,7 +3047,11 @@
       "source": "osm_node",
       "osm_id": 1821304282,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -301.35,
+        "y": 501.256
+      }
     },
     {
       "edge_id": "e282",
@@ -2043,7 +3059,11 @@
       "source": "osm_node",
       "osm_id": 1822082651,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 402.576,
+        "y": 286.649
+      }
     },
     {
       "edge_id": "e282",
@@ -2051,7 +3071,11 @@
       "source": "osm_node",
       "osm_id": 1822082654,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 395.349,
+        "y": 291.586
+      }
     },
     {
       "edge_id": "e140",
@@ -2059,7 +3083,11 @@
       "source": "osm_node",
       "osm_id": 1822082668,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 392.694,
+        "y": 303.751
+      }
     },
     {
       "edge_id": "e273",
@@ -2067,7 +3095,11 @@
       "source": "osm_node",
       "osm_id": 1822082682,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 389.527,
+        "y": 315.193
+      }
     },
     {
       "edge_id": "e291",
@@ -2075,7 +3107,11 @@
       "source": "osm_node",
       "osm_id": 1822082687,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 272.89,
+        "y": 344.337
+      }
     },
     {
       "edge_id": "e188",
@@ -2083,7 +3119,11 @@
       "source": "osm_node",
       "osm_id": 1822082714,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 152.471,
+        "y": 370.301
+      }
     },
     {
       "edge_id": "e187",
@@ -2091,7 +3131,11 @@
       "source": "osm_node",
       "osm_id": 1822082718,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 123.542,
+        "y": 379.497
+      }
     },
     {
       "edge_id": "e743",
@@ -2099,7 +3143,11 @@
       "source": "osm_node",
       "osm_id": 1822082723,
       "confidence": 1.0,
-      "match_distance_m": 11.124
+      "match_distance_m": 11.124,
+      "world_xy_m": {
+        "x": 92.521,
+        "y": 389.516
+      }
     },
     {
       "edge_id": "e742",
@@ -2107,7 +3155,11 @@
       "source": "osm_node",
       "osm_id": 1822082725,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 134.536,
+        "y": 388.337
+      }
     },
     {
       "edge_id": "e890",
@@ -2115,7 +3167,11 @@
       "source": "osm_node",
       "osm_id": 1822082728,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 191.296,
+        "y": 392.485
+      }
     },
     {
       "edge_id": "e743",
@@ -2123,7 +3179,11 @@
       "source": "osm_node",
       "osm_id": 1822082740,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 77.351,
+        "y": 406.173
+      }
     },
     {
       "edge_id": "e9",
@@ -2131,7 +3191,11 @@
       "source": "osm_node",
       "osm_id": 1822082741,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 51.56,
+        "y": 412.867
+      }
     },
     {
       "edge_id": "e338",
@@ -2139,7 +3203,11 @@
       "source": "osm_node",
       "osm_id": 1822082742,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 64.543,
+        "y": 424.931
+      }
     },
     {
       "edge_id": "e9",
@@ -2147,7 +3215,11 @@
       "source": "osm_node",
       "osm_id": 1822082744,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -13.503,
+        "y": 429.257
+      }
     },
     {
       "edge_id": "e113",
@@ -2155,7 +3227,11 @@
       "source": "osm_node",
       "osm_id": 1822082746,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -78.148,
+        "y": 433.883
+      }
     },
     {
       "edge_id": "e10",
@@ -2163,7 +3239,11 @@
       "source": "osm_node",
       "osm_id": 1822082747,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -66.05,
+        "y": 442.5
+      }
     },
     {
       "edge_id": "e634",
@@ -2171,7 +3251,11 @@
       "source": "osm_node",
       "osm_id": 1822082749,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -102.249,
+        "y": 451.629
+      }
     },
     {
       "edge_id": "e797",
@@ -2179,7 +3263,11 @@
       "source": "osm_node",
       "osm_id": 1827138917,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -540.703,
+        "y": 1065.181
+      }
     },
     {
       "edge_id": "e585",
@@ -2187,7 +3275,11 @@
       "source": "osm_node",
       "osm_id": 1829469422,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 671.808,
+        "y": 997.485
+      }
     },
     {
       "edge_id": "e588",
@@ -2195,7 +3287,11 @@
       "source": "osm_node",
       "osm_id": 1832256500,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 473.095,
+        "y": 65.338
+      }
     },
     {
       "edge_id": "e810",
@@ -2203,7 +3299,11 @@
       "source": "osm_node",
       "osm_id": 1840005822,
       "confidence": 1.0,
-      "match_distance_m": 9.226
+      "match_distance_m": 9.226,
+      "world_xy_m": {
+        "x": 729.512,
+        "y": 901.302
+      }
     },
     {
       "edge_id": "e799",
@@ -2211,7 +3311,11 @@
       "source": "osm_node",
       "osm_id": 1840005823,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 706.011,
+        "y": 963.593
+      }
     },
     {
       "edge_id": "e981",
@@ -2219,7 +3323,11 @@
       "source": "osm_node",
       "osm_id": 1840030252,
       "confidence": 1.0,
-      "match_distance_m": 4.478
+      "match_distance_m": 4.478,
+      "world_xy_m": {
+        "x": 695.8,
+        "y": 957.633
+      }
     },
     {
       "edge_id": "e801",
@@ -2227,7 +3335,11 @@
       "source": "osm_node",
       "osm_id": 1840030256,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 664.837,
+        "y": 1033.779
+      }
     },
     {
       "edge_id": "e801",
@@ -2235,7 +3347,11 @@
       "source": "osm_node",
       "osm_id": 1840030257,
       "confidence": 1.0,
-      "match_distance_m": 8.036
+      "match_distance_m": 8.036,
+      "world_xy_m": {
+        "x": 672.459,
+        "y": 1036.659
+      }
     },
     {
       "edge_id": "e482",
@@ -2243,7 +3359,11 @@
       "source": "osm_node",
       "osm_id": 1840030258,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 642.14,
+        "y": 1074.443
+      }
     },
     {
       "edge_id": "e906",
@@ -2251,7 +3371,11 @@
       "source": "osm_node",
       "osm_id": 1841311667,
       "confidence": 1.0,
-      "match_distance_m": 4.304
+      "match_distance_m": 4.304,
+      "world_xy_m": {
+        "x": -47.83,
+        "y": -763.987
+      }
     },
     {
       "edge_id": "e69",
@@ -2259,7 +3383,11 @@
       "source": "osm_node",
       "osm_id": 1843639347,
       "confidence": 1.0,
-      "match_distance_m": 4.195
+      "match_distance_m": 4.195,
+      "world_xy_m": {
+        "x": -417.227,
+        "y": -81.406
+      }
     },
     {
       "edge_id": "e109",
@@ -2267,7 +3395,11 @@
       "source": "osm_node",
       "osm_id": 1922105401,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 26.903,
+        "y": 92.258
+      }
     },
     {
       "edge_id": "e109",
@@ -2275,7 +3407,11 @@
       "source": "osm_node",
       "osm_id": 2084765584,
       "confidence": 1.0,
-      "match_distance_m": 4.905
+      "match_distance_m": 4.905,
+      "world_xy_m": {
+        "x": 31.196,
+        "y": 70.753
+      }
     },
     {
       "edge_id": "e1018",
@@ -2283,7 +3419,11 @@
       "source": "osm_node",
       "osm_id": 2084765585,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 23.677,
+        "y": 97.118
+      }
     },
     {
       "edge_id": "e601",
@@ -2291,7 +3431,11 @@
       "source": "osm_node",
       "osm_id": 2084765587,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 34.093,
+        "y": 101.81
+      }
     },
     {
       "edge_id": "e199",
@@ -2299,7 +3443,11 @@
       "source": "osm_node",
       "osm_id": 2124630215,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 409.056,
+        "y": -818.828
+      }
     },
     {
       "edge_id": "e145",
@@ -2307,7 +3455,11 @@
       "source": "osm_node",
       "osm_id": 2126361735,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -282.362,
+        "y": 679.746
+      }
     },
     {
       "edge_id": "e146",
@@ -2315,7 +3467,11 @@
       "source": "osm_node",
       "osm_id": 2126361737,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -267.089,
+        "y": 691.288
+      }
     },
     {
       "edge_id": "e579",
@@ -2323,7 +3479,11 @@
       "source": "osm_node",
       "osm_id": 2160594535,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 407.535,
+        "y": 288.807
+      }
     },
     {
       "edge_id": "e348",
@@ -2331,7 +3491,11 @@
       "source": "osm_node",
       "osm_id": 2165221563,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 152.478,
+        "y": -1071.385
+      }
     },
     {
       "edge_id": "e619",
@@ -2339,7 +3503,11 @@
       "source": "osm_node",
       "osm_id": 2180084776,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -494.673,
+        "y": 877.283
+      }
     },
     {
       "edge_id": "e316",
@@ -2347,7 +3515,11 @@
       "source": "osm_node",
       "osm_id": 2180084779,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -435.25,
+        "y": 895.208
+      }
     },
     {
       "edge_id": "e619",
@@ -2355,7 +3527,11 @@
       "source": "osm_node",
       "osm_id": 2180084782,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -458.21,
+        "y": 891.828
+      }
     },
     {
       "edge_id": "e242",
@@ -2363,7 +3539,11 @@
       "source": "osm_node",
       "osm_id": 2180084811,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -329.197,
+        "y": 943.978
+      }
     },
     {
       "edge_id": "e622",
@@ -2371,7 +3551,11 @@
       "source": "osm_node",
       "osm_id": 2180084813,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -321.809,
+        "y": 965.728
+      }
     },
     {
       "edge_id": "e436",
@@ -2379,7 +3563,11 @@
       "source": "osm_node",
       "osm_id": 2364610565,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 632.317,
+        "y": -200.44
+      }
     },
     {
       "edge_id": "e999",
@@ -2387,7 +3575,11 @@
       "source": "osm_node",
       "osm_id": 2470142131,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -720.34,
+        "y": -536.482
+      }
     },
     {
       "edge_id": "e999",
@@ -2395,7 +3587,11 @@
       "source": "osm_node",
       "osm_id": 2470142132,
       "confidence": 1.0,
-      "match_distance_m": 6.734
+      "match_distance_m": 6.734,
+      "world_xy_m": {
+        "x": -722.534,
+        "y": -542.909
+      }
     },
     {
       "edge_id": "e776",
@@ -2403,7 +3599,11 @@
       "source": "osm_node",
       "osm_id": 2555407185,
       "confidence": 1.0,
-      "match_distance_m": 14.962
+      "match_distance_m": 14.962,
+      "world_xy_m": {
+        "x": -6.159,
+        "y": -1064.035
+      }
     },
     {
       "edge_id": "e498",
@@ -2411,7 +3611,11 @@
       "source": "osm_node",
       "osm_id": 2758527140,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -537.302,
+        "y": 1073.02
+      }
     },
     {
       "edge_id": "e791",
@@ -2419,7 +3623,11 @@
       "source": "osm_node",
       "osm_id": 2841226112,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 685.449,
+        "y": -178.479
+      }
     },
     {
       "edge_id": "e1079",
@@ -2427,7 +3635,11 @@
       "source": "osm_node",
       "osm_id": 2841226116,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 689.224,
+        "y": -161.333
+      }
     },
     {
       "edge_id": "e322",
@@ -2435,7 +3647,11 @@
       "source": "osm_node",
       "osm_id": 2841226117,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 621.448,
+        "y": -157.441
+      }
     },
     {
       "edge_id": "e463",
@@ -2443,7 +3659,11 @@
       "source": "osm_node",
       "osm_id": 2887835761,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 618.237,
+        "y": 181.114
+      }
     },
     {
       "edge_id": "e830",
@@ -2451,7 +3671,11 @@
       "source": "osm_node",
       "osm_id": 3462104306,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 316.44,
+        "y": -328.492
+      }
     },
     {
       "edge_id": "e156",
@@ -2459,7 +3683,11 @@
       "source": "osm_node",
       "osm_id": 3924222557,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 698.718,
+        "y": -193.735
+      }
     },
     {
       "edge_id": "e664",
@@ -2467,7 +3695,11 @@
       "source": "osm_node",
       "osm_id": 3924222558,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 633.473,
+        "y": -170.395
+      }
     },
     {
       "edge_id": "e825",
@@ -2475,7 +3707,11 @@
       "source": "osm_node",
       "osm_id": 3980067648,
       "confidence": 1.0,
-      "match_distance_m": 17.243
+      "match_distance_m": 17.243,
+      "world_xy_m": {
+        "x": -227.532,
+        "y": -802.327
+      }
     },
     {
       "edge_id": "e573",
@@ -2483,7 +3719,11 @@
       "source": "osm_node",
       "osm_id": 3980334519,
       "confidence": 1.0,
-      "match_distance_m": 3.285
+      "match_distance_m": 3.285,
+      "world_xy_m": {
+        "x": -417.139,
+        "y": -694.334
+      }
     },
     {
       "edge_id": "e545",
@@ -2491,7 +3731,11 @@
       "source": "osm_node",
       "osm_id": 4285759448,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -545.216,
+        "y": -885.323
+      }
     },
     {
       "edge_id": "e596",
@@ -2499,7 +3743,11 @@
       "source": "osm_node",
       "osm_id": 4505164271,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 209.824,
+        "y": -998.853
+      }
     },
     {
       "edge_id": "e596",
@@ -2507,7 +3755,11 @@
       "source": "osm_node",
       "osm_id": 4505164272,
       "confidence": 1.0,
-      "match_distance_m": 4.283
+      "match_distance_m": 4.283,
+      "world_xy_m": {
+        "x": 208.295,
+        "y": -1002.867
+      }
     },
     {
       "edge_id": "e38",
@@ -2515,7 +3767,11 @@
       "source": "osm_node",
       "osm_id": 4505164273,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 208.127,
+        "y": -1080.281
+      }
     },
     {
       "edge_id": "e574",
@@ -2523,7 +3779,11 @@
       "source": "osm_node",
       "osm_id": 4519595968,
       "confidence": 1.0,
-      "match_distance_m": 3.272
+      "match_distance_m": 3.272,
+      "world_xy_m": {
+        "x": -433.436,
+        "y": -685.761
+      }
     },
     {
       "edge_id": "e574",
@@ -2531,7 +3791,11 @@
       "source": "osm_node",
       "osm_id": 4519595969,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -432.455,
+        "y": -682.559
+      }
     },
     {
       "edge_id": "e573",
@@ -2539,7 +3803,11 @@
       "source": "osm_node",
       "osm_id": 4519595971,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -415.778,
+        "y": -691.343
+      }
     },
     {
       "edge_id": "e404",
@@ -2547,7 +3815,11 @@
       "source": "osm_node",
       "osm_id": 4519595973,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -420.745,
+        "y": -679.101
+      }
     },
     {
       "edge_id": "e260",
@@ -2555,7 +3827,11 @@
       "source": "osm_node",
       "osm_id": 4519595975,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -366.303,
+        "y": -733.798
+      }
     },
     {
       "edge_id": "e625",
@@ -2563,7 +3839,11 @@
       "source": "osm_node",
       "osm_id": 4519595977,
       "confidence": 1.0,
-      "match_distance_m": 5.487
+      "match_distance_m": 5.487,
+      "world_xy_m": {
+        "x": -328.802,
+        "y": -739.424
+      }
     },
     {
       "edge_id": "e625",
@@ -2571,7 +3851,11 @@
       "source": "osm_node",
       "osm_id": 4519595979,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -326.519,
+        "y": -734.431
+      }
     },
     {
       "edge_id": "e825",
@@ -2579,7 +3863,11 @@
       "source": "osm_node",
       "osm_id": 4519595980,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -252.138,
+        "y": -771.17
+      }
     },
     {
       "edge_id": "e825",
@@ -2587,7 +3875,11 @@
       "source": "osm_node",
       "osm_id": 4519595981,
       "confidence": 1.0,
-      "match_distance_m": 5.057
+      "match_distance_m": 5.057,
+      "world_xy_m": {
+        "x": -252.716,
+        "y": -776.508
+      }
     },
     {
       "edge_id": "e698",
@@ -2595,7 +3887,11 @@
       "source": "osm_node",
       "osm_id": 4519595982,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -205.384,
+        "y": -794.11
+      }
     },
     {
       "edge_id": "e698",
@@ -2603,7 +3899,11 @@
       "source": "osm_node",
       "osm_id": 4519595983,
       "confidence": 1.0,
-      "match_distance_m": 4.054
+      "match_distance_m": 4.054,
+      "world_xy_m": {
+        "x": -206.832,
+        "y": -797.924
+      }
     },
     {
       "edge_id": "e698",
@@ -2611,7 +3911,11 @@
       "source": "osm_node",
       "osm_id": 4519595984,
       "confidence": 1.0,
-      "match_distance_m": 15.482
+      "match_distance_m": 15.482,
+      "world_xy_m": {
+        "x": -168.0,
+        "y": -830.515
+      }
     },
     {
       "edge_id": "e737",
@@ -2619,7 +3923,11 @@
       "source": "osm_node",
       "osm_id": 4519595985,
       "confidence": 1.0,
-      "match_distance_m": 3.281
+      "match_distance_m": 3.281,
+      "world_xy_m": {
+        "x": -149.772,
+        "y": -826.078
+      }
     },
     {
       "edge_id": "e351",
@@ -2627,7 +3935,11 @@
       "source": "osm_node",
       "osm_id": 4720234396,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -510.735,
+        "y": 547.413
+      }
     },
     {
       "edge_id": "e32",
@@ -2635,7 +3947,11 @@
       "source": "osm_node",
       "osm_id": 4839141965,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -572.023,
+        "y": -601.731
+      }
     },
     {
       "edge_id": "e809",
@@ -2643,7 +3959,11 @@
       "source": "osm_node",
       "osm_id": 4839141967,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -561.483,
+        "y": -614.941
+      }
     },
     {
       "edge_id": "e83",
@@ -2651,7 +3971,11 @@
       "source": "osm_node",
       "osm_id": 4839141973,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -727.106,
+        "y": -523.628
+      }
     },
     {
       "edge_id": "e735",
@@ -2659,7 +3983,11 @@
       "source": "osm_node",
       "osm_id": 5059182776,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -351.206,
+        "y": -939.986
+      }
     },
     {
       "edge_id": "e257",
@@ -2667,7 +3995,11 @@
       "source": "osm_node",
       "osm_id": 5060098124,
       "confidence": 1.0,
-      "match_distance_m": 16.668
+      "match_distance_m": 16.668,
+      "world_xy_m": {
+        "x": -621.491,
+        "y": 1015.098
+      }
     },
     {
       "edge_id": "e787",
@@ -2675,7 +4007,11 @@
       "source": "osm_node",
       "osm_id": 5526534228,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 541.039,
+        "y": -786.904
+      }
     },
     {
       "edge_id": "e1022",
@@ -2683,7 +4019,11 @@
       "source": "osm_node",
       "osm_id": 5939352841,
       "confidence": 1.0,
-      "match_distance_m": 2.6
+      "match_distance_m": 2.6,
+      "world_xy_m": {
+        "x": -475.201,
+        "y": 989.468
+      }
     },
     {
       "edge_id": "e619",
@@ -2691,7 +4031,11 @@
       "source": "osm_node",
       "osm_id": 6032698735,
       "confidence": 1.0,
-      "match_distance_m": 13.26
+      "match_distance_m": 13.26,
+      "world_xy_m": {
+        "x": -492.281,
+        "y": 892.517
+      }
     },
     {
       "edge_id": "e262",
@@ -2699,7 +4043,11 @@
       "source": "osm_node",
       "osm_id": 6083243182,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 423.671,
+        "y": 333.474
+      }
     },
     {
       "edge_id": "e703",
@@ -2707,7 +4055,11 @@
       "source": "osm_node",
       "osm_id": 6126745805,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -576.376,
+        "y": 536.149
+      }
     },
     {
       "edge_id": "e300",
@@ -2715,7 +4067,11 @@
       "source": "osm_node",
       "osm_id": 6126771593,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -399.394,
+        "y": 510.274
+      }
     },
     {
       "edge_id": "e181",
@@ -2723,7 +4079,11 @@
       "source": "osm_node",
       "osm_id": 6128752707,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 301.036,
+        "y": 353.945
+      }
     },
     {
       "edge_id": "e429",
@@ -2731,7 +4091,11 @@
       "source": "osm_node",
       "osm_id": 6128766333,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 636.859,
+        "y": 261.23
+      }
     },
     {
       "edge_id": "e426",
@@ -2739,7 +4103,11 @@
       "source": "osm_node",
       "osm_id": 6128766334,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 642.118,
+        "y": 258.884
+      }
     },
     {
       "edge_id": "e609",
@@ -2747,7 +4115,11 @@
       "source": "osm_node",
       "osm_id": 6206597879,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -729.556,
+        "y": 496.052
+      }
     },
     {
       "edge_id": "e808",
@@ -2755,7 +4127,11 @@
       "source": "osm_node",
       "osm_id": 6213715351,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -465.59,
+        "y": -662.7
+      }
     },
     {
       "edge_id": "e694",
@@ -2763,7 +4139,11 @@
       "source": "osm_node",
       "osm_id": 6213716111,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -462.138,
+        "y": -672.107
+      }
     },
     {
       "edge_id": "e344",
@@ -2771,7 +4151,11 @@
       "source": "osm_node",
       "osm_id": 6376254429,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -236.653,
+        "y": -44.878
+      }
     },
     {
       "edge_id": "e461",
@@ -2779,7 +4163,11 @@
       "source": "osm_node",
       "osm_id": 6389012498,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 532.357,
+        "y": -19.693
+      }
     },
     {
       "edge_id": "e851",
@@ -2787,7 +4175,11 @@
       "source": "osm_node",
       "osm_id": 6539249685,
       "confidence": 1.0,
-      "match_distance_m": 1.927
+      "match_distance_m": 1.927,
+      "world_xy_m": {
+        "x": -691.66,
+        "y": 796.133
+      }
     },
     {
       "edge_id": "e480",
@@ -2795,7 +4187,11 @@
       "source": "osm_node",
       "osm_id": 6749627410,
       "confidence": 1.0,
-      "match_distance_m": 7.468
+      "match_distance_m": 7.468,
+      "world_xy_m": {
+        "x": 715.871,
+        "y": 778.187
+      }
     },
     {
       "edge_id": "e720",
@@ -2803,7 +4199,11 @@
       "source": "osm_node",
       "osm_id": 8491881748,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -383.682,
+        "y": -513.798
+      }
     },
     {
       "edge_id": "e345",
@@ -2811,7 +4211,11 @@
       "source": "osm_node",
       "osm_id": 8547341738,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -282.698,
+        "y": -178.446
+      }
     },
     {
       "edge_id": "e616",
@@ -2819,7 +4223,11 @@
       "source": "osm_node",
       "osm_id": 8547341739,
       "confidence": 1.0,
-      "match_distance_m": 0.003
+      "match_distance_m": 0.003,
+      "world_xy_m": {
+        "x": -290.218,
+        "y": -201.241
+      }
     },
     {
       "edge_id": "e6",
@@ -2827,7 +4235,11 @@
       "source": "osm_node",
       "osm_id": 8547341740,
       "confidence": 1.0,
-      "match_distance_m": 0.021
+      "match_distance_m": 0.021,
+      "world_xy_m": {
+        "x": -297.642,
+        "y": -185.818
+      }
     },
     {
       "edge_id": "e254",
@@ -2835,7 +4247,11 @@
       "source": "osm_node",
       "osm_id": 8561671318,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -411.192,
+        "y": -593.392
+      }
     },
     {
       "edge_id": "e310",
@@ -2843,7 +4259,11 @@
       "source": "osm_node",
       "osm_id": 8561671319,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -426.114,
+        "y": -598.596
+      }
     },
     {
       "edge_id": "e415",
@@ -2851,7 +4271,11 @@
       "source": "osm_node",
       "osm_id": 8561671320,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -433.779,
+        "y": -587.387
+      }
     },
     {
       "edge_id": "e806",
@@ -2859,7 +4283,11 @@
       "source": "osm_node",
       "osm_id": 8561671321,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -419.816,
+        "y": -580.26
+      }
     },
     {
       "edge_id": "e717",
@@ -2867,7 +4295,11 @@
       "source": "osm_node",
       "osm_id": 8580043703,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -345.208,
+        "y": -361.884
+      }
     },
     {
       "edge_id": "e410",
@@ -2875,7 +4307,11 @@
       "source": "osm_node",
       "osm_id": 8580043704,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -350.094,
+        "y": -337.421
+      }
     },
     {
       "edge_id": "e617",
@@ -2883,7 +4319,11 @@
       "source": "osm_node",
       "osm_id": 8580043706,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -334.873,
+        "y": -331.172
+      }
     },
     {
       "edge_id": "e510",
@@ -2891,7 +4331,11 @@
       "source": "osm_node",
       "osm_id": 8707910347,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -121.845,
+        "y": -250.444
+      }
     },
     {
       "edge_id": "e886",
@@ -2899,7 +4343,11 @@
       "source": "osm_node",
       "osm_id": 8707910348,
       "confidence": 1.0,
-      "match_distance_m": 7.439
+      "match_distance_m": 7.439,
+      "world_xy_m": {
+        "x": -140.892,
+        "y": -235.288
+      }
     },
     {
       "edge_id": "e886",
@@ -2907,7 +4355,11 @@
       "source": "osm_node",
       "osm_id": 8707910350,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -161.263,
+        "y": -235.922
+      }
     },
     {
       "edge_id": "e79",
@@ -2915,7 +4367,11 @@
       "source": "osm_node",
       "osm_id": 8707910351,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -156.011,
+        "y": -250.066
+      }
     },
     {
       "edge_id": "e510",
@@ -2923,7 +4379,11 @@
       "source": "osm_node",
       "osm_id": 8707910354,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -31.467,
+        "y": -283.069
+      }
     },
     {
       "edge_id": "e510",
@@ -2931,7 +4391,11 @@
       "source": "osm_node",
       "osm_id": 8707910355,
       "confidence": 1.0,
-      "match_distance_m": 10.346
+      "match_distance_m": 10.346,
+      "world_xy_m": {
+        "x": -21.461,
+        "y": -275.708
+      }
     },
     {
       "edge_id": "e510",
@@ -2939,7 +4403,11 @@
       "source": "osm_node",
       "osm_id": 8707910356,
       "confidence": 1.0,
-      "match_distance_m": 11.228
+      "match_distance_m": 11.228,
+      "world_xy_m": {
+        "x": -26.303,
+        "y": -296.913
+      }
     },
     {
       "edge_id": "e1040",
@@ -2947,7 +4415,11 @@
       "source": "osm_node",
       "osm_id": 8707929646,
       "confidence": 1.0,
-      "match_distance_m": 10.716
+      "match_distance_m": 10.716,
+      "world_xy_m": {
+        "x": -63.11,
+        "y": 55.987
+      }
     },
     {
       "edge_id": "e1018",
@@ -2955,7 +4427,11 @@
       "source": "osm_node",
       "osm_id": 8707929648,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -29.85,
+        "y": 71.476
+      }
     },
     {
       "edge_id": "e210",
@@ -2963,7 +4439,11 @@
       "source": "osm_node",
       "osm_id": 8981647403,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 171.386,
+        "y": -722.456
+      }
     },
     {
       "edge_id": "e1001",
@@ -2971,7 +4451,11 @@
       "source": "osm_node",
       "osm_id": 9074748723,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -532.576,
+        "y": -395.331
+      }
     },
     {
       "edge_id": "e55",
@@ -2979,7 +4463,11 @@
       "source": "osm_node",
       "osm_id": 9074748724,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -542.253,
+        "y": -380.02
+      }
     },
     {
       "edge_id": "e1032",
@@ -2987,7 +4475,11 @@
       "source": "osm_node",
       "osm_id": 9074748725,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -524.479,
+        "y": -371.78
+      }
     },
     {
       "edge_id": "e610",
@@ -2996,6 +4488,10 @@
       "osm_id": 9127269532,
       "confidence": 1.0,
       "match_distance_m": 8.307,
+      "world_xy_m": {
+        "x": -635.696,
+        "y": 257.105
+      },
       "value_kmh": 30
     },
     {
@@ -3004,7 +4500,11 @@
       "source": "osm_node",
       "osm_id": 9127269533,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -618.193,
+        "y": 243.395
+      }
     },
     {
       "edge_id": "e1055",
@@ -3012,7 +4512,11 @@
       "source": "osm_node",
       "osm_id": 9127269534,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -604.215,
+        "y": 253.68
+      }
     },
     {
       "edge_id": "e310",
@@ -3021,6 +4525,10 @@
       "osm_id": 9128647206,
       "confidence": 1.0,
       "match_distance_m": 6.974,
+      "world_xy_m": {
+        "x": -447.889,
+        "y": -642.251
+      },
       "value_kmh": 30
     },
     {
@@ -3029,7 +4537,11 @@
       "source": "osm_node",
       "osm_id": 9150711680,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -248.583,
+        "y": 127.952
+      }
     },
     {
       "edge_id": "e313",
@@ -3037,7 +4549,11 @@
       "source": "osm_node",
       "osm_id": 9150711681,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -243.712,
+        "y": 113.419
+      }
     },
     {
       "edge_id": "e581",
@@ -3045,7 +4561,11 @@
       "source": "osm_node",
       "osm_id": 9150711683,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -263.776,
+        "y": 133.467
+      }
     },
     {
       "edge_id": "e848",
@@ -3053,7 +4573,11 @@
       "source": "osm_node",
       "osm_id": 9153302261,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -213.115,
+        "y": 40.786
+      }
     },
     {
       "edge_id": "e312",
@@ -3061,7 +4585,11 @@
       "source": "osm_node",
       "osm_id": 9153302263,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -224.914,
+        "y": 44.367
+      }
     },
     {
       "edge_id": "e251",
@@ -3069,7 +4597,11 @@
       "source": "osm_node",
       "osm_id": 9370945412,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 246.623,
+        "y": 760.796
+      }
     },
     {
       "edge_id": "e889",
@@ -3077,7 +4609,11 @@
       "source": "osm_node",
       "osm_id": 9370945413,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 265.363,
+        "y": 755.781
+      }
     },
     {
       "edge_id": "e1072",
@@ -3085,7 +4621,11 @@
       "source": "osm_node",
       "osm_id": 9370945414,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 256.286,
+        "y": 750.232
+      }
     },
     {
       "edge_id": "e251",
@@ -3093,7 +4633,11 @@
       "source": "osm_node",
       "osm_id": 9370958538,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 78.945,
+        "y": 779.51
+      }
     },
     {
       "edge_id": "e165",
@@ -3101,7 +4645,11 @@
       "source": "osm_node",
       "osm_id": 9370958539,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 57.134,
+        "y": 781.0
+      }
     },
     {
       "edge_id": "e1031",
@@ -3109,7 +4657,11 @@
       "source": "osm_node",
       "osm_id": 9370958540,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 67.337,
+        "y": 788.394
+      }
     },
     {
       "edge_id": "e507",
@@ -3117,7 +4669,11 @@
       "source": "osm_node",
       "osm_id": 9429848396,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 358.33,
+        "y": -71.598
+      }
     },
     {
       "edge_id": "e508",
@@ -3125,7 +4681,11 @@
       "source": "osm_node",
       "osm_id": 9429848397,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 389.183,
+        "y": -81.862
+      }
     },
     {
       "edge_id": "e507",
@@ -3133,7 +4693,11 @@
       "source": "osm_node",
       "osm_id": 9429848399,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 294.628,
+        "y": -50.471
+      }
     },
     {
       "edge_id": "e479",
@@ -3141,7 +4705,11 @@
       "source": "osm_node",
       "osm_id": 9431369510,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 226.34,
+        "y": -376.862
+      }
     },
     {
       "edge_id": "e479",
@@ -3149,7 +4717,11 @@
       "source": "osm_node",
       "osm_id": 9431369511,
       "confidence": 1.0,
-      "match_distance_m": 7.172
+      "match_distance_m": 7.172,
+      "world_xy_m": {
+        "x": 216.941,
+        "y": -381.076
+      }
     },
     {
       "edge_id": "e479",
@@ -3157,7 +4729,11 @@
       "source": "osm_node",
       "osm_id": 9431369512,
       "confidence": 1.0,
-      "match_distance_m": 10.987
+      "match_distance_m": 10.987,
+      "world_xy_m": {
+        "x": 222.134,
+        "y": -363.641
+      }
     },
     {
       "edge_id": "e829",
@@ -3165,7 +4741,11 @@
       "source": "osm_node",
       "osm_id": 9431369514,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 285.668,
+        "y": -412.845
+      }
     },
     {
       "edge_id": "e19",
@@ -3173,7 +4753,11 @@
       "source": "osm_node",
       "osm_id": 9431369515,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 302.535,
+        "y": -404.527
+      }
     },
     {
       "edge_id": "e902",
@@ -3181,7 +4765,11 @@
       "source": "osm_node",
       "osm_id": 9586883639,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 399.372,
+        "y": -428.056
+      }
     },
     {
       "edge_id": "e84",
@@ -3189,7 +4777,11 @@
       "source": "osm_node",
       "osm_id": 9586883640,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 406.752,
+        "y": -441.855
+      }
     },
     {
       "edge_id": "e673",
@@ -3197,7 +4789,11 @@
       "source": "osm_node",
       "osm_id": 9588759523,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -406.123,
+        "y": -427.478
+      }
     },
     {
       "edge_id": "e694",
@@ -3205,7 +4801,11 @@
       "source": "osm_node",
       "osm_id": 9966710638,
       "confidence": 1.0,
-      "match_distance_m": 2.143
+      "match_distance_m": 2.143,
+      "world_xy_m": {
+        "x": -560.225,
+        "y": -621.013
+      }
     },
     {
       "edge_id": "e114",
@@ -3213,7 +4813,11 @@
       "source": "osm_node",
       "osm_id": 10096027246,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 451.612,
+        "y": 442.945
+      }
     },
     {
       "edge_id": "e116",
@@ -3221,7 +4825,11 @@
       "source": "osm_node",
       "osm_id": 10096027247,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 469.65,
+        "y": 437.285
+      }
     },
     {
       "edge_id": "e364",
@@ -3229,7 +4837,11 @@
       "source": "osm_node",
       "osm_id": 10096027248,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 464.288,
+        "y": 451.084
+      }
     },
     {
       "edge_id": "e262",
@@ -3237,7 +4849,11 @@
       "source": "osm_node",
       "osm_id": 10096027249,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 457.332,
+        "y": 431.336
+      }
     },
     {
       "edge_id": "e766",
@@ -3245,7 +4861,11 @@
       "source": "osm_node",
       "osm_id": 10221854195,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -229.661,
+        "y": -16.624
+      }
     },
     {
       "edge_id": "e1041",
@@ -3253,7 +4873,11 @@
       "source": "osm_node",
       "osm_id": 10561998133,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 8.412,
+        "y": 43.855
+      }
     },
     {
       "edge_id": "e109",
@@ -3261,7 +4885,11 @@
       "source": "osm_node",
       "osm_id": 10561998134,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 25.052,
+        "y": 52.284
+      }
     },
     {
       "edge_id": "e841",
@@ -3269,7 +4897,11 @@
       "source": "osm_node",
       "osm_id": 10561998136,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 401.53,
+        "y": -97.94
+      }
     },
     {
       "edge_id": "e841",
@@ -3277,7 +4909,11 @@
       "source": "osm_node",
       "osm_id": 10561998137,
       "confidence": 1.0,
-      "match_distance_m": 7.342
+      "match_distance_m": 7.342,
+      "world_xy_m": {
+        "x": 394.544,
+        "y": -95.661
+      }
     },
     {
       "edge_id": "e118",
@@ -3285,7 +4921,11 @@
       "source": "osm_node",
       "osm_id": 10570963814,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 293.714,
+        "y": 923.429
+      }
     },
     {
       "edge_id": "e125",
@@ -3293,7 +4933,11 @@
       "source": "osm_node",
       "osm_id": 10570963815,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 284.242,
+        "y": 916.669
+      }
     },
     {
       "edge_id": "e882",
@@ -3301,7 +4945,11 @@
       "source": "osm_node",
       "osm_id": 10570963816,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 609.554,
+        "y": 809.588
+      }
     },
     {
       "edge_id": "e768",
@@ -3309,7 +4957,11 @@
       "source": "osm_node",
       "osm_id": 10570963817,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 622.954,
+        "y": 817.928
+      }
     },
     {
       "edge_id": "e363",
@@ -3317,7 +4969,11 @@
       "source": "osm_node",
       "osm_id": 10570963818,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 617.271,
+        "y": 827.969
+      }
     },
     {
       "edge_id": "e932",
@@ -3325,7 +4981,11 @@
       "source": "osm_node",
       "osm_id": 10741105911,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 23.845,
+        "y": 38.807
+      }
     },
     {
       "edge_id": "e342",
@@ -3333,7 +4993,11 @@
       "source": "osm_node",
       "osm_id": 10860797024,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 606.094,
+        "y": 245.997
+      }
     },
     {
       "edge_id": "e341",
@@ -3341,7 +5005,11 @@
       "source": "osm_node",
       "osm_id": 10860797025,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 619.831,
+        "y": 240.993
+      }
     },
     {
       "edge_id": "e431",
@@ -3349,7 +5017,11 @@
       "source": "osm_node",
       "osm_id": 10860797027,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 644.305,
+        "y": 232.208
+      }
     },
     {
       "edge_id": "e953",
@@ -3357,7 +5029,11 @@
       "source": "osm_node",
       "osm_id": 11033308486,
       "confidence": 1.0,
-      "match_distance_m": 5.057
+      "match_distance_m": 5.057,
+      "world_xy_m": {
+        "x": 3.014,
+        "y": -1097.594
+      }
     },
     {
       "edge_id": "e952",
@@ -3365,7 +5041,11 @@
       "source": "osm_node",
       "osm_id": 11033308487,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 9.831,
+        "y": -1100.129
+      }
     },
     {
       "edge_id": "e517",
@@ -3373,7 +5053,11 @@
       "source": "osm_node",
       "osm_id": 11057516559,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -386.425,
+        "y": -482.653
+      }
     },
     {
       "edge_id": "e740",
@@ -3381,7 +5065,11 @@
       "source": "osm_node",
       "osm_id": 11066482364,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -404.719,
+        "y": -1095.248
+      }
     },
     {
       "edge_id": "e212",
@@ -3389,7 +5077,11 @@
       "source": "osm_node",
       "osm_id": 11070301703,
       "confidence": 1.0,
-      "match_distance_m": 6.855
+      "match_distance_m": 6.855,
+      "world_xy_m": {
+        "x": 223.1,
+        "y": -562.535
+      }
     },
     {
       "edge_id": "e770",
@@ -3397,7 +5089,11 @@
       "source": "osm_node",
       "osm_id": 11086045505,
       "confidence": 1.0,
-      "match_distance_m": 5.091
+      "match_distance_m": 5.091,
+      "world_xy_m": {
+        "x": 333.124,
+        "y": -1065.926
+      }
     },
     {
       "edge_id": "e688",
@@ -3405,7 +5101,11 @@
       "source": "osm_node",
       "osm_id": 11162777723,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -101.174,
+        "y": -1041.974
+      }
     },
     {
       "edge_id": "e830",
@@ -3413,7 +5113,11 @@
       "source": "osm_node",
       "osm_id": 11222078097,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 295.389,
+        "y": -385.835
+      }
     },
     {
       "edge_id": "e638",
@@ -3421,7 +5125,11 @@
       "source": "osm_node",
       "osm_id": 11256203249,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -616.02,
+        "y": 218.309
+      }
     },
     {
       "edge_id": "e167",
@@ -3429,7 +5137,11 @@
       "source": "osm_node",
       "osm_id": 11563663281,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -368.293,
+        "y": 517.857
+      }
     },
     {
       "edge_id": "e342",
@@ -3437,7 +5149,11 @@
       "source": "osm_node",
       "osm_id": 11843458190,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 597.368,
+        "y": 235.066
+      }
     },
     {
       "edge_id": "e829",
@@ -3445,7 +5161,11 @@
       "source": "osm_node",
       "osm_id": 11910678633,
       "confidence": 1.0,
-      "match_distance_m": 9.967
+      "match_distance_m": 9.967,
+      "world_xy_m": {
+        "x": 242.337,
+        "y": -502.401
+      }
     },
     {
       "edge_id": "e177",
@@ -3453,7 +5173,11 @@
       "source": "osm_node",
       "osm_id": 11939734594,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -17.635,
+        "y": 1055.151
+      }
     },
     {
       "edge_id": "e1022",
@@ -3461,7 +5185,11 @@
       "source": "osm_node",
       "osm_id": 11955792116,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -319.578,
+        "y": 971.955
+      }
     },
     {
       "edge_id": "e18",
@@ -3469,7 +5197,11 @@
       "source": "osm_node",
       "osm_id": 12230511973,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -574.159,
+        "y": 570.241
+      }
     },
     {
       "edge_id": "e662",
@@ -3477,7 +5209,11 @@
       "source": "osm_node",
       "osm_id": 12334795468,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 352.749,
+        "y": -277.498
+      }
     },
     {
       "edge_id": "e711",
@@ -3485,7 +5221,11 @@
       "source": "osm_node",
       "osm_id": 12420690646,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -511.613,
+        "y": 544.333
+      }
     },
     {
       "edge_id": "e72",
@@ -3493,7 +5233,11 @@
       "source": "osm_node",
       "osm_id": 12529386664,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -372.045,
+        "y": 175.543
+      }
     },
     {
       "edge_id": "e644",
@@ -3501,7 +5245,11 @@
       "source": "osm_node",
       "osm_id": 12529386668,
       "confidence": 1.0,
-      "match_distance_m": 1.869
+      "match_distance_m": 1.869,
+      "world_xy_m": {
+        "x": -252.029,
+        "y": 135.313
+      }
     },
     {
       "edge_id": "e644",
@@ -3509,7 +5257,11 @@
       "source": "osm_node",
       "osm_id": 12529386669,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -249.98,
+        "y": 134.646
+      }
     },
     {
       "edge_id": "e1039",
@@ -3517,7 +5269,11 @@
       "source": "osm_node",
       "osm_id": 12529386672,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -117.537,
+        "y": 91.747
+      }
     },
     {
       "edge_id": "e318",
@@ -3525,7 +5281,11 @@
       "source": "osm_node",
       "osm_id": 12529386673,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -104.839,
+        "y": 86.61
+      }
     },
     {
       "edge_id": "e1018",
@@ -3533,7 +5293,11 @@
       "source": "osm_node",
       "osm_id": 12529386675,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -40.925,
+        "y": 66.406
+      }
     },
     {
       "edge_id": "e932",
@@ -3541,7 +5305,11 @@
       "source": "osm_node",
       "osm_id": 12529386678,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 24.467,
+        "y": 44.378
+      }
     },
     {
       "edge_id": "e571",
@@ -3549,7 +5317,11 @@
       "source": "osm_node",
       "osm_id": 12529386682,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 181.1,
+        "y": -8.273
+      }
     },
     {
       "edge_id": "e507",
@@ -3557,7 +5329,11 @@
       "source": "osm_node",
       "osm_id": 12529386684,
       "confidence": 1.0,
-      "match_distance_m": 4.596
+      "match_distance_m": 4.596,
+      "world_xy_m": {
+        "x": 303.523,
+        "y": -48.581
+      }
     },
     {
       "edge_id": "e727",
@@ -3565,7 +5341,11 @@
       "source": "osm_node",
       "osm_id": 12529386687,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 368.98,
+        "y": -70.364
+      }
     },
     {
       "edge_id": "e834",
@@ -3573,7 +5353,11 @@
       "source": "osm_node",
       "osm_id": 12529386690,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 408.493,
+        "y": -82.963
+      }
     },
     {
       "edge_id": "e322",
@@ -3581,7 +5365,11 @@
       "source": "osm_node",
       "osm_id": 12529386695,
       "confidence": 1.0,
-      "match_distance_m": 5.261
+      "match_distance_m": 5.261,
+      "world_xy_m": {
+        "x": 509.806,
+        "y": -115.231
+      }
     },
     {
       "edge_id": "e1053",
@@ -3589,7 +5377,11 @@
       "source": "osm_node",
       "osm_id": 12951410807,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -537.945,
+        "y": 216.585
+      }
     },
     {
       "edge_id": "e610",
@@ -3597,7 +5389,11 @@
       "source": "osm_node",
       "osm_id": 12994041207,
       "confidence": 1.0,
-      "match_distance_m": 5.319
+      "match_distance_m": 5.319,
+      "world_xy_m": {
+        "x": -616.964,
+        "y": 248.576
+      }
     },
     {
       "edge_id": "e635",
@@ -3605,7 +5401,11 @@
       "source": "osm_node",
       "osm_id": 12994041208,
       "confidence": 1.0,
-      "match_distance_m": 5.281
+      "match_distance_m": 5.281,
+      "world_xy_m": {
+        "x": -594.976,
+        "y": 242.249
+      }
     },
     {
       "edge_id": "e637",
@@ -3613,7 +5413,11 @@
       "source": "osm_node",
       "osm_id": 13147658507,
       "confidence": 1.0,
-      "match_distance_m": 6.192
+      "match_distance_m": 6.192,
+      "world_xy_m": {
+        "x": -514.539,
+        "y": 207.479
+      }
     },
     {
       "edge_id": "e770",
@@ -3621,7 +5425,11 @@
       "source": "osm_node",
       "osm_id": 13724826889,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 342.224,
+        "y": -1063.646
+      }
     },
     {
       "edge_id": "e627",
@@ -3629,7 +5437,11 @@
       "source": "osm_node",
       "osm_id": 13724826890,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 343.701,
+        "y": -1059.499
+      }
     },
     {
       "edge_id": "e203",
@@ -3637,7 +5449,11 @@
       "source": "osm_node",
       "osm_id": 13724826893,
       "confidence": 1.0,
-      "match_distance_m": 4.955
+      "match_distance_m": 4.955,
+      "world_xy_m": {
+        "x": 327.17,
+        "y": -1038.038
+      }
     },
     {
       "edge_id": "e203",
@@ -3645,7 +5461,11 @@
       "source": "osm_node",
       "osm_id": 13724826894,
       "confidence": 1.0,
-      "match_distance_m": 0.0
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 331.852,
+        "y": -1039.661
+      }
     },
     {
       "edge_id": "e731",
@@ -3653,7 +5473,11 @@
       "source": "osm_node",
       "osm_id": 13726725349,
       "confidence": 1.0,
-      "match_distance_m": 9.094
+      "match_distance_m": 9.094,
+      "world_xy_m": {
+        "x": 280.16,
+        "y": -1042.174
+      }
     }
   ]
 }

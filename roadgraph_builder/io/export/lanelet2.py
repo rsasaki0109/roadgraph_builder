@@ -432,6 +432,11 @@ def export_lanelet2_per_lane(
 
     from roadgraph_builder.hd.boundaries import centerline_lane_boundaries
 
+    # Track the "first" lanelet id we emit per edge so we can attach
+    # regulatory_element relations (traffic_light from camera / OSM semantic
+    # rules, stop lines, etc.) against a lanelet the way Autoware expects.
+    lanelet_id_by_edge: dict[str, int] = {}
+
     for e in graph.edges:
         hd = e.attributes.get("hd") if isinstance(e.attributes.get("hd"), dict) else {}
         lanes_data = hd.get("lanes") if isinstance(hd, dict) else None
@@ -508,6 +513,7 @@ def export_lanelet2_per_lane(
                     lanelet_tags,
                 )
                 edge_lanelet_ids.append(ll_id)
+                lanelet_id_by_edge.setdefault(str(e.id), ll_id)
 
             # Emit lane_change relations for adjacent lanes (A3).
             # Determine sign from lane_markings boundary subtype if available.
@@ -591,7 +597,36 @@ def export_lanelet2_per_lane(
                 ]
                 ll_tags.extend(_autoware_lanelet_tags_from_attributes(e.attributes))
                 ll_tags.extend(_lanelet_tags_from_semantic_rules(hd_use.get("semantic_rules")))
-                new_relation(members, ll_tags)
+                ll_id = new_relation(members, ll_tags)
+                lanelet_id_by_edge.setdefault(str(e.id), ll_id)
+
+    # Regulatory elements from semantic_rules / camera detections. Autoware
+    # treats traffic_lights and stop_lines as separate relations that a
+    # lanelet "refers" to, so we emit them against the first lanelet per
+    # edge (for multi-lane edges, lane 0). Only rules with enough position
+    # data (`world_xy_m`) get a positioned node; others are skipped silently
+    # — the caller can always fall back to camera_detections JSON wiring on
+    # `export_lanelet2` for the old path.
+    for e in graph.edges:
+        hd_edge = e.attributes.get("hd") if isinstance(e.attributes.get("hd"), dict) else {}
+        rules = hd_edge.get("semantic_rules") if isinstance(hd_edge, dict) else None
+        if not isinstance(rules, list):
+            continue
+        ll_ref = lanelet_id_by_edge.get(str(e.id))
+        if ll_ref is None:
+            continue
+        for rule in rules:
+            if not isinstance(rule, dict):
+                continue
+            kind = rule.get("kind")
+            if kind == "traffic_light":
+                _build_traffic_light_regulatory(
+                    rule, ll_ref, new_node, new_relation, origin_lat, origin_lon
+                )
+            elif kind == "stop_line":
+                _build_stop_line_way(
+                    rule, new_node, new_way, origin_lat, origin_lon
+                )
 
     for c in node_children:
         root.append(c)

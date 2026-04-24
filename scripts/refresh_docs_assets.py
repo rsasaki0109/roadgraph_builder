@@ -304,6 +304,11 @@ def _osm_regulatory_observations(
             "osm_id": el.get("id"),
             "confidence": 1.0,
             "match_distance_m": round(best_d, 3),
+            # world_xy_m anchors the regulatory element at the OSM node's
+            # location so `_build_traffic_light_regulatory` (Lanelet2 export)
+            # can emit an XYZ-positioned traffic_light node instead of
+            # falling back to the edge endpoint.
+            "world_xy_m": {"x": round(x, 3), "y": round(y, 3)},
         }
         if kind == "speed_camera" and "maxspeed" in tags:
             try:
@@ -1424,9 +1429,11 @@ def main() -> None:
                 base_lane_width_m=3.5,
             )
             apply_lane_inferences(grid, inferences)
-            if paris_camera_observations:
-                # Re-apply semantic rules so lane inference did not shadow them.
-                apply_camera_detections_to_graph(grid, paris_camera_observations)
+            # Intentionally do NOT re-apply camera detections here: an earlier
+            # call already stamped them into `edge.attributes.hd.semantic_rules`,
+            # and `apply_lane_inferences` preserves existing hd entries. A
+            # second apply would double the rule list and inflate the regulatory
+            # element count emitted below.
             paris_lanelet_path = ASSETS / "map_paris_grid.lanelet.osm"
             export_lanelet2_per_lane(
                 grid,

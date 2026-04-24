@@ -82,6 +82,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   browser smoke covers the `n312 → n191` deep link, asserting the card is
   visible, multiple steps render, and the URL retains `from` / `to`.
 
+- **Per-lane Lanelet2 export now emits regulatory_element relations from semantic_rules.**
+  The single-lanelet `export_lanelet2` already wired `traffic_light` /
+  `stop_line` detections into `type=regulatory_element` relations; the
+  per-lane version did not, so the committed Paris Lanelet2 OSM had
+  zero regulatory_element relations despite carrying 288 real OSM
+  traffic signals in `edge.attributes.hd.semantic_rules`. `export_lanelet2_per_lane`
+  now tracks `lanelet_id_by_edge` (first lanelet per edge, i.e. lane 0)
+  and walks the edge's `semantic_rules` after the lane loop to call the
+  same `_build_traffic_light_regulatory` / `_build_stop_line_way` helpers.
+  `_osm_regulatory_observations` in `refresh_docs_assets.py` now attaches
+  a `world_xy_m` fix derived from the OSM node's `lon` / `lat`, so the
+  new traffic_light regulatory nodes land at the real OSM position.
+  The committed `map_paris_grid.lanelet.osm` now carries 288
+  `subtype=traffic_light` relations plus 404 `subtype=lane_change`
+  relations. Also fixes a doubled-application bug where
+  `apply_camera_detections_to_graph` was called twice around the lane
+  inference step and inflated the semantic_rules list.
+
 - **Berlin Mitte ships a per-lane Lanelet2 OSM + the viewer picks it automatically.**
   The Berlin Mitte refresh path now runs the same
   `infer_lane_counts` + `export_lanelet2_per_lane` pipeline as Paris, so
