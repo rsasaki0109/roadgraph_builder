@@ -82,6 +82,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   browser smoke covers the `n312 → n191` deep link, asserting the card is
   visible, multiple steps render, and the URL retains `from` / `to`.
 
+- **Paris regulatory overlay switches from synthetic samples to real OSM nodes.**
+  A new `scripts/fetch_osm_regulatory_nodes.py` fetches
+  `highway=traffic_signals | stop | crossing | give_way | speed_camera` from
+  Overpass for a bbox, and `scripts/refresh_docs_assets.py` projects each
+  node onto the nearest Paris-grid edge (point-to-polyline, 20 m cutoff) so
+  the committed `paris_grid_camera_detections.json` now ships 456 real
+  observations — 288 traffic lights, 160 crossings (capped for overlay
+  density), 5 stop/give-way, 3 speed cameras — each tagged
+  `source="osm_node"` with its `osm_id`, `confidence=1.0`, and
+  `match_distance_m`. The file previously held 9 hand-authored synthetic
+  markers; the new file is ODbL-attributed per OSM. `apply_camera_detections_to_graph`
+  feeds the observations into `edge.attributes.hd.semantic_rules` so both
+  the viewer overlay and the Lanelet2 export pick them up.
+
 - **OSM `lanes=` tag promotes HD-lite output to real multi-lane Lanelet2.**
   `infer_lane_counts` gained an "OSM lanes tag" source between lane
   markings and trace_stats so `build-osm-graph` edges stamped with

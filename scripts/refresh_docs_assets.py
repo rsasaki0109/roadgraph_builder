@@ -219,6 +219,103 @@ def _point_to_polyline_distance_m(
     return best ** 0.5 if best < float("inf") else best
 
 
+def _osm_regulatory_kind_from_tags(tags: dict) -> str | None:
+    """Map an OSM node's ``highway=*`` tag to the edge-keyed semantic kind
+    the rest of the pipeline uses.
+
+    Returns None when the node is not a regulatory signal we know how to
+    project onto a graph edge.
+    """
+    if not isinstance(tags, dict):
+        return None
+    hwy = tags.get("highway")
+    if not isinstance(hwy, str):
+        return None
+    match hwy:
+        case "traffic_signals":
+            return "traffic_light"
+        case "stop":
+            return "stop_line"
+        case "give_way":
+            return "stop_line"
+        case "crossing":
+            return "crosswalk"
+        case "speed_camera":
+            return "speed_camera"
+    return None
+
+
+def _osm_regulatory_observations(
+    overpass_regulatory_json: dict,
+    graph,
+    origin_lat: float,
+    origin_lon: float,
+    *,
+    max_match_distance_m: float = 20.0,
+    max_crossings: int | None = 160,
+) -> list[dict]:
+    """Project OSM regulatory nodes (``highway=traffic_signals|stop|crossing|...``)
+    onto the nearest graph edge and return camera-detections-style observations
+    with ``source="osm_node"``. ``max_crossings`` keeps the overlay count sane
+    when the bbox has thousands of pedestrian crossings — set to ``None`` to
+    disable the cap.
+    """
+    from roadgraph_builder.utils.geo import lonlat_to_meters
+
+    elements = overpass_regulatory_json.get("elements") or []
+    edge_polys: list[tuple[str, list[tuple[float, float]]]] = []
+    for edge in graph.edges:
+        poly = [(float(x), float(y)) for x, y in edge.polyline]
+        if len(poly) >= 2:
+            edge_polys.append((edge.id, poly))
+    if not edge_polys:
+        return []
+
+    observations: list[dict] = []
+    crossing_count = 0
+    for el in elements:
+        if not isinstance(el, dict) or el.get("type") != "node":
+            continue
+        tags = el.get("tags") or {}
+        kind = _osm_regulatory_kind_from_tags(tags)
+        if kind is None:
+            continue
+        if kind == "crosswalk" and max_crossings is not None:
+            if crossing_count >= max_crossings:
+                continue
+        lat = el.get("lat")
+        lon = el.get("lon")
+        if not isinstance(lat, (int, float)) or not isinstance(lon, (int, float)):
+            continue
+        x, y = lonlat_to_meters(float(lon), float(lat), origin_lat, origin_lon)
+        best_edge = None
+        best_d = max_match_distance_m
+        for eid, poly in edge_polys:
+            d = _point_to_polyline_distance_m(x, y, poly)
+            if d < best_d:
+                best_d = d
+                best_edge = eid
+        if best_edge is None:
+            continue
+        obs: dict = {
+            "edge_id": best_edge,
+            "kind": kind,
+            "source": "osm_node",
+            "osm_id": el.get("id"),
+            "confidence": 1.0,
+            "match_distance_m": round(best_d, 3),
+        }
+        if kind == "speed_camera" and "maxspeed" in tags:
+            try:
+                obs["value_kmh"] = int(float(str(tags["maxspeed"]).split()[0]))
+            except (TypeError, ValueError):
+                pass
+        observations.append(obs)
+        if kind == "crosswalk":
+            crossing_count += 1
+    return observations
+
+
 def _widen_hd_envelope_for_osm_lanes(graph, base_lane_width_m: float = 3.5) -> int:
     """Widen the HD-lite ``hd.lane_boundaries`` envelope on edges that carry
     an OSM ``lanes`` tag so the outermost paint lines reflect the real road
@@ -1254,23 +1351,62 @@ def main() -> None:
         # default single-lane 3.5 m offset; recompute lane_boundaries for them
         # so the paint lines hug the true road width.
         _widen_hd_envelope_for_osm_lanes(grid, base_lane_width_m=3.5)
-        # Apply hand-authored synthetic camera detections (traffic lights,
-        # stop lines, crosswalks, speed limits) so the viewer surfaces
-        # regulatory elements on top of the OSM grid. The inputs live under
-        # docs/assets and are loaded below so export_map_geojson already sees
-        # edge.hd.semantic_rules.
+        # Prefer real OSM regulatory nodes (traffic_signals / stop / crossing /
+        # give_way / speed_camera) projected onto the nearest graph edge. The
+        # upstream fetch is ``scripts/fetch_osm_regulatory_nodes.py``; we use
+        # its cached output under /tmp when present. When absent we fall back
+        # to the hand-authored synthetic sample so the committed dataset
+        # still carries some regulatory markers.
+        paris_regulatory_osm_path = Path(
+            "/tmp/osm_real_data/paris_regulatory_nodes.json"
+        )
         paris_camera_json = ASSETS / "paris_grid_camera_detections.json"
         paris_camera_observations: list[dict] = []
-        if paris_camera_json.is_file():
+        from roadgraph_builder.io.camera.detections import (
+            apply_camera_detections_to_graph,
+        )
+        if paris_regulatory_osm_path.is_file():
+            overpass_reg = json.loads(
+                paris_regulatory_osm_path.read_text(encoding="utf-8")
+            )
+            paris_camera_observations = _osm_regulatory_observations(
+                overpass_reg, grid, lat0, lon0, max_crossings=160
+            )
+            if paris_camera_observations:
+                apply_camera_detections_to_graph(grid, paris_camera_observations)
+                # Overwrite the committed sample with the OSM-derived one so
+                # downstream consumers (documentation, CI, future snapshots)
+                # see the real regulatory data rather than the synthetic demo.
+                paris_camera_json.write_text(
+                    json.dumps(
+                        {
+                            "format_version": 1,
+                            "license": (
+                                "© OpenStreetMap contributors, ODbL 1.0 "
+                                "(derived from Overpass regulatory nodes)"
+                            ),
+                            "license_url": "https://opendatacommons.org/licenses/odbl/1-0/",
+                            "notes": (
+                                "Edge-keyed projections of OSM "
+                                "highway=traffic_signals / stop / crossing / "
+                                "give_way / speed_camera nodes onto the "
+                                "committed Paris grid via nearest "
+                                "point-to-polyline match."
+                            ),
+                            "observations": paris_camera_observations,
+                        },
+                        indent=2,
+                    )
+                    + "\n",
+                    encoding="utf-8",
+                )
+        elif paris_camera_json.is_file():
             paris_camera_raw = json.loads(paris_camera_json.read_text(encoding="utf-8"))
             paris_camera_observations = [
                 o for o in (paris_camera_raw.get("observations") or [])
                 if isinstance(o, dict) and o.get("edge_id") and o.get("kind")
             ]
             if paris_camera_observations:
-                from roadgraph_builder.io.camera.detections import (
-                    apply_camera_detections_to_graph,
-                )
                 apply_camera_detections_to_graph(grid, paris_camera_observations)
         # Infer a per-edge lane count (defaults to 1 lane when no lane_markings
         # or trace_stats are available — which is the Paris-grid case) and

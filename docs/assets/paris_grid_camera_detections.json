@@ -1,63 +1,3659 @@
 {
   "format_version": 1,
-  "license": "MIT (synthetic labels authored for the docs viewer — no real camera imagery)",
-  "notes": "Hand-authored synthetic camera detections placed along the committed Paris TR-aware route (n312 → n191). They mirror the shape produced by scripts/generate_camera_demo.py so the viewer can render HD-like regulatory overlays without shipping any real-world perception output.",
+  "license": "\u00a9 OpenStreetMap contributors, ODbL 1.0 (derived from Overpass regulatory nodes)",
+  "license_url": "https://opendatacommons.org/licenses/odbl/1-0/",
+  "notes": "Edge-keyed projections of OSM highway=traffic_signals / stop / crossing / give_way / speed_camera nodes onto the committed Paris grid via nearest point-to-polyline match.",
   "observations": [
     {
-      "edge_id": "e224",
+      "edge_id": "e174",
       "kind": "traffic_light",
-      "confidence": 0.92,
-      "source": "synthetic_demo"
+      "source": "osm_node",
+      "osm_id": 361074,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
     },
     {
-      "edge_id": "e657",
-      "kind": "speed_limit",
-      "value_kmh": 50,
-      "confidence": 0.88,
-      "source": "synthetic_demo"
-    },
-    {
-      "edge_id": "e576",
-      "kind": "crosswalk",
-      "confidence": 0.81,
-      "source": "synthetic_demo"
-    },
-    {
-      "edge_id": "e1062",
-      "kind": "stop_line",
-      "confidence": 0.78,
-      "source": "synthetic_demo"
-    },
-    {
-      "edge_id": "e1061",
-      "kind": "speed_limit",
-      "value_kmh": 30,
-      "confidence": 0.82,
-      "source": "synthetic_demo"
-    },
-    {
-      "edge_id": "e513",
+      "edge_id": "e91",
       "kind": "traffic_light",
-      "confidence": 0.9,
-      "source": "synthetic_demo"
+      "source": "osm_node",
+      "osm_id": 361075,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e214",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 361093,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
     },
     {
       "edge_id": "e9",
-      "kind": "stop_line",
-      "confidence": 0.73,
-      "source": "synthetic_demo"
-    },
-    {
-      "edge_id": "e337",
-      "kind": "crosswalk",
-      "confidence": 0.76,
-      "source": "synthetic_demo"
-    },
-    {
-      "edge_id": "e129",
       "kind": "traffic_light",
-      "confidence": 0.87,
-      "source": "synthetic_demo"
+      "source": "osm_node",
+      "osm_id": 361098,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e269",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 361100,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e351",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 361104,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e18",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 361105,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e754",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 367934,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e775",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 368182,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e830",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 398708,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e478",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 398709,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e327",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 398745,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e518",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 398747,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e1028",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 470144,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e244",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 470203,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e505",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 15643098,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e422",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 25207301,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e547",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 25207303,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e167",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 25207313,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e510",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 25207319,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e806",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 25207321,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e76",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 25207325,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e914",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 25207333,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e237",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 25207350,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e834",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 25207352,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e159",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 25207356,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e829",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 25207375,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e210",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 25207379,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e201",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 25207381,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e196",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 25273429,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e491",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 25273878,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e712",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 25273879,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e511",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 25273882,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e639",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 25273883,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e752",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 25554308,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e210",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 25554525,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e826",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 25554592,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e212",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 25554674,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e629",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 25554699,
+      "confidence": 1.0,
+      "match_distance_m": 3.816
+    },
+    {
+      "edge_id": "e779",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 25554701,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e202",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 25554703,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e360",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 25554705,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e1003",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 25581040,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e1006",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 25581042,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e65",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 25581047,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e672",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 25581051,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e169",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 25581530,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e479",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 25581534,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e424",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 25581536,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e434",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 25581570,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e776",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 25670833,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e738",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 25670856,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e9",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 25701659,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e346",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 26039523,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e246",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 26039860,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e10",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 26039984,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e20",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 26040013,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e174",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 26400916,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e101",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 26401021,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e204",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 26401417,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e918",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 26401478,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e143",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 26401482,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e91",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 26401984,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e100",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 26402096,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e97",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 26402126,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e504",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 94157762,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e171",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 94158481,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e162",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 94159488,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e649",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 94159491,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e134",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 94161171,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e173",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 94161172,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e352",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 94168454,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e132",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 94169547,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e130",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 94169980,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e582",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 94169987,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e131",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 94170757,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e692",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 94172432,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e618",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 94172434,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e472",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 94173211,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e257",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 94173545,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e4",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 94173784,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e137",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 94212488,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e137",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 94212490,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e498",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 94213772,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e240",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 94215152,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e148",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 169318293,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e592",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 175015374,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e272",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 175026491,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e457",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 175026494,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e406",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 175037213,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e187",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 202818262,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e188",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 202818444,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e517",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 207782331,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e717",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 207782428,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e199",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 224146062,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e175",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 247175821,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e223",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 250218405,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e224",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 250218824,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e293",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 250219135,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e478",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 251543658,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e575",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 253963376,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e221",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 260685773,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e97",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 260685824,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e243",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 268105655,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e85",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 268408320,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e318",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 327330756,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e318",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 327337307,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e1045",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 327337530,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e1040",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 327412773,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e836",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 330165643,
+      "confidence": 1.0,
+      "match_distance_m": 13.793
+    },
+    {
+      "edge_id": "e590",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 338478426,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e450",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 338495966,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e285",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 338496057,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e667",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 355692484,
+      "confidence": 1.0,
+      "match_distance_m": 6.952
+    },
+    {
+      "edge_id": "e160",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 430692965,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e887",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 430693106,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e341",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 431175315,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e902",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 439922652,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e727",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 583017733,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e269",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 583023059,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e482",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 583023082,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e72",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 602545917,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e789",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 602549548,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e27",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 602551166,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e507",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 602568228,
+      "confidence": 1.0,
+      "match_distance_m": 8.215
+    },
+    {
+      "edge_id": "e169",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 602600218,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e79",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 602600220,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e42",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 602626803,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e141",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 626937838,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e550",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 652026059,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e362",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 652026102,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e977",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 652026133,
+      "confidence": 1.0,
+      "match_distance_m": 5.955
+    },
+    {
+      "edge_id": "e323",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 652028889,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e269",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 652028925,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e339",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 663249339,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e346",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 668635735,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e916",
+      "kind": "stop_line",
+      "source": "osm_node",
+      "osm_id": 676788942,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e384",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 676821309,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e16",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 676821350,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e716",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 676872480,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e397",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 676890544,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e395",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 676890545,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e377",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 677017619,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e296",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 677770395,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e517",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 679495414,
+      "confidence": 1.0,
+      "match_distance_m": 5.782
+    },
+    {
+      "edge_id": "e190",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 681369441,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e197",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 681555438,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e854",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 681842204,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e545",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 683598757,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e298",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 687065765,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e750",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 687066197,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e609",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 687096618,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e675",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 687720866,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e1010",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 687720946,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e600",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 687993927,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e1009",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 687994232,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e301",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 689178384,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e246",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 689178412,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e112",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 689178471,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e69",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 689347003,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e839",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 690459409,
+      "confidence": 1.0,
+      "match_distance_m": 2.701
+    },
+    {
+      "edge_id": "e479",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 690459465,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e94",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 690459476,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e515",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 690982009,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e601",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 691083046,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e372",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 691721507,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e839",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 692364452,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e438",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 693255276,
+      "confidence": 1.0,
+      "match_distance_m": 1.646
+    },
+    {
+      "edge_id": "e628",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 693550585,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e629",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 693550587,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e544",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 693639500,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e311",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 693639501,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e694",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 693647624,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e443",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 697179487,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e356",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 697179490,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e623",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 697183816,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e623",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 697183821,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e343",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 697183823,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e399",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 697183828,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e623",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 697183831,
+      "confidence": 1.0,
+      "match_distance_m": 3.607
+    },
+    {
+      "edge_id": "e629",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 697183834,
+      "confidence": 1.0,
+      "match_distance_m": 3.876
+    },
+    {
+      "edge_id": "e689",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 697183836,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e623",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 697183838,
+      "confidence": 1.0,
+      "match_distance_m": 4.61
+    },
+    {
+      "edge_id": "e303",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 697868062,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e218",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 697868073,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e95",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 699225064,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e629",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 699947715,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e931",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 702916029,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e440",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 706127981,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e660",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 706245866,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e440",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 706350383,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e439",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 706350841,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e213",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 706621165,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e461",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 706621241,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e928",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 706621382,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e406",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 706621392,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e342",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 706685413,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e442",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 708253753,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e523",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 777218446,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e476",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 777218474,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e453",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 796920910,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e825",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 902847624,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e625",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 902847629,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e825",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 902847637,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e737",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 902847657,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e737",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 902847666,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e629",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 902847677,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e761",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 1055820771,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e641",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 1055820788,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e880",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1084405425,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e322",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1160283808,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e322",
+      "kind": "speed_camera",
+      "source": "osm_node",
+      "osm_id": 1160283849,
+      "confidence": 1.0,
+      "match_distance_m": 5.582,
+      "value_kmh": 50
+    },
+    {
+      "edge_id": "e929",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1160283855,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e472",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1232772702,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e470",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1232772703,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e4",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1233136959,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e818",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1234212754,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e236",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1234212886,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e614",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1242286070,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e144",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1242438904,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e532",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1242439449,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e147",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1242439622,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e239",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 1342011467,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e1022",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1350142505,
+      "confidence": 1.0,
+      "match_distance_m": 4.607
+    },
+    {
+      "edge_id": "e751",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 1376133927,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e549",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1380981630,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e616",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1542715847,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e518",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1542715852,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e6",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1542715878,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e345",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1542715881,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e848",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1542715919,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e298",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1542715941,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e313",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1542715944,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e581",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1542715952,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e644",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1542715957,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e788",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1548644140,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e27",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1548644144,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e711",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1548644145,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e326",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1712034543,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e692",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 1754658053,
+      "confidence": 1.0,
+      "match_distance_m": 4.488
+    },
+    {
+      "edge_id": "e895",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1754658055,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e692",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1754658065,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e30",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 1757649347,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e529",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1757654927,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e127",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1786279607,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e531",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1786279609,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e266",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1786279646,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e178",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1786279650,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e602",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1787868140,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e981",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1804446166,
+      "confidence": 1.0,
+      "match_distance_m": 5.101
+    },
+    {
+      "edge_id": "e813",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1821290262,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e691",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1821304263,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e634",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1821304276,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e167",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1821304282,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e282",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1822082651,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e282",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1822082654,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e140",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1822082668,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e273",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1822082682,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e291",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1822082687,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e188",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1822082714,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e187",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1822082718,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e743",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1822082723,
+      "confidence": 1.0,
+      "match_distance_m": 11.124
+    },
+    {
+      "edge_id": "e742",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1822082725,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e890",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1822082728,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e743",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1822082740,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e9",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1822082741,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e338",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1822082742,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e9",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1822082744,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e113",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1822082746,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e10",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1822082747,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e634",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1822082749,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e797",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 1827138917,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e585",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1829469422,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e588",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1832256500,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e810",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1840005822,
+      "confidence": 1.0,
+      "match_distance_m": 9.226
+    },
+    {
+      "edge_id": "e799",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1840005823,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e981",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1840030252,
+      "confidence": 1.0,
+      "match_distance_m": 4.478
+    },
+    {
+      "edge_id": "e801",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1840030256,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e801",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1840030257,
+      "confidence": 1.0,
+      "match_distance_m": 8.036
+    },
+    {
+      "edge_id": "e482",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1840030258,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e906",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1841311667,
+      "confidence": 1.0,
+      "match_distance_m": 4.304
+    },
+    {
+      "edge_id": "e69",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1843639347,
+      "confidence": 1.0,
+      "match_distance_m": 4.195
+    },
+    {
+      "edge_id": "e109",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1922105401,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e109",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2084765584,
+      "confidence": 1.0,
+      "match_distance_m": 4.905
+    },
+    {
+      "edge_id": "e1018",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2084765585,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e601",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2084765587,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e199",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2124630215,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e145",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2126361735,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e146",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2126361737,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e579",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2160594535,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e348",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 2165221563,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e619",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 2180084776,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e316",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 2180084779,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e619",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 2180084782,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e242",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 2180084811,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e622",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 2180084813,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e436",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 2364610565,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e999",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 2470142131,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e999",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 2470142132,
+      "confidence": 1.0,
+      "match_distance_m": 6.734
+    },
+    {
+      "edge_id": "e776",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 2555407185,
+      "confidence": 1.0,
+      "match_distance_m": 14.962
+    },
+    {
+      "edge_id": "e498",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 2758527140,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e791",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 2841226112,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e1079",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 2841226116,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e322",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 2841226117,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e463",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 2887835761,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e830",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 3462104306,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e156",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 3924222557,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e664",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 3924222558,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e825",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 3980067648,
+      "confidence": 1.0,
+      "match_distance_m": 17.243
+    },
+    {
+      "edge_id": "e573",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 3980334519,
+      "confidence": 1.0,
+      "match_distance_m": 3.285
+    },
+    {
+      "edge_id": "e545",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 4285759448,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e596",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 4505164271,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e596",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 4505164272,
+      "confidence": 1.0,
+      "match_distance_m": 4.283
+    },
+    {
+      "edge_id": "e38",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 4505164273,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e574",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 4519595968,
+      "confidence": 1.0,
+      "match_distance_m": 3.272
+    },
+    {
+      "edge_id": "e574",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 4519595969,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e573",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 4519595971,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e404",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 4519595973,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e260",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 4519595975,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e625",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 4519595977,
+      "confidence": 1.0,
+      "match_distance_m": 5.487
+    },
+    {
+      "edge_id": "e625",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 4519595979,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e825",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 4519595980,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e825",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 4519595981,
+      "confidence": 1.0,
+      "match_distance_m": 5.057
+    },
+    {
+      "edge_id": "e698",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 4519595982,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e698",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 4519595983,
+      "confidence": 1.0,
+      "match_distance_m": 4.054
+    },
+    {
+      "edge_id": "e698",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 4519595984,
+      "confidence": 1.0,
+      "match_distance_m": 15.482
+    },
+    {
+      "edge_id": "e737",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 4519595985,
+      "confidence": 1.0,
+      "match_distance_m": 3.281
+    },
+    {
+      "edge_id": "e351",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 4720234396,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e32",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 4839141965,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e809",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 4839141967,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e83",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 4839141973,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e735",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 5059182776,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e257",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 5060098124,
+      "confidence": 1.0,
+      "match_distance_m": 16.668
+    },
+    {
+      "edge_id": "e787",
+      "kind": "stop_line",
+      "source": "osm_node",
+      "osm_id": 5526534228,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e1022",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 5939352841,
+      "confidence": 1.0,
+      "match_distance_m": 2.6
+    },
+    {
+      "edge_id": "e619",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 6032698735,
+      "confidence": 1.0,
+      "match_distance_m": 13.26
+    },
+    {
+      "edge_id": "e262",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 6083243182,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e703",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 6126745805,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e300",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 6126771593,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e181",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 6128752707,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e429",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 6128766333,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e426",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 6128766334,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e609",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 6206597879,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e808",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 6213715351,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e694",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 6213716111,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e344",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 6376254429,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e461",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 6389012498,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e851",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 6539249685,
+      "confidence": 1.0,
+      "match_distance_m": 1.927
+    },
+    {
+      "edge_id": "e480",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 6749627410,
+      "confidence": 1.0,
+      "match_distance_m": 7.468
+    },
+    {
+      "edge_id": "e720",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 8491881748,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e345",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 8547341738,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e616",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 8547341739,
+      "confidence": 1.0,
+      "match_distance_m": 0.003
+    },
+    {
+      "edge_id": "e6",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 8547341740,
+      "confidence": 1.0,
+      "match_distance_m": 0.021
+    },
+    {
+      "edge_id": "e254",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 8561671318,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e310",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 8561671319,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e415",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 8561671320,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e806",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 8561671321,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e717",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 8580043703,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e410",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 8580043704,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e617",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 8580043706,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e510",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 8707910347,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e886",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 8707910348,
+      "confidence": 1.0,
+      "match_distance_m": 7.439
+    },
+    {
+      "edge_id": "e886",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 8707910350,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e79",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 8707910351,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e510",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 8707910354,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e510",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 8707910355,
+      "confidence": 1.0,
+      "match_distance_m": 10.346
+    },
+    {
+      "edge_id": "e510",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 8707910356,
+      "confidence": 1.0,
+      "match_distance_m": 11.228
+    },
+    {
+      "edge_id": "e1040",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 8707929646,
+      "confidence": 1.0,
+      "match_distance_m": 10.716
+    },
+    {
+      "edge_id": "e1018",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 8707929648,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e210",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 8981647403,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e1001",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9074748723,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e55",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9074748724,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e1032",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9074748725,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e610",
+      "kind": "speed_camera",
+      "source": "osm_node",
+      "osm_id": 9127269532,
+      "confidence": 1.0,
+      "match_distance_m": 8.307,
+      "value_kmh": 30
+    },
+    {
+      "edge_id": "e610",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9127269533,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e1055",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9127269534,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e310",
+      "kind": "speed_camera",
+      "source": "osm_node",
+      "osm_id": 9128647206,
+      "confidence": 1.0,
+      "match_distance_m": 6.974,
+      "value_kmh": 30
+    },
+    {
+      "edge_id": "e313",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9150711680,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e313",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9150711681,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e581",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9150711683,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e848",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9153302261,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e312",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9153302263,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e251",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9370945412,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e889",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9370945413,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e1072",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9370945414,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e251",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9370958538,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e165",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9370958539,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e1031",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9370958540,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e507",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9429848396,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e508",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9429848397,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e507",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9429848399,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e479",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9431369510,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e479",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9431369511,
+      "confidence": 1.0,
+      "match_distance_m": 7.172
+    },
+    {
+      "edge_id": "e479",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9431369512,
+      "confidence": 1.0,
+      "match_distance_m": 10.987
+    },
+    {
+      "edge_id": "e829",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9431369514,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e19",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9431369515,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e902",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9586883639,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e84",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9586883640,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e673",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9588759523,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e694",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9966710638,
+      "confidence": 1.0,
+      "match_distance_m": 2.143
+    },
+    {
+      "edge_id": "e114",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 10096027246,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e116",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 10096027247,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e364",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 10096027248,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e262",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 10096027249,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e766",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 10221854195,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e1041",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 10561998133,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e109",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 10561998134,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e841",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 10561998136,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e841",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 10561998137,
+      "confidence": 1.0,
+      "match_distance_m": 7.342
+    },
+    {
+      "edge_id": "e118",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 10570963814,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e125",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 10570963815,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e882",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 10570963816,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e768",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 10570963817,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e363",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 10570963818,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e932",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 10741105911,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e342",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 10860797024,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e341",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 10860797025,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e431",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 10860797027,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e953",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 11033308486,
+      "confidence": 1.0,
+      "match_distance_m": 5.057
+    },
+    {
+      "edge_id": "e952",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 11033308487,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e517",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 11057516559,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e740",
+      "kind": "stop_line",
+      "source": "osm_node",
+      "osm_id": 11066482364,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e212",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 11070301703,
+      "confidence": 1.0,
+      "match_distance_m": 6.855
+    },
+    {
+      "edge_id": "e770",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 11086045505,
+      "confidence": 1.0,
+      "match_distance_m": 5.091
+    },
+    {
+      "edge_id": "e688",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 11162777723,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e830",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 11222078097,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e638",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 11256203249,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e167",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 11563663281,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e342",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 11843458190,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e829",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 11910678633,
+      "confidence": 1.0,
+      "match_distance_m": 9.967
+    },
+    {
+      "edge_id": "e177",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 11939734594,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e1022",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 11955792116,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e18",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 12230511973,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e662",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 12334795468,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e711",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 12420690646,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e72",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 12529386664,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e644",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 12529386668,
+      "confidence": 1.0,
+      "match_distance_m": 1.869
+    },
+    {
+      "edge_id": "e644",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 12529386669,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e1039",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 12529386672,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e318",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 12529386673,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e1018",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 12529386675,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e932",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 12529386678,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e571",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 12529386682,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e507",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 12529386684,
+      "confidence": 1.0,
+      "match_distance_m": 4.596
+    },
+    {
+      "edge_id": "e727",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 12529386687,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e834",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 12529386690,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e322",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 12529386695,
+      "confidence": 1.0,
+      "match_distance_m": 5.261
+    },
+    {
+      "edge_id": "e1053",
+      "kind": "stop_line",
+      "source": "osm_node",
+      "osm_id": 12951410807,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e610",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 12994041207,
+      "confidence": 1.0,
+      "match_distance_m": 5.319
+    },
+    {
+      "edge_id": "e635",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 12994041208,
+      "confidence": 1.0,
+      "match_distance_m": 5.281
+    },
+    {
+      "edge_id": "e637",
+      "kind": "stop_line",
+      "source": "osm_node",
+      "osm_id": 13147658507,
+      "confidence": 1.0,
+      "match_distance_m": 6.192
+    },
+    {
+      "edge_id": "e770",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 13724826889,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e627",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 13724826890,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e203",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 13724826893,
+      "confidence": 1.0,
+      "match_distance_m": 4.955
+    },
+    {
+      "edge_id": "e203",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 13724826894,
+      "confidence": 1.0,
+      "match_distance_m": 0.0
+    },
+    {
+      "edge_id": "e731",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 13726725349,
+      "confidence": 1.0,
+      "match_distance_m": 9.094
     }
   ]
 }
