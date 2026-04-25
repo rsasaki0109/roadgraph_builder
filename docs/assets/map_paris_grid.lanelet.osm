@@ -19595,280 +19595,290 @@
   <node id="20837" lat="48.8691785976" lon="2.3388658054">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20839" lat="48.8689633" lon="2.338578103">
+  <node id="20839" lat="48.8689021678" lon="2.3399811651"/>
+  <node id="20840" lat="48.868936771" lon="2.3399961112"/>
+  <node id="20842" lat="48.8689633" lon="2.338578103">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20841" lat="48.8682049021" lon="2.338184898">
+  <node id="20844" lat="48.8682049021" lon="2.338184898">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20843" lat="48.8586364979" lon="2.3473933008">
+  <node id="20846" lat="48.8586364979" lon="2.3473933008">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20845" lat="48.868216899" lon="2.3435543939">
+  <node id="20848" lat="48.868216899" lon="2.3435543939">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20847" lat="48.8682109006" lon="2.3435824067">
+  <node id="20850" lat="48.8682109006" lon="2.3435824067">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20849" lat="48.8762767991" lon="2.3455745992">
+  <node id="20852" lat="48.8762767991" lon="2.3455745992">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20851" lat="48.8653388001" lon="2.3554781004">
+  <node id="20854" lat="48.8653388001" lon="2.3554781004">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20853" lat="48.8645044005" lon="2.3518225962">
+  <node id="20856" lat="48.8645044005" lon="2.3518225962">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20855" lat="48.8654676009" lon="2.3556605051">
+  <node id="20858" lat="48.8654676009" lon="2.3556605051">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20857" lat="48.8630915033" lon="2.3417279953">
+  <node id="20860" lat="48.8630915033" lon="2.3417279953">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20859" lat="48.863155598" lon="2.3414477029">
+  <node id="20862" lat="48.863155598" lon="2.3414477029">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20861" lat="48.8576293027" lon="2.345616803">
+  <node id="20864" lat="48.8576293027" lon="2.345616803">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20863" lat="48.8591762977" lon="2.3465236998">
+  <node id="20866" lat="48.8591762977" lon="2.3465236998">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20865" lat="48.8760340003" lon="2.340176899">
+  <node id="20868" lat="48.8760340003" lon="2.340176899">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20867" lat="48.8759337979" lon="2.3400772067">
+  <node id="20870" lat="48.8759337979" lon="2.3400772067">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20869" lat="48.8609555965" lon="2.3406818957">
+  <node id="20872" lat="48.8609555965" lon="2.3406818957">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20871" lat="48.8614150959" lon="2.3393409025">
+  <node id="20874" lat="48.8614150959" lon="2.3393409025">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20873" lat="48.8598583972" lon="2.3441920995">
+  <node id="20876" lat="48.8598583972" lon="2.3441920995">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20875" lat="48.8598240971" lon="2.3441723032">
+  <node id="20878" lat="48.8598240971" lon="2.3441723032">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20877" lat="48.8595309992" lon="2.3447031936">
+  <node id="20880" lat="48.8595309992" lon="2.3447031936">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20879" lat="48.8718217038" lon="2.3391200947">
+  <node id="20882" lat="48.8718217038" lon="2.3391200947">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20881" lat="48.8718953043" lon="2.3400054999">
+  <node id="20884" lat="48.8718953043" lon="2.3400054999">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20883" lat="48.8705425987" lon="2.3393606031">
+  <node id="20886" lat="48.8705425987" lon="2.3393606031">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20885" lat="48.8631771997" lon="2.3419809038">
+  <node id="20888" lat="48.8631771997" lon="2.3419809038">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20887" lat="48.863745499" lon="2.3422805003">
+  <node id="20890" lat="48.863745499" lon="2.3422805003">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20889" lat="48.8623793036" lon="2.3417545043">
+  <node id="20892" lat="48.8623793036" lon="2.3417545043">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20891" lat="48.8664468003" lon="2.3520892035">
+  <node id="20894" lat="48.8664468003" lon="2.3520892035">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20893" lat="48.8663672013" lon="2.3520444978">
+  <node id="20896" lat="48.8663672013" lon="2.3520444978">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20895" lat="48.857627504" lon="2.3508301981">
+  <node id="20898" lat="48.857627504" lon="2.3508301981">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20897" lat="48.8585465028" lon="2.3421984988">
+  <node id="20900" lat="48.8585465028" lon="2.3421984988">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20899" lat="48.8595989969" lon="2.3449670939">
+  <node id="20902" lat="48.8595989969" lon="2.3449670939">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20901" lat="48.8595709021" lon="2.3449523971">
+  <node id="20904" lat="48.8595709021" lon="2.3449523971">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20903" lat="48.8571005016" lon="2.3475943944">
+  <node id="20906" lat="48.8571005016" lon="2.3475943944">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20905" lat="48.8592039968" lon="2.3399596047">
+  <node id="20908" lat="48.857167825" lon="2.3414723536"/>
+  <node id="20909" lat="48.857132575" lon="2.3414614464"/>
+  <node id="20911" lat="48.8592039968" lon="2.3399596047">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20907" lat="48.8758880044" lon="2.3398697969">
+  <node id="20913" lat="48.8758880044" lon="2.3398697969">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20909" lat="48.8579450995" lon="2.3495876942">
+  <node id="20915" lat="48.8579450995" lon="2.3495876942">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20911" lat="48.8668504968" lon="2.3438601973">
+  <node id="20917" lat="48.8668504968" lon="2.3438601973">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20913" lat="48.8743558032" lon="2.3555166949">
+  <node id="20919" lat="48.8743558032" lon="2.3555166949">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20915" lat="48.8574138972" lon="2.3515542937">
+  <node id="20921" lat="48.8574138972" lon="2.3515542937">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20917" lat="48.8574344017" lon="2.3516787041">
+  <node id="20923" lat="48.8574344017" lon="2.3516787041">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20919" lat="48.857346502" lon="2.3466855973">
+  <node id="20925" lat="48.857346502" lon="2.3466855973">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20921" lat="48.8574309034" lon="2.3469157974">
+  <node id="20927" lat="48.8574309034" lon="2.3469157974">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20923" lat="48.8653948998" lon="2.3563710932">
+  <node id="20929" lat="48.8599143433" lon="2.3544205983"/>
+  <node id="20930" lat="48.8599320567" lon="2.3543730017"/>
+  <node id="20932" lat="48.8653948998" lon="2.3563710932">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20925" lat="48.8765794029" lon="2.3396077969">
+  <node id="20934" lat="48.8765794029" lon="2.3396077969">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20927" lat="48.862297897" lon="2.3415275989">
+  <node id="20936" lat="48.862297897" lon="2.3415275989">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20929" lat="48.8617815964" lon="2.3412604995">
+  <node id="20938" lat="48.8617815964" lon="2.3412604995">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20931" lat="48.8610401957" lon="2.3406347018">
+  <node id="20940" lat="48.8610401957" lon="2.3406347018">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20933" lat="48.8614697027" lon="2.3393237038">
+  <node id="20942" lat="48.8614697027" lon="2.3393237038">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20935" lat="48.8597844999" lon="2.3438893038">
+  <node id="20944" lat="48.8597844999" lon="2.3438893038">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20937" lat="48.8600647016" lon="2.3435529037">
+  <node id="20946" lat="48.8600647016" lon="2.3435529037">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20939" lat="48.8600166958" lon="2.3435450016">
+  <node id="20948" lat="48.8600166958" lon="2.3435450016">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20941" lat="48.8624273993" lon="2.3504276008">
+  <node id="20950" lat="48.8624273993" lon="2.3504276008">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20943" lat="48.8632871957" lon="2.3509055006">
+  <node id="20952" lat="48.8632871957" lon="2.3509055006">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20945" lat="48.8624817993" lon="2.3503131022">
+  <node id="20954" lat="48.8624817993" lon="2.3503131022">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20947" lat="48.8642924034" lon="2.3514526053">
+  <node id="20956" lat="48.8642924034" lon="2.3514526053">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20949" lat="48.8640458005" lon="2.351326199">
+  <node id="20958" lat="48.8640458005" lon="2.351326199">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20951" lat="48.8635301025" lon="2.3510384009">
+  <node id="20960" lat="48.8635301025" lon="2.3510384009">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20953" lat="48.8670222043" lon="2.3530141056">
+  <node id="20962" lat="48.8670222043" lon="2.3530141056">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20955" lat="48.8662538958" lon="2.3525846985">
+  <node id="20964" lat="48.8662538958" lon="2.3525846985">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20957" lat="48.8689106987" lon="2.3541089987">
+  <node id="20966" lat="48.8689106987" lon="2.3541089987">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20959" lat="48.8693188018" lon="2.3542978016">
+  <node id="20968" lat="48.8693188018" lon="2.3542978016">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20961" lat="48.8661192044" lon="2.3524895041">
+  <node id="20970" lat="48.8661192044" lon="2.3524895041">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20963" lat="48.8661397" lon="2.3523939952">
+  <node id="20972" lat="48.8661397" lon="2.3523939952">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20965" lat="48.8673667973" lon="2.3440864054">
+  <node id="20974" lat="48.8673667973" lon="2.3440864054">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20967" lat="48.8741597961" lon="2.3375439933">
+  <node id="20976" lat="48.8741597961" lon="2.3375439933">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20969" lat="48.8742807998" lon="2.3553334973">
+  <node id="20978" lat="48.8742807998" lon="2.3553334973">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20971" lat="48.8648840042" lon="2.3450737997">
+  <node id="20980" lat="48.8648840042" lon="2.3450737997">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20973" lat="48.8648783025" lon="2.3447952983">
+  <node id="20982" lat="48.8648783025" lon="2.3447952983">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20975" lat="48.8737969018" lon="2.3506279014">
+  <node id="20984" lat="48.8737969018" lon="2.3506279014">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20977" lat="48.8631503999" lon="2.352460001">
+  <node id="20986" lat="48.8631503999" lon="2.352460001">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20979" lat="48.8688896995" lon="2.3384074011">
+  <node id="20988" lat="48.8688896995" lon="2.3384074011">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20981" lat="48.8673489997" lon="2.3473259961">
+  <node id="20990" lat="48.8570913021" lon="2.3415338377"/>
+  <node id="20991" lat="48.8571076979" lon="2.3414851623"/>
+  <node id="20993" lat="48.8673489997" lon="2.3473259961">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20983" lat="48.8673991009" lon="2.3473344998">
+  <node id="20995" lat="48.8673991009" lon="2.3473344998">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20985" lat="48.8571063022" lon="2.3471344042">
+  <node id="20997" lat="48.8571063022" lon="2.3471344042">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20987" lat="48.8571291" lon="2.3470412058">
+  <node id="20999" lat="48.8571291" lon="2.3470412058">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20989" lat="48.8621753015" lon="2.3371518956">
+  <node id="21001" lat="48.8621753015" lon="2.3371518956">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20991" lat="48.8621175021" lon="2.3371219004">
+  <node id="21003" lat="48.8621175021" lon="2.3371219004">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20993" lat="48.8634447029" lon="2.3397189049">
+  <node id="21005" lat="48.8634447029" lon="2.3397189049">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20995" lat="48.8635049035" lon="2.3399275041">
+  <node id="21007" lat="48.8635049035" lon="2.3399275041">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20997" lat="48.8676427991" lon="2.3465919067">
+  <node id="21009" lat="48.8676427991" lon="2.3465919067">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="20999" lat="48.8675972035" lon="2.3464404952">
+  <node id="21011" lat="48.8675972035" lon="2.3464404952">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="21001" lat="48.8758984995" lon="2.3405033053">
+  <node id="21013" lat="48.8758984995" lon="2.3405033053">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="21003" lat="48.8757410013" lon="2.3426309">
+  <node id="21015" lat="48.8757410013" lon="2.3426309">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="21005" lat="48.8740901976" lon="2.3479205956">
+  <node id="21017" lat="48.8740901976" lon="2.3479205956">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="21007" lat="48.8636565021" lon="2.3398296028">
+  <node id="21019" lat="48.8636565021" lon="2.3398296028">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="21009" lat="48.8678251006" lon="2.3453930968">
+  <node id="21021" lat="48.8678251006" lon="2.3453930968">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="21011" lat="48.8676201002" lon="2.3460667993">
+  <node id="21023" lat="48.8676201002" lon="2.3460667993">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="21013" lat="48.8675035032" lon="2.3461371937">
+  <node id="21025" lat="48.8675035032" lon="2.3461371937">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="21015" lat="48.8673943975" lon="2.3471150044">
+  <node id="21027" lat="48.8673943975" lon="2.3471150044">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="21017" lat="48.869281399" lon="2.3387394947">
+  <node id="21029" lat="48.8689404557" lon="2.3396704597"/>
+  <node id="21030" lat="48.8689551443" lon="2.3396205403"/>
+  <node id="21032" lat="48.869281399" lon="2.3387394947">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="21019" lat="48.8737469985" lon="2.3505038055">
+  <node id="21034" lat="48.8737469985" lon="2.3505038055">
     <tag k="type" v="traffic_light"/>
   </node>
-  <node id="21021" lat="48.8655490975" lon="2.356422703">
+  <node id="21036" lat="48.8655490975" lon="2.356422703">
     <tag k="type" v="traffic_light"/>
   </node>
   <way id="868">
@@ -58363,6 +58373,46 @@
     <tag k="type" v="line_thin"/>
     <tag k="subtype" v="solid"/>
   </way>
+  <way id="20841">
+    <nd ref="20839"/>
+    <nd ref="20840"/>
+    <tag k="type" v="line_thin"/>
+    <tag k="subtype" v="solid"/>
+    <tag k="roadgraph:source" v="camera_detections"/>
+    <tag k="roadgraph:kind" v="stop_line"/>
+  </way>
+  <way id="20910">
+    <nd ref="20908"/>
+    <nd ref="20909"/>
+    <tag k="type" v="line_thin"/>
+    <tag k="subtype" v="solid"/>
+    <tag k="roadgraph:source" v="camera_detections"/>
+    <tag k="roadgraph:kind" v="stop_line"/>
+  </way>
+  <way id="20931">
+    <nd ref="20929"/>
+    <nd ref="20930"/>
+    <tag k="type" v="line_thin"/>
+    <tag k="subtype" v="solid"/>
+    <tag k="roadgraph:source" v="camera_detections"/>
+    <tag k="roadgraph:kind" v="stop_line"/>
+  </way>
+  <way id="20992">
+    <nd ref="20990"/>
+    <nd ref="20991"/>
+    <tag k="type" v="line_thin"/>
+    <tag k="subtype" v="solid"/>
+    <tag k="roadgraph:source" v="camera_detections"/>
+    <tag k="roadgraph:kind" v="stop_line"/>
+  </way>
+  <way id="21031">
+    <nd ref="21029"/>
+    <nd ref="21030"/>
+    <tag k="type" v="line_thin"/>
+    <tag k="subtype" v="solid"/>
+    <tag k="roadgraph:source" v="camera_detections"/>
+    <tag k="roadgraph:kind" v="stop_line"/>
+  </way>
   <relation id="870">
     <member type="way" ref="868" role="left"/>
     <member type="way" ref="869" role="right"/>
@@ -83831,296 +83881,272 @@
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20840">
+  <relation id="20843">
     <member type="relation" ref="12436" role="refers"/>
-    <member type="node" ref="20839" role="refers"/>
+    <member type="node" ref="20842" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20842">
+  <relation id="20845">
     <member type="relation" ref="12465" role="refers"/>
-    <member type="node" ref="20841" role="refers"/>
+    <member type="node" ref="20844" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20844">
+  <relation id="20847">
     <member type="relation" ref="12535" role="refers"/>
-    <member type="node" ref="20843" role="refers"/>
+    <member type="node" ref="20846" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20846">
+  <relation id="20849">
     <member type="relation" ref="12618" role="refers"/>
-    <member type="node" ref="20845" role="refers"/>
+    <member type="node" ref="20848" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20848">
+  <relation id="20851">
     <member type="relation" ref="12618" role="refers"/>
-    <member type="node" ref="20847" role="refers"/>
+    <member type="node" ref="20850" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20850">
+  <relation id="20853">
     <member type="relation" ref="12745" role="refers"/>
-    <member type="node" ref="20849" role="refers"/>
+    <member type="node" ref="20852" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20852">
+  <relation id="20855">
     <member type="relation" ref="13112" role="refers"/>
-    <member type="node" ref="20851" role="refers"/>
+    <member type="node" ref="20854" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20854">
+  <relation id="20857">
     <member type="relation" ref="13166" role="refers"/>
-    <member type="node" ref="20853" role="refers"/>
+    <member type="node" ref="20856" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20856">
+  <relation id="20859">
     <member type="relation" ref="13200" role="refers"/>
-    <member type="node" ref="20855" role="refers"/>
+    <member type="node" ref="20858" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20858">
+  <relation id="20861">
     <member type="relation" ref="13322" role="refers"/>
-    <member type="node" ref="20857" role="refers"/>
+    <member type="node" ref="20860" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20860">
+  <relation id="20863">
     <member type="relation" ref="13337" role="refers"/>
-    <member type="node" ref="20859" role="refers"/>
+    <member type="node" ref="20862" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20862">
+  <relation id="20865">
     <member type="relation" ref="13568" role="refers"/>
-    <member type="node" ref="20861" role="refers"/>
+    <member type="node" ref="20864" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20864">
+  <relation id="20867">
     <member type="relation" ref="13625" role="refers"/>
-    <member type="node" ref="20863" role="refers"/>
+    <member type="node" ref="20866" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20866">
+  <relation id="20869">
     <member type="relation" ref="13694" role="refers"/>
-    <member type="node" ref="20865" role="refers"/>
+    <member type="node" ref="20868" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20868">
+  <relation id="20871">
     <member type="relation" ref="13694" role="refers"/>
-    <member type="node" ref="20867" role="refers"/>
+    <member type="node" ref="20870" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20870">
+  <relation id="20873">
     <member type="relation" ref="13734" role="refers"/>
-    <member type="node" ref="20869" role="refers"/>
+    <member type="node" ref="20872" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20872">
+  <relation id="20875">
     <member type="relation" ref="13734" role="refers"/>
-    <member type="node" ref="20871" role="refers"/>
+    <member type="node" ref="20874" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20874">
+  <relation id="20877">
     <member type="relation" ref="13780" role="refers"/>
-    <member type="node" ref="20873" role="refers"/>
+    <member type="node" ref="20876" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20876">
+  <relation id="20879">
     <member type="relation" ref="13780" role="refers"/>
-    <member type="node" ref="20875" role="refers"/>
+    <member type="node" ref="20878" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20878">
+  <relation id="20881">
     <member type="relation" ref="13780" role="refers"/>
-    <member type="node" ref="20877" role="refers"/>
+    <member type="node" ref="20880" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20880">
+  <relation id="20883">
     <member type="relation" ref="13871" role="refers"/>
-    <member type="node" ref="20879" role="refers"/>
+    <member type="node" ref="20882" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20882">
+  <relation id="20885">
     <member type="relation" ref="14003" role="refers"/>
-    <member type="node" ref="20881" role="refers"/>
+    <member type="node" ref="20884" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20884">
+  <relation id="20887">
     <member type="relation" ref="14036" role="refers"/>
-    <member type="node" ref="20883" role="refers"/>
+    <member type="node" ref="20886" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20886">
+  <relation id="20889">
     <member type="relation" ref="14145" role="refers"/>
-    <member type="node" ref="20885" role="refers"/>
+    <member type="node" ref="20888" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20888">
+  <relation id="20891">
     <member type="relation" ref="14145" role="refers"/>
-    <member type="node" ref="20887" role="refers"/>
+    <member type="node" ref="20890" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20890">
+  <relation id="20893">
     <member type="relation" ref="14202" role="refers"/>
-    <member type="node" ref="20889" role="refers"/>
+    <member type="node" ref="20892" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20892">
+  <relation id="20895">
     <member type="relation" ref="14335" role="refers"/>
-    <member type="node" ref="20891" role="refers"/>
+    <member type="node" ref="20894" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20894">
+  <relation id="20897">
     <member type="relation" ref="14335" role="refers"/>
-    <member type="node" ref="20893" role="refers"/>
+    <member type="node" ref="20896" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20896">
+  <relation id="20899">
     <member type="relation" ref="14371" role="refers"/>
-    <member type="node" ref="20895" role="refers"/>
+    <member type="node" ref="20898" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20898">
+  <relation id="20901">
     <member type="relation" ref="14751" role="refers"/>
-    <member type="node" ref="20897" role="refers"/>
+    <member type="node" ref="20900" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20900">
+  <relation id="20903">
     <member type="relation" ref="14869" role="refers"/>
-    <member type="node" ref="20899" role="refers"/>
+    <member type="node" ref="20902" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20902">
+  <relation id="20905">
     <member type="relation" ref="14869" role="refers"/>
-    <member type="node" ref="20901" role="refers"/>
+    <member type="node" ref="20904" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20904">
+  <relation id="20907">
     <member type="relation" ref="14880" role="refers"/>
-    <member type="node" ref="20903" role="refers"/>
-    <tag k="type" v="regulatory_element"/>
-    <tag k="subtype" v="traffic_light"/>
-    <tag k="roadgraph:source" v="camera_detections"/>
-    <tag k="roadgraph:confidence" v="1.0000"/>
-  </relation>
-  <relation id="20906">
-    <member type="relation" ref="15199" role="refers"/>
-    <member type="node" ref="20905" role="refers"/>
-    <tag k="type" v="regulatory_element"/>
-    <tag k="subtype" v="traffic_light"/>
-    <tag k="roadgraph:source" v="camera_detections"/>
-    <tag k="roadgraph:confidence" v="1.0000"/>
-  </relation>
-  <relation id="20908">
-    <member type="relation" ref="15282" role="refers"/>
-    <member type="node" ref="20907" role="refers"/>
-    <tag k="type" v="regulatory_element"/>
-    <tag k="subtype" v="traffic_light"/>
-    <tag k="roadgraph:source" v="camera_detections"/>
-    <tag k="roadgraph:confidence" v="1.0000"/>
-  </relation>
-  <relation id="20910">
-    <member type="relation" ref="15391" role="refers"/>
-    <member type="node" ref="20909" role="refers"/>
+    <member type="node" ref="20906" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
   <relation id="20912">
-    <member type="relation" ref="15462" role="refers"/>
+    <member type="relation" ref="15199" role="refers"/>
     <member type="node" ref="20911" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
@@ -84128,7 +84154,7 @@
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
   <relation id="20914">
-    <member type="relation" ref="15508" role="refers"/>
+    <member type="relation" ref="15282" role="refers"/>
     <member type="node" ref="20913" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
@@ -84136,7 +84162,7 @@
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
   <relation id="20916">
-    <member type="relation" ref="15548" role="refers"/>
+    <member type="relation" ref="15391" role="refers"/>
     <member type="node" ref="20915" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
@@ -84144,7 +84170,7 @@
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
   <relation id="20918">
-    <member type="relation" ref="15548" role="refers"/>
+    <member type="relation" ref="15462" role="refers"/>
     <member type="node" ref="20917" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
@@ -84152,7 +84178,7 @@
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
   <relation id="20920">
-    <member type="relation" ref="15642" role="refers"/>
+    <member type="relation" ref="15508" role="refers"/>
     <member type="node" ref="20919" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
@@ -84160,7 +84186,7 @@
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
   <relation id="20922">
-    <member type="relation" ref="15642" role="refers"/>
+    <member type="relation" ref="15548" role="refers"/>
     <member type="node" ref="20921" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
@@ -84168,7 +84194,7 @@
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
   <relation id="20924">
-    <member type="relation" ref="15875" role="refers"/>
+    <member type="relation" ref="15548" role="refers"/>
     <member type="node" ref="20923" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
@@ -84176,7 +84202,7 @@
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
   <relation id="20926">
-    <member type="relation" ref="16007" role="refers"/>
+    <member type="relation" ref="15642" role="refers"/>
     <member type="node" ref="20925" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
@@ -84184,271 +84210,247 @@
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
   <relation id="20928">
-    <member type="relation" ref="16220" role="refers"/>
+    <member type="relation" ref="15642" role="refers"/>
     <member type="node" ref="20927" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20930">
+  <relation id="20933">
+    <member type="relation" ref="15875" role="refers"/>
+    <member type="node" ref="20932" role="refers"/>
+    <tag k="type" v="regulatory_element"/>
+    <tag k="subtype" v="traffic_light"/>
+    <tag k="roadgraph:source" v="camera_detections"/>
+    <tag k="roadgraph:confidence" v="1.0000"/>
+  </relation>
+  <relation id="20935">
+    <member type="relation" ref="16007" role="refers"/>
+    <member type="node" ref="20934" role="refers"/>
+    <tag k="type" v="regulatory_element"/>
+    <tag k="subtype" v="traffic_light"/>
+    <tag k="roadgraph:source" v="camera_detections"/>
+    <tag k="roadgraph:confidence" v="1.0000"/>
+  </relation>
+  <relation id="20937">
     <member type="relation" ref="16220" role="refers"/>
-    <member type="node" ref="20929" role="refers"/>
+    <member type="node" ref="20936" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20932">
+  <relation id="20939">
+    <member type="relation" ref="16220" role="refers"/>
+    <member type="node" ref="20938" role="refers"/>
+    <tag k="type" v="regulatory_element"/>
+    <tag k="subtype" v="traffic_light"/>
+    <tag k="roadgraph:source" v="camera_detections"/>
+    <tag k="roadgraph:confidence" v="1.0000"/>
+  </relation>
+  <relation id="20941">
     <member type="relation" ref="16260" role="refers"/>
-    <member type="node" ref="20931" role="refers"/>
+    <member type="node" ref="20940" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20934">
+  <relation id="20943">
     <member type="relation" ref="16277" role="refers"/>
-    <member type="node" ref="20933" role="refers"/>
+    <member type="node" ref="20942" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20936">
+  <relation id="20945">
     <member type="relation" ref="16561" role="refers"/>
-    <member type="node" ref="20935" role="refers"/>
+    <member type="node" ref="20944" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20938">
+  <relation id="20947">
     <member type="relation" ref="16561" role="refers"/>
-    <member type="node" ref="20937" role="refers"/>
+    <member type="node" ref="20946" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20940">
+  <relation id="20949">
     <member type="relation" ref="16561" role="refers"/>
-    <member type="node" ref="20939" role="refers"/>
+    <member type="node" ref="20948" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20942">
+  <relation id="20951">
     <member type="relation" ref="16611" role="refers"/>
-    <member type="node" ref="20941" role="refers"/>
+    <member type="node" ref="20950" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20944">
+  <relation id="20953">
     <member type="relation" ref="16611" role="refers"/>
-    <member type="node" ref="20943" role="refers"/>
+    <member type="node" ref="20952" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20946">
+  <relation id="20955">
     <member type="relation" ref="16611" role="refers"/>
-    <member type="node" ref="20945" role="refers"/>
+    <member type="node" ref="20954" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20948">
+  <relation id="20957">
     <member type="relation" ref="16682" role="refers"/>
-    <member type="node" ref="20947" role="refers"/>
+    <member type="node" ref="20956" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20950">
+  <relation id="20959">
     <member type="relation" ref="16682" role="refers"/>
-    <member type="node" ref="20949" role="refers"/>
+    <member type="node" ref="20958" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20952">
+  <relation id="20961">
     <member type="relation" ref="16682" role="refers"/>
-    <member type="node" ref="20951" role="refers"/>
+    <member type="node" ref="20960" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20954">
+  <relation id="20963">
     <member type="relation" ref="16776" role="refers"/>
-    <member type="node" ref="20953" role="refers"/>
+    <member type="node" ref="20962" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20956">
+  <relation id="20965">
     <member type="relation" ref="16776" role="refers"/>
-    <member type="node" ref="20955" role="refers"/>
+    <member type="node" ref="20964" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20958">
+  <relation id="20967">
     <member type="relation" ref="16997" role="refers"/>
-    <member type="node" ref="20957" role="refers"/>
+    <member type="node" ref="20966" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20960">
+  <relation id="20969">
     <member type="relation" ref="16997" role="refers"/>
-    <member type="node" ref="20959" role="refers"/>
+    <member type="node" ref="20968" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20962">
+  <relation id="20971">
     <member type="relation" ref="17081" role="refers"/>
-    <member type="node" ref="20961" role="refers"/>
+    <member type="node" ref="20970" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20964">
+  <relation id="20973">
     <member type="relation" ref="17081" role="refers"/>
-    <member type="node" ref="20963" role="refers"/>
+    <member type="node" ref="20972" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20966">
+  <relation id="20975">
     <member type="relation" ref="17188" role="refers"/>
-    <member type="node" ref="20965" role="refers"/>
+    <member type="node" ref="20974" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20968">
+  <relation id="20977">
     <member type="relation" ref="17211" role="refers"/>
-    <member type="node" ref="20967" role="refers"/>
+    <member type="node" ref="20976" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20970">
+  <relation id="20979">
     <member type="relation" ref="17646" role="refers"/>
-    <member type="node" ref="20969" role="refers"/>
+    <member type="node" ref="20978" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20972">
+  <relation id="20981">
     <member type="relation" ref="17704" role="refers"/>
-    <member type="node" ref="20971" role="refers"/>
+    <member type="node" ref="20980" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20974">
+  <relation id="20983">
     <member type="relation" ref="17704" role="refers"/>
-    <member type="node" ref="20973" role="refers"/>
+    <member type="node" ref="20982" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20976">
+  <relation id="20985">
     <member type="relation" ref="17765" role="refers"/>
-    <member type="node" ref="20975" role="refers"/>
+    <member type="node" ref="20984" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20978">
+  <relation id="20987">
     <member type="relation" ref="17950" role="refers"/>
-    <member type="node" ref="20977" role="refers"/>
+    <member type="node" ref="20986" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
-  <relation id="20980">
+  <relation id="20989">
     <member type="relation" ref="18102" role="refers"/>
-    <member type="node" ref="20979" role="refers"/>
-    <tag k="type" v="regulatory_element"/>
-    <tag k="subtype" v="traffic_light"/>
-    <tag k="roadgraph:source" v="camera_detections"/>
-    <tag k="roadgraph:confidence" v="1.0000"/>
-  </relation>
-  <relation id="20982">
-    <member type="relation" ref="18420" role="refers"/>
-    <member type="node" ref="20981" role="refers"/>
-    <tag k="type" v="regulatory_element"/>
-    <tag k="subtype" v="traffic_light"/>
-    <tag k="roadgraph:source" v="camera_detections"/>
-    <tag k="roadgraph:confidence" v="1.0000"/>
-  </relation>
-  <relation id="20984">
-    <member type="relation" ref="18420" role="refers"/>
-    <member type="node" ref="20983" role="refers"/>
-    <tag k="type" v="regulatory_element"/>
-    <tag k="subtype" v="traffic_light"/>
-    <tag k="roadgraph:source" v="camera_detections"/>
-    <tag k="roadgraph:confidence" v="1.0000"/>
-  </relation>
-  <relation id="20986">
-    <member type="relation" ref="18634" role="refers"/>
-    <member type="node" ref="20985" role="refers"/>
-    <tag k="type" v="regulatory_element"/>
-    <tag k="subtype" v="traffic_light"/>
-    <tag k="roadgraph:source" v="camera_detections"/>
-    <tag k="roadgraph:confidence" v="1.0000"/>
-  </relation>
-  <relation id="20988">
-    <member type="relation" ref="18641" role="refers"/>
-    <member type="node" ref="20987" role="refers"/>
-    <tag k="type" v="regulatory_element"/>
-    <tag k="subtype" v="traffic_light"/>
-    <tag k="roadgraph:source" v="camera_detections"/>
-    <tag k="roadgraph:confidence" v="1.0000"/>
-  </relation>
-  <relation id="20990">
-    <member type="relation" ref="19173" role="refers"/>
-    <member type="node" ref="20989" role="refers"/>
-    <tag k="type" v="regulatory_element"/>
-    <tag k="subtype" v="traffic_light"/>
-    <tag k="roadgraph:source" v="camera_detections"/>
-    <tag k="roadgraph:confidence" v="1.0000"/>
-  </relation>
-  <relation id="20992">
-    <member type="relation" ref="19173" role="refers"/>
-    <member type="node" ref="20991" role="refers"/>
+    <member type="node" ref="20988" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
   <relation id="20994">
-    <member type="relation" ref="19201" role="refers"/>
+    <member type="relation" ref="18420" role="refers"/>
     <member type="node" ref="20993" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
@@ -84456,7 +84458,7 @@
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
   <relation id="20996">
-    <member type="relation" ref="19223" role="refers"/>
+    <member type="relation" ref="18420" role="refers"/>
     <member type="node" ref="20995" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
@@ -84464,7 +84466,7 @@
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
   <relation id="20998">
-    <member type="relation" ref="19490" role="refers"/>
+    <member type="relation" ref="18634" role="refers"/>
     <member type="node" ref="20997" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
@@ -84472,7 +84474,7 @@
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
   <relation id="21000">
-    <member type="relation" ref="19490" role="refers"/>
+    <member type="relation" ref="18641" role="refers"/>
     <member type="node" ref="20999" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
@@ -84480,7 +84482,7 @@
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
   <relation id="21002">
-    <member type="relation" ref="19574" role="refers"/>
+    <member type="relation" ref="19173" role="refers"/>
     <member type="node" ref="21001" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
@@ -84488,7 +84490,7 @@
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
   <relation id="21004">
-    <member type="relation" ref="19574" role="refers"/>
+    <member type="relation" ref="19173" role="refers"/>
     <member type="node" ref="21003" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
@@ -84496,7 +84498,7 @@
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
   <relation id="21006">
-    <member type="relation" ref="19711" role="refers"/>
+    <member type="relation" ref="19201" role="refers"/>
     <member type="node" ref="21005" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
@@ -84504,7 +84506,7 @@
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
   <relation id="21008">
-    <member type="relation" ref="19722" role="refers"/>
+    <member type="relation" ref="19223" role="refers"/>
     <member type="node" ref="21007" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
@@ -84512,7 +84514,7 @@
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
   <relation id="21010">
-    <member type="relation" ref="19785" role="refers"/>
+    <member type="relation" ref="19490" role="refers"/>
     <member type="node" ref="21009" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
@@ -84520,7 +84522,7 @@
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
   <relation id="21012">
-    <member type="relation" ref="19798" role="refers"/>
+    <member type="relation" ref="19490" role="refers"/>
     <member type="node" ref="21011" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
@@ -84528,7 +84530,7 @@
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
   <relation id="21014">
-    <member type="relation" ref="19798" role="refers"/>
+    <member type="relation" ref="19574" role="refers"/>
     <member type="node" ref="21013" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
@@ -84536,7 +84538,7 @@
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
   <relation id="21016">
-    <member type="relation" ref="19845" role="refers"/>
+    <member type="relation" ref="19574" role="refers"/>
     <member type="node" ref="21015" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
@@ -84544,7 +84546,7 @@
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
   <relation id="21018">
-    <member type="relation" ref="20099" role="refers"/>
+    <member type="relation" ref="19711" role="refers"/>
     <member type="node" ref="21017" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
@@ -84552,7 +84554,7 @@
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
   <relation id="21020">
-    <member type="relation" ref="20336" role="refers"/>
+    <member type="relation" ref="19722" role="refers"/>
     <member type="node" ref="21019" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
@@ -84560,8 +84562,56 @@
     <tag k="roadgraph:confidence" v="1.0000"/>
   </relation>
   <relation id="21022">
-    <member type="relation" ref="20419" role="refers"/>
+    <member type="relation" ref="19785" role="refers"/>
     <member type="node" ref="21021" role="refers"/>
+    <tag k="type" v="regulatory_element"/>
+    <tag k="subtype" v="traffic_light"/>
+    <tag k="roadgraph:source" v="camera_detections"/>
+    <tag k="roadgraph:confidence" v="1.0000"/>
+  </relation>
+  <relation id="21024">
+    <member type="relation" ref="19798" role="refers"/>
+    <member type="node" ref="21023" role="refers"/>
+    <tag k="type" v="regulatory_element"/>
+    <tag k="subtype" v="traffic_light"/>
+    <tag k="roadgraph:source" v="camera_detections"/>
+    <tag k="roadgraph:confidence" v="1.0000"/>
+  </relation>
+  <relation id="21026">
+    <member type="relation" ref="19798" role="refers"/>
+    <member type="node" ref="21025" role="refers"/>
+    <tag k="type" v="regulatory_element"/>
+    <tag k="subtype" v="traffic_light"/>
+    <tag k="roadgraph:source" v="camera_detections"/>
+    <tag k="roadgraph:confidence" v="1.0000"/>
+  </relation>
+  <relation id="21028">
+    <member type="relation" ref="19845" role="refers"/>
+    <member type="node" ref="21027" role="refers"/>
+    <tag k="type" v="regulatory_element"/>
+    <tag k="subtype" v="traffic_light"/>
+    <tag k="roadgraph:source" v="camera_detections"/>
+    <tag k="roadgraph:confidence" v="1.0000"/>
+  </relation>
+  <relation id="21033">
+    <member type="relation" ref="20099" role="refers"/>
+    <member type="node" ref="21032" role="refers"/>
+    <tag k="type" v="regulatory_element"/>
+    <tag k="subtype" v="traffic_light"/>
+    <tag k="roadgraph:source" v="camera_detections"/>
+    <tag k="roadgraph:confidence" v="1.0000"/>
+  </relation>
+  <relation id="21035">
+    <member type="relation" ref="20336" role="refers"/>
+    <member type="node" ref="21034" role="refers"/>
+    <tag k="type" v="regulatory_element"/>
+    <tag k="subtype" v="traffic_light"/>
+    <tag k="roadgraph:source" v="camera_detections"/>
+    <tag k="roadgraph:confidence" v="1.0000"/>
+  </relation>
+  <relation id="21037">
+    <member type="relation" ref="20419" role="refers"/>
+    <member type="node" ref="21036" role="refers"/>
     <tag k="type" v="regulatory_element"/>
     <tag k="subtype" v="traffic_light"/>
     <tag k="roadgraph:source" v="camera_detections"/>

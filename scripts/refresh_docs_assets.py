@@ -246,6 +246,53 @@ def _osm_regulatory_kind_from_tags(tags: dict) -> str | None:
     return None
 
 
+def _perpendicular_polyline(
+    polyline: list[tuple[float, float]],
+    px: float,
+    py: float,
+    half_width_m: float = 2.0,
+) -> list[list[float]] | None:
+    """Build a short polyline perpendicular to the nearest segment of
+    ``polyline`` at the projection of ``(px, py)``. Returns ``[[x1,y1],
+    [x2,y2]]`` of length ``2*half_width_m`` centred on the projection, or
+    ``None`` if the polyline is too short / degenerate. Used to synthesise a
+    stop_line way for Lanelet2 from a single OSM stop / give_way node.
+    """
+    if len(polyline) < 2:
+        return None
+    best = None
+    best_d2 = float("inf")
+    for i in range(len(polyline) - 1):
+        x1, y1 = polyline[i]
+        x2, y2 = polyline[i + 1]
+        dx = x2 - x1
+        dy = y2 - y1
+        denom = dx * dx + dy * dy
+        if denom <= 0:
+            continue
+        t = ((px - x1) * dx + (py - y1) * dy) / denom
+        t = max(0.0, min(1.0, t))
+        qx = x1 + t * dx
+        qy = y1 + t * dy
+        ex = px - qx
+        ey = py - qy
+        d2 = ex * ex + ey * ey
+        if d2 < best_d2:
+            best_d2 = d2
+            best = (qx, qy, dx, dy)
+    if best is None:
+        return None
+    qx, qy, dx, dy = best
+    seg_len = (dx * dx + dy * dy) ** 0.5
+    if seg_len <= 0:
+        return None
+    nx = -dy / seg_len
+    ny = dx / seg_len
+    p1 = [qx - nx * half_width_m, qy - ny * half_width_m]
+    p2 = [qx + nx * half_width_m, qy + ny * half_width_m]
+    return [p1, p2]
+
+
 def _osm_regulatory_observations(
     overpass_regulatory_json: dict,
     graph,
@@ -316,6 +363,18 @@ def _osm_regulatory_observations(
                 obs["value_kmh"] = int(float(str(tags["maxspeed"]).split()[0]))
             except (TypeError, ValueError):
                 pass
+        if kind == "stop_line":
+            # Synthesise a 4 m line perpendicular to the matched edge so the
+            # Lanelet2 exporter can emit a real `line_thin` way (a single
+            # point would not be a valid stop_line geometry). Half-width 2 m
+            # is a reasonable typical lane width for an urban stop bar.
+            edge_poly = next(
+                (poly for eid, poly in edge_polys if eid == best_edge), None
+            )
+            if edge_poly is not None:
+                perp = _perpendicular_polyline(edge_poly, x, y, half_width_m=2.0)
+                if perp is not None:
+                    obs["polyline_m"] = perp
         observations.append(obs)
         if kind == "crosswalk":
             crossing_count += 1

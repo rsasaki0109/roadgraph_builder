@@ -82,6 +82,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   browser smoke covers the `n312 → n191` deep link, asserting the card is
   visible, multiple steps render, and the URL retains `from` / `to`.
 
+- **OSM stop / give_way nodes now ship as Lanelet2 stop_line ways.**
+  Previously each `kind=stop_line` observation only landed in
+  `edge.attributes.hd.semantic_rules` and was silently skipped by the
+  Lanelet2 exporter (which needs a 2-point polyline, not a single
+  point). `scripts/refresh_docs_assets.py` gains a
+  `_perpendicular_polyline()` helper that projects the OSM point onto
+  the nearest matched-edge segment, computes the normal direction, and
+  builds a 4 m line centred on the projection. The synthesised
+  `polyline_m` rides through to `_build_stop_line_way`, which emits a
+  proper `type=line_thin, subtype=solid, roadgraph:kind=stop_line` way
+  in the Lanelet2 OSM. Paris grid: 5 ways for the 5 OSM stop /
+  give_way fixes inside the bbox. `validate-lanelet2-tags` continues
+  to report `result: ok`.
+
 - **SRTM elevations flow through committed Paris / Berlin datasets.**
   New `scripts/fetch_node_elevations.py` POSTs every `kind=node` point in a
   committed map GeoJSON to Open-Elevation's public SRTM-30m endpoint and
