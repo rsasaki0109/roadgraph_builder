@@ -82,6 +82,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   browser smoke covers the `n312 → n191` deep link, asserting the card is
   visible, multiple steps render, and the URL retains `from` / `to`.
 
+- **Per-lane lane_boundary `subtype` reflects outer-vs-interior position.**
+  Autoware reads `subtype=solid` on a lane boundary as "no lane change
+  allowed" and `subtype=dashed` as "lane change permitted". The
+  per-lane export was previously emitting every boundary as `solid`,
+  which contradicted the `lane_change` regulatory_element relations
+  the same exporter wrote. The fix splits boundaries by position:
+  outermost left of lane 0 and outermost right of lane N-1 stay
+  `solid`, every interior boundary between adjacent lanes becomes
+  `dashed`. When `lane_markings` data is available and classifies the
+  paint as `solid`, that wins. Paris grid emits 2 162 `solid` outer
+  boundaries + 808 `dashed` interior boundaries (114·2 + 91·4 +
+  28·6 + 6·8 across the 2 / 3 / 4 / 5-lane edges). `validate-lanelet2-tags`
+  continues to report `result: ok` with 0 errors.
+
 - **Per-lane Lanelet2 export emits `lane_connection` regulatory_elements.**
   `export_lanelet2` (single-lanelet) had a block that bundled every
   junction's incident lanelets into a `type=regulatory_element,

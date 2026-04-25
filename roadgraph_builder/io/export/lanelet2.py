@@ -477,6 +477,7 @@ def export_lanelet2_per_lane(
             per_lane_half = lane_spacing / 2.0
 
             edge_lanelet_ids: list[int] = []
+            n_lanes = len([l for l in lanes_data if isinstance(l, dict)])
             for lane in lanes_data:
                 if not isinstance(lane, dict):
                     continue
@@ -504,13 +505,38 @@ def export_lanelet2_per_lane(
                 for x, y in right_pts:
                     lon, lat = meters_to_lonlat(float(x), float(y), origin_lat, origin_lon)
                     right_nds.append(new_node(lat, lon, None))
+                # Boundary subtype semantics for Autoware:
+                #   - Outermost boundaries of the road envelope → solid (no
+                #     lane change off the road).
+                #   - Interior boundaries between adjacent lanes → dashed
+                #     (lane change permitted) unless lane_markings explicitly
+                #     said the paint between them is solid.
+                # The lane_markings override is best-effort: if any candidate
+                # for this edge classifies the markings as "solid" we treat
+                # all interior boundaries as solid for now.
+                interior_subtype = "dashed"
+                if lane_markings is not None:
+                    lm_for_edge = [
+                        c for c in lane_markings.get("candidates", []) or []
+                        if isinstance(c, dict) and c.get("edge_id") == e.id
+                    ]
+                    if _lane_marking_subtype(lm_for_edge) == "solid":
+                        interior_subtype = "solid"
+                left_subtype = (
+                    "solid" if (lane_idx == 0 or n_lanes <= 1) else interior_subtype
+                )
+                right_subtype = (
+                    "solid"
+                    if (lane_idx >= n_lanes - 1 or n_lanes <= 1)
+                    else interior_subtype
+                )
                 lw_id = new_way(left_nds, [
                     ("roadgraph", "lane_boundary"),
                     ("roadgraph:edge_id", str(e.id)),
                     ("roadgraph:lane_index", str(lane_idx)),
                     ("roadgraph:side", "left"),
                     ("type", "line_thin"),
-                    ("subtype", "solid"),
+                    ("subtype", left_subtype),
                 ])
                 rw_id = new_way(right_nds, [
                     ("roadgraph", "lane_boundary"),
@@ -518,7 +544,7 @@ def export_lanelet2_per_lane(
                     ("roadgraph:lane_index", str(lane_idx)),
                     ("roadgraph:side", "right"),
                     ("type", "line_thin"),
-                    ("subtype", "solid"),
+                    ("subtype", right_subtype),
                 ])
                 lanelet_tags: list[tuple[str, str]] = [
                     ("type", "lanelet"),
