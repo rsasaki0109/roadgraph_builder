@@ -914,20 +914,36 @@ def _clip_line_fraction(
     return out
 
 
-def _write_paris_grid_reachability_asset() -> None:
-    """Build a committed service-area overlay from the Paris grid GeoJSON."""
+def _write_reachability_asset(
+    *,
+    dataset_id: str,
+    map_filename: str,
+    restrictions_filename: str | None,
+    output_filename: str,
+    start_node: str,
+    budget_m: float,
+) -> None:
+    """Build a committed service-area overlay from a committed map GeoJSON."""
 
     import heapq
     import itertools
     import math
 
-    map_path = ASSETS / "map_paris_grid.geojson"
-    restrictions_path = ASSETS / "paris_grid_turn_restrictions.json"
-    if not (map_path.is_file() and restrictions_path.is_file()):
+    map_path = ASSETS / map_filename
+    if not map_path.is_file():
         return
+    restrictions_path: Path | None = (
+        ASSETS / restrictions_filename if restrictions_filename else None
+    )
+    if restrictions_path is not None and not restrictions_path.is_file():
+        restrictions_path = None
 
     map_doc = json.loads(map_path.read_text(encoding="utf-8"))
-    restrictions_doc = json.loads(restrictions_path.read_text(encoding="utf-8"))
+    restrictions_doc = (
+        json.loads(restrictions_path.read_text(encoding="utf-8"))
+        if restrictions_path is not None
+        else {"turn_restrictions": []}
+    )
     nodes: dict[str, tuple[float, float]] = {}
     edges: dict[str, dict[str, object]] = {}
     adj: dict[str, list[tuple[str, str, str, float]]] = {}
@@ -968,8 +984,7 @@ def _write_paris_grid_reachability_asset() -> None:
         if start != end:
             adj.setdefault(end, []).append((edge_id, "reverse", start, length_m))
 
-    start_node = PARIS_GRID_REACHABLE_START_NODE
-    budget = PARIS_GRID_REACHABLE_MAX_COST_M
+    budget = float(budget_m)
     if start_node not in nodes:
         return
 
@@ -1082,13 +1097,13 @@ def _write_paris_grid_reachability_asset() -> None:
 
     doc = {
         "type": "FeatureCollection",
-        "name": f"reachable_paris_grid_{start_node}_{budget:g}m",
+        "name": f"reachable_{dataset_id}_{start_node}_{budget:g}m",
         "properties": {
             "attribution": "© OpenStreetMap contributors",
             "license": "ODbL-1.0",
             "license_url": "https://opendatacommons.org/licenses/odbl/1-0/",
-            "source_map": "map_paris_grid.geojson",
-            "turn_restrictions": "paris_grid_turn_restrictions.json",
+            "source_map": map_filename,
+            "turn_restrictions": restrictions_filename,
             "start_node": start_node,
             "max_cost_m": budget,
             "node_count": len(best_node_cost),
@@ -1097,9 +1112,33 @@ def _write_paris_grid_reachability_asset() -> None:
         },
         "features": features,
     }
-    (ASSETS / "reachable_paris_grid.geojson").write_text(
+    (ASSETS / output_filename).write_text(
         json.dumps(doc, separators=(",", ":")) + "\n",
         encoding="utf-8",
+    )
+
+
+def _write_paris_grid_reachability_asset() -> None:
+    """Build the committed Paris grid service-area overlay (legacy wrapper)."""
+    _write_reachability_asset(
+        dataset_id="paris_grid",
+        map_filename="map_paris_grid.geojson",
+        restrictions_filename="paris_grid_turn_restrictions.json",
+        output_filename="reachable_paris_grid.geojson",
+        start_node=PARIS_GRID_REACHABLE_START_NODE,
+        budget_m=PARIS_GRID_REACHABLE_MAX_COST_M,
+    )
+
+
+def _write_berlin_mitte_reachability_asset() -> None:
+    """Build the committed Berlin Mitte service-area overlay."""
+    _write_reachability_asset(
+        dataset_id="berlin_mitte",
+        map_filename="map_berlin_mitte.geojson",
+        restrictions_filename="berlin_mitte_turn_restrictions.json",
+        output_filename="reachable_berlin_mitte.geojson",
+        start_node="n32",
+        budget_m=600.0,
     )
 
 
@@ -1660,15 +1699,23 @@ def main() -> None:
     # OSM-highway-derived Berlin Mitte HD-lite sample
     # Same inputs shape as the Paris grid block; shipped so the committed
     # viewer can switch between European and (future) Asian demos without a
-    # live Overpass fetch. Leaves turn restrictions unshipped for now — add
-    # later when the raw relation dump is available.
+    # live Overpass fetch. Turn restrictions, demo route, and reachability
+    # overlays are populated when the matching raw Overpass dump exists
+    # under /tmp.
     berlin_raw = Path("/tmp/berlin_mitte_raw.json")
     if berlin_raw.is_file():
         from roadgraph_builder.io.osm import (
             build_graph_from_overpass_highways,
+            convert_osm_restrictions_to_graph,
             load_overpass_json,
         )
+        from roadgraph_builder.io.osm.turn_restrictions import strip_private_fields
+        from roadgraph_builder.navigation.turn_restrictions import (
+            load_turn_restrictions_json,
+        )
         from roadgraph_builder.pipeline.build_graph import BuildParams
+        from roadgraph_builder.routing.geojson_export import write_route_geojson
+        from roadgraph_builder.routing.shortest_path import shortest_path
         import numpy as np
 
         # Berlin Mitte bbox roughly lat 52.506–52.526, lon 13.367–13.401.
@@ -1728,6 +1775,73 @@ def main() -> None:
             json.dumps(raw, separators=(",", ":")), encoding="utf-8"
         )
         berlin_geo_tmp.unlink(missing_ok=True)
+        # OSM turn-restriction relations for Berlin Mitte. Same flow as Paris:
+        # fetch raw → convert against the graph → save the cleaned committed
+        # JSON. When raw data isn't present we leave the existing committed
+        # file (if any) alone.
+        berlin_tr_raw_path = Path(
+            "/tmp/osm_real_data/berlin_turn_restrictions_raw.json"
+        )
+        berlin_restrictions: list[dict] = []
+        if berlin_tr_raw_path.is_file():
+            tr_raw = load_overpass_json(berlin_tr_raw_path)
+            conv = convert_osm_restrictions_to_graph(
+                berlin_graph, tr_raw, max_snap_distance_m=15.0
+            )
+            berlin_restrictions = strip_private_fields(conv.restrictions)
+            (ASSETS / "berlin_mitte_turn_restrictions.json").write_text(
+                json.dumps(
+                    {
+                        "format_version": 1,
+                        "attribution": "© OpenStreetMap contributors",
+                        "license": "ODbL-1.0",
+                        "license_url": "https://opendatacommons.org/licenses/odbl/1-0/",
+                        "turn_restrictions": berlin_restrictions,
+                    },
+                    indent=2,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+        # Demo TR-aware route + reachability overlay. The endpoints are a
+        # well-separated north-south pair in Berlin Mitte (chosen by lat
+        # extreme on the committed graph; ~2.7 km route).
+        berlin_route_from = "n32"
+        berlin_route_to = "n327"
+        if (
+            berlin_graph.adj.get(berlin_route_from) is not None
+            if hasattr(berlin_graph, "adj")
+            else True
+        ) and any(n.id == berlin_route_from for n in berlin_graph.nodes):
+            try:
+                trs_loaded = (
+                    load_turn_restrictions_json(
+                        ASSETS / "berlin_mitte_turn_restrictions.json"
+                    )
+                    if (ASSETS / "berlin_mitte_turn_restrictions.json").is_file()
+                    else None
+                )
+                route = shortest_path(
+                    berlin_graph,
+                    berlin_route_from,
+                    berlin_route_to,
+                    turn_restrictions=trs_loaded,
+                )
+                if route is not None:
+                    write_route_geojson(
+                        ASSETS / "route_berlin_mitte.geojson",
+                        berlin_graph,
+                        route,
+                        origin_lat=berlin_origin["latitude"],
+                        origin_lon=berlin_origin["longitude"],
+                        attribution="© OpenStreetMap contributors",
+                        license_name="ODbL-1.0",
+                        license_url="https://opendatacommons.org/licenses/odbl/1-0/",
+                    )
+            except Exception as exc:  # pragma: no cover
+                print(f"berlin_mitte demo route skipped: {exc}")
+
         try:
             from roadgraph_builder.cli.hd import apply_lane_inferences
             from roadgraph_builder.hd.lane_inference import infer_lane_counts
@@ -1750,6 +1864,7 @@ def main() -> None:
             print(f"berlin_mitte Lanelet2 export skipped: {exc}")
 
     _write_paris_grid_reachability_asset()
+    _write_berlin_mitte_reachability_asset()
     _write_route_explain_sample_asset()
     _write_map_match_explain_sample_asset()
 

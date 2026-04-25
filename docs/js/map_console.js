@@ -1069,9 +1069,11 @@ const DATASET_URLS = {
 const ROUTE_URLS = {
   paris: "assets/route_paris.geojson",
   paris_grid: "assets/route_paris_grid.geojson",
+  berlin_mitte: "assets/route_berlin_mitte.geojson",
 };
 const REACHABLE_URLS = {
   paris_grid: "assets/reachable_paris_grid.geojson",
+  berlin_mitte: "assets/reachable_berlin_mitte.geojson",
 };
 // Optional turn_restrictions JSON overlay (drawn as markers).
 // Per-dataset Lanelet2 OSM download (HD-lite, Autoware-compatible tags). The
@@ -1083,6 +1085,7 @@ const LANELET_URLS = {
 };
 const RESTRICTIONS_URLS = {
   paris_grid: "assets/paris_grid_turn_restrictions.json",
+  berlin_mitte: "assets/berlin_mitte_turn_restrictions.json",
 };
 
 // Per-dataset graph cached for JS Dijkstra.

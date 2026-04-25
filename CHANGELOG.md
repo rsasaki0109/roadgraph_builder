@@ -82,6 +82,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   browser smoke covers the `n312 → n191` deep link, asserting the card is
   visible, multiple steps render, and the URL retains `from` / `to`.
 
+- **Berlin Mitte gets full Paris-grade overlays: TR + route + reachable.**
+  Berlin Mitte was the only committed map dataset without a turn-
+  restrictions overlay, a demo route, or a service-area overlay — so
+  switching the viewer dropdown from Paris to Berlin dropped most of
+  the interactive narrative. This change closes that gap. Fetched 37
+  OSM `type=restriction` relations into `/tmp` via the existing
+  `scripts/fetch_osm_turn_restrictions.py`, snapped them to the
+  committed graph (17 land cleanly), and shipped them as
+  `docs/assets/berlin_mitte_turn_restrictions.json`. Wrote a TR-aware
+  demo route from `n32` (south end of bbox) to `n327` (north end),
+  2 659 m / 48 edges, into `route_berlin_mitte.geojson`. Generated a
+  600 m reachability overlay from `n32` into
+  `reachable_berlin_mitte.geojson` (12 reachable nodes / 34 directed
+  spans). The legacy `_write_paris_grid_reachability_asset` was
+  refactored into a generic `_write_reachability_asset(dataset_id,
+  ...)` so Paris and Berlin share the implementation. The viewer's
+  `ROUTE_URLS` / `REACHABLE_URLS` / `RESTRICTIONS_URLS` maps gained
+  the Berlin entries, so switching datasets in the dropdown
+  automatically loads the new overlays.
+
 - **Per-lane lane_boundary `subtype` reflects outer-vs-interior position.**
   Autoware reads `subtype=solid` on a lane boundary as "no lane change
   allowed" and `subtype=dashed` as "lane change permitted". The

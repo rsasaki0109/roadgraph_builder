@@ -1,0 +1,195 @@
+{
+  "format_version": 1,
+  "attribution": "\u00a9 OpenStreetMap contributors",
+  "license": "ODbL-1.0",
+  "license_url": "https://opendatacommons.org/licenses/odbl/1-0/",
+  "turn_restrictions": [
+    {
+      "id": "tr_osm_0000",
+      "junction_node_id": "n208",
+      "from_edge_id": "e384",
+      "from_direction": "reverse",
+      "to_edge_id": "e1595",
+      "to_direction": "forward",
+      "restriction": "no_left_turn",
+      "source": "osm",
+      "confidence": 0.8
+    },
+    {
+      "id": "tr_osm_0001",
+      "junction_node_id": "n532",
+      "from_edge_id": "e739",
+      "from_direction": "forward",
+      "to_edge_id": "e386",
+      "to_direction": "forward",
+      "restriction": "no_left_turn",
+      "source": "osm",
+      "confidence": 0.8
+    },
+    {
+      "id": "tr_osm_0002",
+      "junction_node_id": "n330",
+      "from_edge_id": "e621",
+      "from_direction": "reverse",
+      "to_edge_id": "e1225",
+      "to_direction": "reverse",
+      "restriction": "no_left_turn",
+      "source": "osm",
+      "confidence": 0.8
+    },
+    {
+      "id": "tr_osm_0003",
+      "junction_node_id": "n263",
+      "from_edge_id": "e997",
+      "from_direction": "forward",
+      "to_edge_id": "e179",
+      "to_direction": "reverse",
+      "restriction": "only_straight",
+      "source": "osm",
+      "confidence": 0.8
+    },
+    {
+      "id": "tr_osm_0004",
+      "junction_node_id": "n641",
+      "from_edge_id": "e1661",
+      "from_direction": "reverse",
+      "to_edge_id": "e491",
+      "to_direction": "forward",
+      "restriction": "only_straight",
+      "source": "osm",
+      "confidence": 0.8
+    },
+    {
+      "id": "tr_osm_0005",
+      "junction_node_id": "n488",
+      "from_edge_id": "e611",
+      "from_direction": "reverse",
+      "to_edge_id": "e353",
+      "to_direction": "forward",
+      "restriction": "only_straight",
+      "source": "osm",
+      "confidence": 0.8
+    },
+    {
+      "id": "tr_osm_0006",
+      "junction_node_id": "n265",
+      "from_edge_id": "e180",
+      "from_direction": "forward",
+      "to_edge_id": "e1662",
+      "to_direction": "reverse",
+      "restriction": "only_straight",
+      "source": "osm",
+      "confidence": 0.8
+    },
+    {
+      "id": "tr_osm_0007",
+      "junction_node_id": "n1178",
+      "from_edge_id": "e995",
+      "from_direction": "forward",
+      "to_edge_id": "e1399",
+      "to_direction": "forward",
+      "restriction": "only_straight",
+      "source": "osm",
+      "confidence": 0.8
+    },
+    {
+      "id": "tr_osm_0008",
+      "junction_node_id": "n641",
+      "from_edge_id": "e480",
+      "from_direction": "reverse",
+      "to_edge_id": "e1661",
+      "to_direction": "forward",
+      "restriction": "only_right",
+      "source": "osm",
+      "confidence": 0.8
+    },
+    {
+      "id": "tr_osm_0009",
+      "junction_node_id": "n679",
+      "from_edge_id": "e516",
+      "from_direction": "forward",
+      "to_edge_id": "e1785",
+      "to_direction": "forward",
+      "restriction": "no_u_turn",
+      "source": "osm",
+      "confidence": 0.8
+    },
+    {
+      "id": "tr_osm_0010",
+      "junction_node_id": "n152",
+      "from_edge_id": "e724",
+      "from_direction": "forward",
+      "to_edge_id": "e1021",
+      "to_direction": "forward",
+      "restriction": "only_straight",
+      "source": "osm",
+      "confidence": 0.8
+    },
+    {
+      "id": "tr_osm_0011",
+      "junction_node_id": "n385",
+      "from_edge_id": "e929",
+      "from_direction": "forward",
+      "to_edge_id": "e266",
+      "to_direction": "forward",
+      "restriction": "no_left_turn",
+      "source": "osm",
+      "confidence": 0.8
+    },
+    {
+      "id": "tr_osm_0012",
+      "junction_node_id": "n652",
+      "from_edge_id": "e801",
+      "from_direction": "reverse",
+      "to_edge_id": "e494",
+      "to_direction": "reverse",
+      "restriction": "no_left_turn",
+      "source": "osm",
+      "confidence": 0.8
+    },
+    {
+      "id": "tr_osm_0013",
+      "junction_node_id": "n152",
+      "from_edge_id": "e1021",
+      "from_direction": "reverse",
+      "to_edge_id": "e1210",
+      "to_direction": "forward",
+      "restriction": "only_right",
+      "source": "osm",
+      "confidence": 0.8
+    },
+    {
+      "id": "tr_osm_0014",
+      "junction_node_id": "n93",
+      "from_edge_id": "e1434",
+      "from_direction": "forward",
+      "to_edge_id": "e190",
+      "to_direction": "forward",
+      "restriction": "only_straight",
+      "source": "osm",
+      "confidence": 0.8
+    },
+    {
+      "id": "tr_osm_0015",
+      "junction_node_id": "n953",
+      "from_edge_id": "e931",
+      "from_direction": "forward",
+      "to_edge_id": "e757",
+      "to_direction": "forward",
+      "restriction": "no_left_turn",
+      "source": "osm",
+      "confidence": 0.8
+    },
+    {
+      "id": "tr_osm_0016",
+      "junction_node_id": "n15",
+      "from_edge_id": "e1512",
+      "from_direction": "forward",
+      "to_edge_id": "e191",
+      "to_direction": "forward",
+      "restriction": "no_left_turn",
+      "source": "osm",
+      "confidence": 0.8
+    }
+  ]
+}
