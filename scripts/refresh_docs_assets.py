@@ -322,6 +322,57 @@ def _osm_regulatory_observations(
     return observations
 
 
+def _apply_node_elevations(graph, elevations: dict[str, float]) -> int:
+    """Stamp ``node.attributes.elevation_m`` + per-edge ``polyline_z`` from a
+    precomputed ``{node_id: elevation_m}`` mapping (typically produced by
+    ``scripts/fetch_node_elevations.py`` against Open-Elevation / SRTM).
+
+    Each edge's ``polyline_z`` is a linear interpolation between its start-
+    and end-node elevations, so ``enrich_sd_to_hd`` can compute
+    ``hd.slope_deg`` downstream and the Lanelet2 exporter emits ``ele`` tags
+    on graph nodes. Returns the number of nodes with elevation applied.
+    """
+    applied = 0
+    for node in graph.nodes:
+        z = elevations.get(str(node.id))
+        if z is None:
+            continue
+        attrs = dict(node.attributes)
+        attrs["elevation_m"] = float(z)
+        node.attributes = attrs
+        applied += 1
+    if not applied:
+        return 0
+    # Per-edge polyline_z via linear interpolation along cumulative meter length.
+    import math
+
+    for edge in graph.edges:
+        start_z = elevations.get(str(edge.start_node_id))
+        end_z = elevations.get(str(edge.end_node_id))
+        if start_z is None or end_z is None:
+            continue
+        pl = edge.polyline
+        if len(pl) < 2:
+            continue
+        cum = [0.0]
+        for i in range(1, len(pl)):
+            dx = pl[i][0] - pl[i - 1][0]
+            dy = pl[i][1] - pl[i - 1][1]
+            cum.append(cum[-1] + math.hypot(dx, dy))
+        total = cum[-1]
+        if total <= 0:
+            polyline_z = [float(start_z)] * len(pl)
+        else:
+            polyline_z = [
+                float(start_z) + (float(end_z) - float(start_z)) * (c / total)
+                for c in cum
+            ]
+        attrs = dict(edge.attributes)
+        attrs["polyline_z"] = polyline_z
+        edge.attributes = attrs
+    return applied
+
+
 def _widen_hd_envelope_for_osm_lanes(graph, base_lane_width_m: float = 3.5) -> int:
     """Widen the HD-lite ``hd.lane_boundaries`` envelope on edges that carry
     an OSM ``width`` (most accurate) or ``lanes`` tag so the outermost paint
@@ -1377,6 +1428,17 @@ def main() -> None:
             hovp, lat0, lon0, _OSM_WANTED_HIGHWAYS
         )
         _inject_osm_tags_into_graph_edges(grid, lat0, lon0, paris_way_specs)
+        # Apply precomputed SRTM-30m elevations (via Open-Elevation) if
+        # available, so every graph node carries `elevation_m` and every edge
+        # carries a `polyline_z` list. This is what turns `build --3d` and
+        # `route --uphill-penalty` / `--downhill-bonus` into meaningful
+        # operations for this committed dataset.
+        paris_elev_path = Path("/tmp/osm_real_data/paris_node_elevations.json")
+        if paris_elev_path.is_file():
+            elev_doc = json.loads(paris_elev_path.read_text(encoding="utf-8"))
+            elevs = elev_doc.get("elevations") or {}
+            if isinstance(elevs, dict):
+                _apply_node_elevations(grid, elevs)
         # Populate HD-lite lane boundaries so the viewer can render the green /
         # purple dashed lines. Without this the 3D / 2D views only show the
         # orange centerlines for the Paris grid.
@@ -1578,6 +1640,12 @@ def main() -> None:
             berlin_origin["longitude"],
             berlin_way_specs,
         )
+        berlin_elev_path = Path("/tmp/osm_real_data/berlin_node_elevations.json")
+        if berlin_elev_path.is_file():
+            elev_doc = json.loads(berlin_elev_path.read_text(encoding="utf-8"))
+            elevs = elev_doc.get("elevations") or {}
+            if isinstance(elevs, dict):
+                _apply_node_elevations(berlin_graph, elevs)
         enrich_sd_to_hd(berlin_graph, SDToHDConfig(lane_width_m=3.5))
         _widen_hd_envelope_for_osm_lanes(berlin_graph, base_lane_width_m=3.5)
         berlin_geo_tmp = ASSETS / "_map_berlin_mitte.tmp.geojson"

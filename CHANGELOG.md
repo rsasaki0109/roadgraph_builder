@@ -82,6 +82,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   browser smoke covers the `n312 → n191` deep link, asserting the card is
   visible, multiple steps render, and the URL retains `from` / `to`.
 
+- **SRTM elevations flow through committed Paris / Berlin datasets.**
+  New `scripts/fetch_node_elevations.py` POSTs every `kind=node` point in a
+  committed map GeoJSON to Open-Elevation's public SRTM-30m endpoint and
+  caches the result under `/tmp/osm_real_data/<dataset>_node_elevations.json`.
+  `scripts/refresh_docs_assets.py` gains `_apply_node_elevations()` that
+  stamps `node.attributes.elevation_m` and builds a linearly interpolated
+  `edge.attributes.polyline_z`, so `enrich_sd_to_hd` now produces real
+  `hd.slope_deg` values (Paris avg 1.31° |slope|, max 55° on short
+  rooftop-to-valley edges) and the Lanelet2 exporter emits
+  `<tag k="ele" v="N.NN"/>` on every graph-node it writes. Paris gets
+  855 elevations (range 27-65 m) + 1 081 slope_deg; Berlin Mitte gets
+  1 883 elevations. `validate-lanelet2-tags` still reports
+  `result: ok` / 0 errors on both outputs. Routing with
+  `--uphill-penalty` / `--downhill-bonus` becomes meaningful for these
+  datasets for the first time, and `build --3d` becomes a no-op for
+  committed bundles because the elevation pass already ran.
+
 - **OSM `width=` tag drives the HD-lite envelope and becomes a lanelet width attribute.**
   The OSM tag collector in `refresh_docs_assets.py` now also captures
   `width=` (metres) onto `edge.attributes.osm_width_m`.

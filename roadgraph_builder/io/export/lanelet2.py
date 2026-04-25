@@ -432,10 +432,29 @@ def export_lanelet2_per_lane(
         relation_children.append(r_el)
         return r_id
 
-    # Graph-node export (same as standard).
+    # Graph-node export (same as standard). Emit an ``ele`` tag when the
+    # node carries elevation data, either directly via ``elevation_m`` (3D
+    # build / refresh elevation stamp) or inside the ``hd`` block.
     for n in graph.nodes:
-        lon, lat = meters_to_lonlat(float(n.position[0]), float(n.position[1]), origin_lat, origin_lon)
-        new_node(lat, lon, {"roadgraph": "graph_node", "roadgraph:node_id": str(n.id)})
+        lon, lat = meters_to_lonlat(
+            float(n.position[0]), float(n.position[1]), origin_lat, origin_lon
+        )
+        tags: dict[str, str] = {
+            "roadgraph": "graph_node",
+            "roadgraph:node_id": str(n.id),
+        }
+        n_attrs = n.attributes if isinstance(n.attributes, dict) else {}
+        raw_elev = n_attrs.get("elevation_m")
+        if raw_elev is None:
+            hd_n = n_attrs.get("hd")
+            if isinstance(hd_n, dict):
+                raw_elev = hd_n.get("elevation_m")
+        if raw_elev is not None:
+            try:
+                tags["ele"] = f"{float(raw_elev):.2f}"
+            except (TypeError, ValueError):
+                pass
+        new_node(lat, lon, tags)
 
     from roadgraph_builder.hd.boundaries import centerline_lane_boundaries
 
