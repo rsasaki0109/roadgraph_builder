@@ -186,6 +186,13 @@ def _autoware_lanelet_tags_from_attributes(attrs: dict) -> list[tuple[str, str]]
     if isinstance(name, str) and name:
         extra.append(("name", name))
 
+    # OSM width (metres) — emitted for the lanelet as an advisory "width"
+    # attribute (Autoware reads this when available; it does not replace the
+    # per-lane boundaries that carry the real paint lines).
+    width_raw = attrs.get("osm_width_m")
+    if isinstance(width_raw, (int, float)) and float(width_raw) > 0:
+        extra.append(("width", f"{float(width_raw):.2f} m"))
+
     return extra
 
 

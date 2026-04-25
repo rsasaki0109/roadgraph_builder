@@ -181,6 +181,7 @@ def _collect_osm_way_polylines(
                     "maxspeed": tags.get("maxspeed"),
                     "oneway": tags.get("oneway"),
                     "name": tags.get("name"),
+                    "width": tags.get("width"),
                 },
                 "coords_m": coords_m,
             }
@@ -323,10 +324,16 @@ def _osm_regulatory_observations(
 
 def _widen_hd_envelope_for_osm_lanes(graph, base_lane_width_m: float = 3.5) -> int:
     """Widen the HD-lite ``hd.lane_boundaries`` envelope on edges that carry
-    an OSM ``lanes`` tag so the outermost paint lines reflect the real road
-    width (``osm_lanes * base_lane_width_m``). This runs after
-    :func:`enrich_sd_to_hd` which always uses a single-lane envelope. Returns
-    the number of edges whose envelope was widened.
+    an OSM ``width`` (most accurate) or ``lanes`` tag so the outermost paint
+    lines reflect the real road width instead of the single-lane default
+    produced by :func:`enrich_sd_to_hd`.
+
+    Precedence for the total road width:
+      * ``osm_width_m`` (direct OSM ``width=`` tag, metres)
+      * ``osm_lanes * base_lane_width_m`` (derived from OSM ``lanes=`` tag)
+      * otherwise, leave the default single-lane envelope untouched
+
+    Returns the number of edges whose envelope was rewritten.
     """
     from roadgraph_builder.hd.boundaries import (
         centerline_lane_boundaries,
@@ -336,10 +343,27 @@ def _widen_hd_envelope_for_osm_lanes(graph, base_lane_width_m: float = 3.5) -> i
     widened = 0
     for edge in graph.edges:
         attrs = dict(edge.attributes)
+        width_raw = attrs.get("osm_width_m")
+        osm_width_m: float | None = None
+        if isinstance(width_raw, (int, float)) and float(width_raw) > 0:
+            osm_width_m = float(width_raw)
         lanes_n = attrs.get("osm_lanes")
-        if not isinstance(lanes_n, int) or lanes_n < 2:
+        if osm_width_m is not None:
+            total_width = osm_width_m
+            source_tag = "osm_width_tag"
+            note = (
+                f"Outer paint envelope uses OSM width={osm_width_m} m; "
+                "HD-lite, not survey-grade."
+            )
+        elif isinstance(lanes_n, int) and lanes_n >= 2:
+            total_width = base_lane_width_m * float(lanes_n)
+            source_tag = "osm_lanes_offset_hd_lite"
+            note = (
+                f"Outer paint envelope offset by {lanes_n}x {base_lane_width_m} m "
+                "from centerline (OSM lanes tag); HD-lite, not survey-grade."
+            )
+        else:
             continue
-        total_width = base_lane_width_m * float(lanes_n)
         left, right = centerline_lane_boundaries(edge.polyline, total_width)
         if not left or not right:
             continue
@@ -348,11 +372,8 @@ def _widen_hd_envelope_for_osm_lanes(graph, base_lane_width_m: float = 3.5) -> i
             "left": polyline_to_json_points(left),
             "right": polyline_to_json_points(right),
         }
-        hd["quality"] = "osm_lanes_offset_hd_lite"
-        hd["note"] = (
-            f"Outer paint envelope offset by {lanes_n}x {base_lane_width_m} m "
-            "from centerline (OSM lanes tag); HD-lite, not survey-grade."
-        )
+        hd["quality"] = source_tag
+        hd["note"] = note
         attrs["hd"] = hd
         edge.attributes = attrs
         widened += 1
@@ -406,6 +427,14 @@ def _inject_osm_tags_into_graph_edges(
             attrs["osm_oneway"] = str(tags["oneway"])
         if tags.get("name"):
             attrs["osm_name"] = str(tags["name"])
+        width_raw = tags.get("width")
+        if width_raw is not None:
+            try:
+                width_val = float(str(width_raw).strip().split()[0])
+                if width_val > 0:
+                    attrs["osm_width_m"] = round(width_val, 3)
+            except (TypeError, ValueError):
+                pass
         edge.attributes = attrs
         stamped += 1
     return stamped

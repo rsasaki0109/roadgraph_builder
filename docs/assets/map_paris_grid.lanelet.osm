@@ -58488,6 +58488,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue de Valois"/>
+    <tag k="width" v="5.50 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="1535">
@@ -58702,6 +58703,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue de Marengo"/>
+    <tag k="width" v="13.00 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="1706">
@@ -58716,6 +58718,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue de Marengo"/>
+    <tag k="width" v="13.00 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="1717">
@@ -58730,6 +58733,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue de l'Oratoire"/>
+    <tag k="width" v="6.90 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="1724">
@@ -58936,6 +58940,7 @@
     <tag k="one_way" v="yes"/>
     <tag k="participant:vehicle" v="yes"/>
     <tag k="name" v="Rue du Roule"/>
+    <tag k="width" v="4.00 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="1865">
@@ -58964,6 +58969,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue Berger"/>
+    <tag k="width" v="5.00 m"/>
     <tag k="roadgraph:confidence" v="0.6000"/>
   </relation>
   <relation id="1889">
@@ -58978,6 +58984,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue Berger"/>
+    <tag k="width" v="5.00 m"/>
     <tag k="roadgraph:confidence" v="0.6000"/>
   </relation>
   <relation id="1900">
@@ -59034,6 +59041,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue des Prouvaires"/>
+    <tag k="width" v="4.00 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="1942">
@@ -59103,6 +59111,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="20 km/h"/>
     <tag k="name" v="Rue des Bons Enfants"/>
+    <tag k="width" v="4.50 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="2011">
@@ -59117,6 +59126,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="20 km/h"/>
     <tag k="name" v="Rue des Bons Enfants"/>
+    <tag k="width" v="4.50 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="2020">
@@ -59131,6 +59141,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue du Colonel Driant"/>
+    <tag k="width" v="7.00 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="2037">
@@ -59145,6 +59156,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue du Colonel Driant"/>
+    <tag k="width" v="7.00 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="2054">
@@ -59159,6 +59171,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue Jean-Jacques Rousseau"/>
+    <tag k="width" v="3.00 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="2069">
@@ -59173,6 +59186,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue Jean-Jacques Rousseau"/>
+    <tag k="width" v="3.00 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="2082">
@@ -59187,6 +59201,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue du Bouloi"/>
+    <tag k="width" v="4.00 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="2095">
@@ -59201,6 +59216,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue du Bouloi"/>
+    <tag k="width" v="4.00 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="2112">
@@ -59215,6 +59231,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue Croix des Petits Champs"/>
+    <tag k="width" v="7.00 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="2125">
@@ -59271,6 +59288,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue Coquillière"/>
+    <tag k="width" v="3.00 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="2179">
@@ -59285,6 +59303,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue Coquillière"/>
+    <tag k="width" v="3.00 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="2190">
@@ -59299,6 +59318,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue Hérold"/>
+    <tag k="width" v="5.00 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="2201">
@@ -59439,6 +59459,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="20 km/h"/>
     <tag k="name" v="Rue Coquillière"/>
+    <tag k="width" v="5.00 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="2333">
@@ -59495,6 +59516,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Tunnel des Tuileries"/>
+    <tag k="width" v="6.00 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="2389">
@@ -59509,6 +59531,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Tunnel des Tuileries"/>
+    <tag k="width" v="6.00 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="2412">
@@ -59748,6 +59771,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="20 km/h"/>
     <tag k="name" v="Rue de la Verrerie"/>
+    <tag k="width" v="3.60 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="2650">
@@ -59832,6 +59856,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue des Francs Bourgeois"/>
+    <tag k="width" v="4.00 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="2776">
@@ -60098,6 +60123,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue Rougemont"/>
+    <tag k="width" v="3.50 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="3037">
@@ -60717,6 +60743,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="20 km/h"/>
     <tag k="name" v="Rue Saint-Martin"/>
+    <tag k="width" v="4.10 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="3625">
@@ -61316,6 +61343,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue Coq Héron"/>
+    <tag k="width" v="6.00 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="4151">
@@ -61330,6 +61358,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="20 km/h"/>
     <tag k="name" v="Rue Montesquieu"/>
+    <tag k="width" v="99.00 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="4166">
@@ -61344,6 +61373,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="20 km/h"/>
     <tag k="name" v="Rue Quincampoix"/>
+    <tag k="width" v="4.00 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="4179">
@@ -61568,6 +61598,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="20 km/h"/>
     <tag k="name" v="Rue de la Verrerie"/>
+    <tag k="width" v="3.50 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="4399">
@@ -62487,6 +62518,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue du Château d'Eau"/>
+    <tag k="width" v="4.50 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="5217">
@@ -62826,6 +62858,7 @@
     <tag k="one_way" v="no"/>
     <tag k="participant:vehicle" v="yes"/>
     <tag k="name" v="Impasse Martini"/>
+    <tag k="width" v="2.70 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="5507">
@@ -63078,6 +63111,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue Blondel"/>
+    <tag k="width" v="3.60 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="5748">
@@ -63750,6 +63784,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="20 km/h"/>
     <tag k="name" v="Rue Sainte-Croix de la Bretonnerie"/>
+    <tag k="width" v="3.20 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="6300">
@@ -63764,6 +63799,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="20 km/h"/>
     <tag k="name" v="Rue Sainte-Croix de la Bretonnerie"/>
+    <tag k="width" v="3.20 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="6319">
@@ -63778,6 +63814,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="20 km/h"/>
     <tag k="name" v="Rue Sainte-Croix de la Bretonnerie"/>
+    <tag k="width" v="3.20 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="6336">
@@ -63976,6 +64013,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue du Faubourg Poissonnière"/>
+    <tag k="width" v="3.00 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="6557">
@@ -63990,6 +64028,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue du Faubourg Poissonnière"/>
+    <tag k="width" v="3.00 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="6576">
@@ -64004,6 +64043,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue du Faubourg Poissonnière"/>
+    <tag k="width" v="3.00 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="6585">
@@ -64110,6 +64150,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Carrefour des Théâtres"/>
+    <tag k="width" v="4.90 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="6681">
@@ -64124,6 +64165,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Carrefour des Théâtres"/>
+    <tag k="width" v="4.90 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="6702">
@@ -64138,6 +64180,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Carrefour des Théâtres"/>
+    <tag k="width" v="4.30 m"/>
     <tag k="roadgraph:confidence" v="0.6000"/>
   </relation>
   <relation id="6715">
@@ -64576,6 +64619,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="20 km/h"/>
     <tag k="name" v="Rue du Temple"/>
+    <tag k="width" v="3.40 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="7025">
@@ -65337,6 +65381,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue Édouard Colonne"/>
+    <tag k="width" v="4.80 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="7570">
@@ -65715,6 +65760,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue Coquillière"/>
+    <tag k="width" v="7.00 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="7865">
@@ -65757,6 +65803,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue Jean-Jacques Rousseau"/>
+    <tag k="width" v="3.00 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="7896">
@@ -65887,6 +65934,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="20 km/h"/>
     <tag k="name" v="Rue Coquillière"/>
+    <tag k="width" v="3.50 m"/>
     <tag k="roadgraph:confidence" v="0.6000"/>
   </relation>
   <relation id="8018">
@@ -66059,6 +66107,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue du Faubourg Saint-Martin"/>
+    <tag k="width" v="5.70 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="8192">
@@ -66073,6 +66122,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue du Faubourg Saint-Martin"/>
+    <tag k="width" v="5.70 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="8209">
@@ -66087,6 +66137,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue du Faubourg Saint-Martin"/>
+    <tag k="width" v="5.70 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="8216">
@@ -66101,6 +66152,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Carrefour des Théâtres"/>
+    <tag k="width" v="4.90 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="8239">
@@ -66327,6 +66379,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="20 km/h"/>
     <tag k="name" v="Rue de la Verrerie"/>
+    <tag k="width" v="4.10 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="8422">
@@ -66382,6 +66435,7 @@
     <tag k="one_way" v="no"/>
     <tag k="participant:vehicle" v="yes"/>
     <tag k="name" v="Impasse du Bœuf"/>
+    <tag k="width" v="2.50 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="8480">
@@ -66532,6 +66586,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue Saint-Martin"/>
+    <tag k="width" v="7.60 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="8594">
@@ -68318,6 +68373,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue Rossini"/>
+    <tag k="width" v="6.50 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="10226">
@@ -69538,6 +69594,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue Salomon de Caus"/>
+    <tag k="width" v="3.90 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="11527">
@@ -69552,6 +69609,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="20 km/h"/>
     <tag k="name" v="Cour des Petites Écuries"/>
+    <tag k="width" v="3.30 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="11540">
@@ -69652,6 +69710,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue des Archives"/>
+    <tag k="width" v="7.30 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="11622">
@@ -69766,6 +69825,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="20 km/h"/>
     <tag k="name" v="Rue de Turbigo"/>
+    <tag k="width" v="2.70 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="11725">
@@ -69780,6 +69840,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="20 km/h"/>
     <tag k="name" v="Rue de Turbigo"/>
+    <tag k="width" v="2.70 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="11736">
@@ -69850,6 +69911,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Parc Rives de Seine - Georges Pompidou"/>
+    <tag k="width" v="2.00 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="11807">
@@ -69864,6 +69926,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Parc Rives de Seine - Georges Pompidou"/>
+    <tag k="width" v="2.00 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="11826">
@@ -69878,6 +69941,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Parc Rives de Seine - Georges Pompidou"/>
+    <tag k="width" v="2.00 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="11833">
@@ -71675,6 +71739,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue du Colonel Driant"/>
+    <tag k="width" v="5.00 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="13337">
@@ -71689,6 +71754,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue du Colonel Driant"/>
+    <tag k="width" v="6.00 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="13354">
@@ -73456,6 +73522,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Quai de l'Horloge"/>
+    <tag k="width" v="6.00 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="14962">
@@ -73470,6 +73537,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Quai de l'Horloge"/>
+    <tag k="width" v="6.00 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="14969">
@@ -74410,6 +74478,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="20 km/h"/>
     <tag k="name" v="Rue des Bons Enfants"/>
+    <tag k="width" v="4.50 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="15590">
@@ -74424,6 +74493,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue Saint-Honoré"/>
+    <tag k="width" v="12.00 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="15603">
@@ -74990,6 +75060,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue Rossini"/>
+    <tag k="width" v="6.50 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="15985">
@@ -77344,6 +77415,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue du Château d'Eau"/>
+    <tag k="width" v="3.00 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="17765">
@@ -77795,6 +77867,7 @@
     <tag k="one_way" v="no"/>
     <tag k="participant:vehicle" v="yes"/>
     <tag k="name" v="Rue Colbert"/>
+    <tag k="width" v="4.00 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="18122">
@@ -78470,6 +78543,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue Saint-Martin"/>
+    <tag k="width" v="4.90 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="18527">
@@ -78484,6 +78558,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Carrefour des Théâtres"/>
+    <tag k="width" v="4.90 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="18536">
@@ -78645,6 +78720,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Pont au Change"/>
+    <tag k="width" v="5.00 m"/>
     <tag k="roadgraph:confidence" v="0.6000"/>
   </relation>
   <relation id="18625">
@@ -79282,6 +79358,7 @@
     <tag k="one_way" v="yes"/>
     <tag k="participant:vehicle" v="yes"/>
     <tag k="name" v="Rue des Archives"/>
+    <tag k="width" v="7.30 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="19075">
@@ -79479,6 +79556,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue Croix des Petits Champs"/>
+    <tag k="width" v="8.00 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="19212">
@@ -79506,6 +79584,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue du Colonel Driant"/>
+    <tag k="width" v="4.00 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="19234">
@@ -79534,6 +79613,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue Croix des Petits Champs"/>
+    <tag k="width" v="10.00 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="19256">
@@ -79548,6 +79628,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue Croix des Petits Champs"/>
+    <tag k="width" v="10.00 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="19265">
@@ -79920,6 +80001,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue des Archives"/>
+    <tag k="width" v="7.30 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="19517">
@@ -80148,6 +80230,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue Saint-Honoré"/>
+    <tag k="width" v="5.00 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="19658">
@@ -80270,6 +80353,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue du Faubourg Poissonnière"/>
+    <tag k="width" v="3.00 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="19722">
@@ -80284,6 +80368,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue Croix des Petits Champs"/>
+    <tag k="width" v="10.00 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="19731">
@@ -81114,6 +81199,7 @@
     <tag k="one_way" v="yes"/>
     <tag k="participant:vehicle" v="yes"/>
     <tag k="name" v="Rue Pierre au Lard"/>
+    <tag k="width" v="2.00 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="20321">
@@ -81319,6 +81405,7 @@
     <tag k="participant:vehicle" v="yes"/>
     <tag k="speed_limit" v="30 km/h"/>
     <tag k="name" v="Rue Coq Héron"/>
+    <tag k="width" v="6.00 m"/>
     <tag k="roadgraph:confidence" v="0.0000"/>
   </relation>
   <relation id="20448">

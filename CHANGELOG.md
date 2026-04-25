@@ -82,6 +82,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   browser smoke covers the `n312 → n191` deep link, asserting the card is
   visible, multiple steps render, and the URL retains `from` / `to`.
 
+- **OSM `width=` tag drives the HD-lite envelope and becomes a lanelet width attribute.**
+  The OSM tag collector in `refresh_docs_assets.py` now also captures
+  `width=` (metres) onto `edge.attributes.osm_width_m`.
+  `_widen_hd_envelope_for_osm_lanes` gains a precedence ladder:
+  OSM `width` wins over OSM `lanes * 3.5 m` wins over the single-lane
+  default, and the edge's `hd.quality` now reflects which source
+  produced the envelope (`osm_width_tag` / `osm_lanes_offset_hd_lite` /
+  `centerline_offset_hd_lite`). Paris grid distribution:
+  87 `osm_width_tag` / 239 `osm_lanes_offset_hd_lite` / 755 default
+  envelopes. The Autoware lanelet-tag helper also emits
+  `<tag k="width" v="N.NN m"/>` on every lanelet whose edge carries
+  `osm_width_m`. `validate-lanelet2-tags` still reports `result: ok`
+  with 0 errors.
+
 - **Per-lane Lanelet2 export now emits regulatory_element relations from semantic_rules.**
   The single-lanelet `export_lanelet2` already wired `traffic_light` /
   `stop_line` detections into `type=regulatory_element` relations; the
