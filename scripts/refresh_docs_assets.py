@@ -432,6 +432,205 @@ def _apply_node_elevations(graph, elevations: dict[str, float]) -> int:
     return applied
 
 
+def _build_committed_osm_dataset(
+    *,
+    dataset_id: str,
+    raw_highways_path: Path,
+    raw_tr_path: Path | None,
+    raw_regulatory_path: Path | None,
+    elevation_cache_path: Path | None,
+    origin_lat: float,
+    origin_lon: float,
+    route_from: str | None = None,
+    route_to: str | None = None,
+):
+    """Build all committed assets for one OSM-highway dataset (graph GeoJSON,
+    Lanelet2 OSM, optional turn restrictions / route / elevation / regulatory
+    overlay) from raw Overpass dumps under ``/tmp``.
+
+    Returns the built ``Graph`` (or ``None`` when ``raw_highways_path`` is
+    missing). The caller is expected to register the dataset id in the
+    viewer's URL maps and dropdown so the new dataset is reachable from the
+    map console.
+    """
+    if not raw_highways_path.is_file():
+        return None
+    from roadgraph_builder.io.osm import (
+        build_graph_from_overpass_highways,
+        convert_osm_restrictions_to_graph,
+        load_overpass_json,
+    )
+    from roadgraph_builder.io.osm.turn_restrictions import strip_private_fields
+    from roadgraph_builder.navigation.turn_restrictions import (
+        load_turn_restrictions_json,
+    )
+    from roadgraph_builder.pipeline.build_graph import BuildParams
+    from roadgraph_builder.routing.geojson_export import write_route_geojson
+    from roadgraph_builder.routing.shortest_path import shortest_path
+    from roadgraph_builder.io.camera.detections import (
+        apply_camera_detections_to_graph,
+    )
+    from roadgraph_builder.hd.pipeline import SDToHDConfig, enrich_sd_to_hd
+    from roadgraph_builder.io.export.geojson import export_map_geojson
+    import numpy as np
+
+    origin = {"latitude": float(origin_lat), "longitude": float(origin_lon)}
+    (ASSETS / f"{dataset_id}_origin.json").write_text(
+        json.dumps(origin, indent=2) + "\n", encoding="utf-8"
+    )
+    hovp = load_overpass_json(raw_highways_path)
+    graph = build_graph_from_overpass_highways(
+        hovp,
+        origin_lat=origin_lat,
+        origin_lon=origin_lon,
+        params=BuildParams(
+            simplify_tolerance_m=0.0,
+            post_simplify_tolerance_m=0.0,
+            merge_endpoint_m=2.0,
+        ),
+    )
+    way_specs = _collect_osm_way_polylines(
+        hovp, origin_lat, origin_lon, _OSM_WANTED_HIGHWAYS
+    )
+    _inject_osm_tags_into_graph_edges(graph, origin_lat, origin_lon, way_specs)
+    if elevation_cache_path is not None and elevation_cache_path.is_file():
+        elev_doc = json.loads(elevation_cache_path.read_text(encoding="utf-8"))
+        elevs = elev_doc.get("elevations") or {}
+        if isinstance(elevs, dict):
+            _apply_node_elevations(graph, elevs)
+    enrich_sd_to_hd(graph, SDToHDConfig(lane_width_m=3.5))
+    _widen_hd_envelope_for_osm_lanes(graph, base_lane_width_m=3.5)
+
+    # Camera-style observations from real OSM regulatory nodes (traffic
+    # signals, stop / give_way, crossings, speed cameras).
+    observations: list[dict] = []
+    if raw_regulatory_path is not None and raw_regulatory_path.is_file():
+        overpass_reg = json.loads(
+            raw_regulatory_path.read_text(encoding="utf-8")
+        )
+        observations = _osm_regulatory_observations(
+            overpass_reg, graph, origin_lat, origin_lon, max_crossings=160
+        )
+        if observations:
+            apply_camera_detections_to_graph(graph, observations)
+            (ASSETS / f"{dataset_id}_camera_detections.json").write_text(
+                json.dumps(
+                    {
+                        "format_version": 1,
+                        "license": (
+                            "© OpenStreetMap contributors, ODbL 1.0 "
+                            "(derived from Overpass regulatory nodes)"
+                        ),
+                        "license_url": "https://opendatacommons.org/licenses/odbl/1-0/",
+                        "notes": (
+                            "Edge-keyed projections of OSM "
+                            "highway=traffic_signals / stop / crossing / "
+                            "give_way / speed_camera nodes onto the "
+                            f"committed {dataset_id} grid via nearest "
+                            "point-to-polyline match."
+                        ),
+                        "observations": observations,
+                    },
+                    indent=2,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+    geo_tmp = ASSETS / f"_map_{dataset_id}.tmp.geojson"
+    export_map_geojson(
+        graph,
+        np.zeros((0, 2)),
+        geo_tmp,
+        origin_lat=origin_lat,
+        origin_lon=origin_lon,
+        dataset_name=dataset_id,
+        attribution="© OpenStreetMap contributors",
+        license_name="ODbL-1.0",
+        license_url="https://opendatacommons.org/licenses/odbl/1-0/",
+    )
+    raw_doc = json.loads(geo_tmp.read_text(encoding="utf-8"))
+    for f in raw_doc["features"]:
+        for k in ("source", "direction_observed"):
+            f["properties"].pop(k, None)
+    if observations:
+        _append_semantic_overlay_points(raw_doc, observations, dataset_id)
+    (ASSETS / f"map_{dataset_id}.geojson").write_text(
+        json.dumps(raw_doc, separators=(",", ":")), encoding="utf-8"
+    )
+    geo_tmp.unlink(missing_ok=True)
+
+    restrictions_filename: str | None = None
+    if raw_tr_path is not None and raw_tr_path.is_file():
+        tr_raw = load_overpass_json(raw_tr_path)
+        conv = convert_osm_restrictions_to_graph(
+            graph, tr_raw, max_snap_distance_m=15.0
+        )
+        cleaned = strip_private_fields(conv.restrictions)
+        restrictions_filename = f"{dataset_id}_turn_restrictions.json"
+        (ASSETS / restrictions_filename).write_text(
+            json.dumps(
+                {
+                    "format_version": 1,
+                    "attribution": "© OpenStreetMap contributors",
+                    "license": "ODbL-1.0",
+                    "license_url": "https://opendatacommons.org/licenses/odbl/1-0/",
+                    "turn_restrictions": cleaned,
+                },
+                indent=2,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+
+    if route_from and route_to and any(n.id == route_from for n in graph.nodes):
+        try:
+            trs_loaded = (
+                load_turn_restrictions_json(ASSETS / restrictions_filename)
+                if restrictions_filename
+                and (ASSETS / restrictions_filename).is_file()
+                else None
+            )
+            route = shortest_path(
+                graph, route_from, route_to, turn_restrictions=trs_loaded
+            )
+            if route is not None:
+                write_route_geojson(
+                    ASSETS / f"route_{dataset_id}.geojson",
+                    graph,
+                    route,
+                    origin_lat=origin_lat,
+                    origin_lon=origin_lon,
+                    attribution="© OpenStreetMap contributors",
+                    license_name="ODbL-1.0",
+                    license_url="https://opendatacommons.org/licenses/odbl/1-0/",
+                )
+        except Exception as exc:  # pragma: no cover
+            print(f"{dataset_id} demo route skipped: {exc}")
+
+    try:
+        from roadgraph_builder.cli.hd import apply_lane_inferences
+        from roadgraph_builder.hd.lane_inference import infer_lane_counts
+        from roadgraph_builder.io.export.lanelet2 import (
+            export_lanelet2_per_lane,
+        )
+
+        inferences = infer_lane_counts(
+            graph.to_dict(), base_lane_width_m=3.5
+        )
+        apply_lane_inferences(graph, inferences)
+        export_lanelet2_per_lane(
+            graph,
+            ASSETS / f"map_{dataset_id}.lanelet.osm",
+            origin_lat=origin_lat,
+            origin_lon=origin_lon,
+        )
+    except Exception as exc:  # pragma: no cover
+        print(f"{dataset_id} Lanelet2 export skipped: {exc}")
+
+    return graph
+
+
 def _widen_hd_envelope_for_osm_lanes(graph, base_lane_width_m: float = 3.5) -> int:
     """Widen the HD-lite ``hd.lane_boundaries`` envelope on edges that carry
     an OSM ``width`` (most accurate) or ``lanes`` tag so the outermost paint
@@ -1142,6 +1341,18 @@ def _write_berlin_mitte_reachability_asset() -> None:
     )
 
 
+def _write_tokyo_ginza_reachability_asset() -> None:
+    """Build the committed Tokyo Ginza service-area overlay."""
+    _write_reachability_asset(
+        dataset_id="tokyo_ginza",
+        map_filename="map_tokyo_ginza.geojson",
+        restrictions_filename="tokyo_ginza_turn_restrictions.json",
+        output_filename="reachable_tokyo_ginza.geojson",
+        start_node="n472",
+        budget_m=500.0,
+    )
+
+
 def _render_paris_grid_route_preview() -> None:
     """Render a static SVG preview for README / GitHub Pages."""
     map_path = ASSETS / "map_paris_grid.geojson"
@@ -1696,175 +1907,52 @@ def main() -> None:
             license_url="https://opendatacommons.org/licenses/odbl/1-0/",
         )
 
-    # OSM-highway-derived Berlin Mitte HD-lite sample
-    # Same inputs shape as the Paris grid block; shipped so the committed
-    # viewer can switch between European and (future) Asian demos without a
-    # live Overpass fetch. Turn restrictions, demo route, and reachability
-    # overlays are populated when the matching raw Overpass dump exists
-    # under /tmp.
-    berlin_raw = Path("/tmp/berlin_mitte_raw.json")
-    if berlin_raw.is_file():
-        from roadgraph_builder.io.osm import (
-            build_graph_from_overpass_highways,
-            convert_osm_restrictions_to_graph,
-            load_overpass_json,
-        )
-        from roadgraph_builder.io.osm.turn_restrictions import strip_private_fields
-        from roadgraph_builder.navigation.turn_restrictions import (
-            load_turn_restrictions_json,
-        )
-        from roadgraph_builder.pipeline.build_graph import BuildParams
-        from roadgraph_builder.routing.geojson_export import write_route_geojson
-        from roadgraph_builder.routing.shortest_path import shortest_path
-        import numpy as np
-
-        # Berlin Mitte bbox roughly lat 52.506–52.526, lon 13.367–13.401.
-        berlin_origin = {"latitude": 52.5160, "longitude": 13.3840}
-        (ASSETS / "berlin_mitte_origin.json").write_text(
-            json.dumps(berlin_origin, indent=2) + "\n", encoding="utf-8"
-        )
-        hovp = load_overpass_json(berlin_raw)
-        berlin_graph = build_graph_from_overpass_highways(
-            hovp,
-            origin_lat=berlin_origin["latitude"],
-            origin_lon=berlin_origin["longitude"],
-            params=BuildParams(
-                simplify_tolerance_m=0.0,
-                post_simplify_tolerance_m=0.0,
-                merge_endpoint_m=2.0,
-            ),
-        )
-        berlin_way_specs = _collect_osm_way_polylines(
-            hovp,
-            berlin_origin["latitude"],
-            berlin_origin["longitude"],
-            _OSM_WANTED_HIGHWAYS,
-        )
-        _inject_osm_tags_into_graph_edges(
-            berlin_graph,
-            berlin_origin["latitude"],
-            berlin_origin["longitude"],
-            berlin_way_specs,
-        )
-        berlin_elev_path = Path("/tmp/osm_real_data/berlin_node_elevations.json")
-        if berlin_elev_path.is_file():
-            elev_doc = json.loads(berlin_elev_path.read_text(encoding="utf-8"))
-            elevs = elev_doc.get("elevations") or {}
-            if isinstance(elevs, dict):
-                _apply_node_elevations(berlin_graph, elevs)
-        enrich_sd_to_hd(berlin_graph, SDToHDConfig(lane_width_m=3.5))
-        _widen_hd_envelope_for_osm_lanes(berlin_graph, base_lane_width_m=3.5)
-        berlin_geo_tmp = ASSETS / "_map_berlin_mitte.tmp.geojson"
-        export_map_geojson(
-            berlin_graph,
-            np.zeros((0, 2)),
-            berlin_geo_tmp,
-            origin_lat=berlin_origin["latitude"],
-            origin_lon=berlin_origin["longitude"],
-            dataset_name="berlin_mitte",
-            attribution="© OpenStreetMap contributors",
-            license_name="ODbL-1.0",
-            license_url="https://opendatacommons.org/licenses/odbl/1-0/",
-        )
-        raw = json.loads(berlin_geo_tmp.read_text(encoding="utf-8"))
-        for f in raw["features"]:
-            pp = f["properties"]
-            for k in ("source", "direction_observed"):
-                pp.pop(k, None)
-        (ASSETS / "map_berlin_mitte.geojson").write_text(
-            json.dumps(raw, separators=(",", ":")), encoding="utf-8"
-        )
-        berlin_geo_tmp.unlink(missing_ok=True)
-        # OSM turn-restriction relations for Berlin Mitte. Same flow as Paris:
-        # fetch raw → convert against the graph → save the cleaned committed
-        # JSON. When raw data isn't present we leave the existing committed
-        # file (if any) alone.
-        berlin_tr_raw_path = Path(
+    # OSM-highway-derived Berlin Mitte HD-lite sample (bbox lat 52.506–52.526,
+    # lon 13.367–13.401). All inputs read from /tmp; the helper writes the
+    # committed GeoJSON, Lanelet2 OSM, turn_restrictions, demo route, and
+    # camera-detections derivative.
+    _build_committed_osm_dataset(
+        dataset_id="berlin_mitte",
+        raw_highways_path=Path("/tmp/berlin_mitte_raw.json"),
+        raw_tr_path=Path(
             "/tmp/osm_real_data/berlin_turn_restrictions_raw.json"
-        )
-        berlin_restrictions: list[dict] = []
-        if berlin_tr_raw_path.is_file():
-            tr_raw = load_overpass_json(berlin_tr_raw_path)
-            conv = convert_osm_restrictions_to_graph(
-                berlin_graph, tr_raw, max_snap_distance_m=15.0
-            )
-            berlin_restrictions = strip_private_fields(conv.restrictions)
-            (ASSETS / "berlin_mitte_turn_restrictions.json").write_text(
-                json.dumps(
-                    {
-                        "format_version": 1,
-                        "attribution": "© OpenStreetMap contributors",
-                        "license": "ODbL-1.0",
-                        "license_url": "https://opendatacommons.org/licenses/odbl/1-0/",
-                        "turn_restrictions": berlin_restrictions,
-                    },
-                    indent=2,
-                )
-                + "\n",
-                encoding="utf-8",
-            )
+        ),
+        raw_regulatory_path=None,
+        elevation_cache_path=Path(
+            "/tmp/osm_real_data/berlin_node_elevations.json"
+        ),
+        origin_lat=52.5160,
+        origin_lon=13.3840,
+        route_from="n32",
+        route_to="n327",
+    )
 
-        # Demo TR-aware route + reachability overlay. The endpoints are a
-        # well-separated north-south pair in Berlin Mitte (chosen by lat
-        # extreme on the committed graph; ~2.7 km route).
-        berlin_route_from = "n32"
-        berlin_route_to = "n327"
-        if (
-            berlin_graph.adj.get(berlin_route_from) is not None
-            if hasattr(berlin_graph, "adj")
-            else True
-        ) and any(n.id == berlin_route_from for n in berlin_graph.nodes):
-            try:
-                trs_loaded = (
-                    load_turn_restrictions_json(
-                        ASSETS / "berlin_mitte_turn_restrictions.json"
-                    )
-                    if (ASSETS / "berlin_mitte_turn_restrictions.json").is_file()
-                    else None
-                )
-                route = shortest_path(
-                    berlin_graph,
-                    berlin_route_from,
-                    berlin_route_to,
-                    turn_restrictions=trs_loaded,
-                )
-                if route is not None:
-                    write_route_geojson(
-                        ASSETS / "route_berlin_mitte.geojson",
-                        berlin_graph,
-                        route,
-                        origin_lat=berlin_origin["latitude"],
-                        origin_lon=berlin_origin["longitude"],
-                        attribution="© OpenStreetMap contributors",
-                        license_name="ODbL-1.0",
-                        license_url="https://opendatacommons.org/licenses/odbl/1-0/",
-                    )
-            except Exception as exc:  # pragma: no cover
-                print(f"berlin_mitte demo route skipped: {exc}")
-
-        try:
-            from roadgraph_builder.cli.hd import apply_lane_inferences
-            from roadgraph_builder.hd.lane_inference import infer_lane_counts
-            from roadgraph_builder.io.export.lanelet2 import (
-                export_lanelet2_per_lane,
-            )
-
-            berlin_inferences = infer_lane_counts(
-                berlin_graph.to_dict(),
-                base_lane_width_m=3.5,
-            )
-            apply_lane_inferences(berlin_graph, berlin_inferences)
-            export_lanelet2_per_lane(
-                berlin_graph,
-                ASSETS / "map_berlin_mitte.lanelet.osm",
-                origin_lat=berlin_origin["latitude"],
-                origin_lon=berlin_origin["longitude"],
-            )
-        except Exception as exc:  # pragma: no cover - best-effort docs refresh
-            print(f"berlin_mitte Lanelet2 export skipped: {exc}")
+    # OSM-highway-derived Tokyo Ginza HD-lite sample (bbox lat 35.6680–35.6750,
+    # lon 139.7600–139.7750). Asia counterpart to Paris/Berlin so the
+    # committed viewer carries a global-spread set of demos.
+    _build_committed_osm_dataset(
+        dataset_id="tokyo_ginza",
+        raw_highways_path=Path("/tmp/osm_real_data/tokyo_ginza_highways.json"),
+        raw_tr_path=Path(
+            "/tmp/osm_real_data/tokyo_ginza_turn_restrictions_raw.json"
+        ),
+        raw_regulatory_path=Path(
+            "/tmp/osm_real_data/tokyo_ginza_regulatory_nodes.json"
+        ),
+        elevation_cache_path=Path(
+            "/tmp/osm_real_data/tokyo_ginza_node_elevations.json"
+        ),
+        origin_lat=35.6715,
+        origin_lon=139.7675,
+        # West (Hibiya / Imperial Hotel area) → east (Ginza / Showa-dori),
+        # ~2.4 km cross-Ginza route through the busiest intersections.
+        route_from="n472",
+        route_to="n141",
+    )
 
     _write_paris_grid_reachability_asset()
     _write_berlin_mitte_reachability_asset()
+    _write_tokyo_ginza_reachability_asset()
     _write_route_explain_sample_asset()
     _write_map_match_explain_sample_asset()
 

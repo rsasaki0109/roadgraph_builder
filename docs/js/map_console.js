@@ -1060,6 +1060,7 @@ function setView(mode) {
 const DATASET_URLS = {
   paris_grid: "assets/map_paris_grid.geojson",
   berlin_mitte: "assets/map_berlin_mitte.geojson",
+  tokyo_ginza: "assets/map_tokyo_ginza.geojson",
   paris: "assets/map_paris.geojson",
   osm: "assets/map_osm.geojson",
   toy: "assets/map_toy.geojson",
@@ -1070,10 +1071,12 @@ const ROUTE_URLS = {
   paris: "assets/route_paris.geojson",
   paris_grid: "assets/route_paris_grid.geojson",
   berlin_mitte: "assets/route_berlin_mitte.geojson",
+  tokyo_ginza: "assets/route_tokyo_ginza.geojson",
 };
 const REACHABLE_URLS = {
   paris_grid: "assets/reachable_paris_grid.geojson",
   berlin_mitte: "assets/reachable_berlin_mitte.geojson",
+  tokyo_ginza: "assets/reachable_tokyo_ginza.geojson",
 };
 // Optional turn_restrictions JSON overlay (drawn as markers).
 // Per-dataset Lanelet2 OSM download (HD-lite, Autoware-compatible tags). The
@@ -1082,10 +1085,12 @@ const REACHABLE_URLS = {
 const LANELET_URLS = {
   paris_grid: "assets/map_paris_grid.lanelet.osm",
   berlin_mitte: "assets/map_berlin_mitte.lanelet.osm",
+  tokyo_ginza: "assets/map_tokyo_ginza.lanelet.osm",
 };
 const RESTRICTIONS_URLS = {
   paris_grid: "assets/paris_grid_turn_restrictions.json",
   berlin_mitte: "assets/berlin_mitte_turn_restrictions.json",
+  tokyo_ginza: "assets/tokyo_ginza_turn_restrictions.json",
 };
 
 // Per-dataset graph cached for JS Dijkstra.
@@ -2207,14 +2212,15 @@ async function show(which) {
     if (laneletUrl) {
       laneletLink.href = laneletUrl;
       laneletLink.hidden = false;
-      laneletLink.textContent =
-        "Lanelet2 OSM (" +
-        (which === "paris_grid"
+      const datasetLabel =
+        which === "paris_grid"
           ? "Paris"
           : which === "berlin_mitte"
             ? "Berlin"
-            : which) +
-        ")";
+            : which === "tokyo_ginza"
+              ? "Tokyo"
+              : which;
+      laneletLink.textContent = "Lanelet2 OSM (" + datasetLabel + ")";
     } else {
       laneletLink.hidden = true;
     }

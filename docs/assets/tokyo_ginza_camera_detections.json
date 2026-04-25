@@ -1,0 +1,3562 @@
+{
+  "format_version": 1,
+  "license": "\u00a9 OpenStreetMap contributors, ODbL 1.0 (derived from Overpass regulatory nodes)",
+  "license_url": "https://opendatacommons.org/licenses/odbl/1-0/",
+  "notes": "Edge-keyed projections of OSM highway=traffic_signals / stop / crossing / give_way / speed_camera nodes onto the committed tokyo_ginza grid via nearest point-to-polyline match.",
+  "observations": [
+    {
+      "edge_id": "e12",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 31254304,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -61.697,
+        "y": -221.845
+      }
+    },
+    {
+      "edge_id": "e12",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 31254305,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -51.092,
+        "y": -207.334
+      }
+    },
+    {
+      "edge_id": "e12",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 31254306,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -43.549,
+        "y": -197.315
+      }
+    },
+    {
+      "edge_id": "e12",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 31254307,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 34.534,
+        "y": -91.547
+      }
+    },
+    {
+      "edge_id": "e488",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 31254309,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -34.931,
+        "y": -223.935
+      }
+    },
+    {
+      "edge_id": "e137",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 31254310,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -28.707,
+        "y": -214.662
+      }
+    },
+    {
+      "edge_id": "e136",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 31254311,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 52.131,
+        "y": -106.48
+      }
+    },
+    {
+      "edge_id": "e279",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 31254374,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 512.642,
+        "y": -335.086
+      }
+    },
+    {
+      "edge_id": "e149",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 31254375,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 608.168,
+        "y": -239.903
+      }
+    },
+    {
+      "edge_id": "e102",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 31254387,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 670.0,
+        "y": -138.705
+      }
+    },
+    {
+      "edge_id": "e260",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 31254388,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 517.918,
+        "y": -59.99
+      }
+    },
+    {
+      "edge_id": "e135",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 31255167,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 131.397,
+        "y": 1.457
+      }
+    },
+    {
+      "edge_id": "e380",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 31255186,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 369.24,
+        "y": 241.004
+      }
+    },
+    {
+      "edge_id": "e390",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 257544628,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -556.435,
+        "y": 257.55
+      }
+    },
+    {
+      "edge_id": "e390",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 257544652,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -489.996,
+        "y": 326.735
+      }
+    },
+    {
+      "edge_id": "e636",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 260422934,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -572.785,
+        "y": 255.081
+      }
+    },
+    {
+      "edge_id": "e13",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 304153014,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 121.803,
+        "y": 25.819
+      }
+    },
+    {
+      "edge_id": "e372",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 304153015,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 503.844,
+        "y": -327.558
+      }
+    },
+    {
+      "edge_id": "e57",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 304153029,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -327.281,
+        "y": 57.599
+      }
+    },
+    {
+      "edge_id": "e83",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 304153033,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -558.54,
+        "y": -90.502
+      }
+    },
+    {
+      "edge_id": "e394",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 387769180,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -437.269,
+        "y": 384.923
+      }
+    },
+    {
+      "edge_id": "e63",
+      "kind": "stop_line",
+      "source": "osm_node",
+      "osm_id": 469184281,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -430.178,
+        "y": 182.404
+      },
+      "polyline_m": [
+        [
+          -430.85023777110115,
+          184.28788775286205
+        ],
+        [
+          -429.5062720481072,
+          180.52042758247973
+        ]
+      ]
+    },
+    {
+      "edge_id": "e65",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 469192525,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -418.679,
+        "y": 270.493
+      }
+    },
+    {
+      "edge_id": "e536",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 473462990,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -472.652,
+        "y": 9.174
+      }
+    },
+    {
+      "edge_id": "e57",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 473470182,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -319.793,
+        "y": 66.895
+      }
+    },
+    {
+      "edge_id": "e191",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 499831371,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 412.365,
+        "y": -241.271
+      }
+    },
+    {
+      "edge_id": "e86",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 559359760,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -201.413,
+        "y": -226.971
+      }
+    },
+    {
+      "edge_id": "e427",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 559359765,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -302.295,
+        "y": 187.186
+      }
+    },
+    {
+      "edge_id": "e93",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 565362074,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -642.476,
+        "y": -188.853
+      }
+    },
+    {
+      "edge_id": "e468",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 573250482,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -402.275,
+        "y": 122.314
+      }
+    },
+    {
+      "edge_id": "e113",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 588411739,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 602.766,
+        "y": 177.79
+      }
+    },
+    {
+      "edge_id": "e112",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 588411740,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 503.853,
+        "y": 186.83
+      }
+    },
+    {
+      "edge_id": "e12",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 598438985,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 113.809,
+        "y": 15.134
+      }
+    },
+    {
+      "edge_id": "e131",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 835996339,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 79.537,
+        "y": -329.982
+      }
+    },
+    {
+      "edge_id": "e166",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 835996357,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 367.027,
+        "y": -11.042
+      }
+    },
+    {
+      "edge_id": "e403",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 835996361,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 496.681,
+        "y": -101.165
+      }
+    },
+    {
+      "edge_id": "e149",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 878518788,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 598.774,
+        "y": -235.01
+      }
+    },
+    {
+      "edge_id": "e193",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 951246988,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 319.314,
+        "y": -152.637
+      }
+    },
+    {
+      "edge_id": "e132",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 951247002,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 181.63,
+        "y": -224.614
+      }
+    },
+    {
+      "edge_id": "e303",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 951247019,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 217.338,
+        "y": -256.393
+      }
+    },
+    {
+      "edge_id": "e311",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 951247035,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 279.64,
+        "y": -125.639
+      }
+    },
+    {
+      "edge_id": "e481",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 951247037,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -53.296,
+        "y": -186.652
+      }
+    },
+    {
+      "edge_id": "e497",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 1070638565,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -119.554,
+        "y": -312.113
+      }
+    },
+    {
+      "edge_id": "e12",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 1070638575,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -133.872,
+        "y": -297.235
+      }
+    },
+    {
+      "edge_id": "e204",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 1105125104,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 464.911,
+        "y": 84.441
+      }
+    },
+    {
+      "edge_id": "e179",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 1105125667,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 559.497,
+        "y": 50.305
+      }
+    },
+    {
+      "edge_id": "e304",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 1105125687,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 314.075,
+        "y": -340.101
+      }
+    },
+    {
+      "edge_id": "e507",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 1105152852,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 110.846,
+        "y": -364.419
+      }
+    },
+    {
+      "edge_id": "e197",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 1105152927,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 70.242,
+        "y": -338.144
+      }
+    },
+    {
+      "edge_id": "e506",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 1105152950,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 102.617,
+        "y": -372.292
+      }
+    },
+    {
+      "edge_id": "e200",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 1130958292,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 515.948,
+        "y": 359.504
+      }
+    },
+    {
+      "edge_id": "e211",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 1130958372,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 633.127,
+        "y": -121.047
+      }
+    },
+    {
+      "edge_id": "e248",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 1130958932,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -223.436,
+        "y": -206.834
+      }
+    },
+    {
+      "edge_id": "e565",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 1588220611,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -622.973,
+        "y": 294.222
+      }
+    },
+    {
+      "edge_id": "e617",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 1704105638,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -563.68,
+        "y": 247.409
+      }
+    },
+    {
+      "edge_id": "e571",
+      "kind": "stop_line",
+      "source": "osm_node",
+      "osm_id": 1834887211,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 46.431,
+        "y": -375.094
+      },
+      "polyline_m": [
+        [
+          48.31884180374626,
+          -375.75293626000564
+        ],
+        [
+          44.542282472733866,
+          -374.43475584013015
+        ]
+      ]
+    },
+    {
+      "edge_id": "e309",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1834887265,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 283.624,
+        "y": -128.386
+      }
+    },
+    {
+      "edge_id": "e138",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1834887274,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 397.081,
+        "y": -64.982
+      }
+    },
+    {
+      "edge_id": "e258",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1834887298,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 437.025,
+        "y": -19.248
+      }
+    },
+    {
+      "edge_id": "e204",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 1834887302,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 429.392,
+        "y": -7.639
+      }
+    },
+    {
+      "edge_id": "e321",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 1893305685,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 625.801,
+        "y": 354.79
+      }
+    },
+    {
+      "edge_id": "e323",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 1893305698,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 622.775,
+        "y": 347.295
+      }
+    },
+    {
+      "edge_id": "e80",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2019045907,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -601.005,
+        "y": -59.845
+      }
+    },
+    {
+      "edge_id": "e76",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2019045909,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -593.851,
+        "y": -51.428
+      }
+    },
+    {
+      "edge_id": "e94",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2019045912,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -622.368,
+        "y": -27.187
+      }
+    },
+    {
+      "edge_id": "e335",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2133066637,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -351.581,
+        "y": 347.206
+      }
+    },
+    {
+      "edge_id": "e659",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2133066640,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 131.749,
+        "y": 358.782
+      }
+    },
+    {
+      "edge_id": "e475",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828556,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -396.439,
+        "y": -239.681
+      }
+    },
+    {
+      "edge_id": "e83",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828557,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -386.593,
+        "y": -238.302
+      }
+    },
+    {
+      "edge_id": "e333",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828558,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -402.266,
+        "y": -234.91
+      }
+    },
+    {
+      "edge_id": "e475",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828559,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -387.099,
+        "y": -228.016
+      }
+    },
+    {
+      "edge_id": "e83",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828561,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -402.51,
+        "y": -224.458
+      }
+    },
+    {
+      "edge_id": "e333",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828562,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -392.23,
+        "y": -223.68
+      }
+    },
+    {
+      "edge_id": "e430",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828567,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -646.568,
+        "y": -200.662
+      }
+    },
+    {
+      "edge_id": "e385",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828570,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -632.585,
+        "y": -197.315
+      }
+    },
+    {
+      "edge_id": "e431",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828571,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -654.255,
+        "y": -194.602
+      }
+    },
+    {
+      "edge_id": "e430",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828583,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -631.185,
+        "y": -182.215
+      }
+    },
+    {
+      "edge_id": "e93",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828584,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -653.352,
+        "y": -179.391
+      }
+    },
+    {
+      "edge_id": "e431",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828586,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -638.429,
+        "y": -176.211
+      }
+    },
+    {
+      "edge_id": "e475",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828595,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -312.521,
+        "y": -141.951
+      }
+    },
+    {
+      "edge_id": "e538",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828596,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -301.013,
+        "y": -139.783
+      }
+    },
+    {
+      "edge_id": "e333",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828599,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -317.805,
+        "y": -137.515
+      }
+    },
+    {
+      "edge_id": "e475",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828602,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -300.832,
+        "y": -128.363
+      }
+    },
+    {
+      "edge_id": "e538",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828603,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -318.754,
+        "y": -124.883
+      }
+    },
+    {
+      "edge_id": "e333",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828604,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -306.243,
+        "y": -123.793
+      }
+    },
+    {
+      "edge_id": "e430",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828607,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -562.948,
+        "y": -100.209
+      }
+    },
+    {
+      "edge_id": "e431",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828609,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -569.082,
+        "y": -95.227
+      }
+    },
+    {
+      "edge_id": "e83",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 2135828611,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -556.453,
+        "y": -92.403
+      }
+    },
+    {
+      "edge_id": "e83",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 2135828613,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -562.207,
+        "y": -87.199
+      }
+    },
+    {
+      "edge_id": "e430",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828614,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -549.877,
+        "y": -84.664
+      }
+    },
+    {
+      "edge_id": "e83",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828615,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -569.054,
+        "y": -80.928
+      }
+    },
+    {
+      "edge_id": "e431",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828616,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -555.694,
+        "y": -79.749
+      }
+    },
+    {
+      "edge_id": "e475",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828618,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -233.201,
+        "y": -50.438
+      }
+    },
+    {
+      "edge_id": "e333",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828620,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -238.955,
+        "y": -45.657
+      }
+    },
+    {
+      "edge_id": "e484",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828624,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -239.262,
+        "y": -23.773
+      }
+    },
+    {
+      "edge_id": "e630",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828625,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -230.418,
+        "y": -14.3
+      }
+    },
+    {
+      "edge_id": "e430",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828627,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -476.392,
+        "y": -0.567
+      }
+    },
+    {
+      "edge_id": "e431",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828628,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -482.336,
+        "y": 4.403
+      }
+    },
+    {
+      "edge_id": "e430",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828632,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -464.089,
+        "y": 13.332
+      }
+    },
+    {
+      "edge_id": "e431",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828633,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -470.033,
+        "y": 18.514
+      }
+    },
+    {
+      "edge_id": "e430",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828635,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -393.847,
+        "y": 95.149
+      }
+    },
+    {
+      "edge_id": "e487",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828636,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -372.357,
+        "y": 96.506
+      }
+    },
+    {
+      "edge_id": "e431",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828637,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -399.8,
+        "y": 99.92
+      }
+    },
+    {
+      "edge_id": "e430",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828639,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -383.657,
+        "y": 106.124
+      }
+    },
+    {
+      "edge_id": "e628",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828640,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -365.212,
+        "y": 104.912
+      }
+    },
+    {
+      "edge_id": "e431",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828641,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -390.667,
+        "y": 112.563
+      }
+    },
+    {
+      "edge_id": "e443",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828643,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -376.63,
+        "y": 114.787
+      }
+    },
+    {
+      "edge_id": "e392",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828644,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -383.721,
+        "y": 120.824
+      }
+    },
+    {
+      "edge_id": "e443",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828645,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -365.112,
+        "y": 127.919
+      }
+    },
+    {
+      "edge_id": "e392",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828647,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -394.985,
+        "y": 130.598
+      }
+    },
+    {
+      "edge_id": "e427",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828649,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -371.526,
+        "y": 135.558
+      }
+    },
+    {
+      "edge_id": "e442",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828656,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -296.162,
+        "y": 180.625
+      }
+    },
+    {
+      "edge_id": "e442",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 2135828659,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -289.261,
+        "y": 187.163
+      }
+    },
+    {
+      "edge_id": "e634",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828660,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -285.196,
+        "y": 193.368
+      }
+    },
+    {
+      "edge_id": "e428",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828661,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -293.84,
+        "y": 199.072
+      }
+    },
+    {
+      "edge_id": "e634",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828663,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -226.932,
+        "y": 290.019
+      }
+    },
+    {
+      "edge_id": "e429",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828664,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -236.028,
+        "y": 295.968
+      }
+    },
+    {
+      "edge_id": "e98",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 2135828665,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -220.654,
+        "y": 300.337
+      }
+    },
+    {
+      "edge_id": "e382",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 2135828666,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -230.274,
+        "y": 305.497
+      }
+    },
+    {
+      "edge_id": "e633",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828667,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -214.601,
+        "y": 311.335
+      }
+    },
+    {
+      "edge_id": "e429",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2135828668,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -223.662,
+        "y": 316.717
+      }
+    },
+    {
+      "edge_id": "e443",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 2153867528,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -359.015,
+        "y": 133.656
+      }
+    },
+    {
+      "edge_id": "e497",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2172319501,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -45.834,
+        "y": -237.968
+      }
+    },
+    {
+      "edge_id": "e490",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2172319502,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -60.974,
+        "y": -197.049
+      }
+    },
+    {
+      "edge_id": "e136",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2172319504,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 123.574,
+        "y": -9.251
+      }
+    },
+    {
+      "edge_id": "e12",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2172319505,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 105.67,
+        "y": 4.181
+      }
+    },
+    {
+      "edge_id": "e135",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2172319506,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 139.346,
+        "y": 12.721
+      }
+    },
+    {
+      "edge_id": "e82",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2216972617,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -231.349,
+        "y": -378.519
+      }
+    },
+    {
+      "edge_id": "e476",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2217343232,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -481.026,
+        "y": -338.7
+      }
+    },
+    {
+      "edge_id": "e257",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2217343233,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -470.692,
+        "y": -336.587
+      }
+    },
+    {
+      "edge_id": "e332",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2217343234,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -485.299,
+        "y": -334.819
+      }
+    },
+    {
+      "edge_id": "e475",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2217343235,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -469.879,
+        "y": -325.746
+      }
+    },
+    {
+      "edge_id": "e387",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2217343236,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -486.627,
+        "y": -322.51
+      }
+    },
+    {
+      "edge_id": "e333",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2217343237,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -474.233,
+        "y": -321.843
+      }
+    },
+    {
+      "edge_id": "e544",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2217343241,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -214.231,
+        "y": -46.224
+      }
+    },
+    {
+      "edge_id": "e478",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2217343242,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -206.219,
+        "y": -37.528
+      }
+    },
+    {
+      "edge_id": "e495",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2217343245,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -204.674,
+        "y": -15.501
+      }
+    },
+    {
+      "edge_id": "e662",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2217343248,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -209.994,
+        "y": -10.552
+      }
+    },
+    {
+      "edge_id": "e370",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2217343250,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -249.569,
+        "y": 15.968
+      }
+    },
+    {
+      "edge_id": "e445",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2217343252,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -135.706,
+        "y": 53.351
+      }
+    },
+    {
+      "edge_id": "e445",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2217343253,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -152.272,
+        "y": 67.184
+      }
+    },
+    {
+      "edge_id": "e495",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2217343254,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -62.302,
+        "y": 151.081
+      }
+    },
+    {
+      "edge_id": "e381",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2217343255,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -49.529,
+        "y": 154.116
+      }
+    },
+    {
+      "edge_id": "e662",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2217343256,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -67.785,
+        "y": 155.606
+      }
+    },
+    {
+      "edge_id": "e494",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2217343257,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -50.423,
+        "y": 164.869
+      }
+    },
+    {
+      "edge_id": "e97",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2217343258,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -65.879,
+        "y": 168.071
+      }
+    },
+    {
+      "edge_id": "e663",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2217343259,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -55.753,
+        "y": 169.65
+      }
+    },
+    {
+      "edge_id": "e198",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2217343260,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 33.685,
+        "y": 251.89
+      }
+    },
+    {
+      "edge_id": "e494",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2217343261,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 110.395,
+        "y": 350.375
+      }
+    },
+    {
+      "edge_id": "e663",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2217343262,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 104.207,
+        "y": 353.989
+      }
+    },
+    {
+      "edge_id": "e675",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2217343263,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 102.68,
+        "y": 368.367
+      }
+    },
+    {
+      "edge_id": "e398",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2217343264,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 129.391,
+        "y": 373.026
+      }
+    },
+    {
+      "edge_id": "e681",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2217343265,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 122.418,
+        "y": 376.45
+      }
+    },
+    {
+      "edge_id": "e197",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253598240,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 63.874,
+        "y": -344.749
+      }
+    },
+    {
+      "edge_id": "e297",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253598242,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 61.155,
+        "y": -327.958
+      }
+    },
+    {
+      "edge_id": "e131",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253598243,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 86.294,
+        "y": -323.544
+      }
+    },
+    {
+      "edge_id": "e401",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253598245,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 69.537,
+        "y": -319.674
+      }
+    },
+    {
+      "edge_id": "e238",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253598248,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 62.519,
+        "y": -300.994
+      }
+    },
+    {
+      "edge_id": "e221",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253598250,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 17.416,
+        "y": -294.022
+      }
+    },
+    {
+      "edge_id": "e275",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253598253,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 40.767,
+        "y": -276.286
+      }
+    },
+    {
+      "edge_id": "e733",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253598255,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -24.426,
+        "y": -235.077
+      }
+    },
+    {
+      "edge_id": "e399",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253598257,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -17.064,
+        "y": -227.16
+      }
+    },
+    {
+      "edge_id": "e137",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253598258,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -17.768,
+        "y": -199.995
+      }
+    },
+    {
+      "edge_id": "e87",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253598260,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -91.768,
+        "y": -178.157
+      }
+    },
+    {
+      "edge_id": "e606",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253598263,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -70.649,
+        "y": -155.973
+      }
+    },
+    {
+      "edge_id": "e183",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253598265,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -81.028,
+        "y": -145.943
+      }
+    },
+    {
+      "edge_id": "e632",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253598266,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -137.955,
+        "y": -129.498
+      }
+    },
+    {
+      "edge_id": "e560",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253598268,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -118.524,
+        "y": -107.47
+      }
+    },
+    {
+      "edge_id": "e383",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253598271,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -182.515,
+        "y": -86.699
+      }
+    },
+    {
+      "edge_id": "e564",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253598273,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -162.543,
+        "y": -64.404
+      }
+    },
+    {
+      "edge_id": "e384",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253598274,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -268.882,
+        "y": -6.527
+      }
+    },
+    {
+      "edge_id": "e77",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253598276,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -299.315,
+        "y": 19.659
+      }
+    },
+    {
+      "edge_id": "e79",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253598279,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -278.665,
+        "y": 42.098
+      }
+    },
+    {
+      "edge_id": "e57",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253598281,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -333.261,
+        "y": 50.683
+      }
+    },
+    {
+      "edge_id": "e486",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253598282,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -321.916,
+        "y": 52.829
+      }
+    },
+    {
+      "edge_id": "e628",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253598284,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -313.948,
+        "y": 61.769
+      }
+    },
+    {
+      "edge_id": "e486",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253598287,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -335.33,
+        "y": 64.571
+      }
+    },
+    {
+      "edge_id": "e628",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253598289,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -327.516,
+        "y": 73.255
+      }
+    },
+    {
+      "edge_id": "e57",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253598292,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -313.099,
+        "y": 74.489
+      }
+    },
+    {
+      "edge_id": "e370",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253598295,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -187.122,
+        "y": 90.413
+      }
+    },
+    {
+      "edge_id": "e370",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253598297,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -179.408,
+        "y": 98.786
+      }
+    },
+    {
+      "edge_id": "e79",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253598298,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -216.887,
+        "y": 115.676
+      }
+    },
+    {
+      "edge_id": "e79",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253598299,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -208.974,
+        "y": 124.171
+      }
+    },
+    {
+      "edge_id": "e506",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253599222,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 112.292,
+        "y": -382.11
+      }
+    },
+    {
+      "edge_id": "e508",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253599225,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 120.548,
+        "y": -373.993
+      }
+    },
+    {
+      "edge_id": "e546",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253599228,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 119.319,
+        "y": -355.857
+      }
+    },
+    {
+      "edge_id": "e248",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253614021,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -409.122,
+        "y": -381.821
+      }
+    },
+    {
+      "edge_id": "e257",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253614023,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -418.471,
+        "y": -380.943
+      }
+    },
+    {
+      "edge_id": "e218",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253614026,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -446.266,
+        "y": -364.553
+      }
+    },
+    {
+      "edge_id": "e218",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253614028,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -438.57,
+        "y": -356.624
+      }
+    },
+    {
+      "edge_id": "e248",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253614029,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -324.4,
+        "y": -301.394
+      }
+    },
+    {
+      "edge_id": "e82",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253614032,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -314.219,
+        "y": -300.66
+      }
+    },
+    {
+      "edge_id": "e248",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253614035,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -314.481,
+        "y": -291.953
+      }
+    },
+    {
+      "edge_id": "e82",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253614036,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -324.147,
+        "y": -291.931
+      }
+    },
+    {
+      "edge_id": "e218",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253614040,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -358.202,
+        "y": -270.526
+      }
+    },
+    {
+      "edge_id": "e86",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253614043,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -205.902,
+        "y": -231.119
+      }
+    },
+    {
+      "edge_id": "e86",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253614046,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -197.005,
+        "y": -222.901
+      }
+    },
+    {
+      "edge_id": "e248",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253614050,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -228.106,
+        "y": -211.048
+      }
+    },
+    {
+      "edge_id": "e539",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253614052,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -218.603,
+        "y": -211.281
+      }
+    },
+    {
+      "edge_id": "e538",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253614055,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -229.389,
+        "y": -201.685
+      }
+    },
+    {
+      "edge_id": "e631",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253614058,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -219.226,
+        "y": -203.109
+      }
+    },
+    {
+      "edge_id": "e383",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253614061,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -259.37,
+        "y": -167.704
+      }
+    },
+    {
+      "edge_id": "e384",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253614063,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -352.963,
+        "y": -102.8
+      }
+    },
+    {
+      "edge_id": "e384",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253614066,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -345.131,
+        "y": -94.349
+      }
+    },
+    {
+      "edge_id": "e388",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253614069,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -383.142,
+        "y": -76.891
+      }
+    },
+    {
+      "edge_id": "e77",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253614072,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -375.058,
+        "y": -68.596
+      }
+    },
+    {
+      "edge_id": "e336",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253616394,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -485.805,
+        "y": 161.955
+      }
+    },
+    {
+      "edge_id": "e63",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253616395,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -437.459,
+        "y": 178.501
+      }
+    },
+    {
+      "edge_id": "e691",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253616397,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -503.094,
+        "y": 195.47
+      }
+    },
+    {
+      "edge_id": "e391",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253616402,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -492.57,
+        "y": 208.268
+      }
+    },
+    {
+      "edge_id": "e62",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253616418,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -536.562,
+        "y": 214.139
+      }
+    },
+    {
+      "edge_id": "e745",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253616423,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -504.106,
+        "y": 231.764
+      }
+    },
+    {
+      "edge_id": "e98",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253616818,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -213.292,
+        "y": 294.244
+      }
+    },
+    {
+      "edge_id": "e382",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253616821,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -237.022,
+        "y": 309.111
+      }
+    },
+    {
+      "edge_id": "e67",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253616822,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -273.588,
+        "y": 320.897
+      }
+    },
+    {
+      "edge_id": "e66",
+      "kind": "crosswalk",
+      "source": "osm_node",
+      "osm_id": 2253616824,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -266.651,
+        "y": 333.362
+      }
+    },
+    {
+      "edge_id": "e427",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 3949376510,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -297.68,
+        "y": 193.69
+      }
+    },
+    {
+      "edge_id": "e200",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 4114770743,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 524.358,
+        "y": 365.22
+      }
+    },
+    {
+      "edge_id": "e467",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 4553782956,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -491.45,
+        "y": 197.371
+      }
+    },
+    {
+      "edge_id": "e169",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 7107369152,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 313.09,
+        "y": 267.023
+      }
+    },
+    {
+      "edge_id": "e572",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 7598226049,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 641.275,
+        "y": -132.8
+      }
+    },
+    {
+      "edge_id": "e745",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9375575030,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -501.423,
+        "y": 235.644
+      }
+    },
+    {
+      "edge_id": "e398",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9826041183,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 132.21,
+        "y": 378.196
+      }
+    },
+    {
+      "edge_id": "e675",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9826041184,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 94.415,
+        "y": 371.358
+      }
+    },
+    {
+      "edge_id": "e659",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9826041185,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 136.871,
+        "y": 354.678
+      }
+    },
+    {
+      "edge_id": "e663",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9826041186,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 100.187,
+        "y": 349.286
+      }
+    },
+    {
+      "edge_id": "e662",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9987940959,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -155.38,
+        "y": 51.995
+      }
+    },
+    {
+      "edge_id": "e445",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9987940961,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -156.798,
+        "y": 71.165
+      }
+    },
+    {
+      "edge_id": "e662",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9987971909,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -71.389,
+        "y": 151.325
+      }
+    },
+    {
+      "edge_id": "e494",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9987971910,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -46.864,
+        "y": 168.972
+      }
+    },
+    {
+      "edge_id": "e381",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9987971911,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -44.633,
+        "y": 149.768
+      }
+    },
+    {
+      "edge_id": "e663",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9987975924,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 14.272,
+        "y": 249.71
+      }
+    },
+    {
+      "edge_id": "e494",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9987975925,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 38.111,
+        "y": 266.779
+      }
+    },
+    {
+      "edge_id": "e198",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9987975926,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 14.083,
+        "y": 269.403
+      }
+    },
+    {
+      "edge_id": "e495",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9987983247,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -132.183,
+        "y": 69.575
+      }
+    },
+    {
+      "edge_id": "e630",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9988001270,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -236.245,
+        "y": -8.962
+      }
+    },
+    {
+      "edge_id": "e495",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9988001271,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -200.961,
+        "y": -11.142
+      }
+    },
+    {
+      "edge_id": "e544",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9988001272,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -208.35,
+        "y": -51.517
+      }
+    },
+    {
+      "edge_id": "e333",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9988001273,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -242.731,
+        "y": -50.038
+      }
+    },
+    {
+      "edge_id": "e83",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9989376555,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -382.402,
+        "y": -241.905
+      }
+    },
+    {
+      "edge_id": "e333",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9989376556,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -405.59,
+        "y": -238.925
+      }
+    },
+    {
+      "edge_id": "e475",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9989376557,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -383.847,
+        "y": -224.269
+      }
+    },
+    {
+      "edge_id": "e538",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9989417852,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -322.62,
+        "y": -121.436
+      }
+    },
+    {
+      "edge_id": "e333",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9989417853,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -320.823,
+        "y": -141.006
+      }
+    },
+    {
+      "edge_id": "e475",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9989417854,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -297.246,
+        "y": -124.227
+      }
+    },
+    {
+      "edge_id": "e475",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9989426117,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -466.392,
+        "y": -321.654
+      }
+    },
+    {
+      "edge_id": "e332",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9989426118,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -488.262,
+        "y": -338.177
+      }
+    },
+    {
+      "edge_id": "e387",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 9989426119,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -491.64,
+        "y": -318.24
+      }
+    },
+    {
+      "edge_id": "e392",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 10154457634,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -400.549,
+        "y": 135.157
+      }
+    },
+    {
+      "edge_id": "e431",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 10154457635,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -405.003,
+        "y": 93.882
+      }
+    },
+    {
+      "edge_id": "e487",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 10154457636,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -368.22,
+        "y": 92.959
+      }
+    },
+    {
+      "edge_id": "e615",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 10173847657,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -526.933,
+        "y": 234.599
+      }
+    },
+    {
+      "edge_id": "e62",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 10173847660,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -539.507,
+        "y": 210.948
+      }
+    },
+    {
+      "edge_id": "e649",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 10944330517,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 320.371,
+        "y": 263.032
+      }
+    },
+    {
+      "edge_id": "e653",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 10944330518,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 331.373,
+        "y": 249.655
+      }
+    },
+    {
+      "edge_id": "e656",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 10944330519,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 275.928,
+        "y": 267.935
+      }
+    },
+    {
+      "edge_id": "e710",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 10944330520,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 283.985,
+        "y": 248.232
+      }
+    },
+    {
+      "edge_id": "e577",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 10944330521,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 290.11,
+        "y": 244.251
+      }
+    },
+    {
+      "edge_id": "e226",
+      "kind": "stop_line",
+      "source": "osm_node",
+      "osm_id": 11295590408,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 612.513,
+        "y": -68.296
+      },
+      "polyline_m": [
+        [
+          611.8006534707667,
+          -70.16474103676376
+        ],
+        [
+          613.2254659894172,
+          -66.42710685366114
+        ]
+      ]
+    },
+    {
+      "edge_id": "e261",
+      "kind": "stop_line",
+      "source": "osm_node",
+      "osm_id": 11295590416,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 553.942,
+        "y": 3.592
+      },
+      "polyline_m": [
+        [
+          554.6199133133662,
+          5.473163806536935
+        ],
+        [
+          553.2638851701374,
+          1.7100284548957718
+        ]
+      ]
+    },
+    {
+      "edge_id": "e271",
+      "kind": "stop_line",
+      "source": "osm_node",
+      "osm_id": 11295590423,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 593.345,
+        "y": -25.419
+      },
+      "polyline_m": [
+        [
+          594.0325960944602,
+          -23.541203100119258
+        ],
+        [
+          592.6566934600279,
+          -27.297117361728784
+        ]
+      ]
+    },
+    {
+      "edge_id": "e231",
+      "kind": "stop_line",
+      "source": "osm_node",
+      "osm_id": 11295590429,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 607.445,
+        "y": 26.865
+      },
+      "polyline_m": [
+        [
+          609.3282610554681,
+          26.19015772082271
+        ],
+        [
+          605.5626267478747,
+          27.53923083280531
+        ]
+      ]
+    },
+    {
+      "edge_id": "e271",
+      "kind": "stop_line",
+      "source": "osm_node",
+      "osm_id": 11295590434,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 630.796,
+        "y": -39.018
+      },
+      "polyline_m": [
+        [
+          631.4312174150275,
+          -37.12178143948874
+        ],
+        [
+          630.1612280273098,
+          -40.914818079844935
+        ]
+      ]
+    },
+    {
+      "edge_id": "e251",
+      "kind": "stop_line",
+      "source": "osm_node",
+      "osm_id": 11295590435,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 649.549,
+        "y": 27.465
+      },
+      "polyline_m": [
+        [
+          647.6374721950026,
+          28.053055162024894
+        ],
+        [
+          651.4607502929505,
+          26.877238600756858
+        ]
+      ]
+    },
+    {
+      "edge_id": "e251",
+      "kind": "stop_line",
+      "source": "osm_node",
+      "osm_id": 11295590439,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 670.163,
+        "y": 91.102
+      },
+      "polyline_m": [
+        [
+          668.2630454484444,
+          91.7271415221396
+        ],
+        [
+          672.0626255976675,
+          90.47686527681229
+        ]
+      ]
+    },
+    {
+      "edge_id": "e233",
+      "kind": "stop_line",
+      "source": "osm_node",
+      "osm_id": 11295590442,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 653.018,
+        "y": 164.557
+      },
+      "polyline_m": [
+        [
+          654.9148355929924,
+          163.9237636803797
+        ],
+        [
+          651.1208716649796,
+          165.1909802021064
+        ]
+      ]
+    },
+    {
+      "edge_id": "e271",
+      "kind": "stop_line",
+      "source": "osm_node",
+      "osm_id": 11295590449,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 668.329,
+        "y": -51.594
+      },
+      "polyline_m": [
+        [
+          668.9692636520185,
+          -49.69966639243717
+        ],
+        [
+          667.6889349781072,
+          -53.489225533915295
+        ]
+      ]
+    },
+    {
+      "edge_id": "e231",
+      "kind": "stop_line",
+      "source": "osm_node",
+      "osm_id": 11295590462,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 628.439,
+        "y": 91.135
+      },
+      "polyline_m": [
+        [
+          630.3312463402402,
+          90.48902949993834
+        ],
+        [
+          626.5458774244006,
+          91.78169425577994
+        ]
+      ]
+    },
+    {
+      "edge_id": "e226",
+      "kind": "stop_line",
+      "source": "osm_node",
+      "osm_id": 11295590464,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 649.703,
+        "y": -82.151
+      },
+      "polyline_m": [
+        [
+          649.0059097752421,
+          -84.02551650764285
+        ],
+        [
+          650.3994409419358,
+          -80.27610710248935
+        ]
+      ]
+    },
+    {
+      "edge_id": "e251",
+      "kind": "stop_line",
+      "source": "osm_node",
+      "osm_id": 11295629869,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 607.78,
+        "y": -94.249
+      },
+      "polyline_m": [
+        [
+          605.8837635809525,
+          -93.61200551535578
+        ],
+        [
+          609.6755797876658,
+          -94.88563413253809
+        ]
+      ]
+    },
+    {
+      "edge_id": "e195",
+      "kind": "stop_line",
+      "source": "osm_node",
+      "osm_id": 11915135707,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 181.404,
+        "y": -307.198
+      },
+      "polyline_m": [
+        [
+          182.81635616587212,
+          -305.78176949637526
+        ],
+        [
+          179.99241771883212,
+          -308.61467818663147
+        ]
+      ]
+    },
+    {
+      "edge_id": "e139",
+      "kind": "stop_line",
+      "source": "osm_node",
+      "osm_id": 13042475624,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": 137.006,
+        "y": -167.337
+      },
+      "polyline_m": [
+        [
+          135.5427992470498,
+          -165.9740900335741
+        ],
+        [
+          138.46978284424904,
+          -168.70040018132448
+        ]
+      ]
+    },
+    {
+      "edge_id": "e65",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 13048433170,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -413.955,
+        "y": 269.459
+      }
+    },
+    {
+      "edge_id": "e65",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 13048433171,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -422.184,
+        "y": 271.305
+      }
+    },
+    {
+      "edge_id": "e65",
+      "kind": "stop_line",
+      "source": "osm_node",
+      "osm_id": 13048433172,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -466.085,
+        "y": 282.335
+      },
+      "polyline_m": [
+        [
+          -465.59779134781263,
+          284.2747478219557
+        ],
+        [
+          -466.5725256706703,
+          280.39532866442147
+        ]
+      ]
+    },
+    {
+      "edge_id": "e738",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 13048433179,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -476.78,
+        "y": 333.841
+      }
+    },
+    {
+      "edge_id": "e60",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 13048433180,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -471.044,
+        "y": 332.673
+      }
+    },
+    {
+      "edge_id": "e740",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 13048433181,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -461.686,
+        "y": 367.755
+      }
+    },
+    {
+      "edge_id": "e740",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 13048433182,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -458.85,
+        "y": 378.975
+      }
+    },
+    {
+      "edge_id": "e463",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 13048433184,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -432.536,
+        "y": 388.971
+      }
+    },
+    {
+      "edge_id": "e466",
+      "kind": "traffic_light",
+      "source": "osm_node",
+      "osm_id": 13273500889,
+      "confidence": 1.0,
+      "match_distance_m": 0.0,
+      "world_xy_m": {
+        "x": -493.266,
+        "y": 183.594
+      }
+    },
+    {
+      "edge_id": "e425",
+      "kind": "speed_camera",
+      "source": "osm_node",
+      "osm_id": 13277772585,
+      "confidence": 1.0,
+      "match_distance_m": 5.517,
+      "world_xy_m": {
+        "x": 472.137,
+        "y": 212.115
+      }
+    }
+  ]
+}

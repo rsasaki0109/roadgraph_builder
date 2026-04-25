@@ -82,6 +82,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   browser smoke covers the `n312 → n191` deep link, asserting the card is
   visible, multiple steps render, and the URL retains `from` / `to`.
 
+- **Tokyo Ginza joins Paris and Berlin as the third committed map.**
+  `scripts/refresh_docs_assets.py` gained a generic
+  `_build_committed_osm_dataset(dataset_id, raw_*_path, origin_*, route_*)`
+  helper that takes a city's raw Overpass dumps under `/tmp` and emits
+  the full committed surface — `map_<id>.geojson`,
+  `map_<id>.lanelet.osm`, `<id>_origin.json`,
+  `<id>_turn_restrictions.json`, `<id>_camera_detections.json` (real
+  OSM regulatory nodes), and `route_<id>.geojson`. Berlin Mitte's
+  ~160-line inline block is replaced with a single helper call, and
+  Tokyo Ginza (bbox `139.7600,35.6680,139.7750,35.6750`) lands as a
+  second helper call: 548 graph nodes, 19 OSM turn restrictions,
+  104 traffic signals + 160 crossings + 17 stops + 1 speed camera
+  projected onto edges, SRTM-30m elevations applied, demo route
+  `n472 → n141` (~2.4 km cross-Ginza), 500 m reachability from
+  `n472`. The viewer's DATASET_URLS / ROUTE_URLS / REACHABLE_URLS /
+  RESTRICTIONS_URLS / LANELET_URLS / dropdown / Lanelet2 download
+  label all gain the Tokyo entry, so picking it from the toolbar
+  reloads everything just like Paris and Berlin.
+  `validate-lanelet2-tags` reports `result: ok` with 0 errors;
+  default pytest stays at 647 / 3 / 5 and the opt-in browser smoke
+  passes in ~14 s.
+
 - **Berlin Mitte gets full Paris-grade overlays: TR + route + reachable.**
   Berlin Mitte was the only committed map dataset without a turn-
   restrictions overlay, a demo route, or a service-area overlay — so
