@@ -82,6 +82,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   browser smoke covers the `n312 → n191` deep link, asserting the card is
   visible, multiple steps render, and the URL retains `from` / `to`.
 
+- **Per-lane Lanelet2 export emits `lane_connection` regulatory_elements.**
+  `export_lanelet2` (single-lanelet) had a block that bundled every
+  junction's incident lanelets into a `type=regulatory_element,
+  subtype=lane_connection` relation so Autoware's planner could
+  traverse from one lanelet to the next across a graph junction. The
+  per-lane variant skipped that step, so the committed Paris / Berlin
+  Lanelet2 outputs were islands of lanelets that did not form a
+  routable network. `export_lanelet2_per_lane` now applies the same
+  logic against `lanelet_id_by_edge`, attaching each junction's
+  `junction_type` / `junction_hint` as `roadgraph:` tags. Paris ships
+  707 lane_connection relations across its junctions; Berlin ships
+  1 476. `validate-lanelet2-tags` continues to report
+  `result: ok` with 0 errors.
+
 - **OSM stop / give_way nodes now ship as Lanelet2 stop_line ways.**
   Previously each `kind=stop_line` observation only landed in
   `edge.attributes.hd.semantic_rules` and was silently skipped by the

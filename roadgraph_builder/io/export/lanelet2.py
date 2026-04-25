@@ -654,6 +654,40 @@ def export_lanelet2_per_lane(
                     rule, new_node, new_way, origin_lat, origin_lon
                 )
 
+    # Lane connectivity: for every graph node where ≥2 lanelets meet, emit a
+    # `type=regulatory_element, subtype=lane_connection` relation listing
+    # each incident lanelet (member role records whether its canonical start
+    # or end node anchors the junction). Autoware's planner consults this to
+    # treat consecutive lanelets across a junction as a single routable
+    # path. Mirrors the equivalent block in `export_lanelet2`.
+    if lanelet_id_by_edge:
+        node_lanelets: dict[str, list[tuple[int, str]]] = {}
+        for e in graph.edges:
+            rid = lanelet_id_by_edge.get(str(e.id))
+            if rid is None:
+                continue
+            node_lanelets.setdefault(e.start_node_id, []).append((rid, "from_start"))
+            if e.end_node_id != e.start_node_id:
+                node_lanelets.setdefault(e.end_node_id, []).append((rid, "from_end"))
+        node_attrs = {n.id: dict(n.attributes) for n in graph.nodes}
+        for node_id, entries in node_lanelets.items():
+            if len(entries) < 2:
+                continue
+            members = [("relation", rid, role) for rid, role in entries]
+            conn_tags: list[tuple[str, str]] = [
+                ("type", "regulatory_element"),
+                ("subtype", "lane_connection"),
+                ("roadgraph", "lane_connection"),
+                ("roadgraph:junction_node_id", str(node_id)),
+            ]
+            jt = node_attrs.get(node_id, {}).get("junction_type")
+            if isinstance(jt, str):
+                conn_tags.append(("roadgraph:junction_type", jt))
+            jh = node_attrs.get(node_id, {}).get("junction_hint")
+            if isinstance(jh, str):
+                conn_tags.append(("roadgraph:junction_hint", jh))
+            new_relation(members, conn_tags)
+
     for c in node_children:
         root.append(c)
     for c in way_children:
