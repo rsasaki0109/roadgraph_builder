@@ -1,0 +1,16 @@
+{
+  "format_version": 1,
+  "source_lanelet_osm": "map_berlin_mitte.lanelet.osm",
+  "file_size_bytes": 5968796,
+  "lanelet_count": 2842,
+  "regulatory_element_count": 2255,
+  "regulatory_subtypes": {
+    "lane_change": 779,
+    "lane_connection": 1476
+  },
+  "boundary_subtypes": {
+    "solid": 4126,
+    "dashed": 1558
+  },
+  "node_ele_count": 1883
+}

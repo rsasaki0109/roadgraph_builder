@@ -380,6 +380,87 @@
         border-radius: 4px;
         font-size: 10px;
       }
+      .lanelet-card {
+        display: grid;
+        gap: 5px;
+        padding: 10px;
+        border: 1px solid #273449;
+        border-radius: 8px;
+        background: #0f172a;
+        font-size: 12px;
+        color: #e5e7eb;
+      }
+      .lanelet-card[hidden] {
+        display: none;
+      }
+      .lanelet-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        color: #dbeafe;
+      }
+      .lanelet-head strong {
+        font-size: 12px;
+      }
+      .lanelet-head span {
+        color: #94a3b8;
+        font-size: 11px;
+        font-variant-numeric: tabular-nums;
+      }
+      .lanelet-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 10px;
+      }
+      .lanelet-row span {
+        color: #94a3b8;
+      }
+      .lanelet-row strong {
+        font-weight: 600;
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+      }
+      .lanelet-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+      }
+      .lanelet-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 2px 6px;
+        border-radius: 999px;
+        background: #1e293b;
+        color: #e5e7eb;
+        font-size: 11px;
+        font-variant-numeric: tabular-nums;
+      }
+      .lanelet-tag b {
+        color: #93c5fd;
+        font-weight: 600;
+      }
+      .lanelet-tag.solid b {
+        color: #f8fafc;
+      }
+      .lanelet-tag.dashed b {
+        color: #fbbf24;
+      }
+      .lanelet-tag.lane_change b {
+        color: #34d399;
+      }
+      .lanelet-tag.lane_connection b {
+        color: #60a5fa;
+      }
+      .lanelet-tag.traffic_light b {
+        color: #f87171;
+      }
+      .lanelet-hint {
+        color: #64748b;
+        font-size: 11px;
+        margin-top: 2px;
+      }
       .reach-ctrl {
         display: inline-flex;
         align-items: center;
@@ -633,6 +714,18 @@
           <div class="engine-row"><span>Heap pops</span><strong id="engine-pops">—</strong></div>
           <div class="engine-row"><span>TR indexed</span><strong id="engine-tr">—</strong></div>
           <div class="engine-hint" id="engine-hint">Same directed-state Dijkstra the CLI <code>route</code> falls back to.</div>
+        </div>
+        <div class="lanelet-card" id="lanelet-card" hidden aria-label="Lanelet2 export">
+          <div class="lanelet-head">
+            <strong>Lanelet2 export</strong>
+            <span id="lanelet-size">—</span>
+          </div>
+          <div class="lanelet-row"><span>Lanelets</span><strong id="lanelet-count">—</strong></div>
+          <div class="lanelet-row"><span>Regulatory elements</span><strong id="lanelet-reg-count">—</strong></div>
+          <div class="lanelet-row"><span>Nodes with <code>ele</code></span><strong id="lanelet-ele">—</strong></div>
+          <div class="lanelet-tags" id="lanelet-reg-tags"></div>
+          <div class="lanelet-tags" id="lanelet-bnd-tags"></div>
+          <div class="lanelet-hint">Autoware-spec subtypes summarising the Lanelet2 OSM linked above. HD-lite envelopes — not survey-grade.</div>
         </div>
         <div class="steps-card" id="steps-card" hidden aria-label="Route steps">
           <div class="steps-head">

@@ -1,0 +1,17 @@
+{
+  "format_version": 1,
+  "source_lanelet_osm": "map_tokyo_ginza.lanelet.osm",
+  "file_size_bytes": 2240782,
+  "lanelet_count": 978,
+  "regulatory_element_count": 787,
+  "regulatory_subtypes": {
+    "lane_change": 219,
+    "traffic_light": 104,
+    "lane_connection": 464
+  },
+  "boundary_subtypes": {
+    "solid": 1518,
+    "dashed": 438
+  },
+  "node_ele_count": 548
+}

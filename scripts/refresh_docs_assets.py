@@ -432,6 +432,77 @@ def _apply_node_elevations(graph, elevations: dict[str, float]) -> int:
     return applied
 
 
+def _emit_lanelet_summary(lanelet_path: Path, summary_path: Path) -> None:
+    """Write a small JSON summary of a Lanelet2 OSM file: lanelet count,
+    regulatory_element subtype distribution, boundary subtype distribution,
+    and `ele` tag count. The viewer fetches this in the background to
+    surface "what does the Lanelet2 export look like" stats without parsing
+    the multi-megabyte XML in the browser.
+    """
+    if not lanelet_path.is_file():
+        return
+    try:
+        import xml.etree.ElementTree as ET
+
+        tree = ET.parse(lanelet_path)
+    except Exception as exc:  # pragma: no cover
+        print(f"lanelet summary skipped for {lanelet_path}: {exc}")
+        return
+    root = tree.getroot()
+    lanelet_count = 0
+    regulatory_subtypes: dict[str, int] = {}
+    boundary_subtypes: dict[str, int] = {}
+    ele_count = 0
+
+    for node in root.findall("node"):
+        for tag in node.findall("tag"):
+            if tag.get("k") == "ele":
+                ele_count += 1
+                break
+    for way in root.findall("way"):
+        roadgraph_kind = None
+        subtype = None
+        for tag in way.findall("tag"):
+            k = tag.get("k")
+            v = tag.get("v")
+            if k == "roadgraph" and v == "lane_boundary":
+                roadgraph_kind = "lane_boundary"
+            elif k == "subtype":
+                subtype = v
+        if roadgraph_kind == "lane_boundary" and subtype:
+            boundary_subtypes[subtype] = boundary_subtypes.get(subtype, 0) + 1
+    for relation in root.findall("relation"):
+        rel_type = None
+        rel_subtype = None
+        for tag in relation.findall("tag"):
+            k = tag.get("k")
+            v = tag.get("v")
+            if k == "type":
+                rel_type = v
+            elif k == "subtype":
+                rel_subtype = v
+        if rel_type == "lanelet":
+            lanelet_count += 1
+        elif rel_type == "regulatory_element" and rel_subtype:
+            regulatory_subtypes[rel_subtype] = (
+                regulatory_subtypes.get(rel_subtype, 0) + 1
+            )
+
+    payload = {
+        "format_version": 1,
+        "source_lanelet_osm": lanelet_path.name,
+        "file_size_bytes": lanelet_path.stat().st_size,
+        "lanelet_count": lanelet_count,
+        "regulatory_element_count": sum(regulatory_subtypes.values()),
+        "regulatory_subtypes": regulatory_subtypes,
+        "boundary_subtypes": boundary_subtypes,
+        "node_ele_count": ele_count,
+    }
+    summary_path.write_text(
+        json.dumps(payload, indent=2) + "\n", encoding="utf-8"
+    )
+
+
 def _build_committed_osm_dataset(
     *,
     dataset_id: str,
@@ -619,11 +690,16 @@ def _build_committed_osm_dataset(
             graph.to_dict(), base_lane_width_m=3.5
         )
         apply_lane_inferences(graph, inferences)
+        lanelet_path = ASSETS / f"map_{dataset_id}.lanelet.osm"
         export_lanelet2_per_lane(
             graph,
-            ASSETS / f"map_{dataset_id}.lanelet.osm",
+            lanelet_path,
             origin_lat=origin_lat,
             origin_lon=origin_lon,
+        )
+        _emit_lanelet_summary(
+            lanelet_path,
+            ASSETS / f"map_{dataset_id}_lanelet_summary.json",
         )
     except Exception as exc:  # pragma: no cover
         print(f"{dataset_id} Lanelet2 export skipped: {exc}")
@@ -1840,6 +1916,10 @@ def main() -> None:
                 paris_lanelet_path,
                 origin_lat=lat0,
                 origin_lon=lon0,
+            )
+            _emit_lanelet_summary(
+                paris_lanelet_path,
+                ASSETS / "map_paris_grid_lanelet_summary.json",
             )
         except Exception as exc:  # pragma: no cover - best-effort docs refresh
             print(f"paris_grid Lanelet2 export skipped: {exc}")

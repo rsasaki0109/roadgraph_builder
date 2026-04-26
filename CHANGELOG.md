@@ -9,6 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Lanelet2 summary JSON ships with each committed export and surfaces in the
+  map-console inspector.** The refresh pipeline now writes
+  `docs/assets/map_<dataset>_lanelet_summary.json` after every Lanelet2 OSM
+  export (Paris grid, Berlin Mitte, Tokyo Ginza). Each summary records the
+  source filename, file size, total `lanelet` count, total
+  `regulatory_element` count, the per-subtype distribution for both
+  regulatory elements (`lane_change`, `lane_connection`, `traffic_light`)
+  and lane-boundary `subtype` (`solid` / `dashed`), and the number of nodes
+  carrying an `ele` tag. The map console fetches the JSON on dataset switch
+  and renders a *Lanelet2 export* card in the inspector with the file size,
+  lanelet / regulatory / `ele` counts, and color-coded subtype tags. The
+  inspector card lets a visitor see "what's actually in the Lanelet2 OSM I
+  could download" without parsing a multi-megabyte XML in the browser, and
+  makes the HD-lite Autoware-spec subtype coverage (lane_change vs
+  lane_connection vs traffic_light, solid vs dashed) visible at a glance.
+  Paris grid: 1 485 lanelets / 1 399 regulatory_elements / 855 nodes with
+  `ele`. Berlin Mitte: 2 842 / 2 255 / 1 883. Tokyo Ginza: 978 / 787 / 548.
+  `validate-lanelet2-tags` continues to report `result: ok` on all three.
+
 - **Route CLI explain mode exposes routing engine diagnostics.**
   `roadgraph_builder route --explain` adds a `diagnostics` object to stdout
   with the selected search engine, whether the safe A* heuristic was enabled,

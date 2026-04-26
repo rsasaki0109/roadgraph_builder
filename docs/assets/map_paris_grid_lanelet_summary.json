@@ -1,0 +1,17 @@
+{
+  "format_version": 1,
+  "source_lanelet_osm": "map_paris_grid.lanelet.osm",
+  "file_size_bytes": 3466726,
+  "lanelet_count": 1485,
+  "regulatory_element_count": 1399,
+  "regulatory_subtypes": {
+    "lane_change": 404,
+    "traffic_light": 288,
+    "lane_connection": 707
+  },
+  "boundary_subtypes": {
+    "solid": 2162,
+    "dashed": 808
+  },
+  "node_ele_count": 855
+}
