@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <osm version="0.6" generator="roadgraph_builder">
+  <MetaInfo format_version="1" map_version="1" projector_type="local" origin_lat="48.867" origin_lon="2.347" generator="roadgraph_builder"/>
   <node id="1" lat="48.8733546" lon="2.334404">
     <tag k="roadgraph" v="graph_node"/>
     <tag k="roadgraph:node_id" v="n0"/>

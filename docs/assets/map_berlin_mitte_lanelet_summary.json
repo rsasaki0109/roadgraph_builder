@@ -1,7 +1,7 @@
 {
   "format_version": 1,
   "source_lanelet_osm": "map_berlin_mitte.lanelet.osm",
-  "file_size_bytes": 7468160,
+  "file_size_bytes": 7468302,
   "lanelet_count": 2842,
   "regulatory_element_count": 5741,
   "regulatory_subtypes": {

@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Lanelet2 OSM exports embed an Autoware-style `<MetaInfo>` element with
+  the projector origin.** Both `export_lanelet2` and
+  `export_lanelet2_per_lane` now write a `<MetaInfo>` element at the top of
+  every Lanelet2 OSM document with `format_version`, `map_version`,
+  `projector_type=local`, and the WGS84 anchor as `origin_lat` /
+  `origin_lon` attributes. Stock Lanelet2 readers parse the version fields
+  and ignore the rest; an Autoware Universe `map_loader` (or any custom
+  consumer) can recover the projector frame directly from the file without
+  a separate `map_projector_info.yaml` sidecar. Committed Paris / Berlin /
+  Tokyo `.lanelet.osm` regenerated.
+
 ### Changed
 
 - **`lane_connection` regulatory_element relations are now directed pairs.**

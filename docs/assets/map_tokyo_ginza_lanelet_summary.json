@@ -1,7 +1,7 @@
 {
   "format_version": 1,
   "source_lanelet_osm": "map_tokyo_ginza.lanelet.osm",
-  "file_size_bytes": 2600964,
+  "file_size_bytes": 2601109,
   "lanelet_count": 978,
   "regulatory_element_count": 1650,
   "regulatory_subtypes": {

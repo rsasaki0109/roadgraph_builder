@@ -327,6 +327,44 @@ def _build_speed_limit_regulatory(
 
 
 # ---------------------------------------------------------------------------
+# Autoware MetaInfo (origin / projector hint) — embedded in every Lanelet2 OSM
+# ---------------------------------------------------------------------------
+
+
+def _autoware_meta_info_element(
+    origin_lat: float,
+    origin_lon: float,
+    *,
+    generator: str = "roadgraph_builder",
+) -> ET.Element:
+    """Build the ``<MetaInfo>`` element that anchors the Lanelet2 OSM document.
+
+    Lanelet2's stock reader parses the ``format_version`` / ``map_version``
+    attributes; everything else is preserved through the round-trip but
+    ignored by the spec parser. We piggy-back the projector origin on the
+    same element so an Autoware-style ``map_loader`` (or any custom
+    consumer) can recover the WGS84 anchor without a separate
+    ``map_projector_info.yaml`` sidecar.
+
+    Field naming follows the Autoware Universe ``map_projector_info`` shape
+    (``projector_type``, ``map_origin.latitude`` / ``map_origin.longitude``)
+    while keeping each field as a flat attribute so it survives plain XML
+    parsers.
+    """
+    return ET.Element(
+        "MetaInfo",
+        {
+            "format_version": "1",
+            "map_version": "1",
+            "projector_type": "local",
+            "origin_lat": _fmt_lonlat(origin_lat),
+            "origin_lon": _fmt_lonlat(origin_lon),
+            "generator": generator,
+        },
+    )
+
+
+# ---------------------------------------------------------------------------
 # Lane connectivity helpers (shared by export_lanelet2 and export_lanelet2_per_lane)
 # ---------------------------------------------------------------------------
 
@@ -804,6 +842,7 @@ def export_lanelet2_per_lane(
 
     # Autoware-style projector anchor: lives at the top of the document so the
     # standard MetaInfo parser sees it before scanning nodes/ways/relations.
+    root.append(_autoware_meta_info_element(origin_lat, origin_lon, generator=generator))
     for c in node_children:
         root.append(c)
     for c in way_children:
@@ -1112,6 +1151,7 @@ def export_lanelet2(
     # junction node — see `_emit_lane_connection_relations`.
     _emit_lane_connection_relations(graph, lanelet_id_by_edge, new_relation)
 
+    root.append(_autoware_meta_info_element(origin_lat, origin_lon, generator=generator))
     for c in node_children:
         root.append(c)
     for c in way_children:

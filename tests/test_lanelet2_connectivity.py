@@ -167,6 +167,32 @@ def test_lanelet2_reverse_oneway_flips_predecessor_successor(tmp_path: Path):
     assert by_role == {"predecessor": rid_by_edge["eA"], "successor": rid_by_edge["eB"]}
 
 
+def test_lanelet2_emits_autoware_meta_info_with_origin(tmp_path: Path):
+    g = _t_junction_graph()
+    out = tmp_path / "lane.osm"
+    export_lanelet2(g, out, origin_lat=52.52, origin_lon=13.405)
+    tree = ET.parse(out)
+    root = tree.getroot()
+
+    metas = root.findall("MetaInfo")
+    assert len(metas) == 1, "exactly one MetaInfo element should anchor the file"
+    meta = metas[0]
+    assert meta.get("format_version") == "1"
+    assert meta.get("map_version") == "1"
+    assert meta.get("projector_type") == "local"
+    assert float(meta.get("origin_lat")) == 52.52
+    assert float(meta.get("origin_lon")) == 13.405
+    # MetaInfo precedes the first node so a streaming Autoware-style parser
+    # sees the projector hint before any node coordinates.
+    children = list(root)
+    first_node_idx = next(
+        (i for i, c in enumerate(children) if c.tag == "node"), None
+    )
+    assert first_node_idx is not None
+    meta_idx = children.index(meta)
+    assert meta_idx < first_node_idx
+
+
 def test_lanelet2_emits_no_connection_when_node_has_one_lanelet(tmp_path: Path):
     # Single edge between two dead ends → no junction has two lanelets.
     g = Graph(

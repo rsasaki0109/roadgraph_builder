@@ -1,7 +1,7 @@
 {
   "format_version": 1,
   "source_lanelet_osm": "map_paris_grid.lanelet.osm",
-  "file_size_bytes": 3879625,
+  "file_size_bytes": 3879766,
   "lanelet_count": 1485,
   "regulatory_element_count": 2397,
   "regulatory_subtypes": {

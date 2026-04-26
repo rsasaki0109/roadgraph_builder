@@ -374,6 +374,16 @@
       browser smoke に `#junctions-card` / `#junctions-list li >= 4` / `N types · N nodes` assert
       を追加し、hero screenshots を再生成。Paris grid で 7 categories (t/y/crossroads/x/complex/
       through/dead) が色分け表示される状態。
+  102. Lanelet2 OSM 文書冒頭に Autoware 風 `<MetaInfo>` を埋め込む。
+       `format_version=1` / `map_version=1`（Lanelet2 stock parser が読む）
+       に加えて、`projector_type=local` と WGS84 の origin (`origin_lat` /
+       `origin_lon`) を attribute として併記。これで Autoware Universe の
+       `map_loader` が `map_projector_info.yaml` の sidecar 無しでも
+       projector frame を復元できる。`_autoware_meta_info_element()` ヘルパー
+       で生成し、両 export パス (`export_lanelet2` / `export_lanelet2_per_lane`)
+       の最終 assembly で root 直下に最初に append。Paris / Berlin / Tokyo の
+       committed `.lanelet.osm` と `examples/frozen_bundle/lanelet/map.osm`
+       を再生成、`validate-lanelet2-tags` 引き続き ok。
   101. `lane_connection` regulatory_element を有向化。junction node ごとに
        incident lanelet を 1 本の bundle に束ねていた既存実装（member role
        `from_start` / `from_end`）を廃して、`(predecessor, successor)` の
