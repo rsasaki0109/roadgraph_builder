@@ -327,6 +327,122 @@ def _build_speed_limit_regulatory(
 
 
 # ---------------------------------------------------------------------------
+# Lane connectivity helpers (shared by export_lanelet2 and export_lanelet2_per_lane)
+# ---------------------------------------------------------------------------
+
+
+def _flow_directions_for_edge(edge_attrs: object) -> tuple[bool, bool]:
+    """Decide which traffic-flow directions are valid for an edge.
+
+    Returns ``(forward, reverse)`` where ``forward`` means traffic drives in
+    the start_node→end_node direction and ``reverse`` means end_node→start_node.
+    Mirrors the OSM ``oneway`` mapping used in
+    :func:`_autoware_lanelet_tags_from_attributes`; missing or unrecognised tag
+    values default to bidirectional so we keep emitting the same connectivity
+    we did before the directional refactor.
+    """
+    if isinstance(edge_attrs, dict):
+        raw = edge_attrs.get("osm_oneway")
+    else:
+        raw = None
+    if isinstance(raw, str):
+        token = raw.strip().lower()
+        if token in {"yes", "true", "1"}:
+            return True, False
+        if token in {"-1", "reverse"}:
+            return False, True
+        if token in {"no", "false", "0"}:
+            return True, True
+    return True, True
+
+
+def _emit_lane_connection_relations(
+    graph: Graph,
+    lanelet_id_by_edge: dict[object, int],
+    new_relation: Callable[[list[tuple[str, int, str]], list[tuple[str, str]]], int],
+) -> None:
+    """Emit `subtype=lane_connection` regulatory_element relations.
+
+    For every junction node, emits one relation per directed
+    (predecessor, successor) lanelet pair. The two members carry roles
+    ``predecessor`` (lanelet whose traffic flow exits at the junction) and
+    ``successor`` (lanelet whose traffic flow enters the junction), so an
+    Autoware-style planner can read consecutive-lanelet connectivity directly
+    instead of bundling all incident lanelets without direction.
+
+    Bidirectional edges (``oneway=no`` or missing) contribute both flows;
+    one-way edges (``oneway=yes`` / ``-1``) contribute only their valid flow.
+    Self-pairs (a lanelet flowing into itself across a junction) are skipped.
+    """
+    if not lanelet_id_by_edge:
+        return
+
+    exits_at: dict[str, list[int]] = {}
+    entries_at: dict[str, list[int]] = {}
+
+    def _resolve_rid(edge_id: object) -> int | None:
+        rid = lanelet_id_by_edge.get(edge_id)
+        if rid is None:
+            rid = lanelet_id_by_edge.get(str(edge_id))
+        return rid
+
+    for e in graph.edges:
+        rid = _resolve_rid(e.id)
+        if rid is None:
+            continue
+        forward, reverse = _flow_directions_for_edge(e.attributes)
+        if forward:
+            entries_at.setdefault(e.start_node_id, []).append(rid)
+            exits_at.setdefault(e.end_node_id, []).append(rid)
+        if reverse:
+            entries_at.setdefault(e.end_node_id, []).append(rid)
+            exits_at.setdefault(e.start_node_id, []).append(rid)
+
+    node_attrs = {n.id: dict(n.attributes) for n in graph.nodes}
+    junction_nodes = sorted(
+        set(exits_at.keys()) | set(entries_at.keys()), key=str
+    )
+
+    for node_id in junction_nodes:
+        preds = exits_at.get(node_id, [])
+        succs = entries_at.get(node_id, [])
+        # Skip nodes where fewer than two distinct lanelets meet — they have
+        # nothing to connect, matching the pre-directional behaviour.
+        distinct = set(preds) | set(succs)
+        if len(distinct) < 2:
+            continue
+
+        attrs = node_attrs.get(node_id, {})
+        base_tags: list[tuple[str, str]] = [
+            ("type", "regulatory_element"),
+            ("subtype", "lane_connection"),
+            ("roadgraph", "lane_connection"),
+            ("roadgraph:junction_node_id", str(node_id)),
+        ]
+        jt = attrs.get("junction_type")
+        if isinstance(jt, str):
+            base_tags.append(("roadgraph:junction_type", jt))
+        jh = attrs.get("junction_hint")
+        if isinstance(jh, str):
+            base_tags.append(("roadgraph:junction_hint", jh))
+
+        seen: set[tuple[int, int]] = set()
+        for pred_rid in preds:
+            for succ_rid in succs:
+                if pred_rid == succ_rid:
+                    continue
+                key = (pred_rid, succ_rid)
+                if key in seen:
+                    continue
+                seen.add(key)
+                members = [
+                    ("relation", pred_rid, "predecessor"),
+                    ("relation", succ_rid, "successor"),
+                ]
+                new_relation(members, base_tags)
+
+
+# ---------------------------------------------------------------------------
 # δ. validate_lanelet2_tags helper (used by CLI)
 # ---------------------------------------------------------------------------
 
@@ -680,40 +796,14 @@ def export_lanelet2_per_lane(
                     rule, new_node, new_way, origin_lat, origin_lon
                 )
 
-    # Lane connectivity: for every graph node where ≥2 lanelets meet, emit a
-    # `type=regulatory_element, subtype=lane_connection` relation listing
-    # each incident lanelet (member role records whether its canonical start
-    # or end node anchors the junction). Autoware's planner consults this to
-    # treat consecutive lanelets across a junction as a single routable
-    # path. Mirrors the equivalent block in `export_lanelet2`.
-    if lanelet_id_by_edge:
-        node_lanelets: dict[str, list[tuple[int, str]]] = {}
-        for e in graph.edges:
-            rid = lanelet_id_by_edge.get(str(e.id))
-            if rid is None:
-                continue
-            node_lanelets.setdefault(e.start_node_id, []).append((rid, "from_start"))
-            if e.end_node_id != e.start_node_id:
-                node_lanelets.setdefault(e.end_node_id, []).append((rid, "from_end"))
-        node_attrs = {n.id: dict(n.attributes) for n in graph.nodes}
-        for node_id, entries in node_lanelets.items():
-            if len(entries) < 2:
-                continue
-            members = [("relation", rid, role) for rid, role in entries]
-            conn_tags: list[tuple[str, str]] = [
-                ("type", "regulatory_element"),
-                ("subtype", "lane_connection"),
-                ("roadgraph", "lane_connection"),
-                ("roadgraph:junction_node_id", str(node_id)),
-            ]
-            jt = node_attrs.get(node_id, {}).get("junction_type")
-            if isinstance(jt, str):
-                conn_tags.append(("roadgraph:junction_type", jt))
-            jh = node_attrs.get(node_id, {}).get("junction_hint")
-            if isinstance(jh, str):
-                conn_tags.append(("roadgraph:junction_hint", jh))
-            new_relation(members, conn_tags)
+    # Lane connectivity: emit one `subtype=lane_connection` regulatory_element
+    # relation per directed (predecessor, successor) pair at each junction so
+    # Autoware-style planners can read consecutive-lanelet connectivity
+    # directly. See `_emit_lane_connection_relations` for the rules.
+    _emit_lane_connection_relations(graph, lanelet_id_by_edge, new_relation)
 
+    # Autoware-style projector anchor: lives at the top of the document so the
+    # standard MetaInfo parser sees it before scanning nodes/ways/relations.
     for c in node_children:
         root.append(c)
     for c in way_children:
@@ -1018,38 +1108,9 @@ def export_lanelet2(
                     origin_lon,
                 )
 
-    # Lane connectivity: for every graph node where ≥2 lanelets meet, emit one
-    # `type=regulatory_element subtype=lane_connection` relation listing each
-    # incident lanelet as a member. The member role records whether the
-    # lanelet's canonical start or end node anchors the junction, so a
-    # downstream consumer can distinguish incoming from outgoing.
-    if lanelet_id_by_edge:
-        node_lanelets: dict[str, list[tuple[int, str]]] = {}
-        for e in graph.edges:
-            rid = lanelet_id_by_edge.get(e.id)
-            if rid is None:
-                continue
-            node_lanelets.setdefault(e.start_node_id, []).append((rid, "from_start"))
-            if e.end_node_id != e.start_node_id:
-                node_lanelets.setdefault(e.end_node_id, []).append((rid, "from_end"))
-        node_attrs = {n.id: dict(n.attributes) for n in graph.nodes}
-        for node_id, entries in node_lanelets.items():
-            if len(entries) < 2:
-                continue
-            members = [("relation", rid, role) for rid, role in entries]
-            conn_tags = [
-                ("type", "regulatory_element"),
-                ("subtype", "lane_connection"),
-                ("roadgraph", "lane_connection"),
-                ("roadgraph:junction_node_id", str(node_id)),
-            ]
-            jt = node_attrs.get(node_id, {}).get("junction_type")
-            if isinstance(jt, str):
-                conn_tags.append(("roadgraph:junction_type", jt))
-            jh = node_attrs.get(node_id, {}).get("junction_hint")
-            if isinstance(jh, str):
-                conn_tags.append(("roadgraph:junction_hint", jh))
-            new_relation(members, conn_tags)
+    # Lane connectivity: emit directed (predecessor, successor) pairs per
+    # junction node — see `_emit_lane_connection_relations`.
+    _emit_lane_connection_relations(graph, lanelet_id_by_edge, new_relation)
 
     for c in node_children:
         root.append(c)

@@ -374,6 +374,19 @@
       browser smoke に `#junctions-card` / `#junctions-list li >= 4` / `N types · N nodes` assert
       を追加し、hero screenshots を再生成。Paris grid で 7 categories (t/y/crossroads/x/complex/
       through/dead) が色分け表示される状態。
+  101. `lane_connection` regulatory_element を有向化。junction node ごとに
+       incident lanelet を 1 本の bundle に束ねていた既存実装（member role
+       `from_start` / `from_end`）を廃して、`(predecessor, successor)` の
+       lanelet 対ごとに 1 relation を emit するよう refactor。`oneway=yes` /
+       `oneway=-1` を解釈して flow が junction を「出る側」を `predecessor`、
+       「入る側」を `successor` に割り当てる（reverse-only edge も逆向きの
+       successor 候補にならない）。`export_lanelet2` / `export_lanelet2_per_lane`
+       の重複ブロックを `_emit_lane_connection_relations` helper に集約し、
+       `_flow_directions_for_edge` で oneway を解釈。Paris 707 → 1 705、Berlin
+       1 476 → 4 962、Tokyo 464 → 1 327 の lane_connection に増えた状態で
+       `validate-lanelet2-tags` 引き続き ok。Autoware planner が
+       junction を跨ぐ successor 関係を直接読めるようになるので routing
+       graph の reconstruction を再推定で誤魔化さなくて済む。
   100. `_build_committed_osm_dataset()` を生やして Berlin と Tokyo Ginza を一本化。
        Berlin の inline 160 行を helper 化（`dataset_id` / 各種 raw path / origin /
        optional route_from-to を引数）、`raw_regulatory_path` も任意で受けるので

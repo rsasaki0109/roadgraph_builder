@@ -117,6 +117,23 @@ test("Berlin Mitte dataset switch populates inspector + lane boundaries", async 
   const edges = countText(await page.textContent("#stat-edges"));
   expect(nodes, "berlin_mitte should have many nodes").toBeGreaterThan(500);
   expect(edges, "berlin_mitte should have many centerlines").toBeGreaterThan(500);
+
+  // Lanelet2 export card must be populated from the per-dataset summary JSON.
+  await expect(page.locator("#lanelet-card")).toBeVisible();
+  const laneletCount = countText(await page.textContent("#lanelet-count"));
+  expect(
+    laneletCount,
+    "berlin_mitte committed Lanelet2 OSM has thousands of lanelet relations",
+  ).toBeGreaterThan(1000);
+  const regCount = countText(await page.textContent("#lanelet-reg-count"));
+  expect(
+    regCount,
+    "berlin_mitte regulatory_element_count includes lane_change + lane_connection",
+  ).toBeGreaterThan(0);
+  // Directed lane_connection pairs: visible as a `lane_connection` chip in
+  // the regulatory subtype tag list.
+  const regTagText = (await page.textContent("#lanelet-reg-tags")) || "";
+  expect(regTagText).toMatch(/lane_connection/);
 });
 
 test("mobile viewport has no horizontal overflow", async ({ page }) => {

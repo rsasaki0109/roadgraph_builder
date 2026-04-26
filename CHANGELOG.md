@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **`lane_connection` regulatory_element relations are now directed pairs.**
+  `export_lanelet2` / `export_lanelet2_per_lane` previously emitted a single
+  bundle relation per junction node listing every incident lanelet with role
+  `from_start` / `from_end`. They now emit one relation per ordered
+  (predecessor, successor) lanelet pair at the junction, with member roles
+  `predecessor` (lanelet whose traffic flow exits at the junction) and
+  `successor` (lanelet whose traffic flow enters the junction). One-way
+  edges (`oneway=yes` or `oneway=-1`) contribute only their valid flow,
+  so reverse-only edges no longer create spurious successor candidates.
+  Autoware-style planners can now read consecutive-lanelet connectivity
+  directly instead of re-deriving direction from shared boundary points.
+  Committed lane_connection counts: Paris grid 707 → 1 705, Berlin Mitte
+  1 476 → 4 962, Tokyo Ginza 464 → 1 327.
+
 ### Added
 
 - **Lanelet2 summary JSON ships with each committed export and surfaces in the
@@ -24,8 +40,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   could download" without parsing a multi-megabyte XML in the browser, and
   makes the HD-lite Autoware-spec subtype coverage (lane_change vs
   lane_connection vs traffic_light, solid vs dashed) visible at a glance.
-  Paris grid: 1 485 lanelets / 1 399 regulatory_elements / 855 nodes with
-  `ele`. Berlin Mitte: 2 842 / 2 255 / 1 883. Tokyo Ginza: 978 / 787 / 548.
+  Paris grid: 1 485 lanelets / 2 397 regulatory_elements / 855 nodes with
+  `ele`. Berlin Mitte: 2 842 / 5 741 / 1 883. Tokyo Ginza: 978 / 1 650 / 548.
   `validate-lanelet2-tags` continues to report `result: ok` on all three.
 
 - **Route CLI explain mode exposes routing engine diagnostics.**
