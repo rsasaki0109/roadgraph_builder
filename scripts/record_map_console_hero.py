@@ -114,13 +114,16 @@ test("hero", async ({ browser }) => {
       { waitUntil: "domcontentloaded" },
     );
     await page.waitForSelector("body[data-ready='2d']", { timeout: 45000 });
-    // Short 2D soak so OSM tiles settle and the inspector is readable.
+    await page.locator("#lanelet-card").waitFor({ state: "visible", timeout: 15000 });
+    await page.locator("#lanelet-card").scrollIntoViewIfNeeded();
+    // Short 2D soak so OSM tiles settle and the Lanelet2 inspector is readable.
     await page.waitForTimeout(2500);
 
     // 2) Flip to 3D and let auto-rotate show the scene in motion.
     await page.click("#view-3d");
     await page.waitForTimeout(400);
     await page.waitForSelector("body[data-ready]", { timeout: 15000 });
+    await page.locator("#lanelet-card").scrollIntoViewIfNeeded();
     await page.waitForTimeout(4200);
 
     const video = page.video();

@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """Render the README / Showcase map-console hero screenshots.
 
-Serves ``docs/`` on a local HTTP server, then invokes the Playwright CLI
-(``npx -y -p @playwright/test playwright screenshot``) with system Chrome to
-capture 2D and 3D views of ``docs/map.html``.
+Serves ``docs/`` on a local HTTP server, then invokes Playwright through
+``npx -y -p @playwright/test`` with system Chrome to capture 2D and 3D views
+of ``docs/map.html``. By default the inspector is scrolled to the Lanelet2
+export card before capture so the committed screenshots show the HD-lite /
+Autoware-facing summary.
 
 External dependencies pulled at runtime (OSM tiles, Leaflet CDN, Three.js
 CDN) are baked into the PNG and carry the OSM attribution already rendered
@@ -21,6 +23,7 @@ import shutil
 import socketserver
 import subprocess
 import sys
+import tempfile
 import threading
 import time
 from pathlib import Path
@@ -32,6 +35,42 @@ ROOT = Path(__file__).resolve().parent.parent
 DOCS = ROOT / "docs"
 DEFAULT_2D = DOCS / "images" / "map_console_2d.png"
 DEFAULT_3D = DOCS / "images" / "map_console_3d.png"
+
+
+PLAYWRIGHT_SPEC = r"""
+import { test } from "@playwright/test";
+
+const url = process.env.SCREENSHOT_URL;
+const output = process.env.SCREENSHOT_OUTPUT;
+const width = Number(process.env.SCREENSHOT_WIDTH || "1600");
+const height = Number(process.env.SCREENSHOT_HEIGHT || "900");
+const channel = process.env.PLAYWRIGHT_CHANNEL || "chrome";
+const settleMs = Number(process.env.SETTLE_MS || "4500");
+const timeoutMs = Number(process.env.TIMEOUT_MS || "45000");
+const focusSelector = process.env.FOCUS_SELECTOR || "";
+
+if (!url || !output) {
+  throw new Error("SCREENSHOT_URL and SCREENSHOT_OUTPUT are required");
+}
+
+test.use({
+  channel,
+  viewport: { width, height },
+});
+
+test("map console screenshot", async ({ page }) => {
+  await page.goto(url, { waitUntil: "domcontentloaded" });
+  await page.waitForSelector("body[data-ready]", { timeout: timeoutMs });
+  await page.waitForTimeout(settleMs);
+  if (focusSelector) {
+    const focus = page.locator(focusSelector);
+    await focus.waitFor({ state: "visible", timeout: Math.min(timeoutMs, 15000) });
+    await focus.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(350);
+  }
+  await page.screenshot({ path: output, fullPage: false });
+});
+"""
 
 
 class QuietHandler(http.server.SimpleHTTPRequestHandler):
@@ -109,32 +148,56 @@ def _screenshot(
     channel: str,
     settle_ms: int,
     timeout_ms: int,
+    focus_selector: str,
 ) -> None:
     output.parent.mkdir(parents=True, exist_ok=True)
     tmp = output.with_name(output.stem + ".tmp" + output.suffix)
     if tmp.exists():
         tmp.unlink()
-    cmd = [
-        npx,
-        "-y",
-        "-p",
-        "@playwright/test",
-        "playwright",
-        "screenshot",
-        "--channel",
-        channel,
-        "--viewport-size",
-        f"{width},{height}",
-        "--wait-for-selector",
-        "body[data-ready]",
-        "--wait-for-timeout",
-        str(settle_ms),
-        "--timeout",
-        str(timeout_ms),
-        url,
-        str(tmp),
-    ]
-    subprocess.run(cmd, check=True)
+    with tempfile.TemporaryDirectory() as tmpdir:
+        work = Path(tmpdir)
+        spec = work / "map_console_screenshot.spec.mjs"
+        spec.write_text(PLAYWRIGHT_SPEC, encoding="utf-8")
+        shell_cmd = (
+            "set -e\n"
+            'NP="$(dirname "$(dirname "$(command -v playwright)")")"\n'
+            'ln -s "$NP" node_modules\n'
+            "exec playwright test map_console_screenshot.spec.mjs "
+            "--reporter=list --workers=1"
+        )
+        env = os.environ.copy()
+        env["SCREENSHOT_URL"] = url
+        env["SCREENSHOT_OUTPUT"] = str(tmp)
+        env["SCREENSHOT_WIDTH"] = str(width)
+        env["SCREENSHOT_HEIGHT"] = str(height)
+        env["PLAYWRIGHT_CHANNEL"] = channel
+        env["SETTLE_MS"] = str(settle_ms)
+        env["TIMEOUT_MS"] = str(timeout_ms)
+        env["FOCUS_SELECTOR"] = focus_selector
+        env.setdefault("PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD", "1")
+        cmd = [
+            npx,
+            "-y",
+            "-p",
+            "@playwright/test",
+            "sh",
+            "-c",
+            shell_cmd,
+            "map_console_screenshot",
+        ]
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            env=env,
+            cwd=work,
+            timeout=timeout_ms / 1000.0 + 30.0,
+        )
+        if result.returncode != 0:
+            raise RuntimeError(
+                "playwright screenshot failed\n"
+                f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}"
+            )
     _assert_png(tmp)
     _quantize_png(tmp)
     tmp.replace(output)
@@ -177,6 +240,14 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--timeout-ms", type=int, default=45000)
     parser.add_argument(
+        "--focus-selector",
+        default="#lanelet-card",
+        help=(
+            "Selector to scroll into view before capture. Default #lanelet-card; "
+            "pass an empty string to keep the initial inspector scroll."
+        ),
+    )
+    parser.add_argument(
         "--only",
         choices=["2d", "3d"],
         help="Render only one view; default is both.",
@@ -203,6 +274,7 @@ def main(argv: list[str] | None = None) -> int:
                 channel=args.channel,
                 settle_ms=args.settle_ms,
                 timeout_ms=args.timeout_ms,
+                focus_selector=args.focus_selector,
             )
             print(f"Wrote {_rel(args.output_2d)}")
         if args.only != "2d":
@@ -215,6 +287,7 @@ def main(argv: list[str] | None = None) -> int:
                 channel=args.channel,
                 settle_ms=args.settle_ms,
                 timeout_ms=args.timeout_ms,
+                focus_selector=args.focus_selector,
             )
             print(f"Wrote {_rel(args.output_3d)}")
     return 0
