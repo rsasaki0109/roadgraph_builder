@@ -7,9 +7,11 @@ overlays, and export to navigation JSON / simulation GeoJSON / Lanelet2 OSM.
 
 > **Scope reminder — HD-lite, not survey-grade.** The committed
 > [`map_paris_grid.lanelet.osm`](assets/map_paris_grid.lanelet.osm) is valid
-> Lanelet2 OSM XML that Autoware's `lanelet2_validation` can load, but lane
-> widths are centerline-offset envelopes (3.5 m default), lane counts fall
-> back to 1 without real markings, regulatory markers are OSM-derived or
+> Lanelet2 OSM XML that Autoware's `lanelet2_validation` can load; for stock
+> Lanelet2 / Autoware loader smoke tests, `sanitize-lanelet2-autoware` writes
+> a conservative `lanelet2_map.osm` plus optional `map_projector_info.yaml`.
+> Lane widths are centerline-offset envelopes (3.5 m default), lane counts
+> fall back to 1 without real markings, regulatory markers are OSM-derived or
 > sample-grade detections, and elevation is SRTM / trajectory-derived when
 > available.
 > Autonomous vehicle deployment still needs cm-class survey, calibrated

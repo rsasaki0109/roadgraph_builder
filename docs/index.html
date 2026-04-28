@@ -148,7 +148,9 @@
       <p class="small">
         <strong>Scope:</strong> HD-lite, not survey-grade. The pipeline exports
         <a href="assets/map_paris_grid.lanelet.osm">Lanelet2 OSM XML</a>
-        (Autoware's <code>lanelet2_validation</code> can load it), but lane
+        (Autoware's <code>lanelet2_validation</code> can load it), and
+        <code>sanitize-lanelet2-autoware</code> can write a conservative
+        loader-smoke <code>lanelet2_map.osm</code> plus projector sidecar. Lane
         widths are 3.5&nbsp;m offsets, lane counts fall back to 1 without real
         markings, regulatory markers are OSM-derived or sample-grade, and
         elevation is SRTM / trajectory-derived when available. Autonomous

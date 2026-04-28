@@ -54,6 +54,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **README / Showcase now distinguish rich Lanelet2 exports from Autoware
+  loader-smoke maps.** The docs point `sanitize-lanelet2-autoware` from the
+  feature matrix, shipped-command examples, Architecture CLI table, Pages
+  scope note, and attribution manifest so readers know when to use the rich
+  Roadgraph OSM and when to generate the conservative `lanelet2_map.osm` plus
+  `map_projector_info.yaml` sidecar.
+
 - **`lane_connection` regulatory_element relations are now directed pairs.**
   `export_lanelet2` / `export_lanelet2_per_lane` previously emitted a single
   bundle relation per junction node listing every incident lanelet with role

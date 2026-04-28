@@ -26,7 +26,8 @@
   reverse-oneway / forward-oneway を追加した分。連番が変わったのは pytest 集計上の理由）。
 - **current local git:** 2026-04-29 Codex session 時点で `main` は `origin/main` と同期済み。
   直近の pushed work は San Francisco dataset 追加、`sanitize-lanelet2-autoware`
-  追加、Lanelet2 inspector card入り map-console hero PNG / GIF refresh。
+  追加、Lanelet2 inspector card入り map-console hero PNG / GIF refresh、Autoware
+  loader-smoke docs exposure / wording consistency pass。
 - **Claude → Codex handoff (2026-04-26):** Claude session で着手して shipped したのは Lanelet2
   Autoware-friendliness の 3 ポイント（directional `lane_connection` / `_emit_lanelet_summary`
   staleness gate + browser smoke lanelet-card assert / `<MetaInfo>` projector hint）。user は途中で
@@ -64,9 +65,9 @@
   `python3 -m pytest` は **646 passed / 28 skipped / 5 deselected**。
   `python3 -m pytest tests/test_lanelet2_autoware_compat.py tests/test_cli_export.py`
   は **17 passed**。
-- **Codex restart point:** Lanelet2 / Autoware 周辺を続けるなら §5b C の文言整合性チェックか
-  §3.11 可視化の残タスク。Autoware loader-smoke profile は `sanitize-lanelet2-autoware`
-  で実装済み。
+- **Codex restart point:** Lanelet2 / Autoware 周辺の §5b A/B/C は完了済み。
+  次は §3.11 可視化の残タスクか、Autoware sanitizer の実地サンプル bundle 化が自然。
+  Autoware loader-smoke profile は `sanitize-lanelet2-autoware` で実装済み。
   ほかの core algorithm/perf を触るなら §3.8〜§3.10 と benchmark baseline JSON を先に見る。
 - **直近の sessions (2026-04-21〜2026-04-28) で landed / in-progress:**
   - **2026-04-28 Codex session:** §5b A を実行し、San Francisco North Beach /
@@ -1227,13 +1228,18 @@ B. **DONE 2026-04-29 Codex: README + SHOWCASE の hero / 説明を Lanelet2 insp
      `[Unreleased]` は directed pair / current Lanelet2 counts 前提に整合済み。旧 release entry
      の `from_start / from_end` は歴史記述として残している。
 
-C. **CHANGELOG / docs / Codex 内の文言整合性チェック** — Claude session でアップデートした
+C. **DONE 2026-04-29 Codex: CHANGELOG / docs / Codex 内の文言整合性チェック** — Claude session でアップデートした
    - `CHANGELOG.md` `[Unreleased]` の **Added (MetaInfo)** + **Changed (directional
      lane_connection)** 両エントリ
    - `docs/PLAN.md` 番号 `101` (directional) と `102` (MetaInfo)
    が repository 全体の他の参照と矛盾しないか軽く確認すれば release 前 cleanup として OK。
    `tests/test_lanelet_summary.py` の staleness gate があるので summary JSON drift は CI で
    検出される（refresh 忘れても fail）。
+   2026-04-29 Codex で README / SHOWCASE / docs/index / ARCHITECTURE /
+   ATTRIBUTION / CHANGELOG を確認し、`sanitize-lanelet2-autoware` を feature
+   matrix / shipped-command examples / CLI surface / scope note / attribution に露出。
+   rich Roadgraph Lanelet2 export と conservative stock-loader smoke map の違いを
+   docs 上で明確化済み。
 
 D. **push** — A〜C のどれか、または何もしないで「ここで一旦区切り」になった時点で user に
    `push!` を求める。Claude session 終了時点で `main` は **origin/main から 2 commits 進行中**
