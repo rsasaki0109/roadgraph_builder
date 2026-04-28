@@ -118,7 +118,7 @@
         </a>
         <figcaption>
           Paris OSM-highway graph with road-class coloured centerlines, HD-lite
-          lane boundaries, synthetic regulatory markers, a deep-linked TR-aware
+          lane boundaries, OSM-derived regulatory markers, a deep-linked TR-aware
           route, and a live reachability overlay — all rendered client-side
           from committed GeoJSON.
         </figcaption>
@@ -136,9 +136,9 @@
           878 m without.
         </li>
         <li>
-          <strong>HD</strong> — adds HD-lite lane boundaries, synthetic
-          regulatory markers (traffic lights, stop lines, crosswalks, speed
-          limits), and a 500 m reachability overlay.
+          <strong>HD</strong> — adds HD-lite lane boundaries, OSM-derived
+          regulatory markers (traffic lights, stop lines, crosswalks), and a
+          500-600 m reachability overlay.
         </li>
         <li>
           <strong>Full</strong> — everything; click <em>Reach from click</em>
@@ -150,9 +150,10 @@
         <a href="assets/map_paris_grid.lanelet.osm">Lanelet2 OSM XML</a>
         (Autoware's <code>lanelet2_validation</code> can load it), but lane
         widths are 3.5&nbsp;m offsets, lane counts fall back to 1 without real
-        markings, regulatory markers on this dataset are synthetic, and
-        elevation is absent. Autonomous vehicle deployment still needs
-        cm-class survey, calibrated sensors, and per-area QA.
+        markings, regulatory markers are OSM-derived or sample-grade, and
+        elevation is SRTM / trajectory-derived when available. Autonomous
+        vehicle deployment still needs cm-class survey, calibrated sensors,
+        and per-area QA.
       </p>
       <p class="small">
         Source on

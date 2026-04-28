@@ -23,6 +23,10 @@ PARIS_GRID_REACHABLE_START_NODE = "n312"
 PARIS_GRID_REACHABLE_MAX_COST_M = 500.0
 PARIS_GRID_ROUTE_FROM_NODE = "n312"
 PARIS_GRID_ROUTE_TO_NODE = "n191"
+SF_NORTH_BEACH_REACHABLE_START_NODE = "n1377"
+SF_NORTH_BEACH_REACHABLE_MAX_COST_M = 600.0
+SF_NORTH_BEACH_ROUTE_FROM_NODE = "n1377"
+SF_NORTH_BEACH_ROUTE_TO_NODE = "n499"
 
 
 def _load_origin(path: Path) -> tuple[float, float]:
@@ -1429,6 +1433,18 @@ def _write_tokyo_ginza_reachability_asset() -> None:
     )
 
 
+def _write_sf_north_beach_reachability_asset() -> None:
+    """Build the committed San Francisco service-area overlay."""
+    _write_reachability_asset(
+        dataset_id="sf_north_beach",
+        map_filename="map_sf_north_beach.geojson",
+        restrictions_filename="sf_north_beach_turn_restrictions.json",
+        output_filename="reachable_sf_north_beach.geojson",
+        start_node=SF_NORTH_BEACH_REACHABLE_START_NODE,
+        budget_m=SF_NORTH_BEACH_REACHABLE_MAX_COST_M,
+    )
+
+
 def _render_paris_grid_route_preview() -> None:
     """Render a static SVG preview for README / GitHub Pages."""
     map_path = ASSETS / "map_paris_grid.geojson"
@@ -2030,9 +2046,25 @@ def main() -> None:
         route_to="n141",
     )
 
+    # OSM-highway-derived San Francisco North Beach / Russian Hill sample
+    # (bbox lat 37.7900-37.8100, lon -122.4300--122.4000). This gives the
+    # committed viewer an Americas city with steep SRTM-backed slopes.
+    _build_committed_osm_dataset(
+        dataset_id="sf_north_beach",
+        raw_highways_path=Path("/tmp/osm_real_data/sf_highways.json"),
+        raw_tr_path=Path("/tmp/osm_real_data/sf_turn_restrictions_raw.json"),
+        raw_regulatory_path=Path("/tmp/osm_real_data/sf_regulatory_nodes.json"),
+        elevation_cache_path=Path("/tmp/osm_real_data/sf_node_elevations.json"),
+        origin_lat=37.8000,
+        origin_lon=-122.4150,
+        route_from=SF_NORTH_BEACH_ROUTE_FROM_NODE,
+        route_to=SF_NORTH_BEACH_ROUTE_TO_NODE,
+    )
+
     _write_paris_grid_reachability_asset()
     _write_berlin_mitte_reachability_asset()
     _write_tokyo_ginza_reachability_asset()
+    _write_sf_north_beach_reachability_asset()
     _write_route_explain_sample_asset()
     _write_map_match_explain_sample_asset()
 

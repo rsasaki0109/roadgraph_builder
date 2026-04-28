@@ -107,7 +107,12 @@ def test_committed_lanelet_summaries_match_committed_xml(tmp_path: Path) -> None
     """
     refresh = _load_refresh_module()
     assets = _REPO_ROOT / "docs" / "assets"
-    datasets = ["map_paris_grid", "map_berlin_mitte", "map_tokyo_ginza"]
+    datasets = [
+        "map_paris_grid",
+        "map_berlin_mitte",
+        "map_tokyo_ginza",
+        "map_sf_north_beach",
+    ]
     for stem in datasets:
         osm_path = assets / f"{stem}.lanelet.osm"
         committed_summary_path = assets / f"{stem}_lanelet_summary.json"

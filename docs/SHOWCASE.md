@@ -9,8 +9,9 @@ overlays, and export to navigation JSON / simulation GeoJSON / Lanelet2 OSM.
 > [`map_paris_grid.lanelet.osm`](assets/map_paris_grid.lanelet.osm) is valid
 > Lanelet2 OSM XML that Autoware's `lanelet2_validation` can load, but lane
 > widths are centerline-offset envelopes (3.5 m default), lane counts fall
-> back to 1 without real markings, regulatory markers on the Paris grid are
-> synthetic, and elevation is absent without a `z`-bearing trajectory.
+> back to 1 without real markings, regulatory markers are OSM-derived or
+> sample-grade detections, and elevation is SRTM / trajectory-derived when
+> available.
 > Autonomous vehicle deployment still needs cm-class survey, calibrated
 > sensors, and per-area QA — this toolkit does not replace those steps.
 
@@ -18,14 +19,14 @@ overlays, and export to navigation JSON / simulation GeoJSON / Lanelet2 OSM.
 
 ## From SD to HD in the map console
 
-The toolbar's **Mode** select walks through the pipeline tiers. Same committed
-Paris OSM-highway data, four progressively richer views:
+The toolbar's **Mode** select walks through the pipeline tiers. The same
+committed OSM-highway city datasets, four progressively richer views:
 
 | Tier | Drawn | Supporting pipeline step |
 | --- | --- | --- |
 | **Basic** | Centerlines coloured by OSM `highway` class + nodes coloured by junction type | `build-osm-graph` + `pipeline.junction_topology` |
 | **SD** | + directed-state **route** (JS Dijkstra, OSM `no_*` / `only_*`) + **turn restriction** markers | `convert-osm-restrictions` + `route` |
-| **HD** | + **HD-lite lane boundaries** + synthetic **traffic lights / stop lines / crosswalks / speed limits** + 500 m **reachability** spans | `enrich --lane-width-m` + `apply-camera` + `reachable` |
+| **HD** | + **HD-lite lane boundaries** + OSM-derived **traffic lights / stop lines / crosswalks** + 500-600 m **reachability** spans | `enrich --lane-width-m` + `apply-camera` + `reachable` |
 | **Full** | Everything above | default on load; **Reach from click** recomputes live in the browser |
 
 ![2D map console: Paris OSM grid with road-class colours, HD-lite lanes, regulatory markers, and inspector cards](images/map_console_2d.png)
@@ -36,8 +37,9 @@ The inspector on the right surfaces the same graph stats the CLI produces —
 **Road classes** (9 categories), **Junctions** (T / Y / crossroads / …),
 **Route steps** (edge id / direction / cumulative m), **Route engine**
 (`expandedStates` / `queuedStates` / heap pops — matching the
-`route --explain` diagnostics shape), and a live **Hover** card for edges
-and nodes. Everything renders from committed GeoJSON; no backend required.
+`route --explain` diagnostics shape), a **Lanelet2 export** card with
+lanelet / regulatory-element counts, and a live **Hover** card for edges and
+nodes. Everything renders from committed GeoJSON; no backend required.
 
 ![Route diagnostics comparison showing safe A* and the Paris Dijkstra fallback](images/route_diagnostics_compare.png)
 
@@ -63,7 +65,7 @@ committed Paris TR-aware route.
 
 | Signal | Why it matters | Link |
 | --- | --- | --- |
-| Paris + Berlin map console | Real OSM-derived SD / HD-lite graphs with 2D/3D views, inspector metrics, turn restrictions, route, reachability, semantic overlays | [map](map.html) |
+| Paris / Berlin / Tokyo / San Francisco map console | Real OSM-derived SD / HD-lite graphs with 2D/3D views, inspector metrics, turn restrictions, route, reachability, semantic overlays | [map](map.html) |
 | Route diagnostics compare | Generated `route --explain` samples show safe A* vs Dijkstra fallback search work | [viewer](diagram.html) |
 | Static route preview | Works in the GitHub README without running a server | [SVG](images/paris_grid_route.svg) |
 | Architecture | One-page module map for build, routing, perception, export, schemas, and CLI | [architecture](ARCHITECTURE.md) |
@@ -85,6 +87,13 @@ toy graph. It includes:
 The interesting bit is that route and reachability use the same policy layer:
 turn restrictions, confidence filters, observed/unobserved weighting, and slope
 costs are shared across shortest-path and service-area workflows.
+
+San Francisco North Beach / Russian Hill is the fourth committed city dataset:
+1,800 nodes / 2,227 centerlines, 127 mapped OSM turn restrictions, 876
+OSM-derived regulatory observations, 1,800 SRTM-backed elevation nodes, and a
+2.76 km demo route from `n1377` to `n499`. Its Lanelet2 summary reports 3,458
+lanelets and 7,475 regulatory elements, including 6,006 directed
+`lane_connection` pairs.
 
 ## Core Workflows
 

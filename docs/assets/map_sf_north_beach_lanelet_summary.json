@@ -1,0 +1,17 @@
+{
+  "format_version": 1,
+  "source_lanelet_osm": "map_sf_north_beach.lanelet.osm",
+  "file_size_bytes": 9678247,
+  "lanelet_count": 3458,
+  "regulatory_element_count": 7475,
+  "regulatory_subtypes": {
+    "lane_change": 1231,
+    "traffic_light": 238,
+    "lane_connection": 6006
+  },
+  "boundary_subtypes": {
+    "solid": 4454,
+    "dashed": 2462
+  },
+  "node_ele_count": 1800
+}

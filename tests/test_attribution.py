@@ -168,9 +168,18 @@ _OSM_DERIVED_GEOJSON = [
     "map_osm.geojson",
     "map_paris.geojson",
     "map_paris_grid.geojson",
+    "map_berlin_mitte.geojson",
+    "map_tokyo_ginza.geojson",
+    "map_sf_north_beach.geojson",
     "reachable_paris_grid.geojson",
+    "reachable_berlin_mitte.geojson",
+    "reachable_tokyo_ginza.geojson",
+    "reachable_sf_north_beach.geojson",
     "route_paris.geojson",
     "route_paris_grid.geojson",
+    "route_berlin_mitte.geojson",
+    "route_tokyo_ginza.geojson",
+    "route_sf_north_beach.geojson",
 ]
 
 
@@ -188,14 +197,21 @@ def test_shipped_osm_geojson_carries_attribution():
         )
 
 
-def test_shipped_paris_grid_turn_restrictions_carries_attribution():
-    path = ROOT / "docs" / "assets" / "paris_grid_turn_restrictions.json"
-    if not path.is_file():
-        return
-    data = json.loads(path.read_text(encoding="utf-8"))
-    assert data.get("attribution"), "paris_grid_turn_restrictions.json: missing attribution"
-    assert data.get("license"), "paris_grid_turn_restrictions.json: missing license"
-    validate_turn_restrictions_document(data)
+def test_shipped_turn_restrictions_carry_attribution():
+    names = [
+        "paris_grid_turn_restrictions.json",
+        "berlin_mitte_turn_restrictions.json",
+        "tokyo_ginza_turn_restrictions.json",
+        "sf_north_beach_turn_restrictions.json",
+    ]
+    for name in names:
+        path = ROOT / "docs" / "assets" / name
+        if not path.is_file():
+            continue
+        data = json.loads(path.read_text(encoding="utf-8"))
+        assert data.get("attribution"), f"{name}: missing attribution"
+        assert data.get("license"), f"{name}: missing license"
+        validate_turn_restrictions_document(data)
 
 
 def test_shipped_paris_grid_preview_credits_osm():
