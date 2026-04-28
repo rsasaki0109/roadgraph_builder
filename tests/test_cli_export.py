@@ -14,6 +14,7 @@ from roadgraph_builder.cli.export import (
     resolve_bundle_origin,
     resolve_graph_origin,
     run_export_lanelet2,
+    run_sanitize_lanelet2_autoware,
     run_validate_lanelet2,
     run_validate_lanelet2_tags,
 )
@@ -241,6 +242,77 @@ def test_run_validate_lanelet2_handles_skipped_and_failed(tmp_path: Path):
 
     assert rc == 1
     assert "bad lanelet" in stderr.getvalue()
+
+
+def test_run_sanitize_lanelet2_autoware_injects_sanitizer(tmp_path: Path):
+    osm = tmp_path / "map.osm"
+    osm.write_text("<osm/>", encoding="utf-8")
+    output = tmp_path / "compat.osm"
+    stdout = io.StringIO()
+    calls: list[dict[str, object]] = []
+
+    def sanitize_func(input_osm: Path, output_osm: Path, **kwargs: object) -> dict[str, int]:
+        calls.append({"input": input_osm, "output": output_osm, **kwargs})
+        return {"removed_regulatory_relations": 7}
+
+    rc = run_sanitize_lanelet2_autoware(
+        argparse.Namespace(
+            input_osm=str(osm),
+            output_osm=str(output),
+            fill_missing_ele=1.25,
+            no_fill_missing_ele=False,
+            turn_direction="left",
+            map_projector_info_yaml="projector.yaml",
+            traffic_light_height_m=4.5,
+        ),
+        sanitize_func=sanitize_func,
+        stdout=stdout,
+    )
+
+    assert rc == 0
+    assert calls == [
+        {
+            "input": osm,
+            "output": output,
+            "fill_missing_ele": 1.25,
+            "default_turn_direction": "left",
+            "map_projector_info_yaml": "projector.yaml",
+            "traffic_light_height_m": 4.5,
+        }
+    ]
+    payload = json.loads(stdout.getvalue())
+    assert payload["result"] == "ok"
+    assert payload["removed_regulatory_relations"] == 7
+
+
+def test_run_sanitize_lanelet2_autoware_can_disable_placeholders(tmp_path: Path):
+    osm = tmp_path / "map.osm"
+    osm.write_text("<osm/>", encoding="utf-8")
+    calls: list[dict[str, object]] = []
+
+    rc = run_sanitize_lanelet2_autoware(
+        argparse.Namespace(
+            input_osm=str(osm),
+            output_osm=str(tmp_path / "compat.osm"),
+            fill_missing_ele=0.0,
+            no_fill_missing_ele=True,
+            turn_direction="none",
+            map_projector_info_yaml=None,
+            traffic_light_height_m=5.0,
+        ),
+        sanitize_func=lambda input_osm, output_osm, **kwargs: calls.append(kwargs) or {},
+        stdout=io.StringIO(),
+    )
+
+    assert rc == 0
+    assert calls == [
+        {
+            "fill_missing_ele": None,
+            "default_turn_direction": None,
+            "map_projector_info_yaml": None,
+            "traffic_light_height_m": 5.0,
+        }
+    ]
 
 
 def test_run_validate_lanelet2_tags_injects_validator(tmp_path: Path):

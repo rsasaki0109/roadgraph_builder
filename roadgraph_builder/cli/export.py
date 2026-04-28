@@ -110,6 +110,61 @@ def add_lanelet2_parsers(sub) -> None:  # type: ignore[no-untyped-def]
     )
     vlt.add_argument("input_osm", help="OSM XML file produced by export-lanelet2.")
 
+    awc = sub.add_parser(
+        "sanitize-lanelet2-autoware",
+        help=(
+            "Post-process a Lanelet2 OSM into a conservative Autoware loader-smoke "
+            "variant by stripping regulatory elements and Roadgraph-only tags."
+        ),
+    )
+    awc.add_argument("input_osm", help="Input Lanelet2 OSM XML file.")
+    awc.add_argument("output_osm", help="Output sanitized Lanelet2 OSM XML file.")
+    awc.add_argument(
+        "--fill-missing-ele",
+        type=float,
+        default=0.0,
+        metavar="METERS",
+        help=(
+            "Add this ele value to nodes missing elevation (default: 0.0). "
+            "Use --no-fill-missing-ele to leave missing elevations unchanged."
+        ),
+    )
+    awc.add_argument(
+        "--no-fill-missing-ele",
+        action="store_true",
+        default=False,
+        help="Do not add placeholder ele tags to nodes that lack elevation.",
+    )
+    awc.add_argument(
+        "--turn-direction",
+        choices=["infer", "straight", "left", "right", "none"],
+        default="infer",
+        help=(
+            "turn_direction to add to lanelets missing it (default: infer from geometry). "
+            "Use 'none' to leave turn_direction unchanged or a fixed value to override inference."
+        ),
+    )
+    awc.add_argument(
+        "--map-projector-info-yaml",
+        type=str,
+        default=None,
+        metavar="PATH",
+        help=(
+            "Optionally write an Autoware map_projector_info.yaml sidecar from "
+            "the Lanelet2 OSM MetaInfo origin."
+        ),
+    )
+    awc.add_argument(
+        "--traffic-light-height-m",
+        type=float,
+        default=5.0,
+        metavar="METERS",
+        help=(
+            "Height tag to add to generated traffic-light linestrings "
+            "(default: 5.0)."
+        ),
+    )
+
 
 def add_export_bundle_parser(
     sub,  # type: ignore[no-untyped-def]
@@ -405,6 +460,53 @@ def run_validate_lanelet2_tags(
         print(f"validate-lanelet2-tags: {len(errors)} error(s) found.", file=err)
         return 1
     print(json.dumps({"result": "ok", "warnings": len(warnings), "errors": 0}, indent=2), file=out)
+    return 0
+
+
+def run_sanitize_lanelet2_autoware(
+    args: argparse.Namespace,
+    *,
+    sanitize_func: Callable[..., dict[str, int]] | None = None,
+    stdout: TextIO | None = None,
+    stderr: TextIO | None = None,
+) -> int:
+    """Execute ``sanitize-lanelet2-autoware`` from parsed args."""
+
+    out = stdout if stdout is not None else sys.stdout
+    err = stderr if stderr is not None else sys.stderr
+    input_osm = Path(args.input_osm)
+    output_osm = Path(args.output_osm)
+    if not input_osm.is_file():
+        print(f"File not found: {input_osm}", file=err)
+        return 1
+    if sanitize_func is None:
+        from roadgraph_builder.io.export.lanelet2 import sanitize_lanelet2_for_autoware
+
+        sanitize_func = sanitize_lanelet2_for_autoware
+
+    fill_missing_ele = None if getattr(args, "no_fill_missing_ele", False) else args.fill_missing_ele
+    turn_direction = getattr(args, "turn_direction", "infer")
+    default_turn_direction = None if turn_direction == "none" else turn_direction
+    stats = sanitize_func(
+        input_osm,
+        output_osm,
+        fill_missing_ele=fill_missing_ele,
+        default_turn_direction=default_turn_direction,
+        map_projector_info_yaml=getattr(args, "map_projector_info_yaml", None),
+        traffic_light_height_m=getattr(args, "traffic_light_height_m", 5.0),
+    )
+    print(
+        json.dumps(
+            {
+                "result": "ok",
+                "input": str(input_osm),
+                "output": str(output_osm),
+                **stats,
+            },
+            indent=2,
+        ),
+        file=out,
+    )
     return 0
 
 

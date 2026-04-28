@@ -61,6 +61,7 @@ from roadgraph_builder.cli.export import (
     add_lanelet2_parsers,
     run_export_bundle,
     run_export_lanelet2,
+    run_sanitize_lanelet2_autoware,
     run_validate_lanelet2,
     run_validate_lanelet2_tags,
 )
@@ -242,6 +243,8 @@ def main(argv: list[str] | None = None) -> int:
         return run_validate_lanelet2(args)
     if args.command == "validate-lanelet2-tags":
         return run_validate_lanelet2_tags(args)
+    if args.command == "sanitize-lanelet2-autoware":
+        return run_sanitize_lanelet2_autoware(args)
     if args.command == "apply-camera":
         return run_apply_camera(
             args,

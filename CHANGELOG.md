@@ -9,6 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **San Francisco North Beach joins the committed map-console datasets.**
+  `scripts/refresh_docs_assets.py` now builds a fourth OSM-highway city
+  dataset via `_build_committed_osm_dataset(dataset_id="sf_north_beach", ...)`
+  from raw Overpass dumps under `/tmp/osm_real_data` for bbox
+  `-122.4300,37.7900,-122.4000,37.8100`. The committed surface includes
+  `map_sf_north_beach.geojson`, `map_sf_north_beach.lanelet.osm`,
+  `sf_north_beach_origin.json`, `sf_north_beach_turn_restrictions.json`,
+  `sf_north_beach_camera_detections.json`, `route_sf_north_beach.geojson`,
+  `reachable_sf_north_beach.geojson`, and the Lanelet2 summary JSON. The
+  dataset has 1 800 graph nodes / 2 227 centerlines, 127 mapped OSM turn
+  restrictions, 876 OSM-derived regulatory observations, 1 800 SRTM-backed
+  elevation nodes, a 2.76 km demo route (`n1377 → n499`), a 600 m reachable
+  overlay, and a 3 458-lanelet / 7 475-regulatory-element Lanelet2 export.
+  The map console dropdown, route / reachable / restriction overlays,
+  Lanelet2 download link, Lanelet2 inspector card, attribution manifest, and
+  stale-summary regression test all include the SF dataset.
+
 - **Lanelet2 OSM exports embed an Autoware-style `<MetaInfo>` element with
   the projector origin.** Both `export_lanelet2` and
   `export_lanelet2_per_lane` now write a `<MetaInfo>` element at the top of
@@ -18,7 +35,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and ignore the rest; an Autoware Universe `map_loader` (or any custom
   consumer) can recover the projector frame directly from the file without
   a separate `map_projector_info.yaml` sidecar. Committed Paris / Berlin /
-  Tokyo `.lanelet.osm` regenerated.
+  Tokyo / San Francisco `.lanelet.osm` regenerated.
+
+- **`sanitize-lanelet2-autoware` creates loader-smoke OSM from rich Roadgraph
+  Lanelet2 exports.** The new CLI post-processes an existing `.lanelet.osm`
+  into a conservative Autoware-compatible geometry profile by removing
+  Roadgraph-only `lane_change` / `lane_connection` relations and diagnostic
+  tags, converting sample point traffic lights into Lanelet2 `traffic_light`
+  regulatory elements with generated linestrings / `height` tags /
+  `traffic_light_id` tags / `light_bulbs` members, removing width /
+  point-traffic-light tags that stock Lanelet2 flags, filling missing `ele`
+  values from the nearest existing
+  elevation point when possible, inferring lanelet `turn_direction` from
+  geometry, and optionally writing `map_projector_info.yaml` from the embedded
+  `<MetaInfo>` origin. The rich map is still kept for docs / inspection; the
+  sanitized output is meant for loader smoke tests, not production semantic
+  maps.
 
 ### Changed
 
@@ -34,14 +66,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Autoware-style planners can now read consecutive-lanelet connectivity
   directly instead of re-deriving direction from shared boundary points.
   Committed lane_connection counts: Paris grid 707 → 1 705, Berlin Mitte
-  1 476 → 4 962, Tokyo Ginza 464 → 1 327.
+  1 476 → 4 962, Tokyo Ginza 464 → 1 327; San Francisco North Beach emits
+  6 006 directed lane_connection relations.
 
 ### Added
 
 - **Lanelet2 summary JSON ships with each committed export and surfaces in the
   map-console inspector.** The refresh pipeline now writes
   `docs/assets/map_<dataset>_lanelet_summary.json` after every Lanelet2 OSM
-  export (Paris grid, Berlin Mitte, Tokyo Ginza). Each summary records the
+  export (Paris grid, Berlin Mitte, Tokyo Ginza, San Francisco North Beach).
+  Each summary records the
   source filename, file size, total `lanelet` count, total
   `regulatory_element` count, the per-subtype distribution for both
   regulatory elements (`lane_change`, `lane_connection`, `traffic_light`)
@@ -55,7 +89,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   lane_connection vs traffic_light, solid vs dashed) visible at a glance.
   Paris grid: 1 485 lanelets / 2 397 regulatory_elements / 855 nodes with
   `ele`. Berlin Mitte: 2 842 / 5 741 / 1 883. Tokyo Ginza: 978 / 1 650 / 548.
-  `validate-lanelet2-tags` continues to report `result: ok` on all three.
+  San Francisco North Beach: 3 458 / 7 475 / 1 800.
+  `validate-lanelet2-tags` continues to report `result: ok` on all four.
 
 - **Route CLI explain mode exposes routing engine diagnostics.**
   `roadgraph_builder route --explain` adds a `diagnostics` object to stdout

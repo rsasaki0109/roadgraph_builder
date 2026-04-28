@@ -37,6 +37,7 @@ _roadgraph_builder() {
         'export-lanelet2:Write OSM XML 0.6 (Lanelet2 / JOSM)'
         'validate-lanelet2:Run Autoware lanelet2_validation when available'
         'validate-lanelet2-tags:Check required Lanelet2 tags in OSM XML'
+        'sanitize-lanelet2-autoware:Strip regulatory elements and Roadgraph tags for Autoware loader smoke tests'
         'apply-camera:Merge camera detections into attributes.hd.semantic_rules'
         'export-bundle:Write nav/sim/lanelet outputs in one directory'
         'build-osm-graph:Build road graph from Overpass highway ways'
@@ -183,6 +184,15 @@ _roadgraph_builder() {
                 validate-lanelet2)
                     _arguments \
                         '--timeout[Validation subprocess timeout seconds]:int:' \
+                        '*:file:_files'
+                    ;;
+                sanitize-lanelet2-autoware)
+                    _arguments \
+                        '--fill-missing-ele[Placeholder ele value for nodes missing elevation]:float:' \
+                        '--no-fill-missing-ele[Leave missing ele tags unchanged]' \
+                        '--turn-direction[Lanelet turn direction mode]:(infer straight left right none)' \
+                        '--map-projector-info-yaml[Write Autoware projector sidecar]:file:_files' \
+                        '--traffic-light-height-m[Generated traffic-light height tag (m)]:float:' \
                         '*:file:_files'
                     ;;
                 build-osm-graph)

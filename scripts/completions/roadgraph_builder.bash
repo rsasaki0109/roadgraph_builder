@@ -22,6 +22,7 @@ validate-sd-nav validate-manifest validate-turn-restrictions enrich \
 inspect-lidar nearest-node route reachable stats match-trajectory infer-road-class \
 infer-signalized-junctions fuse-traces reconstruct-trips fuse-lidar \
 infer-lane-count export-lanelet2 validate-lanelet2 validate-lanelet2-tags \
+sanitize-lanelet2-autoware \
 apply-camera export-bundle build-osm-graph convert-osm-restrictions \
 project-camera detect-lane-markings detect-lane-markings-camera \
 validate-lane-markings guidance validate-guidance update-graph process-dataset"
@@ -47,6 +48,7 @@ validate-lane-markings guidance validate-guidance update-graph process-dataset"
         --origin-json | --detections-json | --turn-restrictions-json | \
         --lane-markings-json | --camera-detections-json | \
         --camera-detections-refine-json | --skipped-json | \
+        --map-projector-info-yaml | \
         --lidar-points | --points-path | --output | --input_json | --input_las | \
         --input_csv | --output_json | --output_svg | --output_osm | --output_dir | \
         --points_csv | --points_path | --extra-csv)
@@ -91,6 +93,9 @@ validate-lane-markings guidance validate-guidance update-graph process-dataset"
                 ;;
             validate-lanelet2)
                 COMPREPLY=($(compgen -W "--timeout" -- "$cur"))
+                ;;
+            sanitize-lanelet2-autoware)
+                COMPREPLY=($(compgen -W "--fill-missing-ele --no-fill-missing-ele --turn-direction --map-projector-info-yaml --traffic-light-height-m" -- "$cur"))
                 ;;
             nearest-node)
                 COMPREPLY=($(compgen -W "--latlon --xy --origin-lat --origin-lon" -- "$cur"))

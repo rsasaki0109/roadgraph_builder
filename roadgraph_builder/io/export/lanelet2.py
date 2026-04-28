@@ -8,6 +8,7 @@ relation (``type=lanelet``) with ``left`` / ``right`` way members.
 from __future__ import annotations
 
 import xml.etree.ElementTree as ET
+import math
 from collections.abc import Callable
 from pathlib import Path
 
@@ -56,6 +57,498 @@ def _et_to_pretty_bytes(root: ET.Element) -> bytes:
 
     _write(root, 0)
     return b"".join(chunks)
+
+
+def sanitize_lanelet2_for_autoware(
+    input_path: str | Path,
+    output_path: str | Path,
+    *,
+    fill_missing_ele: float | None = 0.0,
+    default_turn_direction: str | None = "infer",
+    map_projector_info_yaml: str | Path | None = None,
+    traffic_light_height_m: float = 5.0,
+) -> dict[str, int]:
+    """Write a conservative Autoware loader-smoke variant of a Lanelet2 OSM.
+
+    Roadgraph's rich docs maps intentionally include experimental regulatory
+    relations such as ``lane_change`` and ``lane_connection`` plus diagnostic
+    ``roadgraph:*`` tags. Stock Lanelet2 readers reject those custom regulatory
+    element subtypes, while Autoware's validator expects every point to have
+    ``ele`` and intersecting lanelets to carry ``turn_direction``. This helper
+    keeps the lanelet geometry and Autoware lanelet tags, but strips regulatory
+    relations and Roadgraph-only tags so the map can be used for loader smoke
+    tests. Missing ``ele`` tags are filled from the nearest existing elevation
+    point when possible, falling back to ``fill_missing_ele``. When
+    ``default_turn_direction="infer"``, lanelet geometry is used to infer
+    ``left`` / ``right`` / ``straight``. This is not a substitute for
+    survey-grade semantic map authoring.
+    """
+    in_path = Path(input_path)
+    out_path = Path(output_path)
+    tree = ET.parse(in_path)
+    root = tree.getroot()
+
+    stats = {
+        "removed_regulatory_relations": 0,
+        "kept_traffic_light_regulatory_relations": 0,
+        "generated_traffic_light_nodes": 0,
+        "generated_traffic_light_ways": 0,
+        "added_traffic_light_height_tags": 0,
+        "added_traffic_light_id_tags": 0,
+        "added_traffic_light_bulb_members": 0,
+        "removed_roadgraph_tags": 0,
+        "removed_width_tags": 0,
+        "removed_point_traffic_light_tags": 0,
+        "filled_missing_ele": 0,
+        "added_turn_direction": 0,
+        "wrote_map_projector_info": 0,
+    }
+
+    node_lonlat: dict[str, tuple[float, float]] = {}
+    raw_ele_points: list[tuple[float, float, float]] = []
+    for node in root.findall("node"):
+        try:
+            lat = float(node.attrib["lat"])
+            lon = float(node.attrib["lon"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        node_lonlat[str(node.attrib.get("id", ""))] = (lat, lon)
+        tags = {t.attrib.get("k"): t.attrib.get("v") for t in node.findall("tag")}
+        raw_ele = tags.get("ele")
+        if raw_ele is not None:
+            try:
+                raw_ele_points.append((lat, lon, float(raw_ele)))
+            except (TypeError, ValueError):
+                pass
+
+    ref_lat = (
+        sum(lat for lat, _lon in node_lonlat.values()) / len(node_lonlat)
+        if node_lonlat
+        else 0.0
+    )
+    ele_points = [
+        (*_sanitize_lonlat_xy(lat, lon, ref_lat), ele)
+        for lat, lon, ele in raw_ele_points
+    ]
+    way_node_refs: dict[str, list[str]] = {
+        str(way.attrib.get("id", "")): [
+            str(nd.attrib.get("ref", "")) for nd in way.findall("nd")
+        ]
+        for way in root.findall("way")
+    }
+    relation_by_id: dict[str, ET.Element] = {
+        str(rel.attrib.get("id", "")): rel for rel in root.findall("relation")
+    }
+    lanelet_by_id = {
+        rel_id: rel
+        for rel_id, rel in relation_by_id.items()
+        if _element_tags_for_sanitize(rel).get("type") == "lanelet"
+    }
+
+    def nearest_ele(lat: float, lon: float) -> float | None:
+        if not ele_points:
+            return None
+        x, y = _sanitize_lonlat_xy(lat, lon, ref_lat)
+        best_d2 = float("inf")
+        best_ele: float | None = None
+        for ex, ey, ele in ele_points:
+            d2 = (x - ex) * (x - ex) + (y - ey) * (y - ey)
+            if d2 < best_d2:
+                best_d2 = d2
+                best_ele = ele
+        return best_ele
+
+    next_id = _next_osm_id_for_sanitize(root)
+
+    def new_id() -> int:
+        nonlocal next_id
+        out = next_id
+        next_id += 1
+        return out
+
+    for rel in list(root.findall("relation")):
+        tags = _element_tags_for_sanitize(rel)
+        if tags.get("type") != "regulatory_element":
+            continue
+        if tags.get("subtype") == "traffic_light":
+            converted = _convert_traffic_light_relation_for_sanitize(
+                root,
+                rel,
+                new_id_fn=new_id,
+                node_lonlat=node_lonlat,
+                way_node_refs=way_node_refs,
+                lanelet_by_id=lanelet_by_id,
+                nearest_ele=nearest_ele,
+                ref_lat=ref_lat,
+                traffic_light_height_m=traffic_light_height_m,
+            )
+            if converted is not None:
+                new_nodes, new_ways, height_tags, id_tags, bulb_members = converted
+                stats["kept_traffic_light_regulatory_relations"] += 1
+                stats["generated_traffic_light_nodes"] += new_nodes
+                stats["generated_traffic_light_ways"] += new_ways
+                stats["added_traffic_light_height_tags"] += height_tags
+                stats["added_traffic_light_id_tags"] += id_tags
+                stats["added_traffic_light_bulb_members"] += bulb_members
+                continue
+        root.remove(rel)
+        stats["removed_regulatory_relations"] += 1
+
+    for elem in list(root):
+        for tag in list(elem.findall("tag")):
+            k = tag.attrib.get("k", "")
+            v = tag.attrib.get("v", "")
+            if k == "roadgraph" or k.startswith("roadgraph:"):
+                elem.remove(tag)
+                stats["removed_roadgraph_tags"] += 1
+            elif k == "width":
+                elem.remove(tag)
+                stats["removed_width_tags"] += 1
+            elif elem.tag == "node" and k == "type" and v == "traffic_light":
+                elem.remove(tag)
+                stats["removed_point_traffic_light_tags"] += 1
+
+        if elem.tag == "node" and fill_missing_ele is not None:
+            if not any(t.attrib.get("k") == "ele" for t in elem.findall("tag")):
+                try:
+                    lat = float(elem.attrib["lat"])
+                    lon = float(elem.attrib["lon"])
+                except (KeyError, TypeError, ValueError):
+                    ele = float(fill_missing_ele)
+                else:
+                    ele = nearest_ele(lat, lon)
+                    if ele is None:
+                        ele = float(fill_missing_ele)
+                ET.SubElement(elem, "tag", k="ele", v=f"{ele:.2f}")
+                stats["filled_missing_ele"] += 1
+            continue
+
+        if elem.tag != "relation" or default_turn_direction is None:
+            continue
+        tags = {t.attrib.get("k"): t.attrib.get("v") for t in elem.findall("tag")}
+        if tags.get("type") == "lanelet" and "turn_direction" not in tags:
+            turn_direction = default_turn_direction
+            if default_turn_direction == "infer":
+                turn_direction = _infer_lanelet_turn_direction(
+                    elem,
+                    node_lonlat=node_lonlat,
+                    way_node_refs=way_node_refs,
+                    ref_lat=ref_lat,
+                )
+            ET.SubElement(elem, "tag", k="turn_direction", v=turn_direction)
+            stats["added_turn_direction"] += 1
+
+    if map_projector_info_yaml is not None:
+        _write_map_projector_info_yaml(root, Path(map_projector_info_yaml))
+        stats["wrote_map_projector_info"] = 1
+
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_bytes(_et_to_pretty_bytes(root))
+    return stats
+
+
+def _sanitize_lonlat_xy(lat: float, lon: float, ref_lat: float) -> tuple[float, float]:
+    """Small local coordinate helper for sanitizer-only nearest/heading logic."""
+
+    lat_rad = math.radians(lat)
+    lon_rad = math.radians(lon)
+    return (lon_rad * math.cos(math.radians(ref_lat)), lat_rad)
+
+
+def _element_tags_for_sanitize(el: ET.Element) -> dict[str, str]:
+    return {
+        str(t.attrib.get("k", "")): str(t.attrib.get("v", ""))
+        for t in el.findall("tag")
+        if t.attrib.get("k") is not None
+    }
+
+
+def _next_osm_id_for_sanitize(root: ET.Element) -> int:
+    max_id = 0
+    for elem in root:
+        try:
+            max_id = max(max_id, int(elem.attrib.get("id", "0")))
+        except (TypeError, ValueError):
+            continue
+    return max_id + 1
+
+
+def _convert_traffic_light_relation_for_sanitize(
+    root: ET.Element,
+    relation: ET.Element,
+    *,
+    new_id_fn: Callable[[], int],
+    node_lonlat: dict[str, tuple[float, float]],
+    way_node_refs: dict[str, list[str]],
+    lanelet_by_id: dict[str, ET.Element],
+    nearest_ele: Callable[[float, float], float | None],
+    ref_lat: float,
+    traffic_light_height_m: float,
+) -> tuple[int, int, int, int, int] | None:
+    """Convert Roadgraph point traffic-light relations to Lanelet2 linestring form."""
+
+    lanelet_id: str | None = None
+    signal_node_id: str | None = None
+    for member in relation.findall("member"):
+        if member.attrib.get("type") == "relation" and member.attrib.get("role") in {
+            "refers",
+            "lanelet",
+        }:
+            lanelet_id = member.attrib.get("ref")
+        elif member.attrib.get("type") == "node" and member.attrib.get("role") == "refers":
+            signal_node_id = member.attrib.get("ref")
+    if lanelet_id is None or signal_node_id is None:
+        return None
+    lanelet_rel = lanelet_by_id.get(str(lanelet_id))
+    signal_latlon = node_lonlat.get(str(signal_node_id))
+    if lanelet_rel is None or signal_latlon is None:
+        return None
+
+    line_node_ids: list[int] = []
+    signal_lat, signal_lon = signal_latlon
+    line_points = _traffic_light_line_points_for_sanitize(
+        signal_lat,
+        signal_lon,
+        lanelet_rel,
+        node_lonlat=node_lonlat,
+        way_node_refs=way_node_refs,
+        ref_lat=ref_lat,
+    )
+    ele = _existing_node_ele_for_sanitize(root, signal_node_id)
+    if ele is None:
+        ele = nearest_ele(signal_lat, signal_lon)
+    for lat, lon in line_points:
+        node_id = new_id_fn()
+        n_el = ET.Element("node", id=str(node_id), lat=_fmt_lonlat(lat), lon=_fmt_lonlat(lon))
+        if ele is not None:
+            ET.SubElement(n_el, "tag", k="ele", v=f"{float(ele):.2f}")
+        _insert_child_before_first(root, n_el, {"way", "relation"})
+        node_lonlat[str(node_id)] = (lat, lon)
+        line_node_ids.append(node_id)
+
+    way_id = new_id_fn()
+    w_el = ET.Element("way", id=str(way_id))
+    for node_id in line_node_ids:
+        ET.SubElement(w_el, "nd", ref=str(node_id))
+    ET.SubElement(w_el, "tag", k="height", v=f"{float(traffic_light_height_m):.2f}")
+    ET.SubElement(w_el, "tag", k="traffic_light_id", v=str(relation.attrib["id"]))
+    _insert_child_before_first(root, w_el, {"relation"})
+    way_node_refs[str(way_id)] = [str(node_id) for node_id in line_node_ids]
+
+    for child in list(relation):
+        if child.tag == "member":
+            relation.remove(child)
+    relation.insert(0, ET.Element("member", type="way", ref=str(way_id), role="light_bulbs"))
+    relation.insert(0, ET.Element("member", type="way", ref=str(way_id), role="refers"))
+    _ensure_lanelet_references_regulatory_element(lanelet_rel, str(relation.attrib["id"]))
+    return (len(line_node_ids), 1, 1, 1, 1)
+
+
+def _traffic_light_line_points_for_sanitize(
+    lat: float,
+    lon: float,
+    lanelet_relation: ET.Element,
+    *,
+    node_lonlat: dict[str, tuple[float, float]],
+    way_node_refs: dict[str, list[str]],
+    ref_lat: float,
+    half_width_m: float = 0.75,
+) -> list[tuple[float, float]]:
+    center_points = _lanelet_center_points_for_sanitize(
+        lanelet_relation,
+        node_lonlat=node_lonlat,
+        way_node_refs=way_node_refs,
+    )
+    hx, hy = 1.0, 0.0
+    if len(center_points) >= 2:
+        (lat0, lon0), (lat1, lon1) = center_points[-2], center_points[-1]
+        hx, hy = _lonlat_vector_m(lat0, lon0, lat1, lon1, ref_lat)
+        norm = math.hypot(hx, hy)
+        if norm > 1e-9:
+            hx, hy = hx / norm, hy / norm
+        else:
+            hx, hy = 1.0, 0.0
+    px, py = -hy, hx
+    return [
+        _offset_lonlat_m(lat, lon, -px * half_width_m, -py * half_width_m),
+        _offset_lonlat_m(lat, lon, px * half_width_m, py * half_width_m),
+    ]
+
+
+def _lonlat_vector_m(
+    lat0: float,
+    lon0: float,
+    lat1: float,
+    lon1: float,
+    ref_lat: float,
+) -> tuple[float, float]:
+    meters_per_deg = 111_320.0
+    dx = (lon1 - lon0) * meters_per_deg * math.cos(math.radians(ref_lat))
+    dy = (lat1 - lat0) * meters_per_deg
+    return dx, dy
+
+
+def _offset_lonlat_m(lat: float, lon: float, dx_m: float, dy_m: float) -> tuple[float, float]:
+    meters_per_deg = 111_320.0
+    dlat = dy_m / meters_per_deg
+    cos_lat = max(math.cos(math.radians(lat)), 1e-9)
+    dlon = dx_m / (meters_per_deg * cos_lat)
+    return lat + dlat, lon + dlon
+
+
+def _existing_node_ele_for_sanitize(root: ET.Element, node_id: str | None) -> float | None:
+    if node_id is None:
+        return None
+    for node in root.findall("node"):
+        if node.attrib.get("id") != str(node_id):
+            continue
+        for tag in node.findall("tag"):
+            if tag.attrib.get("k") == "ele":
+                try:
+                    return float(tag.attrib["v"])
+                except (TypeError, ValueError):
+                    return None
+    return None
+
+
+def _insert_child_before_first(root: ET.Element, child: ET.Element, before_tags: set[str]) -> None:
+    for idx, existing in enumerate(list(root)):
+        if existing.tag in before_tags:
+            root.insert(idx, child)
+            return
+    root.append(child)
+
+
+def _ensure_lanelet_references_regulatory_element(lanelet_relation: ET.Element, reg_id: str) -> None:
+    for member in lanelet_relation.findall("member"):
+        if (
+            member.attrib.get("type") == "relation"
+            and member.attrib.get("ref") == reg_id
+            and member.attrib.get("role") == "regulatory_element"
+        ):
+            return
+    member = ET.Element("member", type="relation", ref=reg_id, role="regulatory_element")
+    for idx, child in enumerate(list(lanelet_relation)):
+        if child.tag == "tag":
+            lanelet_relation.insert(idx, member)
+            return
+    lanelet_relation.append(member)
+
+
+def _infer_lanelet_turn_direction(
+    relation: ET.Element,
+    *,
+    node_lonlat: dict[str, tuple[float, float]],
+    way_node_refs: dict[str, list[str]],
+    ref_lat: float,
+    threshold_deg: float = 35.0,
+) -> str:
+    points = _lanelet_center_points_for_sanitize(
+        relation,
+        node_lonlat=node_lonlat,
+        way_node_refs=way_node_refs,
+    )
+    if len(points) < 3:
+        return "straight"
+    start_heading = _segment_heading_deg(points[0], points[1], ref_lat)
+    end_heading = _segment_heading_deg(points[-2], points[-1], ref_lat)
+    delta = ((end_heading - start_heading + 180.0) % 360.0) - 180.0
+    if delta > threshold_deg:
+        return "left"
+    if delta < -threshold_deg:
+        return "right"
+    return "straight"
+
+
+def _segment_heading_deg(
+    p0: tuple[float, float],
+    p1: tuple[float, float],
+    ref_lat: float,
+) -> float:
+    x0, y0 = _sanitize_lonlat_xy(p0[0], p0[1], ref_lat)
+    x1, y1 = _sanitize_lonlat_xy(p1[0], p1[1], ref_lat)
+    return math.degrees(math.atan2(y1 - y0, x1 - x0))
+
+
+def _lanelet_center_points_for_sanitize(
+    relation: ET.Element,
+    *,
+    node_lonlat: dict[str, tuple[float, float]],
+    way_node_refs: dict[str, list[str]],
+) -> list[tuple[float, float]]:
+    members = list(relation.findall("member"))
+    for member in members:
+        if member.attrib.get("type") == "way" and member.attrib.get("role") == "centerline":
+            pts = _way_points_for_sanitize(
+                member.attrib.get("ref", ""),
+                node_lonlat=node_lonlat,
+                way_node_refs=way_node_refs,
+            )
+            if len(pts) >= 2:
+                return pts
+
+    left: list[tuple[float, float]] = []
+    right: list[tuple[float, float]] = []
+    for member in members:
+        if member.attrib.get("type") != "way":
+            continue
+        role = member.attrib.get("role")
+        if role == "left":
+            left = _way_points_for_sanitize(
+                member.attrib.get("ref", ""),
+                node_lonlat=node_lonlat,
+                way_node_refs=way_node_refs,
+            )
+        elif role == "right":
+            right = _way_points_for_sanitize(
+                member.attrib.get("ref", ""),
+                node_lonlat=node_lonlat,
+                way_node_refs=way_node_refs,
+            )
+    if not left or not right:
+        return left or right
+    n = min(len(left), len(right))
+    return [
+        ((left[i][0] + right[i][0]) / 2.0, (left[i][1] + right[i][1]) / 2.0)
+        for i in range(n)
+    ]
+
+
+def _way_points_for_sanitize(
+    way_id: str | None,
+    *,
+    node_lonlat: dict[str, tuple[float, float]],
+    way_node_refs: dict[str, list[str]],
+) -> list[tuple[float, float]]:
+    refs = way_node_refs.get(str(way_id), [])
+    return [node_lonlat[ref] for ref in refs if ref in node_lonlat]
+
+
+def _write_map_projector_info_yaml(root: ET.Element, output_yaml: Path) -> None:
+    meta = root.find("MetaInfo")
+    if meta is None:
+        raise ValueError("Lanelet2 OSM has no MetaInfo origin for map_projector_info.yaml")
+    try:
+        lat = float(meta.attrib["origin_lat"])
+        lon = float(meta.attrib["origin_lon"])
+    except (KeyError, TypeError, ValueError) as exc:
+        raise ValueError("Lanelet2 OSM MetaInfo is missing origin_lat/origin_lon") from exc
+
+    output_yaml.parent.mkdir(parents=True, exist_ok=True)
+    output_yaml.write_text(
+        "\n".join(
+            [
+                "projector_type: LocalCartesian",
+                "vertical_datum: WGS84",
+                "map_origin:",
+                f"  latitude: {_fmt_lonlat(lat)}",
+                f"  longitude: {_fmt_lonlat(lon)}",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
 
 _REGULATORY_SUBTYPES = frozenset(
     {

@@ -8,11 +8,11 @@
 
 Build once; get a graph you can **inspect in 2D and 3D**, **route and reach** on, **enrich to HD-lite lanes + regulatory overlays**, and export to **navigation JSON / simulation GeoJSON / Lanelet2 OSM XML**. The repository ships the pipeline, the schemas, the CLI, and a static map console that visualises every one of those layers from the committed sample data.
 
-> **Scope — HD-lite, not survey-grade.** The pipeline produces Lanelet2-compatible OSM XML that Autoware's `lanelet2_validation` can load (see the committed [`docs/assets/map_paris_grid.lanelet.osm`](docs/assets/map_paris_grid.lanelet.osm)), but it is **not** a survey-grade HD map for autonomous vehicle deployment. Lane widths are centerline-offset envelopes (default 3.5 m), lane counts fall back to 1 when real markings are absent, regulatory overlays are hand-authored synthetic samples, and elevation is only populated when a trajectory carries a `z` column. Real vehicle deployment still requires calibrated sensors, cm-class validation, and per-area QA beyond what this tool guarantees.
+> **Scope — HD-lite, not survey-grade.** The pipeline produces Lanelet2-compatible OSM XML that Autoware's `lanelet2_validation` can load (see the committed [`docs/assets/map_paris_grid.lanelet.osm`](docs/assets/map_paris_grid.lanelet.osm)), but it is **not** a survey-grade HD map for autonomous vehicle deployment. Lane widths are centerline-offset envelopes (default 3.5 m), lane counts fall back to 1 when real markings are absent, regulatory overlays are OSM-derived or sample-grade detections, and elevation is SRTM / trajectory-derived when available. Real vehicle deployment still requires calibrated sensors, cm-class validation, and per-area QA beyond what this tool guarantees.
 
 [![Map console animated hero: Paris deep-link route in 2D, then 3D auto-rotate with road-class + junction colour coding](docs/images/map_console_hero.gif)](docs/map.html)
 
-> The animation above is the `docs/` map console running against the committed Paris OSM-highway sample — the same graph the pipeline produces, coloured by OSM `highway` class, decorated with HD-lite lane boundaries and synthetic regulatory markers, and walked end-to-end by the JS Dijkstra that mirrors the CLI's `route --explain` diagnostics.
+> The animation above is the `docs/` map console running against the committed Paris OSM-highway sample — the same graph the pipeline produces, coloured by OSM `highway` class, decorated with HD-lite lane boundaries and OSM-derived regulatory markers, and walked end-to-end by the JS Dijkstra that mirrors the CLI's `route --explain` diagnostics.
 
 **Start here:** [Showcase](docs/SHOWCASE.md) · [Launch notes](docs/LAUNCH.md) · [Architecture](docs/ARCHITECTURE.md) · [Benchmarks](docs/benchmarks.md) · [Contributing](CONTRIBUTING.md)
 
@@ -23,10 +23,10 @@ The toolbar's **Mode** select walks through the pipeline tiers on any committed 
 | Tier | What is drawn | What proves it |
 | --- | --- | --- |
 | **Basic** | Centerlines coloured by OSM `highway` class (motorway → red through residential → cyan) + graph nodes coloured by junction type (T / Y / crossroads / X / complex / through-or-corner / dead-end) | `build-osm-graph` + `pipeline.junction_topology` — bare SD graph, topology-honest, 855 nodes / 1 081 centerlines for the Paris bbox. |
-| **SD** | + directed-state **route** (JS Dijkstra honouring OSM `no_*` / `only_*`) + **turn restriction** markers | Paris `n312 → n191` is **909 m / 11 edges / 8 TR honoured** (the unrestricted shortest path is 878 m, a 31 m detour). Berlin Mitte `n32 → n327` ships the same way: **2 659 m / 48 edges**, 17 mapped OSM restrictions. Both use the same JS Dijkstra the CLI's `route` falls back to. |
-| **HD** | + HD-lite **lane boundaries** (green / purple dashes from `enrich --lane-width-m 3.5`) + synthetic **traffic lights / stop lines / crosswalks / speed limits** + 500 m **reachability** spans | 2 162 lane boundaries, 9 regulatory markers, 279 reachable edges / 96 reachable nodes in the committed Paris sample — same overlays `apply-camera` and `reachable` produce from the CLI. |
+| **SD** | + directed-state **route** (JS Dijkstra honouring OSM `no_*` / `only_*`) + **turn restriction** markers | Paris `n312 → n191` is **909 m / 11 edges / 8 TR honoured** (the unrestricted shortest path is 878 m, a 31 m detour). Berlin Mitte, Tokyo Ginza, and San Francisco North Beach ship the same route / restrictions / reachability overlay pattern. |
+| **HD** | + HD-lite **lane boundaries** (green / purple dashes from `enrich --lane-width-m 3.5`) + OSM-derived **traffic lights / stop lines / crosswalks** + 500-600 m **reachability** spans | Paris ships 456 OSM regulatory markers; San Francisco ships 876 regulatory markers plus 1 800 SRTM-backed elevation nodes for slope-aware inspection. Same overlays `apply-camera` and `reachable` produce from the CLI. |
 | **Full** | Everything above | Default when the viewer opens; click **Reach from click** to pick any node and recompute reachability live in the browser. |
-| **Lanelet2** | Downloadable per-lane OSM XML for Autoware tooling | [`docs/assets/map_paris_grid.lanelet.osm`](docs/assets/map_paris_grid.lanelet.osm) — 1 081 `type=lanelet` relations with left/right boundary ways, emitted by `export_lanelet2_per_lane()` after `infer_lane_counts`. HD-lite envelopes, not survey-grade. |
+| **Lanelet2** | Downloadable per-lane OSM XML for Autoware tooling | [`docs/assets/map_paris_grid.lanelet.osm`](docs/assets/map_paris_grid.lanelet.osm) — 1 485 lanelets / 2 397 regulatory elements, including directed `lane_connection` predecessor / successor pairs, emitted by `export_lanelet2_per_lane()` after `infer_lane_counts`. HD-lite envelopes, not survey-grade. |
 
 [![2D map console: Paris OSM grid with road-class colours, HD-lite lanes, regulatory markers, and inspector cards](docs/images/map_console_2d.png)](docs/map.html)
 
@@ -39,7 +39,7 @@ Run the console locally — no build step, just a static server:
 ```bash
 cd docs && python3 -m http.server 8765
 # http://127.0.0.1:8765/map.html
-#   ?dataset=paris_grid  (default) | berlin_mitte | paris | osm | toy
+#   ?dataset=paris_grid  (default) | berlin_mitte | tokyo_ginza | sf_north_beach | paris | osm | toy
 #   ?view=2d | 3d
 #   ?from=n312&to=n191   (deep-link route, auto-fits map bounds)
 ```
@@ -56,7 +56,7 @@ The animated hero above, the two static PNGs, and the diagnostics screenshot are
 - **Real routing semantics** — shortest path, turn restrictions, observable A* / Dijkstra diagnostics, slope-aware cost, lane-change routing, service-area reachability, and turn-by-turn guidance share the same graph.
 - **SD ↔ HD narrative is visible** — the map console's **Basic / SD / HD / Full** tiers, hover card, route-engine diagnostics, and live reachability let visitors walk the pipeline in a browser without running a CLI.
 - **Sensor-ready without forcing heavy deps** — LiDAR LAS/LAZ, camera projection, lane-marking detection, HD-lite refinement, and schema validation are modular and mostly pure Python.
-- **Measured, reproducible progress** — committed Paris / Berlin visualization assets, benchmark baselines, accuracy reports, memory reports, release-bundle byte gates, and CI keep claims checkable.
+- **Measured, reproducible progress** — committed Paris / Berlin / Tokyo / San Francisco visualization assets, benchmark baselines, accuracy reports, memory reports, release-bundle byte gates, and CI keep claims checkable.
 
 ### Measured results
 
@@ -83,11 +83,11 @@ Use the short description and topics listed in [`.github/ABOUT.md`](.github/ABOU
 | **Routing** | A* / Dijkstra search honouring `no_*` / `only_*` turn restrictions, with `route --explain` diagnostics for engine choice and fallback reasons. OSM `type=restriction` relations map onto graph edges via `convert-osm-restrictions`. Uncertainty-aware via `route --prefer-observed` / `--min-confidence` (v0.6). Slope-aware via `route --uphill-penalty` / `--downhill-bonus` (v0.7). Lane-level via `route --allow-lane-change` with a per-swap `--lane-change-cost-m` (v0.7). `RoutePlanner` and `ReachabilityAnalyzer` reuse prepared topology for repeated route and service-area queries. Turn-by-turn guidance via **`guidance`**. |
 | **Perception** | Pixel detections + pinhole calibration (OpenCV 5-coef Brown-Conrady distortion) → world ground plane → nearest edge via `project-camera`. Edge-keyed camera observations merge into `attributes.hd.semantic_rules` via `apply-camera`, and feed HD-lite refinement via `enrich --camera-detections-json`. **`detect-lane-markings-camera`** (v0.7) detects white/yellow lane markings from raw RGB with pure-NumPy HSV + connected components (no cv2/scipy) and back-projects to graph edges. |
 | **LiDAR** | `fuse-lidar` accepts CSV / LAS / LAZ and fits per-edge binned median lane boundaries. `--ground-plane` (v0.7) fits a RANSAC ground plane first and keeps only points within `height_band_m` (default 0–0.3 m) before fusing, so vegetation and overhead structures drop out. `inspect-lidar` reports LAS public-header metadata. **`detect-lane-markings`** extracts painted-line candidates from intensity peaks. |
-| **HD / Lanelet2** | `enrich --lane-width-m` for envelope + offset boundaries; `--lane-markings-json` / `--camera-detections-json` fuse sources into `metadata.hd_refinement`. **`infer-lane-count`** (v0.6) clusters paint-marker offsets into `attributes.hd.lane_count` + `hd.lanes[]` (fallback to `trace_stats.perpendicular_offsets`). `export-lanelet2` emits `roadgraph:*` ways + `lanelet` relations; `--per-lane` expands each multi-lane edge into one lanelet per lane with `lane_change` relations (v0.6); `--camera-detections-json` wires `traffic_light` / `stop_line` regulatory_elements (v0.7). **`validate-lanelet2-tags`** (v0.6) flags missing required Lanelet2 tags; **`validate-lanelet2`** (v0.7) bridges Autoware's `lanelet2_validation` CLI when on PATH. |
+| **HD / Lanelet2** | `enrich --lane-width-m` for envelope + offset boundaries; `--lane-markings-json` / `--camera-detections-json` fuse sources into `metadata.hd_refinement`. **`infer-lane-count`** (v0.6) clusters paint-marker offsets into `attributes.hd.lane_count` + `hd.lanes[]` (fallback to `trace_stats.perpendicular_offsets`). `export-lanelet2` emits `roadgraph:*` ways + `lanelet` relations; `--per-lane` expands each multi-lane edge into one lanelet per lane with `lane_change` and directed `lane_connection` relations; `--camera-detections-json` wires `traffic_light` / `stop_line` regulatory_elements (v0.7). **`validate-lanelet2-tags`** (v0.6) flags missing required Lanelet2 tags; **`validate-lanelet2`** (v0.7) bridges Autoware's `lanelet2_validation` CLI when on PATH. |
 | **Output** | JSON (+ schema), GeoJSON, OSM XML 0.6 (Lanelet2-compatible), SVG. **`export-bundle`** writes nav / sim / lanelet / manifest in one directory. |
 | **Benchmarks** | `make bench` runs a deterministic wall-clock suite (build / shortest path / map matching / reachability / export-bundle); `--baseline` compares against recorded numbers with a 3× regression gate. Baseline JSON in [`docs/assets/benchmark_baseline_0.7.2-dev.json`](docs/assets/benchmark_baseline_0.7.2-dev.json), notes in [`docs/benchmarks.md`](docs/benchmarks.md). Memory profile for v0.7 under [`docs/memory_profile_v0.7.md`](docs/memory_profile_v0.7.md) (Paris peak RSS 61→55 MB after the `export_lanelet2` DOM rewrite). Lane-count accuracy against OSM `lanes=` in [`docs/accuracy_report.md`](docs/accuracy_report.md). |
 | **Demo** | Static viewer in [docs/](docs/) — **[map console](docs/map.html)** (2D OSM tiles, 3D graph preview, inspector metrics, TR-aware click-to-route, live reachability; served at `/` on GitHub Pages via a redirect from [docs/index.html](docs/index.html)) · [diagram + route diagnostics](docs/diagram.html), static previews in [docs/images](docs/images/). |
-| **Samples** | [Toy CSV](examples/sample_trajectory.csv), [OSM GPS](examples/osm_public_trackpoints.csv) (ODbL), [camera calibration + pixel detections](examples/demo_camera_calibration.json), [Paris OSM-grid + turn_restrictions](docs/assets/map_paris_grid.geojson) (ODbL). |
+| **Samples** | [Toy CSV](examples/sample_trajectory.csv), [OSM GPS](examples/osm_public_trackpoints.csv) (ODbL), [camera calibration + pixel detections](examples/demo_camera_calibration.json), [Paris OSM-grid + turn_restrictions](docs/assets/map_paris_grid.geojson) and [San Francisco North Beach](docs/assets/map_sf_north_beach.geojson) (ODbL). |
 
 ### Current release surface
 
@@ -228,7 +228,7 @@ change.
 | **5. Semantics (image)** | `project-camera` — pixel detections + pinhole camera (with Brown-Conrady distortion) + per-image vehicle pose → world ground plane → nearest edge; output is edge-keyed `camera_detections.json` | **Implemented** (pipeline math; detection + calibration are the caller's responsibility) |
 | **6. Semantics (edge-keyed)** | `apply-camera` — JSON observations → `hd.semantic_rules`; OSM `speed_limit` + regulatory | **Implemented** |
 | **7. Turn restrictions** | `convert-osm-restrictions` — OSM `type=restriction` relations → graph-space `turn_restrictions.json`; `route --turn-restrictions-json` honours `no_*` / `only_*` at each junction | **Implemented** |
-| **8. Export** | `export-lanelet2` → OSM XML (`roadgraph:*` ways + `type=lanelet` relations + `type=regulatory_element, subtype=lane_connection` for junctions) | **Implemented** |
+| **8. Export** | `export-lanelet2` → OSM XML (`roadgraph:*` ways + `type=lanelet` relations + directed `type=regulatory_element, subtype=lane_connection` predecessor / successor pairs for junctions) | **Implemented** |
 
 `enrich` without `--lane-width-m` only attaches placeholders. With **`--lane-width-m`**, you get **offset polylines** from each edge centerline — useful for visualization and simulation, **not** cm-class survey HD.
 
@@ -269,8 +269,11 @@ When Pages is available (public repo, Pages-capable private repo plan, or a sepa
 1. In the GitHub repo: **Settings → Pages → Build and deployment → Source**: **Deploy from a branch**, branch **`main`**, folder **`/docs`**, Save.
 2. After a minute, open the Pages URL shown by GitHub:
    - site root — diagram viewer (SVG-style pan/zoom)
-   - `map.html` — **real basemap + 3D graph console** (OSM tiles + GeoJSON: trajectory, **centerlines coloured by OSM road class** — motorway → red through residential → cyan — with `lanes=` / `maxspeed` / `name` surfaced in the hover card, **HD-lite lane boundaries** when `attributes.hd` is filled — bundled assets use `enrich --lane-width-m 3.5` via `scripts/refresh_docs_assets.py` — and **nodes colour-coded by junction type** via the pipeline's `junction_type` / `junction_hint` classification: T, Y, crossroads, X, complex, through/corner, dead end, self-loop). Toggle between 2D Leaflet and a Three.js graph preview, inspect node/edge/lane/route/reachability/restriction counts plus per-dataset **Road classes** / **Junctions** breakdown cards and a **Route engine** card (engine badge, expanded / queued states, heap pops, turn-restriction count — same diagnostics shape the CLI's `route --explain` prints), and switch route / reachability / restriction overlays without reloading. Click any two nodes to route between them; the JS Dijkstra is **directed-state and TR-aware** when the dataset ships a restrictions overlay, and dynamic routes update the 3D view and the **Route steps** inspector card (per-edge id, direction, length, cumulative) in lockstep. In 3D, hovering pauses auto-rotate and a `THREE.Raycaster` fills the **Hovered** card (kind, id, length, endpoints); clicking a node drives the same click-to-route as the 2D map. URL parameters are honoured and mirrored: `?view=3d`, `?dataset=…`, and `?from=nXXX&to=nYYY` all restore state, drawing a route rewrites `from` / `to` via `history.replaceState` so the current route is copy-pasteable, the 2D view auto-fits the route bounds on deep-link entry, and `Download route GeoJSON` exports the current route as a `route_<dataset>_<from>_<to>.geojson` FeatureCollection. The dropdown selects between four datasets:
+   - `map.html` — **real basemap + 3D graph console** (OSM tiles + GeoJSON: trajectory, **centerlines coloured by OSM road class** — motorway → red through residential → cyan — with `lanes=` / `maxspeed` / `name` surfaced in the hover card, **HD-lite lane boundaries** when `attributes.hd` is filled — bundled assets use `enrich --lane-width-m 3.5` via `scripts/refresh_docs_assets.py` — and **nodes colour-coded by junction type** via the pipeline's `junction_type` / `junction_hint` classification: T, Y, crossroads, X, complex, through/corner, dead end, self-loop). Toggle between 2D Leaflet and a Three.js graph preview, inspect node/edge/lane/route/reachability/restriction counts plus per-dataset **Road classes** / **Junctions** breakdown cards, a **Lanelet2 export** card, and a **Route engine** card (engine badge, expanded / queued states, heap pops, turn-restriction count — same diagnostics shape the CLI's `route --explain` prints), and switch route / reachability / restriction overlays without reloading. Click any two nodes to route between them; the JS Dijkstra is **directed-state and TR-aware** when the dataset ships a restrictions overlay, and dynamic routes update the 3D view and the **Route steps** inspector card (per-edge id, direction, length, cumulative) in lockstep. In 3D, hovering pauses auto-rotate and a `THREE.Raycaster` fills the **Hovered** card (kind, id, length, endpoints); clicking a node drives the same click-to-route as the 2D map. URL parameters are honoured and mirrored: `?view=3d`, `?dataset=…`, and `?from=nXXX&to=nYYY` all restore state, drawing a route rewrites `from` / `to` via `history.replaceState` so the current route is copy-pasteable, the 2D view auto-fits the route bounds on deep-link entry, and `Download route GeoJSON` exports the current route as a `route_<dataset>_<from>_<to>.geojson` FeatureCollection. The dropdown selects between the four committed OSM-highway city datasets plus older samples:
      - **Paris grid** (default, 855 nodes / 1081 edges — derived from OSM highway ways, ships with 10 OSM turn restrictions as red-dot markers and a 500 m `reachable` overlay. ODbL.)
+     - **Berlin Mitte** (1883 nodes / 2063 edges, 17 mapped OSM restrictions, 600 m `reachable`, Lanelet2 download. ODbL.)
+     - **Tokyo Ginza** (548 nodes / 598 edges, 19 mapped OSM restrictions, OSM regulatory nodes, Lanelet2 download. ODbL.)
+     - **San Francisco North Beach** (1800 nodes / 2227 edges, 127 mapped OSM restrictions, steep SRTM-backed slopes, Lanelet2 download. ODbL.)
      - **Paris** (older, trajectory-derived, 123 edges / 223 nodes; from OSM public GPS, ODbL.)
      - **OSM Berlin sample** (4 edges, smaller).
      - **Toy** (synthetic trajectory from `examples/sample_trajectory.csv`).
@@ -497,6 +500,24 @@ roadgraph_builder export-lanelet2 out_hd.json map.osm --origin-lat 35.68 --origi
 
 If the JSON has `metadata.map_origin` (`lat0`, `lon0`), you can omit `--origin-lat` / `--origin-lon`.
 
+For an Autoware / stock-Lanelet2 **loader smoke test**, post-process the rich
+Roadgraph export into a conservative geometry-only profile:
+
+```bash
+roadgraph_builder sanitize-lanelet2-autoware \
+  map.osm autoware_map/lanelet2_map.osm \
+  --map-projector-info-yaml autoware_map/map_projector_info.yaml
+```
+
+This strips Roadgraph-only `lane_change` / `lane_connection` relations plus
+diagnostic tags, converts sample point traffic lights into Lanelet2
+`traffic_light` regulatory elements with generated linestrings, fills missing
+`ele` from the nearest existing elevation point when possible, infers
+`turn_direction` from lanelet geometry, and can write the
+`map_projector_info.yaml` sidecar from the embedded `<MetaInfo>` origin. It is
+a compatibility shim; real Autoware maps still need right-of-way semantics and
+survey-grade elevation.
+
 ### Build a graph from OSM highways (and map turn restrictions)
 
 `build-osm-graph` takes a raw Overpass response of drivable `way["highway"]`s and runs the same X/T-split + endpoint union-find pipeline used for trajectory CSVs — every OSM junction becomes a graph node with `metadata.map_origin` preserved. `convert-osm-restrictions` then snaps OSM `type=restriction` relations onto that graph (via-node → nearest graph node within `--max-snap-m`, from/to ways matched by edge tangent alignment) and writes a schema-valid `turn_restrictions.json` that `export-bundle --turn-restrictions-json` and `route --turn-restrictions-json` consume.
@@ -627,7 +648,7 @@ Python package: `roadgraph_builder/`
 - **Real-data camera integration (user-driven)** — `project-camera` works on any pixel-detections JSON + calibration. The shipped demo is synthetic with embedded ground truth so round-trip accuracy is provable; users wanting to run it on real photography can follow `docs/camera_pipeline_demo.md`. This repo intentionally does not ship imagery with viral license terms (e.g. Mapillary CC-BY-SA) so the MIT distribution stays unambiguous.
 - **LiDAR-derived lane centerlines** — today `fuse-lidar` fits the *boundary ribbon* from nearby points; a future pass could infer per-lane centerlines directly from the cloud.
 - **Semantics layer** — broader lane-type / rule / priority model (separate from raw geometry) beyond the current `attributes.hd.semantic_rules` free-form dict.
-- **HD-complete Lanelet2 export** — the current `export_lanelet2` emits lanelet relations where boundaries exist and a regulatory-element relation per junction; full Autoware-ready HD export (traffic signals as referenced points, stop lines as ways, right-of-way relations) is still future work.
+- **HD-complete Lanelet2 export** — the current `export_lanelet2` emits per-lane relations, directed `lane_connection` pairs, lane-change relations, traffic-light relations, and stop-line ways where inputs exist; richer right-of-way / priority modeling is still future work.
 
 Codebase TODOs also mention: graph fusion across tiles/modalities and routing graph generation for other pathfinders (A* / Contraction Hierarchies).
 
