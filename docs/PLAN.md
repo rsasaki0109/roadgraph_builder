@@ -6,7 +6,7 @@
 > このファイル → [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md)（Mermaid 6 枚 + CLI 対応表 +
 > モジュール索引）→ [`CHANGELOG.md`](../CHANGELOG.md) の順。
 
-*最終更新: 2026-04-29 session（**Codex continuation**: San Francisco North Beach committed dataset / `sanitize-lanelet2-autoware` Autoware loader-smoke profile / Lanelet2 inspector card入り map-console hero PNG + GIF refresh）。下流 session への引き継ぎ目的で書き起こし強化。前回 2026-04-24 までに反映済みの V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards polish / README measured-results compacting / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate + manifest policy docs polish / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理 / v0.7.1 release + asset verification / packaging metadata smoke / 0.7.2.dev0 reopen / Actions Node24 update / release+PyPI dry-run / routing hot-path perf / nearest spatial index / cache invalidation hardening / build graph spatial merge perf / T-junction segment index perf / lean near-parallel merge loop / GeoJSON export compact path / compact bundle JSON writer / README quick-start smoke / release readiness dry-run refresh / reachable service-area CLI / reachable docs overlay / reachable benchmark coverage / benchmark baseline JSON / reachability analyzer perf / routing core split / RoutePlanner perf / GitHub star-growth surfaces / launch kit docs / safe A* routing / route explain diagnostics / route explain docs surface / route explain comparison UI / route diagnostics README screenshot / functional shortest_path planner cache + sampled validation / nearest-edge projection index / match-trajectory explain diagnostics / HMM bridge ambiguity benchmark / HMM adjacency reuse perf / HMM tail-cost cache / HMM long trajectory benchmark / edge-index cell tuning / 2D/3D map console / PLAN handoff expansion / map console pushed + CI green / Claude handoff refresh / map console hero screenshots / map console browser smoke opt-in pytest / map console JS split + 3D raycaster picking / map console deep link + route steps inspector / map console route export + deep-link 自動 fit + hero screenshot refresh / Paris grid + Berlin Mitte HD-lite lanes & committed viewer dataset / junction topology color coding / OSM road-class color coding + class breakdown / animated map console hero GIF / JS route engine diagnostics in inspector / Paris grid synthetic camera semantic overlay / live reachability on click / 2D hover card sync / SD-HD layer tier toggle / README + SHOWCASE map-first reorg / Pages index map-first redirect / Paris grid Lanelet2 OSM + AV scope disclaimer / Autoware-spec lanelet tags / OSM lanes tag → multi-lane Lanelet2 / OSM regulatory nodes replace synthetic / Berlin Lanelet2 + dataset-aware download link / regulatory_element emission from semantic_rules / OSM width tag → HD envelope + lanelet width attr / SRTM elevation + slope_deg + lanelet ele tag / OSM stop point → perpendicular stop_line way / per-lane lanelet lane_connection emission / boundary subtype outer-solid interior-dashed / Berlin TR / route / reachable overlay parity / Tokyo Ginza committed dataset + helper refactor / Lanelet2 summary JSON + map console inspector card）を反映済み。*
+*最終更新: 2026-04-29 session close-out（**Codex wrap-up**: San Francisco North Beach committed dataset / `sanitize-lanelet2-autoware` Autoware loader-smoke profile / Lanelet2 inspector card入り map-console hero PNG + GIF refresh / rich Roadgraph Lanelet2 export と conservative loader-smoke map の docs 整合 / 最終 PLAN handoff）。下流 session への引き継ぎ目的で書き起こし強化。前回 2026-04-24 までに反映済みの V1 実測 / camera warning fix / perf flake fix / docs sync / completions sync / Paris accuracy refresh / Berlin tuning sweep / README+docs visual preview + measured-results cards polish / README measured-results compacting / float32 opt-in + drift report + compare script + 1M synthetic memory profile + OSM public-trace replay profile / release bundle byte + normalized-manifest gate + manifest policy docs polish / private repo Pages blocked note / CLI boundary split wave 完了 / README release surface 整理 / v0.7.1 release + asset verification / packaging metadata smoke / 0.7.2.dev0 reopen / Actions Node24 update / release+PyPI dry-run / routing hot-path perf / nearest spatial index / cache invalidation hardening / build graph spatial merge perf / T-junction segment index perf / lean near-parallel merge loop / GeoJSON export compact path / compact bundle JSON writer / README quick-start smoke / release readiness dry-run refresh / reachable service-area CLI / reachable docs overlay / reachable benchmark coverage / benchmark baseline JSON / reachability analyzer perf / routing core split / RoutePlanner perf / GitHub star-growth surfaces / launch kit docs / safe A* routing / route explain diagnostics / route explain docs surface / route explain comparison UI / route diagnostics README screenshot / functional shortest_path planner cache + sampled validation / nearest-edge projection index / match-trajectory explain diagnostics / HMM bridge ambiguity benchmark / HMM adjacency reuse perf / HMM tail-cost cache / HMM long trajectory benchmark / edge-index cell tuning / 2D/3D map console / PLAN handoff expansion / map console pushed + CI green / Claude handoff refresh / map console hero screenshots / map console browser smoke opt-in pytest / map console JS split + 3D raycaster picking / map console deep link + route steps inspector / map console route export + deep-link 自動 fit + hero screenshot refresh / Paris grid + Berlin Mitte HD-lite lanes & committed viewer dataset / junction topology color coding / OSM road-class color coding + class breakdown / animated map console hero GIF / JS route engine diagnostics in inspector / Paris grid synthetic camera semantic overlay / live reachability on click / 2D hover card sync / SD-HD layer tier toggle / README + SHOWCASE map-first reorg / Pages index map-first redirect / Paris grid Lanelet2 OSM + AV scope disclaimer / Autoware-spec lanelet tags / OSM lanes tag → multi-lane Lanelet2 / OSM regulatory nodes replace synthetic / Berlin Lanelet2 + dataset-aware download link / regulatory_element emission from semantic_rules / OSM width tag → HD envelope + lanelet width attr / SRTM elevation + slope_deg + lanelet ele tag / OSM stop point → perpendicular stop_line way / per-lane lanelet lane_connection emission / boundary subtype outer-solid interior-dashed / Berlin TR / route / reachable overlay parity / Tokyo Ginza committed dataset + helper refactor / Lanelet2 summary JSON + map console inspector card）を反映済み。*
 
 ---
 
@@ -17,17 +17,18 @@
   ナビ SD / simulation / Lanelet2 を一括エクスポートする graph-first ライブラリ。HD は
   survey-grade ではなく「HD-lite」帯まで。
 - **state:** **v0.7.2.dev0 open on main** after **v0.7.1 shipped (2026-04-21)**。tag `v0.7.1` は `8282f7c`。
-  最新 main CI run `24833808373`、最新 Pages run `24833807860`、Release workflow run `24721632168` は green。
+  最新 main CI run `25080174777`、最新 Pages run `25080174049`、Release workflow run `24721632168` は green。
   GitHub Release assets (`roadgraph_sample_bundle.tar.gz` / `.sha256`) は download + checksum +
   `validate-manifest` / `validate-sd-nav` / `validate` 済み。`v0.7.0` は shipped (2026-04-20)。
-  最新 full local `pytest` (2026-04-26) = **639 passed / 28 skipped / 1 deselected**
-  （opt-in `browser_smoke` / `slow` markers 除外、city-scale 除外。前回より +2 tests = 新規
-  `test_lanelet_summary.py` の 3 テストと、`test_lanelet2_connectivity.py` に MetaInfo /
-  reverse-oneway / forward-oneway を追加した分。連番が変わったのは pytest 集計上の理由）。
-- **current local git:** 2026-04-29 Codex session 時点で `main` は `origin/main` と同期済み。
-  直近の pushed work は San Francisco dataset 追加、`sanitize-lanelet2-autoware`
-  追加、Lanelet2 inspector card入り map-console hero PNG / GIF refresh、Autoware
-  loader-smoke docs exposure / wording consistency pass。
+  最新 full local `pytest` (2026-04-28 Codex session) = **646 passed / 28 skipped / 5 deselected**
+  （opt-in `browser_smoke` / `slow` markers 除外、city-scale 除外）。2026-04-29 close-out は
+  docs / viewer focused checks を追加実行（下の latest Codex checks 参照）。
+- **current local git:** 2026-04-29 Codex close-out 時点で `main` は `origin/main`
+  と同期済みの前提で終了する。直近の pushed stack は San Francisco dataset 追加、
+  `sanitize-lanelet2-autoware` 追加、Lanelet2 inspector card入り map-console hero
+  PNG / GIF refresh、Autoware loader-smoke docs exposure / wording consistency pass、
+  この PLAN handoff refresh。次 agent は最初に `git status --branch --short`
+  と `git log --oneline -8` を見ること。
 - **Claude → Codex handoff (2026-04-26):** Claude session で着手して shipped したのは Lanelet2
   Autoware-friendliness の 3 ポイント（directional `lane_connection` / `_emit_lanelet_summary`
   staleness gate + browser smoke lanelet-card assert / `<MetaInfo>` projector hint）。user は途中で
@@ -39,7 +40,7 @@
   で **639 passed / 28 skipped / 1 deselected** in ~65s。
   `validate-lanelet2-tags` を Paris / Berlin / Tokyo の committed `.lanelet.osm` に手動で実行し、
   errors=0、warnings は missing speed_limit のみ（既存）。Browser smoke と city-scale は走らせていない。
-- **latest Codex checks (2026-04-28 session):** `git diff --check` clean。
+- **latest Codex checks (2026-04-28/29 sessions):** `git diff --check` clean。
   `validate-lanelet2-tags docs/assets/map_sf_north_beach.lanelet.osm` は
   `result: ok`, errors=0, warnings=2160（missing speed_limit informational）。
   `python3 -m pytest tests/test_lanelet_summary.py tests/test_attribution.py`
@@ -65,11 +66,28 @@
   `python3 -m pytest` は **646 passed / 28 skipped / 5 deselected**。
   `python3 -m pytest tests/test_lanelet2_autoware_compat.py tests/test_cli_export.py`
   は **17 passed**。
+  2026-04-29 hero / docs wrap-up では `python3 -m py_compile
+  scripts/render_map_console_screenshot.py scripts/record_map_console_hero.py`、
+  `python3 -m pytest tests/test_attribution.py tests/test_route_explain_asset.py
+  tests/test_lanelet_summary.py` = **17 passed**、`make viewer-smoke` =
+  **1 passed / 678 deselected**、`git diff --check` clean。GitHub Actions は
+  pushed head `d2f0b0a` で **CI run 25080174777 success**、
+  **pages-build-deployment run 25080174049 success**。
 - **Codex restart point:** Lanelet2 / Autoware 周辺の §5b A/B/C は完了済み。
-  次は §3.11 可視化の残タスクか、Autoware sanitizer の実地サンプル bundle 化が自然。
-  Autoware loader-smoke profile は `sanitize-lanelet2-autoware` で実装済み。
+  次の自然な選択肢は (1) v0.7.2 release prep、(2) SF slope/elevation mode の
+  map-console 可視化、(3) Autoware sanitizer の実地サンプル bundle 化（ただし生成物サイズを
+  先に確認し、repo へ巨大 OSM を二重 commit しない）、(4) README 上部の圧縮。
   ほかの core algorithm/perf を触るなら §3.8〜§3.10 と benchmark baseline JSON を先に見る。
-- **直近の sessions (2026-04-21〜2026-04-28) で landed / in-progress:**
+- **直近の sessions (2026-04-21〜2026-04-29) で landed / in-progress:**
+  - **2026-04-29 Codex close-out:** §5b B/C と final handoff を完了。
+    `scripts/render_map_console_screenshot.py` を Playwright test 経由にして
+    `#lanelet-card` を scrollIntoView してから PNG を撮るように変更し、
+    `scripts/record_map_console_hero.py` も Lanelet2 card へスクロールして録画。
+    `docs/images/map_console_2d.png`, `map_console_3d.png`,
+    `map_console_hero.gif` を再生成。README / SHOWCASE / docs/index /
+    ARCHITECTURE / ATTRIBUTION / CHANGELOG は rich Roadgraph Lanelet2 OSM と
+    `sanitize-lanelet2-autoware` の conservative stock-loader smoke map の違いを
+    明示する形に更新。CI / Pages は green。
   - **2026-04-28 Codex session:** §5b A を実行し、San Francisco North Beach /
     Russian Hill (`sf_north_beach`) を 4 都市目の committed dataset として追加。
     Raw Overpass / Open-Elevation cache は `/tmp/osm_real_data/` のみ、repo には
@@ -101,10 +119,10 @@
        Paris / Berlin / Tokyo の committed `.lanelet.osm` と `examples/frozen_bundle/lanelet/map.osm`
        を再生成（後者は frozen byte gate にも引っかかるため必須）。`_autoware_meta_info_element()`
        ヘルパー越しに 1 行差分で挿入。
-     - 着手した中で **未消化** の候補 (Codex に投げる): (a) 4 都市目の dataset 追加（user は
-       SF / 京都 を候補に挙げた）、(b) README hero 画像を Lanelet2 inspector card 入りに更新、
-       (c) `lane_connection` directional 化に伴う `docs/SHOWCASE.md` / `README.md` の文言確認。
-       詳細は §5b の「2026-04-26 残し」サブセクション。
+     - 当時 **未消化** だった候補は 2026-04-28/29 Codex で完了済み:
+       (a) 4 都市目 dataset は SF North Beach として追加、(b) README hero 画像は
+       Lanelet2 inspector card入りに更新、(c) `lane_connection` directional 化に伴う
+       `docs/SHOWCASE.md` / `README.md` 文言確認も実施。詳細は §5b。
   1. V1 accuracy 実測 — Paris 20e MAE 0.938、Tokyo Ginza MAE 0.903、Berlin Mitte MAE 1.220（lane-count vs OSM `lanes=`、canonical 20 m）
   2. `scripts/measure_lane_accuracy.py` が meter-frame graph を正しく扱う bug fix（`map_origin` 自動検出）
   3. 3D2 camera `_rgb_to_hsv` の divide-by-zero `RuntimeWarning` 撲滅
@@ -893,6 +911,28 @@
   committed `.lanelet.osm` と `examples/frozen_bundle/lanelet/map.osm` を再生成、
   `validate-lanelet2-tags` 引き続き ok。`tests/test_lanelet_summary.py` の **staleness gate** が
   「summary JSON と XML が drift していないか」を CI 的に固定する。
+- **A6 `sanitize-lanelet2-autoware` loader-smoke profile (v0.7.2.dev0, 2026-04-28/29 Codex):**
+  rich Roadgraph Lanelet2 OSM は docs / inspector / graph semantics を優先して
+  `lane_change` / `lane_connection` / diagnostic `roadgraph:*` tags を含むため、stock
+  Lanelet2 strict load では custom regulatory_element や point traffic-light で詰まる。
+  新 CLI `sanitize-lanelet2-autoware input.osm output.osm --map-projector-info-yaml ...`
+  は **loader smoke 用の conservative profile** を生成する。実装は
+  `io.export.lanelet2.sanitize_lanelet2_for_autoware`。主な処理:
+  Roadgraph-only `lane_change` / `lane_connection` relations と diagnostic tags を削除、
+  sample point traffic lights を generated linestring + `height` + `traffic_light_id` +
+  `light_bulbs` member を持つ Lanelet2 `traffic_light` regulatory_element に変換、
+  missing `ele` を近傍既存 elevation から補完、lanelet geometry から `turn_direction`
+  を推定、embedded `<MetaInfo>` から `map_projector_info.yaml` sidecar を書く。
+  SF North Beach の実地確認では sanitizer stats は removed regulatory relations 7 237、
+  kept traffic lights 238、generated traffic-light nodes 476 / ways 238、
+  filled missing ele 31 318、added turn_direction 3 458、wrote projector sidecar 1。
+  sanitized `/tmp/roadgraph_autoware_sf_map_compat/lanelet2_map.osm` は strict
+  `lanelet2.io.load` で 3 458 lanelets / 33 594 points / 7 632 linestrings /
+  238 regulatory_elements（全部 lanelet に attached）として load 成功し、
+  Autoware validator は RTPS SHM warning のみで `starting validation` →
+  `finished validation` exit 0。**注意:** この output は production semantics ではなく
+  loader smoke / integration smoke 用。repo に二重で巨大 OSM を commit する前に必ず
+  file size と GitHub Pages 影響を見る。現時点では generated compat map は `/tmp` のみ。
 
 ### 3.7 3D elevation (v0.7 / 3D1)
 
@@ -1241,9 +1281,35 @@ C. **DONE 2026-04-29 Codex: CHANGELOG / docs / Codex 内の文言整合性チェ
    rich Roadgraph Lanelet2 export と conservative stock-loader smoke map の違いを
    docs 上で明確化済み。
 
-D. **push** — A〜C のどれか、または何もしないで「ここで一旦区切り」になった時点で user に
-   `push!` を求める。Claude session 終了時点で `main` は **origin/main から 2 commits 進行中**
-   （`a2399b6` directional lane_connection / `aa6bc74` MetaInfo）。
+D. **DONE 2026-04-29 Codex: push / CI / Pages 確認まで完了。**
+   A〜C と sanitizer / hero / docs exposure は `main` に push 済み。
+   直近 CI / Pages は green。以後の agent は「未pushの SF / sanitizer / hero work がある」と
+   誤解しないこと。push 方針としては引き続き、user が `push!` / `yattekou` などで明示した時だけ
+   remote write する。
+
+#### 2026-04-29 close-out 後の次候補
+
+1. **v0.7.2 release prep**
+   `[Unreleased]` が SF dataset / directed lane_connection / MetaInfo / sanitizer /
+   map-console hero refresh / docs exposure で十分溜まっている。次にやるなら
+   CHANGELOG を release note 形に整理し、version bump、package build、`twine>=6`
+   check、release dry-run を行うのが自然。
+2. **SF slope / elevation mode in map console**
+   `sf_north_beach` は 1 800 SRTM-backed elevation nodes と steep slopes が売り。
+   現 viewer は stats と Lanelet2 card まで見えるが、slope の色分け mode はまだ無い。
+   map console の Mode か layer toggle に `slope_deg` gradient を追加すると SF dataset の
+   価値が直感的に出る。
+3. **Autoware sanitizer sample workflow**
+   実地サンプルを repo に commit する前に、`docs/assets/map_sf_north_beach.lanelet.osm`
+   から生成した compat output の file size を確認すること。大きければ generated asset は
+   commit せず、`scripts/` に reproducible recipe と README copy-paste smoke test を置く。
+4. **README top compression**
+   README 上部は product story と実績が増えて長くなっている。GitHub first screen を
+   map hero + 3 bullets + quick links に圧縮し、詳細は SHOWCASE / ARCHITECTURE / PLAN へ
+   逃がすと、外部 visitor には読みやすくなる。
+5. **次都市 dataset は後回しでよい**
+   Kyoto / Singapore / LA downtown は候補として残るが、SF が Americas / steep elevation
+   を埋めたので急ぎではない。次都市より release prep か SF slope mode の方が価値が高い。
 
 #### 既存（before 2026-04-26）の小タスク群
 
@@ -1253,8 +1319,8 @@ routing / reachability の core cost-policy layer も分離済み。
 code commit `342f61f` の release bundle / package build dry-run は PASS
 （ただし `Metadata-Version: 2.4` 対応のため `twine>=6` で確認する）。
 2026-04-23 の map console 作業はすでに origin/main に載っており、CI / Pages も green。
-ただし README/SHOWCASE に埋め込む静的 hero 画像はまだ旧 `paris_grid_route.svg` 中心。
-次に触るなら以下の順が現実的。
+README / SHOWCASE の静的 PNG / animated GIF hero は 2026-04-29 に Lanelet2 inspector
+card 入りへ refresh 済み。以下は既存 viewer line の残タスクとして読む。
 
 1. **README / Showcase に map-console screenshot を載せる** — ~~DONE 2026-04-24~~ (refresh: deep-link bake)。
    `docs/map.html` に `?view=2d|3d` / `?dataset=…` / `?from=nXXX&to=nYYY` URL param + `body[data-ready]`
@@ -1481,9 +1547,9 @@ feedback / project / reference の 4 種、`MEMORY.md` は index）。
 3. `docs/PLAN.md`（このファイル）§5 — open tasks。
 4. `docs/ARCHITECTURE.md` — 全体図（Mermaid 6 枚）。
 5. Cursor / Codex など Claude memory が読めない環境では、§0 の "Claude → Codex handoff"
-   ブロックと §5b の「2026-04-26 残し」を先に読む。
+   ブロックと §5b の close-out 状態を先に読む。
 6. Memory `MEMORY.md` — user preference / past decisions（Claude Code 環境で読める場合）。
-7. **Lanelet2 出力**を触る場合は §3.6 末尾 (A4 / A5) と `tests/test_lanelet_summary.py` の
+7. **Lanelet2 出力**を触る場合は §3.6 末尾 (A4 / A5 / A6) と `tests/test_lanelet_summary.py` の
    staleness gate を必ず確認すること（XML を直接 emit する code を書く時、summary JSON を
    refresh しないと CI が落ちる）。
 
@@ -1493,9 +1559,11 @@ feedback / project / reference の 4 種、`MEMORY.md` は index）。
 
 新しい機能 / バグ修正を入れる前に:
 
-- [ ] `pytest` が **639 passed / 28 skipped / 1 deselected**（2026-04-26 baseline、
-      `--ignore=tests/test_map_console_browser_smoke.py --ignore=tests/test_city_scale.py` 想定）
-      で通ること。±1 は OK、大きく減ったら skip 理由を確認。`browser_smoke` と `slow` は opt-in。
+- [ ] default `pytest` が **646 passed / 28 skipped / 5 deselected** 近辺で通ること
+      （2026-04-28 Codex baseline。`browser_smoke` / `slow` / `city_scale` は opt-in）。
+      docs-only なら `tests/test_attribution.py tests/test_route_explain_asset.py
+      tests/test_lanelet_summary.py`（2026-04-29: 17 passed）と `git diff --check` でよい。
+      viewer を触ったら `make viewer-smoke` も実行する。
 - [ ] `CHANGELOG.md` の `[Unreleased]` にユーザー向け変更を足すこと。
 - [ ] スキーマ変更時は対応する `validate_*` と CI の expectation を同時更新すること。
 - [ ] 機密（IMEI、キー、生ダンプ）は **コミットしない** こと。Overpass raw JSON は `/tmp`。
